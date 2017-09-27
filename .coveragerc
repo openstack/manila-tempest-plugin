@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = manila_tempest_tests
+
+[report]
+ignore_errors = True
