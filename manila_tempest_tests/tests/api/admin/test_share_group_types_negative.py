@@ -109,7 +109,7 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
                 share_types=[self.share_type['share_type']['id']],
                 client=self.admin_shares_v2_client)
             list_of_ids.add(sg_type['id'])
-            self.assertEqual(unique_name,  sg_type['name'])
+            self.assertEqual(unique_name, sg_type['name'])
             self.admin_shares_v2_client.delete_share_group_type(sg_type['id'])
         self.assertEqual(2, len(list_of_ids))
 

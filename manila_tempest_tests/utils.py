@@ -110,7 +110,7 @@ def rand_ip(network=False):
 
 def rand_ipv6_ip(network=False):
     """This uses the IPv6 documentation range of 2001:DB8::/32"""
-    ran_add = ["%x" % random.randrange(0, 16**4) for i in range(6)]
+    ran_add = ["%x" % random.randrange(0, 16 ** 4) for i in range(6)]
     address = "2001:0DB8:" + ":".join(ran_add)
     if network:
         mask_length = six.text_type(random.randint(32, 128))

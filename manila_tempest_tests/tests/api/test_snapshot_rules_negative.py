@@ -48,7 +48,7 @@ class SnapshotIpRulesForNFSNegativeTest(
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data("1.2.3.256", "1.1.1.-", "1.2.3.4/33", "1.2.3.*", "1.2.3.*/23",
-              "1.2.3.1|23", "1.2.3.1/",  "1.2.3.1/-1",
+              "1.2.3.1|23", "1.2.3.1/", "1.2.3.1/-1",
               "fe80:217:f2ff:fe07:ed62", "2001:db8::1/148",
               "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
               "2001:0db8:0000:85a3:0000:0000:ac1f:8001/64")

@@ -55,7 +55,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
                                     "are needed to run share migration tests.")
 
         cls.share = cls.create_share(cls.protocol,
-                                     size=CONF.share.share_size+1)
+                                     size=CONF.share.share_size + 1)
         cls.share = cls.shares_client.get_share(cls.share['id'])
 
         cls.default_type = cls.shares_v2_client.list_share_types(
