@@ -48,9 +48,16 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
     protocol = None
+    ip_version = 4
+
+    @property
+    def use_ipv6(self):
+        return self.ip_version == 6
 
     def setUp(self):
         super(ShareBasicOpsBase, self).setUp()
+        if self.use_ipv6 and not CONF.share.run_ipv6_tests:
+            raise self.skipException("IPv6 tests are disabled")
         base.verify_test_has_appropriate_tags(self)
         self.image_ref = None
         # Setup image and flavor the test instance
@@ -90,27 +97,33 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             'key_name': self.keypair['name'],
             'security_groups': security_groups,
             'wait_until': wait_until,
+            'networks': [{'uuid': self.net['id']}, ],
         }
-        if CONF.share.multitenancy_enabled:
-            create_kwargs['networks'] = [{'uuid': self.net['id']}, ]
         instance = self.create_server(
             image_id=self.image_ref, flavor=self.flavor_ref, **create_kwargs)
         return instance
 
-    def init_ssh(self, instance, do_ping=False):
-        # Obtain a floating IP
-        floating_ip = (self.compute_floating_ips_client.create_floating_ip()
-                       ['floating_ip'])
-        self.floatings[instance['id']] = floating_ip
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.compute_floating_ips_client.delete_floating_ip,
-                        floating_ip['id'])
-        # Attach a floating IP
-        self.compute_floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], instance['id'])
+    def init_ssh(self, instance):
+        if self.use_ipv6:
+            server_ip = self._get_ipv6_server_ip(instance)
+        else:
+            # Obtain a floating IP
+            floating_ip = (
+                self.compute_floating_ips_client.create_floating_ip()
+                ['floating_ip'])
+            self.floatings[instance['id']] = floating_ip
+            self.addCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                self.compute_floating_ips_client.delete_floating_ip,
+                floating_ip['id'])
+            # Attach a floating IP
+            self.compute_floating_ips_client.associate_floating_ip_to_server(
+                floating_ip['ip'], instance['id'])
+            server_ip = floating_ip['ip']
+        self.assertIsNotNone(server_ip)
         # Check ssh
         ssh_client = self.get_remote_client(
-            server_or_ip=floating_ip['ip'],
+            server_or_ip=server_ip,
             username=self.ssh_user,
             private_key=self.keypair['private_key'])
 
@@ -118,9 +131,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         ssh_client = ssh_client.ssh_client
 
         self.share = self.shares_client.get_share(self.share['id'])
-        if do_ping:
-            server_ip = self.share['export_location'].split(":")[0]
-            ssh_client.exec_command("ping -c 1 %s" % server_ip)
         return ssh_client
 
     def mount_share(self, location, ssh_client, target_dir=None):
@@ -149,8 +159,11 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
     def create_share_network(self):
         self.net = self._create_network(namestart="manila-share")
-        self.subnet = self._create_subnet(network=self.net,
-                                          namestart="manila-share-sub")
+        self.subnet = self._create_subnet(
+            network=self.net,
+            namestart="manila-share-sub",
+            ip_version=self.ip_version,
+            use_default_subnetpool=self.use_ipv6)
         router = self._get_router()
         self._create_router_interface(subnet_id=self.subnet['id'],
                                       router_id=router['id'])
@@ -158,6 +171,12 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             neutron_net_id=self.net['id'],
             neutron_subnet_id=self.subnet['id'],
             name=data_utils.rand_name("sn-name"))
+
+    def _get_ipv6_server_ip(self, instance):
+        for net_list in instance['addresses'].values():
+            for net_data in net_list:
+                if net_data['version'] == 6:
+                    return net_data['addr']
 
     def _get_share_type(self):
         if CONF.share.default_share_type_name:
@@ -201,7 +220,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                                         access_to=ip, cleanup=cleanup)
         else:
             self._allow_access(share_id, access_type='ip', access_to=ip,
-                               cleanup=cleanup)
+                               cleanup=cleanup, client=self.shares_v2_client)
 
     def provide_access_to_auxiliary_instance(self, instance, share=None,
                                              snapshot=None):
@@ -211,8 +230,14 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                 share['id'], instance=instance, cleanup=False,
                 snapshot=snapshot)
         elif not CONF.share.multitenancy_enabled:
+            if self.use_ipv6:
+                server_ip = self._get_ipv6_server_ip(instance)
+            else:
+                server_ip = (CONF.share.override_ip_for_nfs_access or
+                             self.floatings[instance['id']]['ip'])
+            self.assertIsNotNone(server_ip)
             self.allow_access_ip(
-                share['id'], ip=self.floatings[instance['id']]['ip'],
+                share['id'], ip=server_ip,
                 instance=instance, cleanup=False, snapshot=snapshot)
         elif (CONF.share.multitenancy_enabled and
               self.protocol.lower() == 'nfs'):
@@ -226,25 +251,70 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         return self.os_primary.servers_client.show_server(
             instance_id)["server"]
 
+    def _ping_export_location(self, export, ssh_client):
+        ip, version = self.get_ip_and_version_from_export_location(export)
+        if version == 6:
+            ssh_client.exec_command("ping6 -c 1 %s" % ip)
+        else:
+            ssh_client.exec_command("ping -c 1 %s" % ip)
+
+    def get_ip_and_version_from_export_location(self, export):
+        export = export.replace('[', '').replace(']', '')
+        if self.protocol == 'nfs' and ':/' in export:
+            ip = export.split(':/')[0]
+            version = 6 if ip.count(':') > 1 else 4
+        elif self.protocol == 'cifs' and export.startswith(r'\\'):
+            ip = export.split('\\')[2]
+            version = 6 if (ip.count(':') > 1 or
+                            ip.endswith('ipv6-literal.net')) else 4
+        else:
+            message = ("Protocol %s is not supported" % self.protocol)
+            raise self.skipException(message)
+        return ip, version
+
+    def _get_export_locations_according_to_ip_version(
+            self, all_locations, error_on_invalid_ip_version):
+        locations = [
+            x for x in all_locations
+            if self.get_ip_and_version_from_export_location(
+                x)[1] == self.ip_version]
+
+        if len(locations) == 0 and not error_on_invalid_ip_version:
+            message = ("Configured backend does not support "
+                       "ip_version %s" % self.ip_version)
+            raise self.skipException(message)
+        return locations
+
+    def _get_share_export_locations(self, share):
+
+        if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):
+            locations = share['export_locations']
+        else:
+            exports = self.shares_v2_client.list_share_export_locations(
+                share['id'])
+            locations = [x['path'] for x in exports]
+
+        return locations
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
         instance = self.boot_instance(wait_until="BUILD")
         self.create_share()
+        locations = self._get_user_export_locations(self.share)
         instance = self.wait_for_active_instance(instance["id"])
         ssh_client = self.init_ssh(instance)
-
         self.provide_access_to_auxiliary_instance(instance)
-
-        if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):
-            locations = self.share['export_locations']
-        else:
-            exports = self.shares_v2_client.list_share_export_locations(
-                self.share['id'])
-            locations = [x['path'] for x in exports]
 
         for location in locations:
             self.mount_share(location, ssh_client)
             self.umount_share(ssh_client)
+
+    def _get_snapshot_export_locations(self, snapshot):
+        exports = (self.shares_v2_client.
+                   list_snapshot_export_locations(snapshot['id']))
+        locations = [x['path'] for x in exports]
+
+        return locations
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_read_write_two_vms(self):
@@ -255,6 +325,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         instance1 = self.boot_instance(wait_until="BUILD")
         instance2 = self.boot_instance(wait_until="BUILD")
         self.create_share()
+        location = self._get_user_export_locations(self.share)[0]
         instance1 = self.wait_for_active_instance(instance1["id"])
         instance2 = self.wait_for_active_instance(instance2["id"])
 
@@ -262,22 +333,17 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         ssh_client_inst1 = self.init_ssh(instance1)
         self.provide_access_to_auxiliary_instance(instance1)
 
-        if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):
-            locations = self.share['export_locations']
-        else:
-            exports = self.shares_v2_client.list_share_export_locations(
-                self.share['id'])
-            locations = [x['path'] for x in exports]
-
-        self.mount_share(locations[0], ssh_client_inst1)
+        self.mount_share(location, ssh_client_inst1)
         self.addCleanup(self.umount_share,
                         ssh_client_inst1)
         self.write_data(test_data, ssh_client_inst1)
 
         # Read from second VM
         ssh_client_inst2 = self.init_ssh(instance2)
-        self.provide_access_to_auxiliary_instance(instance2)
-        self.mount_share(locations[0], ssh_client_inst2)
+        if not CONF.share.override_ip_for_nfs_access or self.use_ipv6:
+            self.provide_access_to_auxiliary_instance(instance2)
+
+        self.mount_share(location, ssh_client_inst2)
         self.addCleanup(self.umount_share,
                         ssh_client_inst2)
         data = self.read_data(ssh_client_inst2)
@@ -304,6 +370,10 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             raise self.skipException("Only NFS protocol supported "
                                      "at this moment.")
 
+        if self.use_ipv6:
+            raise self.skipException("Share Migration using IPv6 is not "
+                                     "supported at this moment.")
+
         pools = self.shares_admin_v2_client.list_pools(detail=True)['pools']
 
         if len(pools) < 2:
@@ -312,6 +382,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         instance = self.boot_instance(wait_until="BUILD")
         self.create_share()
+        exports = self._get_user_export_locations(self.share)
         instance = self.wait_for_active_instance(instance["id"])
         self.share = self.shares_admin_v2_client.get_share(self.share['id'])
 
@@ -328,12 +399,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         ssh_client = self.init_ssh(instance)
         self.provide_access_to_auxiliary_instance(instance)
-
-        exports = self.shares_v2_client.list_share_export_locations(
-            self.share['id'])
-        self.assertNotEmpty(exports)
-        exports = [x['path'] for x in exports]
-        self.assertNotEmpty(exports)
 
         self.mount_share(exports[0], ssh_client)
 
@@ -373,11 +438,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         self.share = self.migration_complete(self.share['id'], dest_pool)
 
-        new_exports = self.shares_v2_client.list_share_export_locations(
-            self.share['id'])
-        self.assertNotEmpty(new_exports)
-        new_exports = [x['path'] for x in new_exports]
-        self.assertNotEmpty(new_exports)
+        new_exports = self._get_user_export_locations(
+            self.share, error_on_invalid_ip_version=True)
 
         self.assertEqual(dest_pool, self.share['host'])
         self.assertEqual(constants.TASK_STATE_MIGRATION_SUCCESS,
@@ -395,24 +457,20 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.assertIn('1m4.bin', output)
         self.assertIn('1m5.bin', output)
 
-    def _get_user_export_location(self, share=None, snapshot=None):
-        user_export_location = None
+    def _get_user_export_locations(self, share=None, snapshot=None,
+                                   error_on_invalid_ip_version=False):
+        locations = None
         if share:
-            if utils.is_microversion_lt(
-                    CONF.share.max_api_microversion, "2.9"):
-                user_export_location = share['export_locations'][0]
-            else:
-                exports = self.shares_v2_client.list_share_export_locations(
-                    share['id'])
-                locations = [x['path'] for x in exports]
-                user_export_location = locations[0]
+            locations = self._get_share_export_locations(share)
         elif snapshot:
-            exports = (self.shares_v2_client.
-                       list_snapshot_export_locations(snapshot['id']))
-            locations = [x['path'] for x in exports]
-            user_export_location = locations[0]
-        self.assertIsNotNone(user_export_location)
-        return user_export_location
+            locations = self._get_snapshot_export_locations(snapshot)
+
+        self.assertNotEmpty(locations)
+        locations = self._get_export_locations_according_to_ip_version(
+            locations, error_on_invalid_ip_version)
+        self.assertNotEmpty(locations)
+
+        return locations
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
@@ -437,9 +495,10 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance, parent_share)
 
         # 5 - Try mount S1 to UVM, ok, mounted
-        user_export_location = self._get_user_export_location(parent_share)
+        user_export_location = self._get_user_export_locations(parent_share)[0]
         parent_share_dir = "/mnt/parent"
         ssh_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
+
         self.mount_share(user_export_location, ssh_client, parent_share_dir)
         self.addCleanup(self.umount_share, ssh_client, parent_share_dir)
 
@@ -458,9 +517,10 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 10 - Try mount S2 - fail, access denied. We test that child share
         #      did not get access rules from parent share.
-        user_export_location = self._get_user_export_location(child_share)
+        user_export_location = self._get_user_export_locations(child_share)[0]
         child_share_dir = "/mnt/child"
         ssh_client.exec_command("sudo mkdir -p %s" % child_share_dir)
+
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
             self.mount_share,
@@ -520,11 +580,12 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance, parent_share)
 
         # 5 - Try mount S1 to UVM, ok, mounted
-        user_export_location = self._get_user_export_location(parent_share)
+        user_export_location = self._get_user_export_locations(parent_share)[0]
         parent_share_dir = "/mnt/parent"
         snapshot_dir = "/mnt/snapshot_dir"
         ssh_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
         ssh_client.exec_command("sudo mkdir -p %s" % snapshot_dir)
+
         self.mount_share(user_export_location, ssh_client, parent_share_dir)
         self.addCleanup(self.umount_share, ssh_client, parent_share_dir)
 
@@ -542,8 +603,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance, snapshot=snapshot)
 
         # 10 - Mount SS1
-        user_export_location = self._get_user_export_location(
-            snapshot=snapshot)
+        user_export_location = self._get_user_export_locations(
+            snapshot=snapshot)[0]
         self.mount_share(user_export_location, ssh_client, snapshot_dir)
         self.addCleanup(self.umount_share, ssh_client, snapshot_dir)
 
@@ -565,6 +626,9 @@ class TestShareBasicOpsNFS(ShareBasicOpsBase):
     protocol = "nfs"
 
     def mount_share(self, location, ssh_client, target_dir=None):
+
+        self._ping_export_location(location, ssh_client)
+
         target_dir = target_dir or "/mnt"
         ssh_client.exec_command(
             "sudo mount -vt nfs \"%s\" %s" % (location, target_dir))
@@ -574,11 +638,18 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
     protocol = "cifs"
 
     def mount_share(self, location, ssh_client, target_dir=None):
+
+        self._ping_export_location(location, ssh_client)
+
         location = location.replace("\\", "/")
         target_dir = target_dir or "/mnt"
         ssh_client.exec_command(
             "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
         )
+
+
+class TestShareBasicOpsNFSIPv6(TestShareBasicOpsNFS):
+    ip_version = 6
 
 
 # NOTE(u_glide): this function is required to exclude ShareBasicOpsBase from

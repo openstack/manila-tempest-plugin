@@ -741,7 +741,8 @@ class SharesV2Client(shares_client.SharesClient):
         }
         body = json.dumps(post_body)
         resp, body = self.post(
-            "shares/%s/action" % share_id, body, version=version)
+            "shares/%s/action" % share_id, body, version=version,
+            extra_headers=True)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 

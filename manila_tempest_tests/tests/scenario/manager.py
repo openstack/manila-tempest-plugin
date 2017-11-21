@@ -753,43 +753,67 @@ class NetworkScenarioTest(ScenarioTest):
                 tenant_id=tenant_id, cidr=cidr)['subnets']
             return len(cidr_in_use) != 0
 
-        ip_version = kwargs.pop('ip_version', 4)
-
-        if ip_version == 6:
-            tenant_cidr = netaddr.IPNetwork(
-                CONF.network.project_network_v6_cidr)
-            num_bits = CONF.network.project_network_v6_mask_bits
-        else:
-            tenant_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            num_bits = CONF.network.project_network_mask_bits
-
-        result = None
-        str_cidr = None
-        # Repeatedly attempt subnet creation with sequential cidr
-        # blocks until an unallocated block is found.
-        for subnet_cidr in tenant_cidr.subnet(num_bits):
-            str_cidr = str(subnet_cidr)
-            if cidr_in_use(str_cidr, tenant_id=network['tenant_id']):
-                continue
+        def _make_create_subnet_request(namestart, network,
+                                        ip_version, subnets_client, **kwargs):
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
                 network_id=network['id'],
                 tenant_id=network['tenant_id'],
-                cidr=str_cidr,
                 ip_version=ip_version,
                 **kwargs
             )
+
+            if ip_version == 6:
+                subnet['ipv6_address_mode'] = 'slaac'
+                subnet['ipv6_ra_mode'] = 'slaac'
+
             try:
-                result = subnets_client.create_subnet(**subnet)
-                break
+                return subnets_client.create_subnet(**subnet)
             except lib_exc.Conflict as e:
                 if 'overlaps with another subnet' not in six.text_type(e):
                     raise
-        self.assertIsNotNone(result, 'Unable to allocate tenant network')
+
+        result = None
+        str_cidr = None
+
+        use_default_subnetpool = kwargs.get('use_default_subnetpool', False)
+
+        ip_version = kwargs.pop('ip_version', 4)
+
+        if not use_default_subnetpool:
+
+            if ip_version == 6:
+                tenant_cidr = netaddr.IPNetwork(
+                    CONF.network.project_network_v6_cidr)
+                num_bits = CONF.network.project_network_v6_mask_bits
+            else:
+                tenant_cidr = netaddr.IPNetwork(
+                    CONF.network.project_network_cidr)
+                num_bits = CONF.network.project_network_mask_bits
+
+            # Repeatedly attempt subnet creation with sequential cidr
+            # blocks until an unallocated block is found.
+            for subnet_cidr in tenant_cidr.subnet(num_bits):
+                str_cidr = str(subnet_cidr)
+                if cidr_in_use(str_cidr, tenant_id=network['tenant_id']):
+                    continue
+
+                result = _make_create_subnet_request(
+                    namestart, network, ip_version, subnets_client,
+                    cidr=str_cidr, **kwargs)
+                if result is not None:
+                    break
+        else:
+            result = _make_create_subnet_request(
+                namestart, network, ip_version, subnets_client,
+                **kwargs)
+
+        self.assertIsNotNone(result)
 
         subnet = result['subnet']
-        self.assertEqual(subnet['cidr'], str_cidr)
+        if str_cidr is not None:
+            self.assertEqual(subnet['cidr'], str_cidr)
 
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         subnets_client.delete_subnet, subnet['id'])
@@ -1105,6 +1129,13 @@ class NetworkScenarioTest(ScenarioTest):
                 protocol='tcp',
                 port_range_min=22,
                 port_range_max=22,
+            ),
+            dict(
+                # ipv6-ssh
+                protocol='tcp',
+                port_range_min=22,
+                port_range_max=22,
+                ethertype='IPv6',
             ),
             dict(
                 # ping

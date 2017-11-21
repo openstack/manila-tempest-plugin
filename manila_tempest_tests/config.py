@@ -82,6 +82,10 @@ ShareGroup = [
     cfg.StrOpt("username_for_user_rules",
                default="Administrator",
                help="Username, that will be used in user tests."),
+    cfg.StrOpt("override_ip_for_nfs_access",
+               help="Forces access rules to be as specified on NFS scenario"
+                    " tests. This can used for working around multiple "
+                    "NATs between the VMs and the storage controller."),
     cfg.ListOpt("enable_ro_access_level_for_protocols",
                 default=["nfs", ],
                 help="List of protocols to run tests with ro access level."),
@@ -244,4 +248,8 @@ ShareGroup = [
     cfg.IntOpt("share_size",
                default=1,
                help="Default size in GB for shares created by share tests."),
+    cfg.BoolOpt("run_ipv6_tests",
+                default=False,
+                help="Enable or disable running IPv6 tests."),
+
 ]
