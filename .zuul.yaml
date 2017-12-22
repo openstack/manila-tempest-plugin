@@ -1,0 +1,38 @@
+- project:
+    name: openstack/manila-tempest-plugin
+    check:
+      jobs:
+        - manila-tempest-dsvm-mysql-generic:
+            voting: false
+        - manila-tempest-dsvm-postgres-container:
+            voting: false
+        - manila-tempest-dsvm-postgres-zfsonlinux:
+            voting: false
+        - manila-tempest-dsvm-postgres-generic-singlebackend:
+            voting: false
+        - manila-tempest-dsvm-generic-no-share-servers:
+            voting: false
+        - manila-tempest-dsvm-scenario:
+            voting: false
+        - manila-tempest-minimal-dsvm-cephfs-native-centos-7:
+            voting: false
+        - manila-tempest-minimal-dsvm-cephfs-nfs-centos-7:
+            voting: false
+        - manila-tempest-dsvm-glusterfs-nfs:
+            voting: false
+        - manila-tempest-minimal-dsvm-dummy
+        - manila-tempest-minimal-dsvm-lvm-centos-7
+    gate:
+      jobs:
+        - manila-tempest-minimal-dsvm-dummy
+        - manila-tempest-minimal-dsvm-lvm-centos-7
+    experimental:
+      jobs:
+        - manila-tempest-dsvm-glusterfs-nfs:
+            voting: false
+        - manila-tempest-dsvm-glusterfs-native:
+            voting: false
+        - manila-tempest-dsvm-glusterfs-nfs-heketi:
+            voting: false
+        - manila-tempest-dsvm-glusterfs-native-heketi:
+            voting: false
