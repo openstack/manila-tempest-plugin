@@ -53,7 +53,7 @@ class MicroversionsTest(base.BaseSharesTest):
 
         v2 = [v for v in version_list if v['id'] == 'v2.0'][0]
         self.assertEqual(_MIN_API_VERSION, v2.get('min_version'))
-        self.assertEqual(_MAX_API_VERSION, v2.get('version'))
+        self.assertNotIn(v2.get('version'), [None, ''])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v1_no_version(self):
@@ -105,7 +105,7 @@ class MicroversionsTest(base.BaseSharesTest):
                          resp.get(API_MICROVERSIONS_HEADER_LOWER))
         self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
-        self.assertEqual(_MAX_API_VERSION, version_list[0].get('version'))
+        self.assertNotIn(version_list[0].get('version'), [None, ''])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_min_version(self):
@@ -123,7 +123,7 @@ class MicroversionsTest(base.BaseSharesTest):
                          resp.get(API_MICROVERSIONS_HEADER_LOWER))
         self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
-        self.assertEqual(_MAX_API_VERSION, version_list[0].get('version'))
+        self.assertNotIn(version_list[0].get('version'), [None, ''])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_max_version(self):
@@ -141,7 +141,7 @@ class MicroversionsTest(base.BaseSharesTest):
                          resp.get(API_MICROVERSIONS_HEADER_LOWER))
         self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
-        self.assertEqual(_MAX_API_VERSION, version_list[0].get('version'))
+        self.assertNotIn(version_list[0].get('version'), [None, ''])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_invalid_version(self):
