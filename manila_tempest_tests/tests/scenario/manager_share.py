@@ -21,6 +21,7 @@ from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import remote_client
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager
+from manila_tempest_tests import utils
 
 from tempest.common import waiters
 from tempest import config
@@ -201,7 +202,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
 
         remote_client.exec_command(
-            "sudo sh -c \"dd bs={} count={} if={} of={} conv=fsync\""
+            "sudo sh -c \"dd bs={} count={} if={} of={} conv=fsync"
+            " iflag=fullblock\""
             .format(block_size, block_count, input_file, output_file))
 
     def read_data_from_mounted_share(self,
@@ -346,6 +348,15 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 'snapshot_support': CONF.share.capability_snapshot_support,
                 'driver_handles_share_servers': CONF.share.multitenancy_enabled
             },)['share_type']
+
+    def get_share_export_locations(self, share):
+        if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):
+            locations = share['export_locations']
+        else:
+            exports = self.shares_v2_client.list_share_export_locations(
+                share['id'])
+            locations = [x['path'] for x in exports]
+        return locations
 
     def _get_ipv6_server_ip(self, instance):
         for net_list in instance['addresses'].values():

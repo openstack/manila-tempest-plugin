@@ -19,6 +19,7 @@ STATUS_MANAGE_ERROR = 'manage_error'
 STATUS_MIGRATING_TO = 'migrating_to'
 STATUS_CREATING = 'creating'
 STATUS_DELETING = 'deleting'
+STATUS_SHRINKING = 'shrinking'
 
 TEMPEST_MANILA_PREFIX = 'tempest-manila'
 
