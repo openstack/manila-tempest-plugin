@@ -28,7 +28,7 @@ CONF = config.CONF
 @base.skip_if_microversion_lt(
     constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
 @ddt.ddt
-class AccessesMetadataNegativeTest(base.BaseSharesTest):
+class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
 
     @classmethod
     def resource_setup(cls):
@@ -60,7 +60,11 @@ class AccessesMetadataNegativeTest(base.BaseSharesTest):
             cls.access_type = "cephx"
             cls.access_to = "eve"
         cls.shares_v2_client.share_protocol = cls.protocol
-        cls.share = cls.create_share()
+        # create share type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
+        # create share
+        cls.share = cls.create_share(share_type_id=cls.share_type_id)
         cls.access = cls.shares_v2_client.create_access_rule(
             cls.share["id"], cls.access_type, cls.access_to,
             'rw', metadata={u"key1": u"value1"})

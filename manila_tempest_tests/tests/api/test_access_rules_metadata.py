@@ -27,7 +27,7 @@ CONF = config.CONF
 @base.skip_if_microversion_lt(
     constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
 @ddt.ddt
-class AccessRulesMetadataTest(base.BaseSharesTest):
+class AccessRulesMetadataTest(base.BaseSharesMixedTest):
 
     @classmethod
     def resource_setup(cls):
@@ -69,7 +69,11 @@ class AccessRulesMetadataTest(base.BaseSharesTest):
             'cert': ['tenant_%d.example.com' % i for i in int_range],
             'cephx': ['eve%d' % i for i in int_range],
         }
-        cls.share = cls.create_share()
+        # create share type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
+        # create share
+        cls.share = cls.create_share(share_type_id=cls.share_type_id)
         cls.md1 = {"key1": "value1", "key2": "value2"}
         cls.access = cls.shares_v2_client.create_access_rule(
             cls.share["id"], cls.access_type,

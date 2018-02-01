@@ -39,8 +39,12 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                 cls.protocol in CONF.share.enable_ip_rules_for_protocols):
             msg = "IP rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+        # create share_type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
         # create share
-        cls.share = cls.create_share(cls.protocol)
+        cls.share = cls.create_share(cls.protocol,
+                                     share_type_id=cls.share_type_id)
         if CONF.share.run_snapshot_tests:
             # create snapshot
             cls.snap = cls.create_snapshot_wait_for_active(cls.share["id"])
@@ -182,7 +186,7 @@ class ShareIpRulesForCIFSNegativeTest(ShareIpRulesForNFSNegativeTest):
 
 
 @ddt.ddt
-class ShareUserRulesForNFSNegativeTest(base.BaseSharesTest):
+class ShareUserRulesForNFSNegativeTest(base.BaseSharesMixedTest):
     protocol = "nfs"
 
     @classmethod
@@ -192,8 +196,12 @@ class ShareUserRulesForNFSNegativeTest(base.BaseSharesTest):
                 cls.protocol in CONF.share.enable_user_rules_for_protocols):
             msg = "USER rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+        # create share type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
         # create share
-        cls.share = cls.create_share(cls.protocol)
+        cls.share = cls.create_share(cls.protocol,
+                                     share_type_id=cls.share_type_id)
         if CONF.share.run_snapshot_tests:
             # create snapshot
             cls.snap = cls.create_snapshot_wait_for_active(cls.share["id"])
@@ -272,7 +280,7 @@ class ShareUserRulesForCIFSNegativeTest(ShareUserRulesForNFSNegativeTest):
 
 
 @ddt.ddt
-class ShareCertRulesForGLUSTERFSNegativeTest(base.BaseSharesTest):
+class ShareCertRulesForGLUSTERFSNegativeTest(base.BaseSharesMixedTest):
     protocol = "glusterfs"
 
     @classmethod
@@ -282,8 +290,12 @@ class ShareCertRulesForGLUSTERFSNegativeTest(base.BaseSharesTest):
                 cls.protocol in CONF.share.enable_cert_rules_for_protocols):
             msg = "CERT rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+        # create share type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
         # create share
-        cls.share = cls.create_share(cls.protocol)
+        cls.share = cls.create_share(cls.protocol,
+                                     share_type_id=cls.share_type_id)
         if CONF.share.run_snapshot_tests:
             # create snapshot
             cls.snap = cls.create_snapshot_wait_for_active(cls.share["id"])
@@ -334,7 +346,7 @@ class ShareCertRulesForGLUSTERFSNegativeTest(base.BaseSharesTest):
 
 
 @ddt.ddt
-class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesTest):
+class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
     protocol = "cephfs"
 
     @classmethod
@@ -345,8 +357,12 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesTest):
             msg = ("CEPHX rule tests for %s protocol are disabled" %
                    cls.protocol)
             raise cls.skipException(msg)
+        # create share type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
         # create share
-        cls.share = cls.create_share(cls.protocol)
+        cls.share = cls.create_share(cls.protocol,
+                                     share_type_id=cls.share_type_id)
         cls.access_type = "cephx"
         cls.access_to = "david"
 
@@ -378,7 +394,7 @@ def skip_if_cephx_access_type_not_supported_by_client(self, client):
 
 
 @ddt.ddt
-class ShareRulesNegativeTest(base.BaseSharesTest):
+class ShareRulesNegativeTest(base.BaseSharesMixedTest):
     # Tests independent from rule type and share protocol
 
     @classmethod
@@ -394,8 +410,11 @@ class ShareRulesNegativeTest(base.BaseSharesTest):
                     for p in cls.protocols)):
             cls.message = "Rule tests are disabled"
             raise cls.skipException(cls.message)
+        # create share type
+        cls.share_type = cls._create_share_type()
+        cls.share_type_id = cls.share_type['id']
         # create share
-        cls.share = cls.create_share()
+        cls.share = cls.create_share(share_type_id=cls.share_type_id)
         if CONF.share.run_snapshot_tests:
             # create snapshot
             cls.snap = cls.create_snapshot_wait_for_active(cls.share["id"])
