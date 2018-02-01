@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ddt
 from oslo_log import log
 import six
 from tempest import config
@@ -20,11 +21,14 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 LOG = log.getLogger(__name__)
 
 
+@ddt.ddt
 class SecurityServiceListMixin(object):
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -39,8 +43,15 @@ class SecurityServiceListMixin(object):
         [self.assertIn(key, s_s.keys()) for s_s in listed for key in keys]
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_list_security_services_with_detail(self):
-        listed = self.shares_client.list_security_services(detailed=True)
+    @ddt.data(*set(['1.0', '2.42', '2.44', LATEST_MICROVERSION]))
+    def test_list_security_services_with_detail(self, version):
+        with_ou = True if utils.is_microversion_ge(version, '2.44') else False
+        if utils.is_microversion_ge(version, '2.0'):
+            listed = self.shares_v2_client.list_security_services(
+                detailed=True, version=version)
+        else:
+            listed = self.shares_client.list_security_services(detailed=True)
+
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
                             for ss in listed))
@@ -52,6 +63,9 @@ class SecurityServiceListMixin(object):
             "created_at", "updated_at", "project_id",
         ]
         [self.assertIn(key, s_s.keys()) for s_s in listed for key in keys]
+
+        for ss in listed:
+            self.assertEqual(with_ou, 'ou' in ss.keys())
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @testtools.skipIf(
@@ -98,6 +112,7 @@ class SecurityServiceListMixin(object):
                                 in search_opts.items()))
 
 
+@ddt.ddt
 class SecurityServicesTest(base.BaseSharesTest,
                            SecurityServiceListMixin):
     def setUp(self):
@@ -110,6 +125,8 @@ class SecurityServicesTest(base.BaseSharesTest,
             'user': 'fake_user',
             'password': 'pass',
         }
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.44'):
+            ss_ldap_data['ou'] = 'OU=fake_unit_1'
         ss_kerberos_data = {
             'name': 'ss_kerberos',
             'dns_ip': '2.2.2.2',
@@ -118,6 +135,8 @@ class SecurityServicesTest(base.BaseSharesTest,
             'user': 'test_user',
             'password': 'word',
         }
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.44'):
+            ss_kerberos_data['ou'] = 'OU=fake_unit_2'
         self.ss_ldap = self.create_security_service('ldap', **ss_ldap_data)
         self.ss_kerberos = self.create_security_service(
             'kerberos', **ss_kerberos_data)
@@ -133,13 +152,24 @@ class SecurityServicesTest(base.BaseSharesTest,
             self.shares_client.delete_security_service(ss["id"])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_get_security_service(self):
-        data = self.generate_security_service_data()
-        ss = self.create_security_service(**data)
-        self.assertDictContainsSubset(data, ss)
+    @ddt.data(*set(['1.0', '2.43', '2.44', LATEST_MICROVERSION]))
+    def test_get_security_service(self, version):
+        with_ou = True if utils.is_microversion_ge(version, '2.44') else False
+        data = self.generate_security_service_data(set_ou=with_ou)
 
-        get = self.shares_client.get_security_service(ss["id"])
+        if utils.is_microversion_ge(version, '2.0'):
+            ss = self.create_security_service(
+                client=self.shares_v2_client, version=version, **data)
+            get = self.shares_v2_client.get_security_service(
+                ss["id"], version=version)
+        else:
+            ss = self.create_security_service(**data)
+            get = self.shares_client.get_security_service(ss["id"])
+
+        self.assertDictContainsSubset(data, ss)
+        self.assertEqual(with_ou, 'ou' in ss)
         self.assertDictContainsSubset(data, get)
+        self.assertEqual(with_ou, 'ou' in get)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_security_service(self):
@@ -154,6 +184,16 @@ class SecurityServicesTest(base.BaseSharesTest,
         get = self.shares_client.get_security_service(ss["id"])
         self.assertDictContainsSubset(upd_data, updated)
         self.assertDictContainsSubset(upd_data, get)
+
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.44'):
+            # update again with ou
+            upd_data_ou = self.generate_security_service_data(set_ou=True)
+            updated_ou = self.shares_v2_client.update_security_service(
+                ss["id"], **upd_data_ou)
+
+            get_ou = self.shares_v2_client.get_security_service(ss["id"])
+            self.assertDictContainsSubset(upd_data_ou, updated_ou)
+            self.assertDictContainsSubset(upd_data_ou, get_ou)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(

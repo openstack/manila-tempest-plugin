@@ -1030,7 +1030,7 @@ class BaseSharesTest(test.BaseTestCase):
         return data
 
     @classmethod
-    def generate_security_service_data(self):
+    def generate_security_service_data(self, set_ou=False):
         data = {
             "name": data_utils.rand_name("ss-name"),
             "description": data_utils.rand_name("ss-desc"),
@@ -1040,6 +1040,9 @@ class BaseSharesTest(test.BaseTestCase):
             "user": data_utils.rand_name("ss-user"),
             "password": data_utils.rand_name("ss-password"),
         }
+        if set_ou:
+            data["ou"] = data_utils.rand_name("ss-ou")
+
         return data
 
     # Useful assertions
