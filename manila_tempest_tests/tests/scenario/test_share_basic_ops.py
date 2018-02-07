@@ -370,10 +370,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             raise self.skipException("Only NFS protocol supported "
                                      "at this moment.")
 
-        if self.use_ipv6:
-            raise self.skipException("Share Migration using IPv6 is not "
-                                     "supported at this moment.")
-
         pools = self.shares_admin_v2_client.list_pools(detail=True)['pools']
 
         if len(pools) < 2:
