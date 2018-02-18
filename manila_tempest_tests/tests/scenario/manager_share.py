@@ -102,27 +102,30 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                                             ssh_user=self.ssh_user))
 
         self.security_group = self._create_security_group()
-        self.share_network = self.create_share_network()
-
-    def mount_share(self, location, remote_client, target_dir=None):
-        raise NotImplementedError
-
-    def umount_share(self, remote_client, target_dir=None):
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command("sudo umount %s" % target_dir)
-
-    def create_share_network(self):
-        self.net = self._create_network(namestart="manila-share")
+        self.network = self._create_network(namestart="manila-share")
         self.subnet = self._create_subnet(
-            network=self.net,
+            network=self.network,
             namestart="manila-share-sub",
             ip_version=self.ip_version,
             use_default_subnetpool=self.ipv6_enabled)
         router = self._get_router()
         self._create_router_interface(subnet_id=self.subnet['id'],
                                       router_id=router['id'])
+
+        if CONF.share.multitenancy_enabled:
+            # Skip if DHSS=False
+            self.share_network = self.create_share_network()
+
+    def mount_share(self, location, remote_client, target_dir=None):
+        raise NotImplementedError
+
+    def unmount_share(self, remote_client, target_dir=None):
+        target_dir = target_dir or "/mnt"
+        remote_client.exec_command("sudo umount %s" % target_dir)
+
+    def create_share_network(self):
         share_network = self._create_share_network(
-            neutron_net_id=self.net['id'],
+            neutron_net_id=self.network['id'],
             neutron_subnet_id=self.subnet['id'],
             name=data_utils.rand_name("sn-name"))
         return share_network
@@ -134,7 +137,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             'key_name': self.keypair['name'],
             'security_groups': security_groups,
             'wait_until': wait_until,
-            'networks': [{'uuid': self.net['id']}, ],
+            'networks': [{'uuid': self.network['id']}, ],
         }
         instance = self.create_server(
             image_id=self.image_id, flavor=self.flavor_ref, **create_kwargs)
@@ -177,6 +180,30 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                                    .format(escaped_string=escaped_string,
                                            mount_point=mount_point))
 
+    def write_data_to_mounted_share_using_dd(self, remote_client,
+                                             output_file,
+                                             block_size,
+                                             block_count,
+                                             input_file='/dev/zero'):
+        """Writes data to mounted share using dd command
+
+        Example Usage for writing 512Mb to a file on /mnt/
+        (remote_client, block_size=1024, block_count=512000,
+        output_file='/mnt/512mb_of_zeros', input_file='/dev/zero')
+
+        For more information, refer to the dd man page.
+
+        :param remote_client: An SSH client connection to the Nova instance
+        :param block_size: The size of an individual block in bytes
+        :param block_count: The number of blocks to write
+        :param output_file: Path to the file to be written
+        :param input_file: Path to the file to read from
+        """
+
+        remote_client.exec_command(
+            "sudo sh -c \"dd bs={} count={} if={} of={} conv=fsync\""
+            .format(block_size, block_count, input_file, output_file))
+
     def read_data_from_mounted_share(self,
                                      remote_client,
                                      mount_point='/mnt/t1'):
@@ -199,7 +226,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             'share_protocol': self.protocol,
         })
         if not ('share_type_id' in kwargs or 'snapshot_id' in kwargs):
-            default_share_type_id = self._get_share_type()['id']
+            default_share_type_id = self.get_share_type()['id']
             kwargs.update({'share_type_id': default_share_type_id})
         if CONF.share.multitenancy_enabled:
             kwargs.update({'share_network_id': self.share_network['id']})
@@ -240,7 +267,9 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return linux_client
 
     def allow_access_ip(self, share_id, ip=None, instance=None,
-                        access_level="rw", cleanup=True, snapshot=None):
+                        access_level="rw", cleanup=True, snapshot=None,
+                        client=None):
+        client = client or self.shares_v2_client
         if instance and not ip:
             try:
                 net_addresses = instance['addresses']
@@ -256,12 +285,13 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         if snapshot:
             self._allow_access_snapshot(snapshot['id'], access_type='ip',
-                                        access_to=ip, cleanup=cleanup)
+                                        access_to=ip, cleanup=cleanup,
+                                        client=client)
         else:
             return self._allow_access(share_id, access_type='ip',
                                       access_level=access_level, access_to=ip,
                                       cleanup=cleanup,
-                                      client=self.shares_v2_client)
+                                      client=client)
 
     def deny_access(self, share_id, access_rule_id, client=None):
         """Deny share access
@@ -275,12 +305,14 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             share_id, "active", status_attr='access_rules_status')
 
     def provide_access_to_auxiliary_instance(self, instance, share=None,
-                                             snapshot=None, access_level='rw'):
+                                             snapshot=None, access_level='rw',
+                                             client=None):
         share = share or self.share
+        client = client or self.shares_v2_client
         if self.protocol.lower() == 'cifs':
             self.allow_access_ip(
                 share['id'], instance=instance, cleanup=False,
-                snapshot=snapshot, access_level=access_level)
+                snapshot=snapshot, access_level=access_level, client=client)
         elif not CONF.share.multitenancy_enabled:
             if self.ipv6_enabled:
                 server_ip = self._get_ipv6_server_ip(instance)
@@ -291,12 +323,12 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             return self.allow_access_ip(
                 share['id'], ip=server_ip,
                 instance=instance, cleanup=False, snapshot=snapshot,
-                access_level=access_level)
+                access_level=access_level, client=client)
         elif (CONF.share.multitenancy_enabled and
               self.protocol.lower() == 'nfs'):
             return self.allow_access_ip(
                 share['id'], instance=instance, cleanup=False,
-                snapshot=snapshot, access_level=access_level)
+                snapshot=snapshot, access_level=access_level, client=client)
 
     def wait_for_active_instance(self, instance_id):
         waiters.wait_for_server_status(
@@ -304,7 +336,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return self.os_primary.servers_client.show_server(
             instance_id)["server"]
 
-    def _get_share_type(self):
+    def get_share_type(self):
         if CONF.share.default_share_type_name:
             return self.shares_client.get_share_type(
                 CONF.share.default_share_type_name)['share_type']
@@ -324,7 +356,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def _create_share(self, share_protocol=None, size=None, name=None,
                       snapshot_id=None, description=None, metadata=None,
                       share_network_id=None, share_type_id=None,
-                      client=None, cleanup_in_class=True):
+                      client=None, cleanup=True):
         """Create a share
 
         :param share_protocol: NFS or CIFS
@@ -336,7 +368,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param share_network_id: id of network to be used
         :param share_type_id: type of the share to be created
         :param client: client object
-        :param cleanup_in_class: default: True
+        :param cleanup: default: True
         :returns: a created share
         """
         client = client or self.shares_client
@@ -360,10 +392,11 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         }
         share = self.shares_client.create_share(**kwargs)
 
-        self.addCleanup(client.wait_for_resource_deletion,
-                        share_id=share['id'])
-        self.addCleanup(client.delete_share,
-                        share['id'])
+        if cleanup:
+            self.addCleanup(client.wait_for_resource_deletion,
+                            share_id=share['id'])
+            self.addCleanup(client.delete_share,
+                            share['id'])
 
         client.wait_for_share_status(share['id'], 'available')
         return share
@@ -420,13 +453,11 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param access_to
         :returns: access object
         """
-        client = client or self.shares_client
+        client = client or self.shares_v2_client
         access = client.create_access_rule(share_id, access_type, access_to,
                                            access_level)
 
-        # NOTE(u_glide): Ignore provided client, because we always need v2
-        # client to make this call
-        self.shares_v2_client.wait_for_share_status(
+        client.wait_for_share_status(
             share_id, "active", status_attr='access_rules_status')
 
         if cleanup:
@@ -434,22 +465,25 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return access
 
     def _allow_access_snapshot(self, snapshot_id, access_type="ip",
-                               access_to="0.0.0.0/0", cleanup=True):
+                               access_to="0.0.0.0/0", cleanup=True,
+                               client=None):
         """Allow snapshot access
 
         :param snapshot_id: id of the snapshot
         :param access_type: "ip", "user" or "cert"
         :param access_to
+        :param client: shares client, normal/admin
         :returns: access object
         """
-        access = self.shares_v2_client.create_snapshot_access_rule(
+        client = client or self.shares_v2_client
+        access = client.create_snapshot_access_rule(
             snapshot_id, access_type, access_to)
 
         if cleanup:
-            self.addCleanup(self.shares_v2_client.delete_snapshot_access_rule,
+            self.addCleanup(client.delete_snapshot_access_rule,
                             snapshot_id, access['id'])
 
-        self.shares_v2_client.wait_for_snapshot_access_rule_status(
+        client.wait_for_snapshot_access_rule_status(
             snapshot_id, access['id'])
 
         return access

@@ -122,7 +122,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         for location in locations:
             self.mount_share(location, remote_client)
-            self.umount_share(remote_client)
+            self.unmount_share(remote_client)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
     def test_write_with_ro_access(self):
@@ -143,7 +143,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.deny_access(self.share['id'], acc_rule_id)
 
         self.provide_access_to_auxiliary_instance(instance, access_level='ro')
-        self.addCleanup(self.umount_share, remote_client_inst)
+        self.addCleanup(self.unmount_share, remote_client_inst)
 
         # Test if write with RO access fails.
         self.assertRaises(exceptions.SSHExecCommandFailed,
@@ -168,7 +168,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance1)
 
         self.mount_share(location, remote_client_inst1)
-        self.addCleanup(self.umount_share,
+        self.addCleanup(self.unmount_share,
                         remote_client_inst1)
         self.write_data_to_mounted_share(test_data, remote_client_inst1)
 
@@ -178,7 +178,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             self.provide_access_to_auxiliary_instance(instance2)
 
         self.mount_share(location, remote_client_inst2)
-        self.addCleanup(self.umount_share,
+        self.addCleanup(self.unmount_share,
                         remote_client_inst2)
         data = self.read_data_from_mounted_share(remote_client_inst2)
         self.assertEqual(test_data, data)
@@ -268,7 +268,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                 remote_client.exec_command,
                 "dd if=/dev/zero of=/mnt/f1/1m6.bin bs=1M count=1")
 
-        self.umount_share(remote_client)
+        self.unmount_share(remote_client)
 
         self.share = self.migration_complete(self.share['id'], dest_pool)
 
@@ -283,7 +283,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         output = remote_client.exec_command("ls -lRA --ignore=lost+found /mnt")
 
-        self.umount_share(remote_client)
+        self.unmount_share(remote_client)
 
         self.assertIn('1m1.bin', output)
         self.assertIn('1m2.bin', output)
@@ -319,7 +319,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
 
         self.mount_share(user_export_location, remote_client, parent_share_dir)
-        self.addCleanup(self.umount_share, remote_client, parent_share_dir)
+        self.addCleanup(self.unmount_share, remote_client, parent_share_dir)
 
         # 6 - Create "file1", ok, created
         remote_client.exec_command("sudo touch %s/file1" % parent_share_dir)
@@ -351,7 +351,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 12 - Try mount S2, ok, mounted
         self.mount_share(user_export_location, remote_client, child_share_dir)
-        self.addCleanup(self.umount_share, remote_client, child_share_dir)
+        self.addCleanup(self.unmount_share, remote_client, child_share_dir)
 
         # 13 - List files on S2, only "file1" exists
         output = remote_client.exec_command(
@@ -409,7 +409,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client.exec_command("sudo mkdir -p %s" % snapshot_dir)
 
         self.mount_share(user_export_location, remote_client, parent_share_dir)
-        self.addCleanup(self.umount_share, remote_client, parent_share_dir)
+        self.addCleanup(self.unmount_share, remote_client, parent_share_dir)
 
         # 6 - Create "file1", ok, created
         remote_client.exec_command("sudo touch %s/file1" % parent_share_dir)
@@ -428,7 +428,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         user_export_location = self._get_user_export_locations(
             snapshot=snapshot)[0]
         self.mount_share(user_export_location, remote_client, snapshot_dir)
-        self.addCleanup(self.umount_share, remote_client, snapshot_dir)
+        self.addCleanup(self.unmount_share, remote_client, snapshot_dir)
 
         # 11 - List files on SS1, only "file1" exists
         # NOTE(lseki): using ls without recursion to avoid permission denied
