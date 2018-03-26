@@ -26,6 +26,7 @@ from tempest.common import credentials_factory as common_creds
 from tempest import config
 from tempest.lib.common import dynamic_creds
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 from tempest import test
 
@@ -125,6 +126,9 @@ class BaseSharesTest(test.BaseTestCase):
 
     # Will be cleaned up in resource_cleanup
     class_resources = []
+
+    # Will be cleaned up in clear_net_resources
+    class_net_resources = []
 
     # Will be cleaned up in tearDown method
     method_resources = []
@@ -304,12 +308,14 @@ class BaseSharesTest(test.BaseTestCase):
         super(BaseSharesTest, self).setUp()
         self.addCleanup(self.clear_isolated_creds)
         self.addCleanup(self.clear_resources)
+        self.addCleanup(self.clear_net_resources)
         verify_test_has_appropriate_tags(self)
 
     @classmethod
     def resource_cleanup(cls):
         cls.clear_resources(cls.class_resources)
         cls.clear_isolated_creds(cls.class_isolated_creds)
+        cls.clear_net_resources(cls.class_net_resources)
         super(BaseSharesTest, cls).resource_cleanup()
 
     @classmethod
@@ -387,6 +393,24 @@ class BaseSharesTest(test.BaseTestCase):
                         network, subnet, router = net_data
                         net_id = network["id"]
                         subnet_id = subnet["id"]
+                        network_res = {
+                            "type": "network",
+                            "resource": network,
+                            "client": ic,
+                        }
+                        subnet_res = {
+                            "type": "subnet",
+                            "resource": subnet,
+                            "client": ic,
+                        }
+                        router_res = {
+                            "type": "router",
+                            "resource": router,
+                            "client": ic,
+                        }
+                        cls.class_net_resources.insert(0, network_res)
+                        cls.class_net_resources.insert(0, subnet_res)
+                        cls.class_net_resources.insert(0, router_res)
 
                     # Try get suitable share-network
                     share_networks = sc.list_share_networks_with_detail()
@@ -414,6 +438,58 @@ class BaseSharesTest(test.BaseTestCase):
                     share_network_id = sn["id"]
 
         return share_network_id
+
+    @classmethod
+    def clear_net_resources(cls, resources=None):
+        if resources is None:
+            resources = cls.class_net_resources
+        for res in resources:
+            if "deleted" not in res.keys():
+                res["deleted"] = False
+            if not (res["deleted"]):
+                if res["type"] is "router":
+                    cls.clear_router(res['client'], res['resource'])
+                elif res["type"] is "subnet":
+                    cls.clear_subnet(res['client'], res['resource'])
+                elif res["type"] is "network":
+                    cls.clear_network(res['client'], res['resource'])
+                else:
+                    LOG.warning("Provided unsupported resource type for "
+                                "cleanup '%s'. Skipping." % res["type"])
+            res["deleted"] = True
+
+    @classmethod
+    def clear_router(cls, ic, router):
+        body = ic.ports_admin_client.list_ports(device_id=router['id'])
+        interfaces = body['ports']
+        for i in interfaces:
+            test_utils.call_and_ignore_notfound_exc(
+                ic.routers_admin_client.remove_router_interface, router['id'],
+                subnet_id=i['fixed_ips'][0]['subnet_id'])
+
+        try:
+            ic.routers_admin_client.delete_router(router['id'])
+        except exceptions.NotFound:
+            LOG.warning('router with name: %s not found for delete' %
+                        router['name'])
+
+    @classmethod
+    def clear_subnet(cls, ic, subnet):
+        client = ic.subnets_admin_client
+        try:
+            client.delete_subnet(subnet['id'])
+        except exceptions.NotFound:
+            LOG.warning('subnet with name: %s not found for delete' %
+                        subnet['name'])
+
+    @classmethod
+    def clear_network(cls, ic, network):
+        net_client = ic.networks_admin_client
+        try:
+            net_client.delete_network(network['id'])
+        except exceptions.NotFound:
+            LOG.warning('network with name: %s not found for delete' %
+                        network['name'])
 
     @classmethod
     def _create_share(cls, share_protocol=None, size=None, name=None,
