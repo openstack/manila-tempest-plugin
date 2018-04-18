@@ -29,6 +29,9 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager_share as manager
 from manila_tempest_tests import utils
 
+from tempfile import mkstemp
+from urllib2 import urlopen
+
 CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
@@ -72,7 +75,10 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             raise self.skipException(message)
         if not hasattr(self, 'flavor_ref'):
             self.flavor_ref = CONF.share.client_vm_flavor_ref
-        if CONF.share.image_with_share_tools:
+
+        if CONF.share.image_with_share_tools == 'centos':
+            self.image_ref = self._create_centos_based_glance_image()
+        elif CONF.share.image_with_share_tools:
             images = self.compute_images_client.list_images()["images"]
             for img in images:
                 if img["name"] == CONF.share.image_with_share_tools:
@@ -295,6 +301,24 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             locations = [x['path'] for x in exports]
 
         return locations
+
+    def _create_centos_based_glance_image(self):
+        imagepath = mkstemp(suffix='.qcow2')[1]
+        imagefile = open(imagepath, 'wb+')
+        image_response = urlopen('http://cloud.centos.org/centos/7/images/' +
+                                 'CentOS-7-x86_64-GenericCloud.qcow2')
+
+        LOG.info('Downloading CentOS7 image')
+        while True:
+            imagecopy = image_response.read(100 * 1024 * 1024)
+            if imagecopy == '':
+                break
+            imagefile.write(imagecopy)
+
+        imagefile.close()
+
+        LOG.info('Creating Glance image using the downloaded image file')
+        return self._image_create('centos', 'bare', imagepath, 'qcow2')
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
