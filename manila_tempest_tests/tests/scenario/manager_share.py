@@ -136,18 +136,20 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                         sn['id'])
         return sn
 
-    def _allow_access(self, share_id, client=None,
-                      access_type="ip", access_to="0.0.0.0", cleanup=True):
+    def _allow_access(self, share_id, client=None, access_type="ip",
+                      access_level="rw", access_to="0.0.0.0", cleanup=True):
         """Allow share access
 
         :param share_id: id of the share
         :param client: client object
         :param access_type: "ip", "user" or "cert"
+        :param access_level: "rw" or "ro"
         :param access_to
         :returns: access object
         """
         client = client or self.shares_client
-        access = client.create_access_rule(share_id, access_type, access_to)
+        access = client.create_access_rule(share_id, access_type, access_to,
+                                           access_level)
 
         # NOTE(u_glide): Ignore provided client, because we always need v2
         # client to make this call
@@ -157,6 +159,17 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         if cleanup:
             self.addCleanup(client.delete_access_rule, share_id, access['id'])
         return access
+
+    def _deny_access(self, share_id, rule_id, client=None):
+        """Deny share access
+
+        :param share_id: id of the share
+        :param rule_id: id of the rule that will be deleted
+        """
+        client = client or self.shares_client
+        client.delete_access_rule(share_id, rule_id)
+        self.shares_v2_client.wait_for_share_status(
+            share_id, "active", status_attr='access_rules_status')
 
     def _allow_access_snapshot(self, snapshot_id, access_type="ip",
                                access_to="0.0.0.0/0", cleanup=True):
