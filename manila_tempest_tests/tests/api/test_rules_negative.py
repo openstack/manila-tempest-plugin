@@ -124,6 +124,39 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                 rule_id=rule["id"], share_id=self.share["id"], version=version)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data("10.20.30.40", "fd8c:b029:bba6:ac54::1",
+              "fd2c:b029:bba6:df54::1/128", "10.10.30.40/32")
+    def test_create_duplicate_single_host_rules(self, access_to):
+        """Test rules for individual clients with and without max-prefix."""
+        if ':' in access_to and utils.is_microversion_lt(
+                '2.38', CONF.share.max_api_microversion):
+            reason = ("Skipped. IPv6 rules are accepted from and beyond "
+                      "API version 2.38, the configured maximum API version "
+                      "is %s" % CONF.share.max_api_microversion)
+            raise self.skipException(reason)
+
+        rule = self.shares_v2_client.create_access_rule(
+            self.share["id"], "ip", access_to)
+        self.addCleanup(self.shares_v2_client.delete_access_rule,
+                        self.share["id"], rule['id'])
+        self.shares_v2_client.wait_for_share_status(
+            self.share["id"], "active", status_attr='access_rules_status')
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.create_access_rule,
+                          self.share["id"], "ip", access_to)
+
+        if '/' in access_to:
+            access_to = access_to.split("/")[0]
+        else:
+            access_to = ('%s/32' % access_to if '.' in access_to else
+                         '%s/128' % access_to)
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.create_access_rule,
+                          self.share["id"], "ip", access_to)
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_add_access_rule_on_share_with_no_host(self):
         access_type, access_to = self._get_access_rule_data_from_config()
         extra_specs = self.add_extra_specs_to_dict(

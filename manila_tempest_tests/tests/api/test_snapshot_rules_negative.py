@@ -21,6 +21,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.api import test_snapshot_rules
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -58,14 +59,22 @@ class SnapshotIpRulesForNFSNegativeTest(
                           self.snap["id"], "ip", target)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_create_duplicate_of_ip_rule(self):
-        self._test_duplicate_rules()
-        self._test_duplicate_rules()
+    @ddt.data("1.2.3.4", "fd8c:b029:bba6:ac54::1",
+              "fd8c:b029:bba6:ac54::1/128", "1.2.3.4/32")
+    def test_create_duplicate_of_ip_rule(self, access_to):
+        self._test_duplicate_rules(access_to)
+        self._test_duplicate_rules(access_to)
 
-    def _test_duplicate_rules(self):
+    def _test_duplicate_rules(self, access_to):
+        if ':' in access_to and utils.is_microversion_lt(
+                '2.38', CONF.share.max_api_microversion):
+            reason = ("Skipped. IPv6 rules are accepted from and beyond "
+                      "API version 2.38, the configured maximum API version "
+                      "is %s" % CONF.share.max_api_microversion)
+            raise self.skipException(reason)
+
         # test data
         access_type = "ip"
-        access_to = "1.2.3.4"
 
         # create rule
         rule = self.shares_v2_client.create_snapshot_access_rule(
@@ -75,6 +84,16 @@ class SnapshotIpRulesForNFSNegativeTest(
             self.snap['id'], rule['id'])
 
         # try create duplicate of rule
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.create_snapshot_access_rule,
+                          self.snap["id"], access_type, access_to)
+
+        # try alternate notation
+        if '/' in access_to:
+            access_to = access_to.split("/")[0]
+        else:
+            access_to = ('%s/32' % access_to if '.' in access_to else
+                         '%s/128' % access_to)
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.create_snapshot_access_rule,
                           self.snap["id"], access_type, access_to)
