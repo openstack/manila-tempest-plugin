@@ -18,7 +18,6 @@ import subprocess
 
 import netaddr
 from oslo_log import log
-from oslo_serialization import jsonutils as json
 from oslo_utils import netutils
 import six
 
@@ -80,13 +79,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.security_groups_client = cls.os_primary.security_groups_client
         cls.security_group_rules_client = (
             cls.os_primary.security_group_rules_client)
-
-        if CONF.volume_feature_enabled.api_v2:
-            cls.volumes_client = cls.os_primary.volumes_v2_client
-            cls.snapshots_client = cls.os_primary.snapshots_v2_client
-        else:
-            cls.volumes_client = cls.os_primary.volumes_client
-            cls.snapshots_client = cls.os_primary.snapshots_client
 
     # ## Test functions library
     #
@@ -213,61 +205,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         clients.servers_client.delete_server, body['id'])
         server = clients.servers_client.show_server(body['id'])['server']
         return server
-
-    def create_volume(self, size=None, name=None, snapshot_id=None,
-                      imageRef=None, volume_type=None):
-        if size is None:
-            size = CONF.volume.volume_size
-        if imageRef:
-            image = self.compute_images_client.show_image(imageRef)['image']
-            min_disk = image.get('minDisk')
-            size = max(size, min_disk)
-        if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + "-volume")
-        kwargs = {'display_name': name,
-                  'snapshot_id': snapshot_id,
-                  'imageRef': imageRef,
-                  'volume_type': volume_type,
-                  'size': size}
-        volume = self.volumes_client.create_volume(**kwargs)['volume']
-
-        self.addCleanup(self.volumes_client.wait_for_resource_deletion,
-                        volume['id'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.volumes_client.delete_volume, volume['id'])
-
-        # NOTE(e0ne): Cinder API v2 uses name instead of display_name
-        if 'display_name' in volume:
-            self.assertEqual(name, volume['display_name'])
-        else:
-            self.assertEqual(name, volume['name'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-        # The volume retrieved on creation has a non-up-to-date status.
-        # Retrieval after it becomes active ensures correct details.
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
-        return volume
-
-    def create_volume_type(self, client=None, name=None, backend_name=None):
-        if not client:
-            client = self.admin_volume_types_client
-        if not name:
-            class_name = self.__class__.__name__
-            name = data_utils.rand_name(class_name + '-volume-type')
-        randomized_name = data_utils.rand_name('scenario-type-' + name)
-
-        LOG.debug("Creating a volume type: %s on backend %s",
-                  randomized_name, backend_name)
-        extra_specs = {}
-        if backend_name:
-            extra_specs = {"volume_backend_name": backend_name}
-
-        body = client.create_volume_type(name=randomized_name,
-                                         extra_specs=extra_specs)
-        volume_type = body['volume_type']
-        self.assertIn('id', volume_type)
-        self.addCleanup(client.delete_volume_type, volume_type['id'])
-        return volume_type
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.compute_security_groups_client
@@ -442,72 +379,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # network debug is called as part of ssh init
         if not isinstance(exc, lib_exc.SSHTimeout):
             LOG.debug('Network information on a devstack host')
-
-    def create_server_snapshot(self, server, name=None):
-        # Glance client
-        _image_client = self.image_client
-        # Compute client
-        _images_client = self.compute_images_client
-        if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + 'snapshot')
-        LOG.debug("Creating a snapshot image for server: %s", server['name'])
-        image = _images_client.create_image(server['id'], name=name)
-        image_id = image.response['location'].split('images/')[1]
-        waiters.wait_for_image_status(_image_client, image_id, 'active')
-
-        self.addCleanup(_image_client.wait_for_resource_deletion,
-                        image_id)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        _image_client.delete_image, image_id)
-
-        if CONF.image_feature_enabled.api_v1:
-            # In glance v1 the additional properties are stored in the headers.
-            resp = _image_client.check_image(image_id)
-            snapshot_image = common_image.get_image_meta_from_headers(resp)
-            image_props = snapshot_image.get('properties', {})
-        else:
-            # In glance v2 the additional properties are flattened.
-            snapshot_image = _image_client.show_image(image_id)
-            image_props = snapshot_image
-
-        bdm = image_props.get('block_device_mapping')
-        if bdm:
-            bdm = json.loads(bdm)
-            if bdm and 'snapshot_id' in bdm[0]:
-                snapshot_id = bdm[0]['snapshot_id']
-                self.addCleanup(
-                    self.snapshots_client.wait_for_resource_deletion,
-                    snapshot_id)
-                self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                                self.snapshots_client.delete_snapshot,
-                                snapshot_id)
-                waiters.wait_for_volume_resource_status(self.snapshots_client,
-                                                        snapshot_id,
-                                                        'available')
-        image_name = snapshot_image['name']
-        self.assertEqual(name, image_name)
-        LOG.debug("Created snapshot image %s for server %s",
-                  image_name, server['name'])
-        return snapshot_image
-
-    def nova_volume_attach(self, server, volume_to_attach):
-        volume = self.servers_client.attach_volume(
-            server['id'], volumeId=volume_to_attach['id'], device='/dev/%s'
-            % CONF.compute.volume_device_name)['volumeAttachment']
-        self.assertEqual(volume_to_attach['id'], volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'in-use')
-
-        # Return the updated volume after the attachment
-        return self.volumes_client.show_volume(volume['id'])['volume']
-
-    def nova_volume_detach(self, server, volume):
-        self.servers_client.detach_volume(server['id'], volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
-        self.assertEqual('available', volume['status'])
 
     def rebuild_server(self, server_id, image=None,
                        preserve_ephemeral=False, wait=True,
