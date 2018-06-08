@@ -991,8 +991,8 @@ class BaseSharesTest(test.BaseTestCase):
                         client.wait_for_resource_deletion(snapshot_id=res_id)
                     elif (res["type"] is "share_network" and
                             res_id != CONF.share.share_network_id):
-                            client.delete_share_network(res_id)
-                            client.wait_for_resource_deletion(sn_id=res_id)
+                        client.delete_share_network(res_id)
+                        client.wait_for_resource_deletion(sn_id=res_id)
                     elif res["type"] is "security_service":
                         client.delete_security_service(res_id)
                         client.wait_for_resource_deletion(ss_id=res_id)
