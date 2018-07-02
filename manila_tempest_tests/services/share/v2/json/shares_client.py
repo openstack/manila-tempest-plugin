@@ -731,7 +731,8 @@ class SharesV2Client(shares_client.SharesClient):
 
     def create_access_rule(self, share_id, access_type="ip",
                            access_to="0.0.0.0", access_level=None,
-                           version=LATEST_MICROVERSION, action_name=None):
+                           version=LATEST_MICROVERSION, metadata=None,
+                           action_name=None):
         post_body = {
             self._get_access_action_name(version, 'os-allow_access'): {
                 "access_type": access_type,
@@ -739,6 +740,8 @@ class SharesV2Client(shares_client.SharesClient):
                 "access_level": access_level,
             }
         }
+        if metadata is not None:
+            post_body['allow_access']['metadata'] = metadata
         body = json.dumps(post_body)
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version,
@@ -747,10 +750,34 @@ class SharesV2Client(shares_client.SharesClient):
         return self._parse_resp(body)
 
     def list_access_rules(self, share_id, version=LATEST_MICROVERSION,
-                          action_name=None):
-        body = {self._get_access_action_name(version, 'os-access_list'): None}
-        resp, body = self.post(
-            "shares/%s/action" % share_id, json.dumps(body), version=version)
+                          metadata=None, action_name=None):
+        if utils.is_microversion_lt(version, "2.45"):
+            body = {
+                self._get_access_action_name(version, 'os-access_list'): None
+            }
+            resp, body = self.post(
+                "shares/%s/action" % share_id, json.dumps(body),
+                version=version)
+            self.expected_success(200, resp.status)
+        else:
+            return self.list_access_rules_with_new_API(
+                share_id, metadata=metadata, version=version,
+                action_name=action_name)
+        return self._parse_resp(body)
+
+    def list_access_rules_with_new_API(self, share_id, metadata=None,
+                                       version=LATEST_MICROVERSION,
+                                       action_name=None):
+        metadata = metadata or {}
+        query_string = ''
+
+        params = sorted(
+            [(k, v) for (k, v) in list(metadata.items()) if v])
+        if params:
+            query_string = "&%s" % urlparse.urlencode(params)
+
+        url = 'share-access-rules?share_id=%s' % share_id + query_string
+        resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -766,6 +793,28 @@ class SharesV2Client(shares_client.SharesClient):
             "shares/%s/action" % share_id, body, version=version)
         self.expected_success(202, resp.status)
         return body
+
+    def get_access(self, access_id, version=LATEST_MICROVERSION):
+        resp, body = self.get("share-access-rules/%s" % access_id,
+                              version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def update_access_metadata(self, access_id, metadata,
+                               version=LATEST_MICROVERSION):
+        url = 'share-access-rules/%s/metadata' % access_id
+        body = {"metadata": metadata}
+        resp, body = self.put(url, json.dumps(body), version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def delete_access_metadata(self, access_id, key,
+                               version=LATEST_MICROVERSION):
+        url = "share-access-rules/%s/metadata/%s" % (access_id, key)
+        resp, body = self.delete(url, version=version)
+        self.expected_success(200, resp.status)
+        return body
+
 
 ###############
 

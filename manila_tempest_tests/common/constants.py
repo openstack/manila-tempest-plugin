@@ -83,3 +83,5 @@ SHARE_GROUP_SNAPSHOT_DETAIL_REQUIRED_KEYS = {
 SHARE_GROUP_TYPE_REQUIRED_KEYS = {
     'id', 'name', 'share_types', 'is_public', 'group_specs',
 }
+
+MIN_SHARE_ACCESS_METADATA_MICROVERSION = '2.45'
