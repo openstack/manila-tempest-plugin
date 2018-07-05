@@ -1734,3 +1734,54 @@ class SharesV2Client(shares_client.SharesClient):
                            ' the required time (%s s).' %
                            (resource_id, self.build_timeout))
                 raise exceptions.TimeoutException(message)
+
+###############
+
+    def create_security_service(self, ss_type="ldap",
+                                version=LATEST_MICROVERSION, **kwargs):
+        """Creates Security Service.
+
+        :param ss_type: ldap, kerberos, active_directory
+        :param version: microversion string
+        :param kwargs: name, description, dns_ip, server, ou, domain, user,
+        :param kwargs: password
+        """
+        post_body = {"type": ss_type}
+        post_body.update(kwargs)
+        body = json.dumps({"security_service": post_body})
+        resp, body = self.post("security-services", body, version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def update_security_service(self, ss_id, version=LATEST_MICROVERSION,
+                                **kwargs):
+        """Updates Security Service.
+
+        :param ss_id: id of security-service entity
+        :param version: microversion string
+        :param kwargs: dns_ip, server, ou, domain, user, password, name,
+        :param kwargs: description
+        :param kwargs: for 'active' status can be changed
+        :param kwargs: only 'name' and 'description' fields
+        """
+        body = json.dumps({"security_service": kwargs})
+        resp, body = self.put("security-services/%s" % ss_id, body,
+                              version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_security_service(self, ss_id, version=LATEST_MICROVERSION):
+        resp, body = self.get("security-services/%s" % ss_id, version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def list_security_services(self, detailed=False, params=None,
+                               version=LATEST_MICROVERSION):
+        uri = "security-services"
+        if detailed:
+            uri += '/detail'
+        if params:
+            uri += "?%s" % urlparse.urlencode(params)
+        resp, body = self.get(uri, version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
