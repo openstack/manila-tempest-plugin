@@ -564,7 +564,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         self.assertEqual(-1, quotas.get('share_group_snapshots'))
 
     @ddt.data(11, -1)
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_user_quotas_bigger_than_project_quota(self, user_quota):
         self.client.update_quotas(self.tenant_id, shares=10)
         self.client.update_quotas(
@@ -572,7 +572,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
             shares=user_quota)
 
     @ddt.data(11, -1)
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @base.skip_if_microversion_lt("2.39")
     def test_update_share_type_quotas_bigger_than_project_quota(self, st_q):
         share_type = self._create_share_type()
@@ -582,7 +582,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
             self.tenant_id, share_type=share_type['name'], force=True,
             shares=st_q)
 
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @base.skip_if_microversion_lt("2.39")
     def test_set_share_type_quota_bigger_than_users_quota(self):
         share_type = self._create_share_type()
