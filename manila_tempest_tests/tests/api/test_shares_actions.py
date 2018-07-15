@@ -440,7 +440,7 @@ class SharesActionsTest(base.BaseSharesTest):
         if version is None:
             snapshot = self.shares_client.get_snapshot(self.snap["id"])
         else:
-            utils.skip_if_microversion_not_supported(version)
+            self.skip_if_microversion_not_supported(version)
             snapshot = self.shares_v2_client.get_snapshot(
                 self.snap["id"], version=version)
 
@@ -515,7 +515,7 @@ class SharesActionsTest(base.BaseSharesTest):
         if version is None:
             snaps = self.shares_client.list_snapshots_with_detail()
         else:
-            utils.skip_if_microversion_not_supported(version)
+            self.skip_if_microversion_not_supported(version)
             snaps = self.shares_v2_client.list_snapshots_with_detail(
                 version=version, params=params)
 

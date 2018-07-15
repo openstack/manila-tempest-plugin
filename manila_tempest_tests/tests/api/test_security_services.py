@@ -45,6 +45,7 @@ class SecurityServiceListMixin(object):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(['1.0', '2.42', '2.44', LATEST_MICROVERSION]))
     def test_list_security_services_with_detail(self, version):
+        self.skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
         if utils.is_microversion_ge(version, '2.0'):
             listed = self.shares_v2_client.list_security_services(
@@ -154,6 +155,7 @@ class SecurityServicesTest(base.BaseSharesTest,
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(['1.0', '2.43', '2.44', LATEST_MICROVERSION]))
     def test_get_security_service(self, version):
+        self.skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
         data = self.generate_security_service_data(set_ou=with_ou)
 
