@@ -488,7 +488,8 @@ class ShareRulesTest(base.BaseSharesTest):
         cls.share = cls.create_share()
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*set(
+        ['1.0', '2.9', '2.27', '2.28', '2.45', LATEST_MICROVERSION]))
     def test_list_access_rules(self, version):
         if (utils.is_microversion_lt(version, '2.13') and
                 CONF.share.enable_cephx_rules_for_protocols):
@@ -496,6 +497,9 @@ class ShareRulesTest(base.BaseSharesTest):
                    "version >= 2.13." % version)
             raise self.skipException(msg)
 
+        metadata = None
+        if utils.is_microversion_ge(version, '2.45'):
+            metadata = {'key1': 'v1', 'key2': 'v2'}
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
@@ -503,7 +507,7 @@ class ShareRulesTest(base.BaseSharesTest):
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], self.access_type, self.access_to,
-                version=version)
+                metadata=metadata, version=version)
 
         # verify added rule keys since 2.33 when create rule
         if utils.is_microversion_ge(version, '2.33'):
@@ -543,6 +547,8 @@ class ShareRulesTest(base.BaseSharesTest):
             keys += ("access_key", )
         if utils.is_microversion_ge(version, '2.33'):
             keys += ("created_at", "updated_at", )
+        if utils.is_microversion_ge(version, '2.45'):
+            keys += ("metadata",)
         for key in keys:
             [self.assertIn(key, r.keys()) for r in rules]
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -625,7 +631,11 @@ class ShareRulesTest(base.BaseSharesTest):
             self.assertRaises(lib_exc.NotFound,
                               self.shares_client.list_access_rules,
                               share['id'])
-        else:
+        elif utils.is_microversion_lt(version, '2.45'):
             self.assertRaises(lib_exc.NotFound,
+                              self.shares_v2_client.list_access_rules,
+                              share['id'], version)
+        else:
+            self.assertRaises(lib_exc.BadRequest,
                               self.shares_v2_client.list_access_rules,
                               share['id'], version)
