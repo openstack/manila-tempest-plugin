@@ -202,7 +202,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             default_share_type_id = self._get_share_type()['id']
             kwargs.update({'share_type_id': default_share_type_id})
         if CONF.share.multitenancy_enabled:
-            kwargs.update({'share_network_id': self.share_net['id']})
+            kwargs.update({'share_network_id': self.share_network['id']})
         self.share = self._create_share(**kwargs)
         return self.share
 
