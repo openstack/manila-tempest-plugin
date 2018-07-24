@@ -21,8 +21,11 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
+
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
 @testtools.skipUnless(
@@ -243,3 +246,42 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         # List projects that have access for share group type - none expected
         access = self.shares_v2_client.list_access_to_share_group_type(sgt_id)
         self.assertEmpty(access)
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    @ddt.data(*set(('2.45', '2.46', LATEST_MICROVERSION)))
+    def test_share_group_type_create_show_list_with_is_default_key(self,
+                                                                   version):
+        self.skip_if_microversion_not_supported(version)
+        name = data_utils.rand_name("tempest-manila")
+
+        # Create share group type
+        sg_type_c = self.create_share_group_type(
+            name=name,
+            share_types=self.share_type['id'],
+            cleanup_in_class=False,
+            version=version)
+        if utils.is_microversion_ge(version, '2.46'):
+            self.assertIn('is_default', sg_type_c)
+            self.assertIs(False, sg_type_c['is_default'])
+        else:
+            self.assertNotIn('is_default', sg_type_c)
+
+        # List share group type
+        sg_type_list = self.shares_v2_client.list_share_group_types(
+            version=version)
+        for sg_type_get in sg_type_list:
+            if utils.is_microversion_ge(version, '2.46'):
+                self.assertIn('is_default', sg_type_get)
+                self.assertTrue(sg_type_get['is_default'] in (True, False))
+            else:
+                self.assertNotIn('is_default', sg_type_get)
+
+        # Show share group type
+        sg_type_id = sg_type_c['id']
+        sg_type_show = self.shares_v2_client.get_share_group_type(
+            sg_type_id, version=version)
+        if utils.is_microversion_ge(version, '2.46'):
+            self.assertIn('is_default', sg_type_show)
+            self.assertIs(False, sg_type_show['is_default'])
+        else:
+            self.assertNotIn('is_default', sg_type_show)
