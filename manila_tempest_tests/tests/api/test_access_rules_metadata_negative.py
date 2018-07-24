@@ -25,7 +25,8 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@base.skip_if_microversion_lt(constants.MIN_SHARE_GROUP_MICROVERSION)
+@base.skip_if_microversion_lt(
+    constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
 @ddt.ddt
 class AccessesMetadataNegativeTest(base.BaseSharesTest):
 

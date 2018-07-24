@@ -491,6 +491,7 @@ class ShareRulesTest(base.BaseSharesTest):
     @ddt.data(*set(
         ['1.0', '2.9', '2.27', '2.28', '2.45', LATEST_MICROVERSION]))
     def test_list_access_rules(self, version):
+        self.skip_if_microversion_not_supported(version)
         if (utils.is_microversion_lt(version, '2.13') and
                 CONF.share.enable_cephx_rules_for_protocols):
             msg = ("API version %s does not support cephx access type, need "
