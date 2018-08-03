@@ -24,6 +24,8 @@ from manila_tempest_tests import utils
 
 CONF = config.CONF
 
+LATEST_MICROVERSION = CONF.share.max_api_microversion
+
 
 @ddt.ddt
 class ShareTypesAdminTest(base.BaseSharesAdminTest):
@@ -205,3 +207,43 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         # List projects that have access for share type - none expected
         access = self.shares_v2_client.list_access_to_share_type(st_id)
         self.assertEmpty(access)
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    @ddt.data(*set(('2.45', '2.46', LATEST_MICROVERSION)))
+    def test_share_type_create_show_list_with_is_default_key(self, version):
+        self.skip_if_microversion_not_supported(version)
+        name = data_utils.rand_name("tempest-manila")
+        extra_specs = self.add_extra_specs_to_dict()
+
+        # Create share type
+        st_create = self.create_share_type(
+            name, extra_specs=extra_specs, version=version)['share_type']
+
+        if utils.is_microversion_ge(version, '2.46'):
+            self.assertIn('is_default', st_create)
+            self.assertIs(False, st_create['is_default'])
+        else:
+            self.assertNotIn('is_default', st_create)
+
+        # list share types
+        st_list = self.shares_v2_client.list_share_types(version=version)
+        for st_get in st_list['share_types']:
+            if utils.is_microversion_ge(version, '2.46'):
+                self.assertIn('is_default', st_get)
+                if st_create['id'] == st_get['id']:
+                    self.assertIs(False, st_get['is_default'])
+                else:
+                    self.assertTrue(st_get['is_default'] in (True, False))
+            else:
+                self.assertNotIn('is_default', st_get)
+
+        # show share types
+        st_id = st_create['id']
+        st_show = self.shares_v2_client.get_share_type(
+            st_id, version=version)['share_type']
+
+        if utils.is_microversion_ge(version, '2.46'):
+            self.assertIn('is_default', st_show)
+            self.assertIs(False, st_show['is_default'])
+        else:
+            self.assertNotIn('is_default', st_show)
