@@ -42,7 +42,7 @@ class SharesMetadataTest(base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_get_delete_metadata(self):
 
-        md = {u"key3": u"value3", u"key4": u"value4", }
+        md = {u"key3": u"value3", u"key4": u"value4", u"key.5.1": u"value.5"}
 
         # create share
         share = self.create_share(cleanup_in_class=False)
