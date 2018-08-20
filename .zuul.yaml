@@ -1,4 +1,7 @@
 - project:
+    templates:
+      - check-requirements
+      - tempest-plugin-jobs
     check:
       jobs:
         - manila-tempest-dsvm-mysql-generic:
@@ -22,6 +25,7 @@
         - manila-tempest-minimal-dsvm-dummy
         - manila-tempest-minimal-dsvm-lvm-centos-7
     gate:
+      queue: manila
       jobs:
         - manila-tempest-minimal-dsvm-dummy
         - manila-tempest-minimal-dsvm-lvm-centos-7
