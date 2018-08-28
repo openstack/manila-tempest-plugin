@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib.common.utils import data_utils
 import testtools
 from testtools import testcase as tc
 
@@ -225,9 +226,9 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     def test_update_valid_keys_sh_server_exists(self):
         self.create_share(share_type_id=self.share_type_id,
                           cleanup_in_class=False)
+        description = data_utils.rand_name("tempest-description")
         update_dict = {
-            "name": "tempest_new_name",
-            "description": "new_description",
+            "description": description,
         }
         updated = self.shares_client.update_share_network(
             self.shares_client.share_network_id, **update_dict)
