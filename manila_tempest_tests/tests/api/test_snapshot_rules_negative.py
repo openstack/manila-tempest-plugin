@@ -71,7 +71,7 @@ class SnapshotIpRulesForNFSNegativeTest(
 
     def _test_duplicate_rules(self, access_to):
         if ':' in access_to and utils.is_microversion_lt(
-                '2.38', CONF.share.max_api_microversion):
+                CONF.share.max_api_microversion, '2.38'):
             reason = ("Skipped. IPv6 rules are accepted from and beyond "
                       "API version 2.38, the configured maximum API version "
                       "is %s" % CONF.share.max_api_microversion)
