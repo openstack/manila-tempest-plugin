@@ -32,13 +32,18 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
     protocol = "nfs"
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareIpRulesForNFSNegativeTest, cls).resource_setup()
-        cls.admin_client = cls.admin_shares_v2_client
+    def skip_checks(cls):
+        super(ShareIpRulesForNFSNegativeTest, cls).skip_checks()
         if not (cls.protocol in CONF.share.enable_protocols and
                 cls.protocol in CONF.share.enable_ip_rules_for_protocols):
             msg = "IP rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareIpRulesForNFSNegativeTest, cls).resource_setup()
+        cls.admin_client = cls.admin_shares_v2_client
+
         # create share_type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
