@@ -15,6 +15,7 @@
 
 from oslo_log import log
 import six
+from six.moves.urllib.request import urlopen
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import remote_client
@@ -28,7 +29,6 @@ from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
 from tempfile import mkstemp
-from urllib2 import urlopen
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
