@@ -1525,6 +1525,26 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(expected_status, resp.status)
         return self._parse_resp(body)
 
+    def list_share_replica_export_locations(self, replica_id,
+                                            expected_status=200,
+                                            version=LATEST_MICROVERSION):
+        uri = "share-replicas/%s/export-locations" % replica_id
+        resp, body = self.get(uri, headers=EXPERIMENTAL,
+                              extra_headers=True, version=version)
+        self.expected_success(expected_status, resp.status)
+        return self._parse_resp(body)
+
+    def get_share_replica_export_location(self, replica_id,
+                                          export_location_id,
+                                          expected_status=200,
+                                          version=LATEST_MICROVERSION):
+        uri = "share-replicas/%s/export-locations/%s" % (replica_id,
+                                                         export_location_id)
+        resp, body = self.get(uri, headers=EXPERIMENTAL,
+                              extra_headers=True, version=version)
+        self.expected_success(expected_status, resp.status)
+        return self._parse_resp(body)
+
     def wait_for_share_replica_status(self, replica_id, expected_status,
                                       status_attr='status'):
         """Waits for a replica's status_attr to reach a given status."""
