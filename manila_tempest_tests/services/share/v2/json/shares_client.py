@@ -1663,7 +1663,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get("snapshots/%s/access-list" % snapshot_id,
                               version=LATEST_MICROVERSION)
         body = self._parse_resp(body)
-        found_rules = filter(lambda x: x['id'] == rule_id, body)
+        found_rules = [r for r in body if r['id'] == rule_id]
 
         return found_rules[0] if len(found_rules) > 0 else None
 
