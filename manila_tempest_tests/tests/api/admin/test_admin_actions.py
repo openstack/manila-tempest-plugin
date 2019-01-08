@@ -13,22 +13,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import config
+import ddt
 import testtools
-from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
-
+from tempest import config
+from testtools import testcase as tc
 
 CONF = config.CONF
 
 
+@ddt.ddt
 class AdminActionsTest(base.BaseSharesAdminTest):
 
     @classmethod
     def resource_setup(cls):
         super(AdminActionsTest, cls).resource_setup()
-        cls.states = ["error", "available"]
         cls.task_states = ["migration_starting", "data_copying_in_progress",
                            "migration_success", None]
         cls.bad_status = "error_deleting"
@@ -37,35 +37,49 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.sh = cls.create_share(share_type_id=cls.share_type_id)
-        cls.sh_instance = (
-            cls.shares_v2_client.get_instances_of_share(cls.sh["id"])[0]
-        )
-        if CONF.share.run_snapshot_tests:
-            cls.sn = cls.create_snapshot_wait_for_active(cls.sh["id"])
+
+    def _wait_for_resource_status(self, resource_id, resource_type):
+        wait_for_resource_status = getattr(
+            self.shares_v2_client, "wait_for_{}_status".format(resource_type))
+        wait_for_resource_status(resource_id, "available")
+
+    def _reset_resource_available(self, resource_id, resource_type="shares"):
+        self.shares_v2_client.reset_state(
+            resource_id, s_type=resource_type, status="available")
+        self._wait_for_resource_status(resource_id, resource_type[:-1])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_reset_share_state(self):
-        for status in self.states:
-            self.shares_v2_client.reset_state(self.sh["id"], status=status)
-            self.shares_v2_client.wait_for_share_status(self.sh["id"], status)
+    @ddt.data("error", "available", "error_deleting", "deleting", "creating")
+    def test_reset_share_state(self, status):
+        self.shares_v2_client.reset_state(self.sh["id"], status=status)
+        self.shares_v2_client.wait_for_share_status(self.sh["id"], status)
+        self.addCleanup(self._reset_resource_available, self.sh["id"])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_reset_share_instance_state(self):
-        id = self.sh_instance["id"]
-        for status in self.states:
-            self.shares_v2_client.reset_state(
-                id, s_type="share_instances", status=status)
-            self.shares_v2_client.wait_for_share_instance_status(id, status)
+    @ddt.data("error", "available", "error_deleting", "deleting", "creating")
+    def test_reset_share_instance_state(self, status):
+        sh_instance = self.shares_v2_client.get_instances_of_share(
+            self.sh["id"])[0]
+        share_instance_id = sh_instance["id"]
+        self.shares_v2_client.reset_state(
+            share_instance_id, s_type="share_instances", status=status)
+        self.shares_v2_client.wait_for_share_instance_status(
+            share_instance_id, status)
+        self.addCleanup(self._reset_resource_available,
+                        share_instance_id, "share_instances")
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
-    def test_reset_snapshot_state_to_error(self):
-        for status in self.states:
-            self.shares_v2_client.reset_state(
-                self.sn["id"], s_type="snapshots", status=status)
-            self.shares_v2_client.wait_for_snapshot_status(
-                self.sn["id"], status)
+    @ddt.data("error", "available", "error_deleting", "deleting", "creating")
+    def test_reset_snapshot_state(self, status):
+        snapshot = self.create_snapshot_wait_for_active(self.sh["id"])
+        self.shares_v2_client.reset_state(
+            snapshot["id"], s_type="snapshots", status=status)
+        self.shares_v2_client.wait_for_snapshot_status(
+            snapshot["id"], status)
+        self.addCleanup(self._reset_resource_available,
+                        snapshot["id"], "snapshots")
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_force_delete_share(self):
