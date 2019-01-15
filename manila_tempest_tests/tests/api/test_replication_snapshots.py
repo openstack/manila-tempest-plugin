@@ -42,19 +42,16 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
             raise share_exceptions.ShareReplicationTypeException(
                 replication_type=cls.replication_type
             )
-        cls.zones = cls.get_availability_zones(client=cls.admin_client)
-        cls.share_zone = cls.zones[0]
-        cls.replica_zone = cls.zones[-1]
 
         # create share type
         extra_specs = {"replication_type": cls.replication_type}
         cls.share_type = cls._create_share_type(extra_specs)
         cls.share_type_id = cls.share_type['id']
-        # Create share with above share_type
-        cls.creation_data = {'kwargs': {
-            'share_type_id': cls.share_type_id,
-            'availability_zone': cls.share_zone,
-        }}
+
+        cls.zones = cls.get_availability_zones_matching_share_type(
+            cls.share_type, client=cls.admin_client)
+        cls.share_zone = cls.zones[0]
+        cls.replica_zone = cls.zones[-1]
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_snapshot_after_share_replica(self):

@@ -46,10 +46,6 @@ class ReplicationTest(base.BaseSharesMixedTest):
             raise share_exceptions.ShareReplicationTypeException(
                 replication_type=cls.replication_type
             )
-        cls.zones = cls.get_availability_zones(client=cls.admin_client)
-        cls.share_zone = cls.zones[0]
-        cls.replica_zone = cls.zones[-1]
-
         cls.extra_specs = cls.add_extra_specs_to_dict(
             {"replication_type": cls.replication_type})
         share_type = cls.create_share_type(
@@ -57,6 +53,12 @@ class ReplicationTest(base.BaseSharesMixedTest):
             extra_specs=cls.extra_specs,
             client=cls.admin_client)
         cls.share_type = share_type["share_type"]
+
+        cls.zones = cls.get_availability_zones_matching_share_type(
+            cls.share_type, client=cls.admin_client)
+        cls.share_zone = cls.zones[0]
+        cls.replica_zone = cls.zones[-1]
+
         # Create share with above share_type
         cls.creation_data = {'kwargs': {
             'share_type_id': cls.share_type['id'],
@@ -309,10 +311,6 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
             raise share_exceptions.ShareReplicationTypeException(
                 replication_type=cls.replication_type
             )
-        cls.zones = cls.get_availability_zones(client=cls.admin_client)
-        cls.share_zone = cls.zones[0]
-        cls.replica_zone = cls.zones[-1]
-
         cls.extra_specs = cls.add_extra_specs_to_dict(
             {"replication_type": cls.replication_type})
         share_type = cls.create_share_type(
@@ -320,6 +318,12 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
             extra_specs=cls.extra_specs,
             client=cls.admin_client)
         cls.share_type = share_type["share_type"]
+
+        cls.zones = cls.get_availability_zones_matching_share_type(
+            cls.share_type, client=cls.admin_client)
+        cls.share_zone = cls.zones[0]
+        cls.replica_zone = cls.zones[-1]
+
         # Create share with above share_type
         cls.creation_data = {'kwargs': {
             'share_type_id': cls.share_type['id'],

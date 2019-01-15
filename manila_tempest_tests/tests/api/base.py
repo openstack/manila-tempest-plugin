@@ -687,17 +687,55 @@ class BaseSharesTest(test.BaseTestCase):
         return sg_snapshot
 
     @classmethod
-    def get_availability_zones(cls, client=None):
+    def get_availability_zones(cls, client=None, backends=None):
         """List the availability zones for "manila-share" services
 
          that are currently in "up" state.
          """
-        client = client or cls.shares_v2_client
+        client = client or cls.admin_shares_v2_client
+        backends = (
+            '|'.join(['^%s$' % backend for backend in backends])
+            if backends else '.*'
+        )
         cls.services = client.list_services()
         zones = [service['zone'] for service in cls.services if
-                 service['binary'] == "manila-share" and
-                 service['state'] == 'up']
+                 service['binary'] == 'manila-share' and
+                 service['state'] == 'up' and
+                 re.search(backends, service['host'])]
         return zones
+
+    @classmethod
+    def get_pools_matching_share_type(cls, share_type, client=None):
+        client = client or cls.admin_shares_v2_client
+        if utils.is_microversion_supported('2.23'):
+            return client.list_pools(
+                search_opts={'share_type': share_type['id']})['pools']
+
+        pools = client.list_pools(detail=True)['pools']
+        share_type = client.get_share_type(share_type['id'])['share_type']
+        extra_specs = {}
+        for k, v in share_type['extra_specs'].items():
+            extra_specs[k] = (
+                True if six.text_type(v).lower() == 'true'
+                else False if six.text_type(v).lower() == 'false' else v
+            )
+        return [
+            pool for pool in pools if all(y in pool['capabilities'].items()
+                                          for y in extra_specs.items())
+        ]
+
+    @classmethod
+    def get_availability_zones_matching_share_type(cls, share_type,
+                                                   client=None):
+
+        client = client or cls.admin_shares_v2_client
+        pools_matching_share_type = cls.get_pools_matching_share_type(
+            share_type, client=client)
+        backends_matching_share_type = set(
+            [pool['name'].split("#")[0] for pool in pools_matching_share_type]
+        )
+        azs = cls.get_availability_zones(backends=backends_matching_share_type)
+        return azs
 
     def get_pools_for_replication_domain(self):
         # Get the list of pools for the replication domain

@@ -78,10 +78,6 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
                 raise share_exceptions.ShareReplicationTypeException(
                     replication_type=cls.replication_type
                 )
-            cls.zones = cls.get_availability_zones(client=cls.admin_client)
-            cls.share_zone = cls.zones[0]
-            cls.replica_zone = cls.zones[-1]
-
             extra_specs = cls.add_extra_specs_to_dict({
                 "replication_type": cls.replication_type,
                 constants.REVERT_TO_SNAPSHOT_SUPPORT: True,
@@ -91,6 +87,10 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
                 extra_specs=extra_specs,
                 client=cls.admin_client)
             cls.replicated_share_type = share_type["share_type"]
+            cls.zones = cls.get_availability_zones_matching_share_type(
+                cls.replicated_share_type, client=cls.admin_client)
+            cls.share_zone = cls.zones[0]
+            cls.replica_zone = cls.zones[-1]
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
