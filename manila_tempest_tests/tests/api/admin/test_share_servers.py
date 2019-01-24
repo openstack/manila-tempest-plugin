@@ -22,7 +22,9 @@ from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -168,6 +170,9 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             "updated_at",
             "backend_details",
         ]
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.49"):
+            keys.append("is_auto_deletable")
+            keys.append("identifier")
         # all expected keys are present
         for key in keys:
             self.assertIn(key, server.keys())
@@ -261,3 +266,65 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             if delete_share_network:
                 self.shares_v2_client.wait_for_resource_deletion(
                     sn_id=new_sn["id"])
+
+    @testtools.skipIf(CONF.share.share_network_id != "",
+                      "This test is not suitable for pre-existing "
+                      "share_network.")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.49")
+    def test_share_server_reset_state(self):
+        # Get network and subnet from existing share_network and reuse it
+        # to be able to delete share_server after test ends.
+        new_sn = self.create_share_network(
+            neutron_net_id=self.share_network['neutron_net_id'],
+            neutron_subnet_id=self.share_network['neutron_subnet_id'])
+        share = self.create_share(
+            share_type_id=self.share_type_id,
+            share_network_id=new_sn['id']
+        )
+        share = self.shares_v2_client.get_share(share['id'])
+
+        # obtain share server
+        share_server = self.shares_v2_client.show_share_server(
+            share['share_server_id']
+        )
+
+        for state in (constants.SERVER_STATE_ACTIVE,
+                      constants.SERVER_STATE_CREATING,
+                      constants.SERVER_STATE_DELETING,
+                      constants.SERVER_STATE_ERROR,
+                      constants.SERVER_STATE_MANAGE_ERROR,
+                      constants.SERVER_STATE_MANAGE_STARTING,
+                      constants.SERVER_STATE_UNMANAGE_ERROR,
+                      constants.SERVER_STATE_UNMANAGE_STARTING):
+
+            # leave it in a new state
+            self.shares_v2_client.share_server_reset_state(
+                share_server['id'],
+                status=state,
+            )
+            self.shares_v2_client.wait_for_share_server_status(
+                share_server['id'],
+                status=state
+            )
+
+        # bring the share server back in the active state
+        self.shares_v2_client.share_server_reset_state(
+            share_server['id'],
+            status=constants.SERVER_STATE_ACTIVE,
+        )
+        self.shares_v2_client.wait_for_share_server_status(
+            share_server['id'],
+            status=constants.SERVER_STATE_ACTIVE
+        )
+
+        # delete share
+        self.shares_v2_client.delete_share(share["id"])
+        self.shares_v2_client.wait_for_resource_deletion(
+            share_id=share["id"]
+        )
+
+        # delete share network. This will trigger share server deletion
+        self.shares_v2_client.delete_share_network(new_sn["id"])
+        self.shares_v2_client.wait_for_resource_deletion(
+            sn_id=new_sn['id'])

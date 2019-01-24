@@ -436,7 +436,7 @@ class SharesV2Client(shares_client.SharesClient):
     def manage_share(self, service_host, protocol, export_path,
                      share_type_id, name=None, description=None,
                      is_public=False, version=LATEST_MICROVERSION,
-                     url=None):
+                     url=None, share_server_id=None):
         post_body = {
             "share": {
                 "export_path": export_path,
@@ -448,6 +448,8 @@ class SharesV2Client(shares_client.SharesClient):
                 "is_public": is_public,
             }
         }
+        if share_server_id is not None:
+            post_body['share']['share_server_id'] = share_server_id
         if url is None:
             if utils.is_microversion_gt(version, "2.6"):
                 url = 'shares/manage'
@@ -548,6 +550,8 @@ class SharesV2Client(shares_client.SharesClient):
             time.sleep(self.build_interval)
             body = self.get_snapshot(snapshot_id, version=version)
             snapshot_status = body['status']
+            if snapshot_status == status:
+                return
             if 'error' in snapshot_status:
                 raise (share_exceptions.
                        SnapshotBuildErrorException(snapshot_id=snapshot_id))
@@ -595,6 +599,12 @@ class SharesV2Client(shares_client.SharesClient):
             version=version)
         self.expected_success(202, resp.status)
         return body
+
+    def snapshot_reset_state(self, snapshot_id,
+                             status=constants.STATUS_AVAILABLE,
+                             version=LATEST_MICROVERSION):
+        self.reset_state(snapshot_id, status=status, s_type='snapshots',
+                         version=version)
 
 ###############
 
@@ -1367,6 +1377,64 @@ class SharesV2Client(shares_client.SharesClient):
                            'within the required time (%s s).' %
                            (sg_snapshot_name, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
+
+###############
+
+    def manage_share_server(self, host, share_network_id, identifier,
+                            driver_options=None, version=LATEST_MICROVERSION):
+        body = {
+            'share_server': {
+                'host': host,
+                'share_network_id': share_network_id,
+                'identifier': identifier,
+                'driver_options': driver_options if driver_options else {},
+            }
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post('share-servers/manage', body,
+                               extra_headers=True, version=version)
+        self.expected_success(202, resp.status)
+        return self._parse_resp(body)
+
+    def unmanage_share_server(self, share_server_id,
+                              version=LATEST_MICROVERSION):
+        body = json.dumps({'unmanage': None})
+        resp, body = self.post('share-servers/%s/action' % share_server_id,
+                               body, extra_headers=True, version=version)
+        self.expected_success(202, resp.status)
+        return self._parse_resp(body)
+
+    def wait_for_share_server_status(self, server_id, status,
+                                     status_attr='status'):
+        """Waits for a share to reach a given status."""
+        body = self.show_share_server(server_id)
+        server_status = body[status_attr]
+        start = int(time.time())
+
+        while server_status != status:
+            time.sleep(self.build_interval)
+            body = self.show_share_server(server_id)
+            server_status = body[status_attr]
+            if server_status == status:
+                return
+            elif constants.STATUS_ERROR in server_status.lower():
+                raise share_exceptions.ShareServerBuildErrorException(
+                    server_id=server_id)
+
+            if int(time.time()) - start >= self.build_timeout:
+                message = ("Share server's %(status_attr)s failed to "
+                           "transition to %(status)s within the required "
+                           "time %(seconds)s." %
+                           {"status_attr": status_attr, "status": status,
+                            "seconds": self.build_timeout})
+                raise exceptions.TimeoutException(message)
+
+    def share_server_reset_state(self, share_server_id,
+                                 status=constants.SERVER_STATE_ACTIVE,
+                                 version=LATEST_MICROVERSION):
+        self.reset_state(share_server_id, status=status,
+                         s_type='share-servers', version=version)
 
 ###############
 

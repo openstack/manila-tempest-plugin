@@ -1115,6 +1115,88 @@ class BaseSharesAdminTest(BaseSharesTest):
             name=share_group_type_name, share_types=[cls.share_type_id],
             client=cls.admin_shares_v2_client)
 
+    def _create_share_for_manage(self):
+        creation_data = {
+            'share_type_id': self.st['share_type']['id'],
+            'share_protocol': self.protocol,
+        }
+
+        share = self.create_share(**creation_data)
+        share = self.shares_v2_client.get_share(share['id'])
+
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.9"):
+            el = self.shares_v2_client.list_share_export_locations(share["id"])
+            share["export_locations"] = el
+
+        return share
+
+    def _unmanage_share_and_wait(self, share):
+        self.shares_v2_client.unmanage_share(share['id'])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
+
+    def _reset_state_and_delete_share(self, share):
+        self.shares_v2_client.reset_state(share['id'])
+        self._delete_share_and_wait(share)
+
+    def _delete_snapshot_and_wait(self, snap):
+        self.shares_v2_client.delete_snapshot(snap['id'])
+        self.shares_v2_client.wait_for_resource_deletion(
+            snapshot_id=snap['id']
+        )
+        self.assertRaises(exceptions.NotFound,
+                          self.shares_v2_client.get_snapshot,
+                          snap['id'])
+
+    def _delete_share_and_wait(self, share):
+        self.shares_v2_client.delete_share(share['id'])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
+        self.assertRaises(exceptions.NotFound,
+                          self.shares_v2_client.get_share,
+                          share['id'])
+
+    def _manage_share(self, share, name, description, share_server_id):
+        managed_share = self.shares_v2_client.manage_share(
+            service_host=share['host'],
+            export_path=share['export_locations'][0],
+            protocol=share['share_proto'],
+            share_type_id=self.share_type['share_type']['id'],
+            name=name,
+            description=description,
+            share_server_id=share_server_id
+        )
+        self.shares_v2_client.wait_for_share_status(
+            managed_share['id'], constants.STATUS_AVAILABLE
+        )
+
+        return managed_share
+
+    def _unmanage_share_server_and_wait(self, server):
+        self.shares_v2_client.unmanage_share_server(server['id'])
+        self.shares_v2_client.wait_for_resource_deletion(
+            server_id=server['id']
+        )
+
+    def _manage_share_server(self, share_server, fields=None):
+        params = fields or {}
+        managed_share_server = self.shares_v2_client.manage_share_server(
+            params.get('host', share_server['host']),
+            params.get('share_network_id', share_server['share_network_id']),
+            params.get('identifier', share_server['identifier']),
+        )
+        self.shares_v2_client.wait_for_share_server_status(
+            managed_share_server['id'],
+            constants.SERVER_STATE_ACTIVE,
+        )
+
+        return managed_share_server
+
+    def _delete_share_server_and_wait(self, share_server_id):
+        self.shares_v2_client.delete_share_server(
+            share_server_id
+        )
+        self.shares_v2_client.wait_for_resource_deletion(
+            server_id=share_server_id)
+
 
 class BaseSharesMixedTest(BaseSharesTest):
     """Base test case class for all Shares API tests with all user roles."""

@@ -15,6 +15,10 @@ STATUS_ERROR = 'error'
 STATUS_AVAILABLE = 'available'
 STATUS_ERROR_DELETING = 'error_deleting'
 STATUS_MIGRATING = 'migrating'
+STATUS_MANAGE_ERROR = 'manage_error'
+STATUS_MIGRATING_TO = 'migrating_to'
+STATUS_CREATING = 'creating'
+STATUS_DELETING = 'deleting'
 
 TEMPEST_MANILA_PREFIX = 'tempest-manila'
 
@@ -85,3 +89,13 @@ SHARE_GROUP_TYPE_REQUIRED_KEYS = {
 }
 
 MIN_SHARE_ACCESS_METADATA_MICROVERSION = '2.45'
+
+# Share servers
+SERVER_STATE_ACTIVE = 'active'
+SERVER_STATE_CREATING = 'creating'
+SERVER_STATE_DELETING = 'deleting'
+SERVER_STATE_ERROR = 'error'
+SERVER_STATE_MANAGE_ERROR = 'manage_error'
+SERVER_STATE_MANAGE_STARTING = 'manage_starting'
+SERVER_STATE_UNMANAGE_ERROR = 'unmanage_error'
+SERVER_STATE_UNMANAGE_STARTING = 'unmanage_starting'

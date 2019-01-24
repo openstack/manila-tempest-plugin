@@ -168,3 +168,12 @@ def get_configured_extra_specs(variation=None):
             CONF.share.capability_create_share_from_snapshot_support)
 
     return extra_specs
+
+
+def skip_if_manage_not_supported_for_version(
+        version=CONF.share.max_api_microversion):
+    if (is_microversion_lt(version, "2.49")
+            and CONF.share.multitenancy_enabled):
+        raise testtools.TestCase.skipException(
+            "Share manage tests with multitenancy are disabled for "
+            "microversion < 2.49")

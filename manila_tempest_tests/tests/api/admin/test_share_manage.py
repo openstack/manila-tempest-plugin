@@ -13,19 +13,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
 CONF = config.CONF
 
 
+@ddt.ddt
 class ManageNFSShareTest(base.BaseSharesAdminTest):
     protocol = 'nfs'
 
@@ -34,36 +35,23 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
     # won't be deleted.
 
     @classmethod
-    @testtools.skipIf(
-        CONF.share.multitenancy_enabled,
-        "Only for driver_handles_share_servers = False driver mode.")
     @testtools.skipUnless(
         CONF.share.run_manage_unmanage_tests,
         "Manage/unmanage tests are disabled.")
     def resource_setup(cls):
-        super(ManageNFSShareTest, cls).resource_setup()
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
 
-        # Create share types
+        utils.skip_if_manage_not_supported_for_version()
+
+        super(ManageNFSShareTest, cls).resource_setup()
+
+        # Create share type
         cls.st_name = data_utils.rand_name("manage-st-name")
-        cls.st_name_invalid = data_utils.rand_name("manage-st-name-invalid")
         cls.extra_specs = {
             'storage_protocol': CONF.share.capability_storage_protocol,
-            'driver_handles_share_servers': False,
-            'snapshot_support': six.text_type(
-                CONF.share.capability_snapshot_support),
-            'create_share_from_snapshot_support': six.text_type(
-                CONF.share.capability_create_share_from_snapshot_support)
-        }
-        cls.extra_specs_invalid = {
-            'storage_protocol': CONF.share.capability_storage_protocol,
-            'driver_handles_share_servers': True,
-            'snapshot_support': six.text_type(
-                CONF.share.capability_snapshot_support),
-            'create_share_from_snapshot_support': six.text_type(
-                CONF.share.capability_create_share_from_snapshot_support),
+            'driver_handles_share_servers': CONF.share.multitenancy_enabled,
         }
 
         cls.st = cls.create_share_type(
@@ -71,14 +59,11 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             cleanup_in_class=True,
             extra_specs=cls.extra_specs)
 
-        cls.st_invalid = cls.create_share_type(
-            name=cls.st_name_invalid,
-            cleanup_in_class=True,
-            extra_specs=cls.extra_specs_invalid)
-
     def _test_manage(self, is_public=False,
                      version=CONF.share.max_api_microversion,
                      check_manage=False):
+
+        utils.skip_if_manage_not_supported_for_version(version)
 
         share = self._create_share_for_manage()
 
@@ -97,16 +82,19 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             self.assertNotIn(share['id'], share_ids)
 
         # Manage share
-        managed_share = self.shares_v2_client.manage_share(
-            service_host=share['host'],
-            export_path=share['export_locations'][0],
-            protocol=share['share_proto'],
-            share_type_id=self.st['share_type']['id'],
-            name=name,
-            description=description,
-            is_public=is_public,
-            version=version,
-        )
+        manage_params = {
+            'service_host': share['host'],
+            'export_path': share['export_locations'][0],
+            'protocol': share['share_proto'],
+            'share_type_id': self.st['share_type']['id'],
+            'name': name,
+            'description': description,
+            'is_public': is_public,
+            'version': version,
+        }
+        if CONF.share.multitenancy_enabled:
+            manage_params['share_server_id'] = share['share_server_id']
+        managed_share = self.shares_v2_client.manage_share(**manage_params)
 
         # Add managed share to cleanup queue
         self.method_resources.insert(
@@ -115,7 +103,7 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
 
         # Wait for success
         self.shares_v2_client.wait_for_share_status(managed_share['id'],
-                                                    'available')
+                                                    constants.STATUS_AVAILABLE)
 
         # Verify data of managed share
         self.assertEqual(name, managed_share['name'])
@@ -141,31 +129,7 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             self.assertNotIn('user_id', managed_share)
 
         # Delete share
-        self.shares_v2_client.delete_share(managed_share['id'])
-        self.shares_v2_client.wait_for_resource_deletion(
-            share_id=managed_share['id'])
-        self.assertRaises(lib_exc.NotFound,
-                          self.shares_v2_client.get_share,
-                          managed_share['id'])
-
-    def _create_share_for_manage(self):
-        creation_data = {
-            'share_type_id': self.st['share_type']['id'],
-            'share_protocol': self.protocol,
-        }
-
-        share = self.create_share(**creation_data)
-        share = self.shares_v2_client.get_share(share['id'])
-
-        if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.9"):
-            el = self.shares_v2_client.list_share_export_locations(share["id"])
-            share["export_locations"] = el
-
-        return share
-
-    def _unmanage_share_and_wait(self, share):
-        self.shares_v2_client.unmanage_share(share['id'])
-        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
+        self._delete_share_and_wait(managed_share)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.5")
@@ -185,55 +149,6 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_manage(self):
         self._test_manage(check_manage=True)
-
-    @testtools.skipUnless(
-        CONF.share.multitenancy_enabled,
-        "Will be re-enabled along with the updated tests of Manage-Unmanage "
-        "with Share Server patch")
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_manage_invalid(self):
-        # Try to manage share with invalid parameters, it should not succeed
-        # because the scheduler will reject it. If it succeeds, then this test
-        # case failed. Then, in order to remove the resource from backend, we
-        # need to manage it again, properly, so we can delete it. Consequently
-        # the second part of this test also tests that manage operation with a
-        # proper share type works.
-
-        def _delete_share(share_id):
-            self.shares_v2_client.reset_state(share_id)
-            self.shares_v2_client.delete_share(share_id)
-            self.shares_v2_client.wait_for_resource_deletion(share_id=share_id)
-            self.assertRaises(lib_exc.NotFound,
-                              self.shares_v2_client.get_share,
-                              share_id)
-
-        share = self._create_share_for_manage()
-
-        self._unmanage_share_and_wait(share)
-
-        managed_share = self.shares_v2_client.manage_share(
-            service_host=share['host'],
-            export_path=share['export_locations'][0],
-            protocol=share['share_proto'],
-            share_type_id=self.st_invalid['share_type']['id'])
-        self.addCleanup(_delete_share, managed_share['id'])
-
-        self.shares_v2_client.wait_for_share_status(
-            managed_share['id'], 'manage_error')
-        managed_share = self.shares_v2_client.get_share(managed_share['id'])
-        self.assertEqual(1, int(managed_share['size']))
-
-        # Delete resource from backend. We need to manage the share properly
-        # so it can be removed.
-        managed_share = self.shares_v2_client.manage_share(
-            service_host=share['host'],
-            export_path=share['export_locations'][0],
-            protocol=share['share_proto'],
-            share_type_id=self.st['share_type']['id'])
-        self.addCleanup(_delete_share, managed_share['id'])
-
-        self.shares_v2_client.wait_for_share_status(
-            managed_share['id'], 'available')
 
 
 class ManageCIFSShareTest(ManageNFSShareTest):

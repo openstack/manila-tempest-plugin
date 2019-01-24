@@ -75,3 +75,8 @@ class ResourceReleaseFailed(exceptions.TempestException):
 class ShareReplicationTypeException(exceptions.TempestException):
     message = ("Option backend_replication_type is set to incorrect value: "
                "%(replication_type)s")
+
+
+class ShareServerBuildErrorException(exceptions.TempestException):
+    message = ("Share server %(server_id)s failed to build and is in ERROR "
+               "status")

@@ -14,13 +14,13 @@
 #    under the License.
 
 import ddt
-import six
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -36,27 +36,24 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
 
     @classmethod
     @base.skip_if_microversion_lt("2.12")
-    @testtools.skipIf(
-        CONF.share.multitenancy_enabled,
-        "Only for driver_handles_share_servers = False driver mode.")
     @testtools.skipUnless(
         CONF.share.run_manage_unmanage_snapshot_tests,
         "Manage/unmanage snapshot tests are disabled.")
     def resource_setup(cls):
-        super(ManageNFSSnapshotTest, cls).resource_setup()
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
+
+        utils.skip_if_manage_not_supported_for_version()
+
+        super(ManageNFSSnapshotTest, cls).resource_setup()
 
         # Create share type
         cls.st_name = data_utils.rand_name("tempest-manage-st-name")
         cls.extra_specs = {
             'storage_protocol': CONF.share.capability_storage_protocol,
-            'driver_handles_share_servers': False,
-            'snapshot_support': six.text_type(
-                CONF.share.capability_snapshot_support),
-            'create_share_from_snapshot_support': six.text_type(
-                CONF.share.capability_create_share_from_snapshot_support)
+            'driver_handles_share_servers': CONF.share.multitenancy_enabled,
+            'snapshot_support': CONF.share.capability_snapshot_support,
         }
 
         cls.st = cls.create_share_type(
@@ -75,6 +72,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         name = ("Name for 'managed' snapshot that had ID %s" %
                 snapshot['id'])
         description = "Description for 'managed' snapshot"
+
+        utils.skip_if_manage_not_supported_for_version(version)
 
         # Manage snapshot
         share_id = snapshot['share_id']
@@ -96,8 +95,10 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
                 'client': self.shares_v2_client})
 
         # Wait for success
-        self.shares_v2_client.wait_for_snapshot_status(snapshot['id'],
-                                                       'available')
+        self.shares_v2_client.wait_for_snapshot_status(
+            snapshot['id'],
+            constants.STATUS_AVAILABLE
+        )
 
         # Verify manage snapshot API response
         expected_keys = ["status", "links", "share_id", "name",
@@ -135,6 +136,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         version as well as versions 2.12 (when the API was introduced) and
         2.16.
         """
+        utils.skip_if_manage_not_supported_for_version(version)
+
         # Skip in case specified version is not supported
         self.skip_if_microversion_not_supported(version)
 
