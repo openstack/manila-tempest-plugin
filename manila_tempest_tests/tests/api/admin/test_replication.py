@@ -41,13 +41,15 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             raise share_exceptions.ShareReplicationTypeException(
                 replication_type=cls.replication_type
             )
-        cls.zones = cls.get_availability_zones(client=cls.admin_client)
-        cls.share_zone = cls.zones[0]
-        cls.replica_zone = cls.zones[-1]
 
         extra_specs = {"replication_type": cls.replication_type}
         cls.share_type = cls._create_share_type(extra_specs)
         cls.share_type_id = cls.share_type['id']
+
+        cls.zones = cls.get_availability_zones_matching_share_type(
+            cls.share_type, client=cls.admin_client)
+        cls.share_zone = cls.zones[0]
+        cls.replica_zone = cls.zones[-1]
 
         # Create share with above share_type
         cls.share = cls.create_share(share_type_id=cls.share_type_id,
@@ -71,7 +73,8 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             raise self.skipException(
                 msg % ','.join(constants.REPLICATION_PROMOTION_CHOICES))
         share = self.create_share(
-            share_type_id=self.share_type_id, client=self.admin_client)
+            share_type_id=self.share_type_id, client=self.admin_client,
+            availability_zone=self.share_zone)
         original_replica = self.admin_client.list_share_replicas(
             share_id=share['id'])[0]
 

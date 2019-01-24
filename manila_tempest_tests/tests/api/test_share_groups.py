@@ -195,7 +195,8 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
     def test_create_sg_and_share_specifying_az(self, where_specify_az):
         # Get list of existing availability zones, at least one always
         # should exist
-        azs = self.shares_v2_client.list_availability_zones()
+        azs = self.get_availability_zones_matching_share_type(
+            self.share_type)
 
         sg_kwargs = {
             'share_group_type_id': self.share_group_type_id,
@@ -204,7 +205,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             'cleanup_in_class': False,
         }
         if where_specify_az in ('sg', 'sg_and_share'):
-            sg_kwargs['availability_zone'] = azs[0]['name']
+            sg_kwargs['availability_zone'] = azs[0]
 
         # Create share group
         share_group = self.create_share_group(**sg_kwargs)
@@ -215,10 +216,9 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
 
         self.assertIn('availability_zone', share_group)
         if where_specify_az in ('sg', 'sg_and_share'):
-            self.assertEqual(azs[0]['name'], share_group['availability_zone'])
+            self.assertEqual(azs[0], share_group['availability_zone'])
         else:
-            self.assertIn(
-                share_group['availability_zone'], [az['name'] for az in azs])
+            self.assertIn(share_group['availability_zone'], azs)
 
         # Test 'consistent_snapshot_support' as part of 2.33 API change
         self.assertIn('consistent_snapshot_support', share_group)
@@ -233,7 +233,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             'experimental': True,
         }
         if where_specify_az == 'sg_and_share':
-            s_kwargs['availability_zone'] = azs[0]['name']
+            s_kwargs['availability_zone'] = azs[0]
 
         # Create share in share group
         share = self.create_share(**s_kwargs)
