@@ -186,6 +186,10 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
     def test_manage(self):
         self._test_manage(check_manage=True)
 
+    @testtools.skipUnless(
+        CONF.share.multitenancy_enabled,
+        "Will be re-enabled along with the updated tests of Manage-Unmanage "
+        "with Share Server patch")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_invalid(self):
         # Try to manage share with invalid parameters, it should not succeed
