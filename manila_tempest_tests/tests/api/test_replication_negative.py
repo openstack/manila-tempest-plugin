@@ -194,6 +194,19 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
             lib_exc.Conflict, self.admin_client.migrate_share,
             self.share1['id'], dest_host)
 
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @base.skip_if_microversion_lt("2.48")
+    def test_try_add_replica_share_type_azs_unsupported_az(self):
+        self.admin_shares_v2_client.update_share_type_extra_spec(
+            self.share_type['id'], 'availability_zones', 'non-existent az')
+        self.addCleanup(
+            self.admin_shares_v2_client.delete_share_type_extra_spec,
+            self.share_type['id'], 'availability_zones')
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_share_replica,
+                          self.share1['id'],
+                          self.replica_zone)
+
 
 @testtools.skipUnless(CONF.share.run_replication_tests,
                       'Replication tests are disabled.')

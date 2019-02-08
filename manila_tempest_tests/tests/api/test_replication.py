@@ -248,6 +248,28 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.assertEqual(access_to, rules_list[0]["access_to"])
         self.assertEqual('ro', rules_list[0]["access_level"])
 
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @base.skip_if_microversion_not_supported("2.48")
+    def test_share_type_azs_share_replicas(self):
+        az_spec = ', '.join(self.zones)
+        self.admin_shares_v2_client.update_share_type_extra_spec(
+            self.share_type['id'], 'availability_zones', az_spec)
+        self.addCleanup(
+            self.admin_shares_v2_client.delete_share_type_extra_spec,
+            self.share_type['id'], 'availability_zones')
+
+        share = self.create_share(
+            share_type_id=self.share_type['id'], cleanup_in_class=False,
+            availability_zone=self.share_zone)
+        share = self.shares_v2_client.get_share(share['id'])
+        replica = self.create_share_replica(share['id'], self.replica_zone)
+        replica = self.shares_v2_client.get_share_replica(replica['id'])
+
+        self.assertEqual(self.share_zone, share['availability_zone'])
+        self.assertEqual(self.replica_zone, replica['availability_zone'])
+        self.assertIn(share['availability_zone'], self.zones)
+        self.assertIn(replica['availability_zone'], self.zones)
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_promote_and_promote_back(self):
         # Test promote back and forth between 2 share replicas
