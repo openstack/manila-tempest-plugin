@@ -14,10 +14,11 @@
 #    under the License.
 
 import json
+import re
 import six
 import time
 
-from six.moves.urllib import parse as urlparse
+from six.moves.urllib import parse
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
@@ -139,6 +140,15 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(202, resp.status)
         return body
 
+    @staticmethod
+    def _get_base_url(endpoint):
+        url = parse.urlparse(endpoint)
+        # Get any valid path components before the version string
+        # regex matches version str & everything after (examples: v1, v2, v1.2)
+        base_path = re.split(r'(^|/)+v\d+(\.\d+)?', url.path)[0]
+        base_url = url._replace(path=base_path)
+        return parse.urlunparse(base_url) + '/'
+
     def send_microversion_request(self, version=None, script_name=None):
         """Prepare and send the HTTP GET Request to the base URL.
 
@@ -153,12 +163,19 @@ class SharesV2Client(shares_client.SharesClient):
         headers = self.get_headers()
         url, headers, body = self.auth_provider.auth_request(
             'GET', 'shares', headers, None, self.filters)
-        url = '/'.join(url.split('/')[:3]) + '/'
+        url = self._get_base_url(url)
         if script_name:
             url += script_name + '/'
         if version:
             headers[self.API_MICROVERSIONS_HEADER] = version
+
+        # Handle logging because raw_request doesn't log anything
+        start = time.time()
+        self._log_request_start('GET', url)
         resp, resp_body = self.raw_request(url, 'GET', headers=headers)
+        end = time.time()
+        self._log_request(
+            'GET', url, resp, secs=(end - start), resp_body=resp_body)
         self.response_checker('GET', resp, resp_body)
         resp_body = json.loads(resp_body)
         return resp, resp_body
@@ -243,7 +260,7 @@ class SharesV2Client(shares_client.SharesClient):
         """Get list of shares w/o filters."""
         headers = EXPERIMENTAL if experimental else None
         uri = 'shares/detail' if detailed else 'shares'
-        uri += '?%s' % urlparse.urlencode(params) if params else ''
+        uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, headers=headers, extra_headers=experimental,
                               version=version)
         self.expected_success(200, resp.status)
@@ -284,7 +301,7 @@ class SharesV2Client(shares_client.SharesClient):
     def delete_share(self, share_id, params=None,
                      version=LATEST_MICROVERSION):
         uri = "shares/%s" % share_id
-        uri += '?%s' % (urlparse.urlencode(params) if params else '')
+        uri += '?%s' % (parse.urlencode(params) if params else '')
         resp, body = self.delete(uri, version=version)
         self.expected_success(202, resp.status)
         return body
@@ -300,7 +317,7 @@ class SharesV2Client(shares_client.SharesClient):
     def list_share_instances(self, version=LATEST_MICROVERSION,
                              params=None):
         uri = 'share_instances'
-        uri += '?%s' % urlparse.urlencode(params) if params else ''
+        uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -494,7 +511,7 @@ class SharesV2Client(shares_client.SharesClient):
                        version=LATEST_MICROVERSION):
         """Get list of share snapshots w/o filters."""
         uri = 'snapshots/detail' if detailed else 'snapshots'
-        uri += '?%s' % urlparse.urlencode(params) if params else ''
+        uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -610,7 +627,7 @@ class SharesV2Client(shares_client.SharesClient):
                                    version=LATEST_MICROVERSION):
         uri = "types/%s/extra_specs" % share_type_id
         if params is not None:
-            uri += '?%s' % urlparse.urlencode(params)
+            uri += '?%s' % parse.urlencode(params)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -774,7 +791,7 @@ class SharesV2Client(shares_client.SharesClient):
         params = sorted(
             [(k, v) for (k, v) in list(metadata.items()) if v])
         if params:
-            query_string = "&%s" % urlparse.urlencode(params)
+            query_string = "&%s" % parse.urlencode(params)
 
         url = 'share-access-rules?share_id=%s' % share_id + query_string
         resp, body = self.get(url, version=version)
@@ -841,7 +858,7 @@ class SharesV2Client(shares_client.SharesClient):
             else:
                 url = 'os-services'
         if params:
-            url += '?%s' % urlparse.urlencode(params)
+            url += '?%s' % parse.urlencode(params)
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -854,7 +871,7 @@ class SharesV2Client(shares_client.SharesClient):
         if default:
             uri += '/default'
         if params is not None:
-            uri += '?%s' % urlparse.urlencode(params)
+            uri += '?%s' % parse.urlencode(params)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -1039,7 +1056,7 @@ class SharesV2Client(shares_client.SharesClient):
                           version=LATEST_MICROVERSION):
         """Get list of share groups w/o filters."""
         uri = 'share-groups%s' % ('/detail' if detailed else '')
-        uri += '?%s' % (urlparse.urlencode(params) if params else '')
+        uri += '?%s' % (parse.urlencode(params) if params else '')
         resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
                               version=version)
         self.expected_success(200, resp.status)
@@ -1135,7 +1152,7 @@ class SharesV2Client(shares_client.SharesClient):
                                version=LATEST_MICROVERSION):
         """Get list of share group types."""
         uri = 'share-group-types%s' % ('/detail' if detailed else '')
-        uri += '?%s' % (urlparse.urlencode(params) if params else '')
+        uri += '?%s' % (parse.urlencode(params) if params else '')
         resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
                               version=version)
         self.expected_success(200, resp.status)
@@ -1221,7 +1238,7 @@ class SharesV2Client(shares_client.SharesClient):
                                     version=LATEST_MICROVERSION):
         uri = "share-group-types/%s/group_specs" % share_group_type_id
         if params is not None:
-            uri += '?%s' % urlparse.urlencode(params)
+            uri += '?%s' % parse.urlencode(params)
         resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
                               version=version)
         self.expected_success(200, resp.status)
@@ -1285,7 +1302,7 @@ class SharesV2Client(shares_client.SharesClient):
                                    version=LATEST_MICROVERSION):
         """Get list of share group snapshots w/o filters."""
         uri = 'share-group-snapshots%s' % ('/detail' if detailed else '')
-        uri += '?%s' % (urlparse.urlencode(params) if params else '')
+        uri += '?%s' % (parse.urlencode(params) if params else '')
         resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
                               version=version)
         self.expected_success(200, resp.status)
@@ -1627,7 +1644,7 @@ class SharesV2Client(shares_client.SharesClient):
                             version=LATEST_MICROVERSION):
         """Get list of share networks w/o filters."""
         uri = 'share-networks/detail' if detailed else 'share-networks'
-        uri += '?%s' % urlparse.urlencode(params) if params else ''
+        uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -1755,7 +1772,7 @@ class SharesV2Client(shares_client.SharesClient):
     def list_messages(self, params=None, version=LATEST_MICROVERSION):
         """List all messages."""
         url = 'messages'
-        url += '?%s' % urlparse.urlencode(params) if params else ''
+        url += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -1830,7 +1847,7 @@ class SharesV2Client(shares_client.SharesClient):
         if detailed:
             uri += '/detail'
         if params:
-            uri += "?%s" % urlparse.urlencode(params)
+            uri += "?%s" % parse.urlencode(params)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
