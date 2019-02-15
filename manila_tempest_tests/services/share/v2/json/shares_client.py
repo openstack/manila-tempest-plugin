@@ -55,25 +55,38 @@ class SharesV2Client(shares_client.SharesClient):
             new_headers = headers
         return new_headers
 
+    def verify_request_id(self, response):
+        response_headers = [r.lower() for r in response.keys()]
+        assert_msg = ("Response is missing request ID. Response "
+                      "headers are: %s") % response
+        assert 'x-compute-request-id' in response_headers, assert_msg
+
     # Overwrite all http verb calls to inject the micro version header
     def post(self, url, body, headers=None, extra_headers=False,
              version=LATEST_MICROVERSION):
         headers = self.inject_microversion_header(headers, version,
                                                   extra_headers=extra_headers)
-        return super(SharesV2Client, self).post(url, body, headers=headers)
+        resp, body = super(SharesV2Client, self).post(url, body,
+                                                      headers=headers)
+        self.verify_request_id(resp)
+        return resp, body
 
     def get(self, url, headers=None, extra_headers=False,
             version=LATEST_MICROVERSION):
         headers = self.inject_microversion_header(headers, version,
                                                   extra_headers=extra_headers)
-        return super(SharesV2Client, self).get(url, headers=headers)
+        resp, body = super(SharesV2Client, self).get(url, headers=headers)
+        self.verify_request_id(resp)
+        return resp, body
 
     def delete(self, url, headers=None, body=None, extra_headers=False,
                version=LATEST_MICROVERSION):
         headers = self.inject_microversion_header(headers, version,
                                                   extra_headers=extra_headers)
-        return super(SharesV2Client, self).delete(url, headers=headers,
-                                                  body=body)
+        resp, body = super(SharesV2Client, self).delete(url, headers=headers,
+                                                        body=body)
+        self.verify_request_id(resp)
+        return resp, body
 
     def patch(self, url, body, headers=None, extra_headers=False,
               version=LATEST_MICROVERSION):
@@ -85,19 +98,26 @@ class SharesV2Client(shares_client.SharesClient):
             version=LATEST_MICROVERSION):
         headers = self.inject_microversion_header(headers, version,
                                                   extra_headers=extra_headers)
-        return super(SharesV2Client, self).put(url, body, headers=headers)
+        resp, body = super(SharesV2Client, self).put(url, body,
+                                                     headers=headers)
+        self.verify_request_id(resp)
+        return resp, body
 
     def head(self, url, headers=None, extra_headers=False,
              version=LATEST_MICROVERSION):
         headers = self.inject_microversion_header(headers, version,
                                                   extra_headers=extra_headers)
-        return super(SharesV2Client, self).head(url, headers=headers)
+        resp, body = super(SharesV2Client, self).head(url, headers=headers)
+        self.verify_request_id(resp)
+        return resp, body
 
     def copy(self, url, headers=None, extra_headers=False,
              version=LATEST_MICROVERSION):
         headers = self.inject_microversion_header(headers, version,
                                                   extra_headers=extra_headers)
-        return super(SharesV2Client, self).copy(url, headers=headers)
+        resp, body = super(SharesV2Client, self).copy(url, headers=headers)
+        self.verify_request_id(resp)
+        return resp, body
 
     def reset_state(self, s_id, status="error", s_type="shares",
                     headers=None, version=LATEST_MICROVERSION,
