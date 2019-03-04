@@ -264,6 +264,19 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
             new_share_type_id=new_type_opposite['share_type']['id'],
             new_share_network_id=new_share_network_id)
 
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @base.skip_if_microversion_lt("2.48")
+    def test_share_type_azs_share_migrate_unsupported_az(self):
+        extra_specs = self.add_extra_specs_to_dict({
+            'availability_zones': 'non-existent az'})
+        new_share_type = self.create_share_type(
+            name=data_utils.rand_name('share_type_specific_az'),
+            extra_specs=extra_specs, cleanup_in_class=False)
+        self.assertRaises(
+            lib_exc.BadRequest, self.shares_v2_client.migrate_share,
+            self.share['id'], self.dest_pool,
+            new_share_type_id=new_share_type['share_type']['id'])
+
     @testtools.skipUnless(CONF.share.run_driver_assisted_migration_tests,
                           "Driver-assisted migration tests are disabled.")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
