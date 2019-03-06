@@ -46,8 +46,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return self.ip_version == 6
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareScenarioTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(ShareScenarioTest, cls).setup_clients()
 
         # Manila clients
         cls.shares_client = cls.os_primary.share_v1.SharesClient()
