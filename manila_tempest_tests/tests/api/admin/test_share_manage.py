@@ -131,6 +131,14 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
         # Delete share
         self._delete_share_and_wait(managed_share)
 
+        # Delete share server, since it can't be "auto-deleted"
+        if (CONF.share.multitenancy_enabled and
+                not CONF.share.share_network_id):
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(
+                managed_share['share_server_id'])
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.5")
     def test_manage_with_os_share_manage_url(self):

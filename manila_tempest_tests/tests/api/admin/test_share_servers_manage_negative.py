@@ -260,6 +260,11 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
             invalid_params
         )
 
+        # unmanage the share server in manage_error
+        search_opts = {'identifier': 'invalid_id'}
+        invalid_servers = self.shares_v2_client.list_share_servers(search_opts)
+        self._unmanage_share_server_and_wait(invalid_servers[0])
+
         # manage in the correct way
         managed_share_server = self._manage_share_server(share_server)
         managed_share_server = self.shares_v2_client.show_share_server(
@@ -318,3 +323,9 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
 
         # delete share
         self._delete_share_and_wait(share)
+
+        # Delete share server, since it can't be "auto-deleted"
+        if not CONF.share.share_network_id:
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(share_server['id'])

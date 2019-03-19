@@ -59,14 +59,11 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             cleanup_in_class=True,
             extra_specs=cls.extra_specs)
 
-    def _manage_share_for_cleanup_and_wait(self, params,
-                                           state=constants.STATUS_AVAILABLE):
-        # Manage the share, schedule its deletion upon tearDown and wait for
-        # the expected state.
+    def _manage_share_and_wait(self, params,
+                               state=constants.STATUS_AVAILABLE):
+        # Manage the share and wait for the expected state.
         # Return the managed share object.
         managed_share = self.shares_v2_client.manage_share(**params)
-        self.addCleanup(self._reset_state_and_delete_share,
-                        managed_share)
         self.shares_v2_client.wait_for_share_status(
             managed_share['id'], state)
 
@@ -128,8 +125,17 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
                 **invalid_params
             )
 
-        # manage it properly and schedule cleanup upon tearDown
-        self._manage_share_for_cleanup_and_wait(valid_params)
+        # manage it properly and cleanup
+        managed_share = self._manage_share_and_wait(valid_params)
+        self._delete_share_and_wait(managed_share)
+
+        # Delete share server, since it can't be "auto-deleted"
+        if (CONF.share.multitenancy_enabled and
+                not CONF.share.share_network_id):
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(
+                managed_share['share_server_id'])
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_invalid_param_manage_error(self):
@@ -163,8 +169,17 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             # cleanup
             self._unmanage_share_and_wait(invalid_share)
 
-        # manage it properly and schedule cleanup upon tearDown
-        self._manage_share_for_cleanup_and_wait(valid_params)
+        # manage it properly and cleanup
+        managed_share = self._manage_share_and_wait(valid_params)
+        self._delete_share_and_wait(managed_share)
+
+        # Delete share server, since it can't be "auto-deleted"
+        if (CONF.share.multitenancy_enabled and
+                not CONF.share.share_network_id):
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(
+                managed_share['share_server_id'])
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_share_duplicate(self):
@@ -174,7 +189,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         self._unmanage_share_and_wait(share)
 
         # manage the share for the first time
-        managed_share = self._manage_share_for_cleanup_and_wait(manage_params)
+        managed_share = self._manage_share_and_wait(manage_params)
 
         # update managed share's reference
         managed_share = self.shares_v2_client.get_share(managed_share['id'])
@@ -186,6 +201,17 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self.shares_v2_client.manage_share,
             **manage_params
         )
+
+        # cleanup
+        self._delete_share_and_wait(managed_share)
+
+        # Delete share server, since it can't be "auto-deleted"
+        if (CONF.share.multitenancy_enabled and
+                not CONF.share.share_network_id):
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(
+                managed_share['share_server_id'])
 
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           'Multitenancy tests are disabled.')
@@ -203,7 +229,17 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             **manage_params)
 
         manage_params['share_server_id'] = share_server_id
-        self._manage_share_for_cleanup_and_wait(manage_params)
+
+        managed_share = self._manage_share_and_wait(manage_params)
+        self._delete_share_and_wait(managed_share)
+
+        # Delete share server, since it can't be "auto-deleted"
+        if (CONF.share.multitenancy_enabled and
+                not CONF.share.share_network_id):
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(
+                managed_share['share_server_id'])
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_share_in_manage_error(self):
@@ -230,7 +266,16 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
 
         # cleanup
         self.shares_v2_client.unmanage_share(invalid_share['id'])
-        self._manage_share_for_cleanup_and_wait(valid_params)
+        managed_share = self._manage_share_and_wait(valid_params)
+        self._delete_share_and_wait(managed_share)
+
+        # Delete share server, since it can't be "auto-deleted"
+        if (CONF.share.multitenancy_enabled and
+                not CONF.share.share_network_id):
+            # For a pre-configured share_network_id, we don't
+            # delete the share server.
+            self._delete_share_server_and_wait(
+                managed_share['share_server_id'])
 
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           'Snapshot tests are disabled.')
