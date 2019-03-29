@@ -1,0 +1,3 @@
+GITREPO["manila-tempest-plugin"]=${MANILA_TEMPEST_REPO:-${GIT_BASE}/openstack/manila-tempest-plugin.git}
+GITDIR["manila-tempest-plugin"]=$DEST/manila-tempest-plugin
+GITBRANCH["manila-tempest-plugin"]=master
