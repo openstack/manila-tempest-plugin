@@ -82,7 +82,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                                    error_on_invalid_ip_version=False):
         locations = None
         if share:
-            locations = self._get_share_export_locations(share)
+            locations = self.get_share_export_locations(share)
         elif snapshot:
             locations = self._get_snapshot_export_locations(snapshot)
 
@@ -90,17 +90,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         locations = self._get_export_locations_according_to_ip_version(
             locations, error_on_invalid_ip_version)
         self.assertNotEmpty(locations)
-
-        return locations
-
-    def _get_share_export_locations(self, share):
-
-        if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):
-            locations = share['export_locations']
-        else:
-            exports = self.shares_v2_client.list_share_export_locations(
-                share['id'])
-            locations = [x['path'] for x in exports]
 
         return locations
 
