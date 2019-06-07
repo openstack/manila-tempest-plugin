@@ -116,6 +116,11 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
     def test_write_with_ro_access(self):
         '''Test if an instance with ro access can write on the share.'''
+        if self.protocol.upper() == 'CIFS':
+            msg = ("Skipped for CIFS protocol because RO access is not "
+                   "supported for shares by IP.")
+            raise self.skipException(msg)
+
         test_data = "Some test data to write"
 
         instance = self.boot_instance(wait_until="BUILD")
