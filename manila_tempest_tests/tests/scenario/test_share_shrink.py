@@ -71,7 +71,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         LOG.debug('Step 5 - mount')
         self.mount_share(locations[0], remote_client)
 
-        total_blocks = (1024 * default_share_size) / 64
+        total_blocks = int((1024 * default_share_size) / 64)
         blocks = total_blocks + 4
         LOG.debug('Step 6 - writing {} * 64MB blocks'.format(blocks))
         self.write_data_to_mounted_share_using_dd(remote_client,
