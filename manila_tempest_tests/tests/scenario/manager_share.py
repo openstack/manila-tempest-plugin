@@ -311,11 +311,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                                              client=None):
         share = share or self.share
         client = client or self.shares_v2_client
-        if self.protocol.lower() == 'cifs':
-            self.allow_access_ip(
-                share['id'], instance=instance, cleanup=False,
-                snapshot=snapshot, access_level=access_level, client=client)
-        elif not CONF.share.multitenancy_enabled:
+        if not CONF.share.multitenancy_enabled:
             if self.ipv6_enabled:
                 server_ip = self._get_ipv6_server_ip(instance)
             else:
@@ -326,8 +322,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 share['id'], ip=server_ip,
                 instance=instance, cleanup=False, snapshot=snapshot,
                 access_level=access_level, client=client)
-        elif (CONF.share.multitenancy_enabled and
-              self.protocol.lower() == 'nfs'):
+        else:
             return self.allow_access_ip(
                 share['id'], instance=instance, cleanup=False,
                 snapshot=snapshot, access_level=access_level, client=client)
