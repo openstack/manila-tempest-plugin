@@ -125,15 +125,24 @@ ShareGroup = [
                default="",
                help="Some backend drivers requires share network "
                     "for share creation. Share network id, that will be "
-                    "used for shares. If not set, it won't be used."),
+                    "used for shares. If not set, it won't be used. Setting "
+                    "this option to a valid share network ID will mean that "
+                    "the value of create_networks_when_multitenancy_enabled "
+                    "should be False."),
     cfg.StrOpt("alt_share_network_id",
                default="",
                help="Share network id, that will be used for shares"
-                    " in alt tenant. If not set, it won't be used"),
+                    " in alt tenant. If not set, it won't be used. Setting "
+                    "this option to a valid share network ID will mean that "
+                    "the value of create_networks_when_multitenancy_enabled "
+                    "should be False."),
     cfg.StrOpt("admin_share_network_id",
                default="",
                help="Share network id, that will be used for shares"
-                    " in admin tenant. If not set, it won't be used"),
+                    " in admin tenant. If not set, it won't be used. Setting "
+                    "this option to a valid share network ID will mean that "
+                    "the value of create_networks_when_multitenancy_enabled "
+                    "should be False."),
     cfg.BoolOpt("multi_backend",
                 default=False,
                 help="Runs Manila multi-backend tests."),
