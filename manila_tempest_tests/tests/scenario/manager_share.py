@@ -200,7 +200,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param output_file: Path to the file to be written
         :param input_file: Path to the file to read from
         """
-
+        block_count = int(block_count)
         remote_client.exec_command(
             "sudo sh -c \"dd bs={} count={} if={} of={} conv=fsync"
             " iflag=fullblock\""
