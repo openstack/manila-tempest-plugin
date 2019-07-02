@@ -68,7 +68,8 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual({'v1.0'}, set(ids))
 
         self.assertEqual('1.0', resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
+        self.assertIn(API_MICROVERSIONS_HEADER,
+                      resp.get('vary', '').split(','))
         self.assertEqual('', version_list[0].get('min_version'))
         self.assertEqual('', version_list[0].get('version'))
 
@@ -85,7 +86,8 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual({'v1.0'}, set(ids))
 
         self.assertEqual('1.0', resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
+        self.assertIn(API_MICROVERSIONS_HEADER,
+                      resp.get('vary', '').split(','))
         self.assertEqual('', version_list[0].get('min_version'))
         self.assertEqual('', version_list[0].get('version'))
 
@@ -103,7 +105,8 @@ class MicroversionsTest(base.BaseSharesTest):
 
         self.assertEqual(_MIN_API_VERSION,
                          resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
+        self.assertIn(API_MICROVERSIONS_HEADER,
+                      resp.get('vary', '').split(','))
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
         self.assertNotIn(version_list[0].get('version'), [None, ''])
 
@@ -121,7 +124,8 @@ class MicroversionsTest(base.BaseSharesTest):
 
         self.assertEqual(_MIN_API_VERSION,
                          resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
+        self.assertIn(API_MICROVERSIONS_HEADER,
+                      resp.get('vary', '').split(','))
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
         self.assertNotIn(version_list[0].get('version'), [None, ''])
 
@@ -139,7 +143,8 @@ class MicroversionsTest(base.BaseSharesTest):
 
         self.assertEqual(_MAX_API_VERSION,
                          resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertEqual(API_MICROVERSIONS_HEADER, resp.get('vary'))
+        self.assertIn(API_MICROVERSIONS_HEADER,
+                      resp.get('vary', '').split(','))
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
         self.assertNotIn(version_list[0].get('version'), [None, ''])
 
