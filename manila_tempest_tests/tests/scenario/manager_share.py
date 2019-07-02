@@ -26,7 +26,6 @@ from manila_tempest_tests import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
 from tempfile import mkstemp
@@ -162,10 +161,9 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             server_ip = self._get_ipv6_server_ip(instance)
         if not server_ip:
             # Obtain a floating IP
-            floating_ip = (
-                self.compute_floating_ips_client.create_floating_ip()
-                ['floating_ip'])
+            floating_ip = self.create_floating_ip(instance)
             self.floating_ips[instance['id']] = floating_ip
+            server_ip = floating_ip['floating_ip_address']
 
             if self.storage_network:
                 storage_net_nic = instance['addresses'].get(
@@ -174,15 +172,10 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                     self.storage_network_nic_ips[instance['id']] = (
                         storage_net_nic[0]['addr']
                     )
-
-            self.addCleanup(
-                test_utils.call_and_ignore_notfound_exc,
-                self.compute_floating_ips_client.delete_floating_ip,
-                floating_ip['id'])
             # Attach a floating IP
             self.compute_floating_ips_client.associate_floating_ip_to_server(
-                floating_ip['ip'], instance['id'])
-            server_ip = floating_ip['ip']
+                floating_ip['floating_ip_address'], instance['id'])
+
         self.assertIsNotNone(server_ip)
         # Check ssh
         remote_client = self.get_remote_client(
@@ -337,10 +330,12 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             if self.ipv6_enabled and not self.storage_network:
                 server_ip = self._get_ipv6_server_ip(instance)
             else:
-                server_ip = (CONF.share.override_ip_for_nfs_access or
-                             self.storage_network_nic_ips.get(
-                                 instance['id']) or
-                             self.floating_ips[instance['id']]['ip'])
+                server_ip = (
+                    CONF.share.override_ip_for_nfs_access
+                    or self.storage_network_nic_ips.get(instance['id'])
+                    or self.floating_ips[instance['id']]['floating_ip_address']
+                )
+
             self.assertIsNotNone(server_ip)
             return self.allow_access_ip(
                 share['id'], ip=server_ip,
