@@ -61,9 +61,9 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
     def _ping_host_from_export_location(self, export, remote_client):
         ip, version = self.get_ip_and_version_from_export_location(export)
         if version == 6:
-            remote_client.exec_command("ping6 -c 1 %s" % ip)
+            remote_client.exec_command("ping6 -c 5 %s" % ip)
         else:
-            remote_client.exec_command("ping -c 1 %s" % ip)
+            remote_client.exec_command("ping -c 5 %s" % ip)
 
     def _get_export_locations_according_to_ip_version(
             self, all_locations, error_on_invalid_ip_version):
