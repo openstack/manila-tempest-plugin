@@ -351,3 +351,17 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
             share_type=share_type['name'],
             force=False,
             shares=st_q)
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_create_share_over_quota_limit(self):
+        original_quota = self.shares_v2_client.show_quotas(
+            self.tenant_id)
+        self.create_share(share_type_id=self.share_type_id)
+        self.shares_v2_client.update_quotas(self.tenant_id, shares=1)
+        self.addCleanup(self.shares_v2_client.update_quotas,
+                        self.tenant_id, shares=original_quota['shares'])
+        self.shares_v2_client.show_quotas(self.tenant_id)
+
+        self.assertRaises(lib_exc.OverLimit,
+                          self.create_share,
+                          share_type_id=self.share_type_id)
