@@ -42,8 +42,12 @@ TAG_POSITIVE = "positive"
 TAG_NEGATIVE = "negative"
 
 # Test tags related to service involvement
+# Only requires that manila-api service running.
 TAG_API = "api"
+# Requires all manila services running, intended to test back-end
+# (manila-share) behavior.
 TAG_BACKEND = "backend"
+# Requires all manila services running, intended to test API behavior.
 TAG_API_WITH_BACKEND = "api_with_backend"
 
 TAGS_MAPPER = {
