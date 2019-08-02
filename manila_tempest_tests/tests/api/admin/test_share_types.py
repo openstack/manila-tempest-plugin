@@ -99,6 +99,82 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertDictMatch(get["volume_type"], get["share_type"])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    @ddt.data(
+        ('2.50', data_utils.rand_name("type_updated"),
+         'description_updated', True),
+        ('2.50', data_utils.rand_name("type_updated"), None, None),
+        ('2.50', None, 'description_updated', None),
+        ('2.50', None, None, True),
+        ('2.50', None, None, False),
+        (LATEST_MICROVERSION, data_utils.rand_name("type_updated"),
+         'description_updated', True),
+        (LATEST_MICROVERSION, data_utils.rand_name("type_updated"),
+         None, None),
+        (LATEST_MICROVERSION, None, 'description_updated', None),
+        (LATEST_MICROVERSION, None, None, True),
+        (LATEST_MICROVERSION, None, None, False),
+    )
+    @ddt.unpack
+    def test_share_type_create_update(self, version, st_name,
+                                      st_description, st_is_public):
+        name = data_utils.rand_name("tempest-manila")
+        description = "Description for share type"
+        extra_specs = self.add_extra_specs_to_dict({"key": "value", })
+
+        # Create share type
+        st_create = self.create_share_type(
+            name, extra_specs=extra_specs, version=version,
+            description=description)
+        self.assertEqual(name, st_create['share_type']['name'])
+        self._verify_description(
+            description, st_create['share_type'], version)
+        self._verify_is_public_key_name(st_create['share_type'], version)
+        st_id = st_create["share_type"]["id"]
+
+        # Update share type
+        updated_st = self.shares_v2_client.update_share_type(
+            st_id, name=st_name, is_public=st_is_public,
+            description=st_description, version=version)
+        if st_name is not None:
+            self.assertEqual(st_name, updated_st["share_type"]["name"])
+        if st_description is not None:
+            self._verify_description(st_description,
+                                     updated_st['share_type'], version)
+        if st_is_public is not None:
+            self.assertEqual(
+                st_is_public,
+                updated_st["share_type"]["share_type_access:is_public"])
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    @ddt.data(
+        ('2.50', None, '', None),
+        (LATEST_MICROVERSION, None, '', None),
+    )
+    @ddt.unpack
+    def test_share_type_unset_description(
+            self, version, st_name, st_description, st_is_public):
+        name = data_utils.rand_name("tempest-manila")
+        description = "Description for share type"
+        extra_specs = self.add_extra_specs_to_dict({"key": "value", })
+
+        # Create share type
+        st_create = self.create_share_type(
+            name, extra_specs=extra_specs, version=version,
+            description=description)
+        self.assertEqual(name, st_create['share_type']['name'])
+        self._verify_description(
+            description, st_create['share_type'], version)
+        self._verify_is_public_key_name(st_create['share_type'], version)
+        st_id = st_create["share_type"]["id"]
+
+        # Update share type
+        updated_st = self.shares_v2_client.update_share_type(
+            st_id, name=st_name, is_public=st_is_public,
+            description=st_description, version=version)
+
+        self._verify_description(None, updated_st['share_type'], version)
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('2.0', '2.6', '2.7', '2.40', '2.41')
     def test_share_type_create_list(self, version):
         self.skip_if_microversion_not_supported(version)

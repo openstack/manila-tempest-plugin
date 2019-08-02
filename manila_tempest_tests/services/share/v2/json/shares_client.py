@@ -924,6 +924,22 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
+    def update_share_type(self, share_type_id, name=None,
+                          is_public=None, description=None,
+                          version=LATEST_MICROVERSION):
+        post_body = {}
+        if is_public is not None:
+            post_body.update({"share_type_access:is_public": is_public})
+        if name is not None:
+            post_body.update({"name": name})
+        if description is not None:
+            post_body.update({"description": description})
+        post_body = json.dumps({'share_type': post_body})
+        resp, body = self.put("types/%s" % share_type_id, post_body,
+                              version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
     def delete_share_type(self, share_type_id, version=LATEST_MICROVERSION):
         resp, body = self.delete("types/%s" % share_type_id, version=version)
         self.expected_success(202, resp.status)

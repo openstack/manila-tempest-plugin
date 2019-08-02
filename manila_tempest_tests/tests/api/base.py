@@ -870,6 +870,16 @@ class BaseSharesTest(test.BaseTestCase):
             cls.method_resources.insert(0, resource)
         return share_type
 
+    @classmethod
+    def update_share_type(cls, share_type_id, name=None,
+                          is_public=None, description=None,
+                          client=None):
+        if client is None:
+            client = cls.shares_v2_client
+        share_type = client.update_share_type(share_type_id, name,
+                                              is_public, description)
+        return share_type
+
     @staticmethod
     def add_extra_specs_to_dict(extra_specs=None):
         """Add any required extra-specs to share type dictionary"""
