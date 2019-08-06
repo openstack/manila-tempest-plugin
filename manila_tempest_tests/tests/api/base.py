@@ -361,8 +361,13 @@ class BaseSharesTest(test.BaseTestCase):
                 # Try get suitable share-network
                 share_networks = sc.list_share_networks_with_detail()
                 for sn in share_networks:
-                    if (sn["neutron_net_id"] is None and
-                            sn["neutron_subnet_id"] is None and
+                    net_info = (
+                        utils.share_network_get_default_subnet(sn)
+                        if utils.share_network_subnets_are_supported() else sn)
+                    if net_info is None:
+                        continue
+                    if(net_info["neutron_net_id"] is None and
+                            net_info["neutron_subnet_id"] is None and
                             sn["name"] and search_word in sn["name"]):
                         share_network_id = sn["id"]
                         break
@@ -401,8 +406,14 @@ class BaseSharesTest(test.BaseTestCase):
                     # Try get suitable share-network
                     share_networks = sc.list_share_networks_with_detail()
                     for sn in share_networks:
-                        if (net_id == sn["neutron_net_id"] and
-                                subnet_id == sn["neutron_subnet_id"] and
+                        net_info = (
+                            utils.share_network_get_default_subnet(sn)
+                            if utils.share_network_subnets_are_supported()
+                            else sn)
+                        if net_info is None:
+                            continue
+                        if (net_id == net_info["neutron_net_id"] and
+                                subnet_id == net_info["neutron_subnet_id"] and
                                 sn["name"] and search_word in sn["name"]):
                             share_network_id = sn["id"]
                             break
@@ -837,6 +848,26 @@ class BaseSharesTest(test.BaseTestCase):
         return share_network
 
     @classmethod
+    def create_share_network_subnet(cls, client=None,
+                                    cleanup_in_class=False, **kwargs):
+        if client is None:
+            client = cls.shares_v2_client
+        share_network_subnet = client.create_subnet(**kwargs)
+        resource = {
+            "type": "share-network-subnet",
+            "id": share_network_subnet["id"],
+            "extra_params": {
+                "share_network_id": share_network_subnet["share_network_id"]
+            },
+            "client": client,
+        }
+        if cleanup_in_class:
+            cls.class_resources.insert(0, resource)
+        else:
+            cls.method_resources.insert(0, resource)
+        return share_network_subnet
+
+    @classmethod
     def create_security_service(cls, ss_type="ldap", client=None,
                                 cleanup_in_class=False, **kwargs):
         if client is None:
@@ -990,6 +1021,12 @@ class BaseSharesTest(test.BaseTestCase):
                     elif res["type"] is "share_replica":
                         client.delete_share_replica(res_id)
                         client.wait_for_resource_deletion(replica_id=res_id)
+                    elif res["type"] is "share_network_subnet":
+                        sn_id = res["extra_params"]["share_network_id"]
+                        client.delete_subnet(sn_id, res_id)
+                        client.wait_for_resource_deletion(
+                            share_network_subnet_id=res_id,
+                            sn_id=sn_id)
                     else:
                         LOG.warning("Provided unsupported resource type for "
                                     "cleanup '%s'. Skipping.", res["type"])
@@ -1000,6 +1037,14 @@ class BaseSharesTest(test.BaseTestCase):
         data = {
             "name": data_utils.rand_name("sn-name"),
             "description": data_utils.rand_name("sn-desc"),
+            "neutron_net_id": data_utils.rand_name("net-id"),
+            "neutron_subnet_id": data_utils.rand_name("subnet-id"),
+        }
+        return data
+
+    @classmethod
+    def generate_subnet_data(self):
+        data = {
             "neutron_net_id": data_utils.rand_name("net-id"),
             "neutron_subnet_id": data_utils.rand_name("subnet-id"),
         }
@@ -1192,10 +1237,12 @@ class BaseSharesAdminTest(BaseSharesTest):
 
     def _manage_share_server(self, share_server, fields=None):
         params = fields or {}
+        subnet_id = params.get('share_network_subnet_id', None)
         managed_share_server = self.shares_v2_client.manage_share_server(
             params.get('host', share_server['host']),
             params.get('share_network_id', share_server['share_network_id']),
             params.get('identifier', share_server['identifier']),
+            share_network_subnet_id=subnet_id,
         )
         self.shares_v2_client.wait_for_share_server_status(
             managed_share_server['id'],

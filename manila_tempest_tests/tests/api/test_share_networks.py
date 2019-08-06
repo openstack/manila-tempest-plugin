@@ -76,6 +76,19 @@ class ShareNetworkListMixin(object):
         if utils.is_microversion_supported('2.20'):
             keys.append('mtu')
 
+        # In v2.51 and beyond, share-network does not have
+        # network parameters anymore.
+        if utils.is_microversion_supported('2.51'):
+            subnet_keys = [
+                "network_type", "cidr", "ip_version", "neutron_net_id",
+                "neutron_subnet_id", "segmentation_id", "gateway", "mtu"
+            ]
+            keys = list(set(keys) - set(subnet_keys))
+            keys.append('share_network_subnets')
+            for sn in listed:
+                [self.assertIn(key, list(subnet.keys())) for key in subnet_keys
+                 for subnet in sn['share_network_subnets']]
+
         [self.assertIn(key, sn.keys()) for sn in listed for key in keys]
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -279,11 +292,14 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
                           cleanup_in_class=False)
         share_net_details = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id)
+        share_net_info = (
+            utils.share_network_get_default_subnet(share_net_details)
+            if utils.share_network_subnets_are_supported()
+            else share_net_details)
         subnet_details = subnet_client.show_subnet(
-            share_net_details['neutron_subnet_id'])
-
+            share_net_info['neutron_subnet_id'])
         self.assertEqual(subnet_details['subnet']['gateway_ip'],
-                         share_net_details['gateway'])
+                         share_net_info['gateway'])
 
     @testtools.skipUnless(CONF.share.create_networks_when_multitenancy_enabled,
                           "Only for setups with network creation.")
@@ -299,8 +315,12 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
                           cleanup_in_class=False)
         share_net_details = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id)
+        share_net_info = (
+            utils.share_network_get_default_subnet(share_net_details)
+            if utils.share_network_subnets_are_supported()
+            else share_net_details)
         network_details = network_client.show_network(
-            share_net_details['neutron_net_id'])
+            share_net_info['neutron_net_id'])
 
         self.assertEqual(network_details['network']['mtu'],
-                         share_net_details['mtu'])
+                         share_net_info['mtu'])

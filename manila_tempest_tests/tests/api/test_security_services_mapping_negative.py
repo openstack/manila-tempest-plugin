@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -32,6 +33,9 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(SecServicesMappingNegativeTest, cls).resource_setup()
         cls.sn = cls.create_share_network(cleanup_in_class=True)
+        cls.share_net_info = (
+            utils.share_network_get_default_subnet(cls.sn)
+            if utils.share_network_subnets_are_supported() else cls.sn)
         cls.ss = cls.create_security_service(cleanup_in_class=True)
         cls.cl = cls.shares_client
         # create share type

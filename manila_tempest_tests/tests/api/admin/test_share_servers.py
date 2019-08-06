@@ -53,6 +53,10 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             cls.share_network["name"],
             cls.share_network["id"],
         ]
+        cls.share_net_info = (
+            utils.share_network_get_default_subnet(cls.share_network)
+            if utils.share_network_subnets_are_supported()
+            else cls.share_network)
 
         # Date should be like '2014-13-12T11:10:09.000000'
         cls.date_re = re.compile("^([0-9]{4}-[0-9]{2}-[0-9]{2}[A-Z]{1}"
@@ -70,6 +74,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             "updated_at",
             "project_id",
         ]
+
         for server in servers:
             # All expected keys are present
             for key in keys:
@@ -171,6 +176,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.49"):
             keys.append("is_auto_deletable")
             keys.append("identifier")
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.51"):
+            keys.append("share_network_subnet_id")
         # all expected keys are present
         for key in keys:
             self.assertIn(key, server.keys())
@@ -211,8 +218,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # TODO(vponomaryov): attach security-services too. If any exist from
         #                    donor share-network.
         new_sn = self.create_share_network(
-            neutron_net_id=self.share_network['neutron_net_id'],
-            neutron_subnet_id=self.share_network['neutron_subnet_id'])
+            neutron_net_id=self.share_net_info['neutron_net_id'],
+            neutron_subnet_id=self.share_net_info['neutron_subnet_id'])
 
         # Create server with share
         self.create_share(share_type_id=self.share_type_id,
@@ -274,8 +281,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # Get network and subnet from existing share_network and reuse it
         # to be able to delete share_server after test ends.
         new_sn = self.create_share_network(
-            neutron_net_id=self.share_network['neutron_net_id'],
-            neutron_subnet_id=self.share_network['neutron_subnet_id'])
+            neutron_net_id=self.share_net_info['neutron_net_id'],
+            neutron_subnet_id=self.share_net_info['neutron_subnet_id'])
         share = self.create_share(
             share_type_id=self.share_type_id,
             share_network_id=new_sn['id']

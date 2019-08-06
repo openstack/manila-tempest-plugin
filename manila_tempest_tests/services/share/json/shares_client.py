@@ -376,9 +376,9 @@ class SharesClient(rest_client.RestClient):
             raise share_exceptions.InvalidResource(
                 message=six.text_type(kwargs))
 
-    def _is_resource_deleted(self, func, res_id):
+    def _is_resource_deleted(self, func, res_id, **kwargs):
         try:
-            res = func(res_id)
+            res = func(res_id, **kwargs)
         except exceptions.NotFound:
             return True
         if res.get('status') in ['error_deleting', 'error']:

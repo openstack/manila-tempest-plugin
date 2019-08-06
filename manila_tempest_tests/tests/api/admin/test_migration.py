@@ -195,11 +195,14 @@ class MigrationBase(base.BaseSharesAdminTest):
 
         old_share_network = self.shares_v2_client.get_share_network(
             old_share_network_id)
-
+        share_net_info = (
+            utils.share_network_get_default_subnet(old_share_network)
+            if utils.share_network_subnets_are_supported()
+            else old_share_network)
         new_share_network = self.create_share_network(
             cleanup_in_class=True,
-            neutron_net_id=old_share_network['neutron_net_id'],
-            neutron_subnet_id=old_share_network['neutron_subnet_id'])
+            neutron_net_id=share_net_info['neutron_net_id'],
+            neutron_subnet_id=share_net_info['neutron_subnet_id'])
 
         return new_share_network['id']
 

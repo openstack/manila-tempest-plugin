@@ -226,6 +226,13 @@ class SharesV2Client(shares_client.SharesClient):
         elif "message_id" in kwargs:
             return self._is_resource_deleted(
                 self.get_message, kwargs.get("message_id"))
+        elif "share_network_subnet_id" in kwargs:
+            subnet_kwargs = {
+                "sn_id": kwargs["extra_params"]["share_network_id"]}
+            return self._is_resource_deleted(
+                self.get_subnet, kwargs.get("share_network_subnet_id"),
+                **subnet_kwargs
+            )
         else:
             return super(SharesV2Client, self).is_resource_deleted(
                 *args, **kwargs)
@@ -1417,7 +1424,8 @@ class SharesV2Client(shares_client.SharesClient):
 ###############
 
     def manage_share_server(self, host, share_network_id, identifier,
-                            driver_options=None, version=LATEST_MICROVERSION):
+                            driver_options=None, version=LATEST_MICROVERSION,
+                            share_network_subnet_id=None):
         body = {
             'share_server': {
                 'host': host,
@@ -1426,6 +1434,9 @@ class SharesV2Client(shares_client.SharesClient):
                 'driver_options': driver_options if driver_options else {},
             }
         }
+        if share_network_subnet_id:
+            body['share_server']['share_network_subnet_id'] = (
+                share_network_subnet_id)
 
         body = json.dumps(body)
         resp, body = self.post('share-servers/manage', body,
@@ -1975,3 +1986,42 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+###############
+
+    def create_subnet(
+            self, share_network_id, availability_zone=None,
+            neutron_net_id=None, neutron_subnet_id=None):
+        body = {'share_network_id': share_network_id}
+
+        if availability_zone:
+            body['availability_zone'] = availability_zone
+        if neutron_net_id:
+            body['neutron_net_id'] = neutron_net_id
+        if neutron_subnet_id:
+            body['neutron_subnet_id'] = neutron_subnet_id
+        body = json.dumps({"share-network-subnet": body})
+        url = '/share-networks/%s/subnets' % share_network_id
+        resp, body = self.post(url, body, version=LATEST_MICROVERSION)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_subnet(self, share_network_subnet_id, share_network_id):
+        url = ('share-networks/%(network)s/subnets/%(subnet)s' % {
+            'network': share_network_id,
+            'subnet': share_network_subnet_id}
+        )
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def delete_subnet(self, share_network_id, share_network_subnet_id):
+        url = ('share-networks/%(network)s/subnets/%(subnet)s' % {
+            'network': share_network_id,
+            'subnet': share_network_subnet_id}
+        )
+        resp, body = self.delete(url)
+        self.expected_success(202, resp.status)
+        return body
+
+###############

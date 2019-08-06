@@ -23,6 +23,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -53,11 +54,15 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
             extra_specs=cls.extra_specs)
         cls.original_share_network = cls.shares_v2_client.get_share_network(
             cls.shares_v2_client.share_network_id)
+        cls.share_net_info = (
+            utils.share_network_get_default_subnet(cls.original_share_network)
+            if utils.share_network_subnets_are_supported() else
+            cls.original_share_network)
 
     def _create_share_with_new_share_network(self):
         share_network = self.create_share_network(
-            neutron_net_id=self.original_share_network['neutron_net_id'],
-            neutron_subnet_id=self.original_share_network['neutron_subnet_id'],
+            neutron_net_id=self.share_net_info['neutron_net_id'],
+            neutron_subnet_id=self.share_net_info['neutron_subnet_id'],
             cleanup_in_class=True
         )
         share = self.create_share(
@@ -69,6 +74,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
     @ddt.data(
         ('host', 'invalid_host'),
         ('share_network_id', 'invalid_share_network_id'),
+        ('share_network_subnet_id', 'invalid_share_network_subnet_id'),
     )
     @ddt.unpack
     @testtools.skipIf(CONF.share.share_network_id != "",

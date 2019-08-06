@@ -13,12 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
 import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -30,6 +32,7 @@ CONF = config.CONF
 @testtools.skipUnless(
     CONF.share.run_manage_unmanage_tests,
     'Manage/unmanage tests are disabled.')
+@ddt.ddt
 class ManageShareServersTest(base.BaseSharesAdminTest):
 
     @classmethod
@@ -51,23 +54,44 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
                       "This test is not suitable for pre-existing "
                       "share_network.")
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_manage_share_server(self):
-
+    @ddt.data(True, False)
+    def test_manage_share_server(self, add_subnet_field):
+        # Starting from v2.51 share network spans to multiple subnets.
+        if add_subnet_field and not utils.is_microversion_supported('2.51'):
+            msg = ("Manage share server with share network subnet is "
+                   "supported starting from microversion '2.51'.")
+            raise self.skipException(msg)
         # create a new share network to make sure that a new share server
         # will be created
         original_share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
         )
+        share_net_info = (
+            utils.share_network_get_default_subnet(original_share_network)
+            if utils.share_network_subnets_are_supported()
+            else original_share_network)
         share_network = self.create_share_network(
-            neutron_net_id=original_share_network['neutron_net_id'],
-            neutron_subnet_id=original_share_network['neutron_subnet_id'],
+            neutron_net_id=share_net_info['neutron_net_id'],
+            neutron_subnet_id=share_net_info['neutron_subnet_id'],
             cleanup_in_class=True
         )
+        az = params = None
+        if add_subnet_field:
+            # Get a compatible availability zone
+            az = self.get_availability_zones_matching_share_type(
+                self.share_type['share_type'])[0]
+            az_subnet = self.shares_v2_client.create_subnet(
+                share_network['id'],
+                neutron_net_id=share_network['neutron_net_id'],
+                neutron_subnet_id=share_network['neutron_subnet_id'],
+                availability_zone=az
+            )
+            params = {'share_network_subnet_id': az_subnet['id']}
 
         # create share
         share = self.create_share(
             share_type_id=self.share_type['share_type']['id'],
-            share_network_id=share_network['id']
+            share_network_id=share_network['id'], availability_zone=az
         )
         share = self.shares_v2_client.get_share(share['id'])
         el = self.shares_v2_client.list_share_export_locations(share['id'])
@@ -88,6 +112,8 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
             "is_auto_deletable",
             "identifier",
         ]
+        if add_subnet_field:
+            keys.append('share_network_subnet_id')
         # all expected keys are present
         for key in keys:
             self.assertIn(key, share_server)
@@ -95,6 +121,9 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         # check that the share server is initially auto-deletable
         self.assertIs(True, share_server["is_auto_deletable"])
         self.assertIsNotNone(share_server["identifier"])
+        if add_subnet_field:
+            self.assertEqual(az_subnet["id"],
+                             share_server["share_network_subnet_id"])
 
         self._unmanage_share_and_wait(share)
 
@@ -107,7 +136,8 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
 
         # unmanage share server and manage it again
         self._unmanage_share_server_and_wait(share_server)
-        managed_share_server = self._manage_share_server(share_server)
+        managed_share_server = self._manage_share_server(share_server,
+                                                         fields=params)
         managed_share = self._manage_share(
             share,
             name="managed share that had ID %s" % share['id'],
@@ -138,3 +168,8 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
 
         # delete share server
         self._delete_share_server_and_wait(managed_share_server['id'])
+
+        if add_subnet_field:
+            # delete the created subnet
+            self.shares_v2_client.delete_subnet(share_network['id'],
+                                                az_subnet['id'])
