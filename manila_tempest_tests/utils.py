@@ -22,6 +22,7 @@ from tempest import config
 import testtools
 
 CONF = config.CONF
+SHARE_NETWORK_SUBNETS_MICROVERSION = '2.51'
 
 
 def get_microversion_as_tuple(microversion_str):
@@ -177,3 +178,13 @@ def skip_if_manage_not_supported_for_version(
         raise testtools.TestCase.skipException(
             "Share manage tests with multitenancy are disabled for "
             "microversion < 2.49")
+
+
+def share_network_subnets_are_supported():
+    return is_microversion_supported(SHARE_NETWORK_SUBNETS_MICROVERSION)
+
+
+def share_network_get_default_subnet(share_network):
+    return next((
+        subnet for subnet in share_network.get('share_network_subnets', [])
+        if subnet['availability_zone'] is None), None)
