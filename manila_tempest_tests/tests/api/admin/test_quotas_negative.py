@@ -358,9 +358,10 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
             self.tenant_id)
         self.create_share(share_type_id=self.share_type_id)
         self.shares_v2_client.update_quotas(self.tenant_id, shares=1)
+        updated_quota = self.shares_v2_client.show_quotas(self.tenant_id)
         self.addCleanup(self.shares_v2_client.update_quotas,
                         self.tenant_id, shares=original_quota['shares'])
-        self.shares_v2_client.show_quotas(self.tenant_id)
+        self.assertEqual(1, updated_quota['shares'])
 
         self.assertRaises(lib_exc.OverLimit,
                           self.create_share,
