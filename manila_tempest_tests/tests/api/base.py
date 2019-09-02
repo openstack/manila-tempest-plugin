@@ -756,7 +756,8 @@ class BaseSharesTest(test.BaseTestCase):
     def create_share_replica(cls, share_id, availability_zone, client=None,
                              cleanup_in_class=False, cleanup=True):
         client = client or cls.shares_v2_client
-        replica = client.create_share_replica(share_id, availability_zone)
+        replica = client.create_share_replica(
+            share_id, availability_zone=availability_zone)
         resource = {
             "type": "share_replica",
             "id": replica["id"],

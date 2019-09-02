@@ -170,6 +170,11 @@ def get_configured_extra_specs(variation=None):
     return extra_specs
 
 
+def replication_with_multitenancy_support():
+    return (share_network_subnets_are_supported() and
+            CONF.share.multitenancy_enabled)
+
+
 def skip_if_manage_not_supported_for_version(
         version=CONF.share.max_api_microversion):
     if (is_microversion_lt(version, "2.49")

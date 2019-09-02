@@ -20,6 +20,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
@@ -37,6 +38,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         super(ReplicationSnapshotTest, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type
+        cls.multitenancy_enabled = (
+            utils.replication_with_multitenancy_support())
 
         if cls.replication_type not in constants.REPLICATION_TYPE_CHOICES:
             raise share_exceptions.ShareReplicationTypeException(
@@ -47,6 +50,11 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         extra_specs = {"replication_type": cls.replication_type}
         cls.share_type = cls._create_share_type(extra_specs)
         cls.share_type_id = cls.share_type['id']
+        cls.sn_id = None
+        if cls.multitenancy_enabled:
+            cls.share_network = cls.shares_v2_client.get_share_network(
+                cls.shares_v2_client.share_network_id)
+            cls.sn_id = cls.share_network['id']
 
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type, client=cls.admin_client)
@@ -62,7 +70,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         creating a share from that snapshot.
         """
         share = self.create_share(share_type_id=self.share_type_id,
-                                  availability_zone=self.share_zone)
+                                  availability_zone=self.share_zone,
+                                  share_network_id=self.sn_id)
         original_replica = self.shares_v2_client.list_share_replicas(
             share["id"])[0]
 
@@ -83,7 +92,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
 
         if CONF.share.capability_create_share_from_snapshot_support:
             self.create_share(share_type_id=self.share_type_id,
-                              snapshot_id=snapshot['id'])
+                              snapshot_id=snapshot['id'],
+                              share_network_id=self.sn_id)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_snapshot_before_share_replica(self):
@@ -94,7 +104,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         Verify snapshot by creating share from the snapshot.
         """
         share = self.create_share(share_type_id=self.share_type_id,
-                                  availability_zone=self.share_zone)
+                                  availability_zone=self.share_zone,
+                                  share_network_id=self.sn_id)
         snapshot = self.create_snapshot_wait_for_active(share["id"])
 
         original_replica = self.shares_v2_client.list_share_replicas(
@@ -119,7 +130,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
 
         if CONF.share.capability_create_share_from_snapshot_support:
             self.create_share(share_type_id=self.share_type_id,
-                              snapshot_id=snapshot['id'])
+                              snapshot_id=snapshot['id'],
+                              share_network_id=self.sn_id)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_snapshot_before_and_after_share_replica(self):
@@ -130,7 +142,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         Verify snapshots by creating share from the snapshots.
         """
         share = self.create_share(share_type_id=self.share_type_id,
-                                  availability_zone=self.share_zone)
+                                  availability_zone=self.share_zone,
+                                  share_network_id=self.sn_id)
         snapshot1 = self.create_snapshot_wait_for_active(share["id"])
 
         original_replica = self.shares_v2_client.list_share_replicas(
@@ -163,9 +176,11 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
 
         if CONF.share.capability_create_share_from_snapshot_support:
             self.create_share(share_type_id=self.share_type_id,
-                              snapshot_id=snapshot1['id'])
+                              snapshot_id=snapshot1['id'],
+                              share_network_id=self.sn_id)
             self.create_share(share_type_id=self.share_type_id,
-                              snapshot_id=snapshot2['id'])
+                              snapshot_id=snapshot2['id'],
+                              share_network_id=self.sn_id)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_delete_snapshot_after_adding_replica(self):
@@ -176,7 +191,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         """
 
         share = self.create_share(share_type_id=self.share_type_id,
-                                  availability_zone=self.share_zone)
+                                  availability_zone=self.share_zone,
+                                  share_network_id=self.sn_id)
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone)
         self.shares_v2_client.wait_for_share_replica_status(
@@ -195,10 +211,12 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         """Test replica for a share that was created from snapshot."""
 
         share = self.create_share(share_type_id=self.share_type_id,
-                                  availability_zone=self.share_zone)
+                                  availability_zone=self.share_zone,
+                                  share_network_id=self.sn_id)
         orig_snapshot = self.create_snapshot_wait_for_active(share["id"])
         snap_share = self.create_share(share_type_id=self.share_type_id,
-                                       snapshot_id=orig_snapshot['id'])
+                                       snapshot_id=orig_snapshot['id'],
+                                       share_network_id=self.sn_id)
         original_replica = self.shares_v2_client.list_share_replicas(
             snap_share["id"])[0]
         share_replica = self.create_share_replica(snap_share["id"],
