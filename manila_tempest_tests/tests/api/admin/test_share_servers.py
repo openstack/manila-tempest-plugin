@@ -81,8 +81,6 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertGreater(len(server["host"]), 0)
             # Id is not empty
             self.assertGreater(len(server["id"]), 0)
-            # Project id is not empty
-            self.assertGreater(len(server["project_id"]), 0)
 
         # Do not verify statuses because we get all share servers from whole
         # cluster and here can be servers with any state.
@@ -185,7 +183,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertTrue(self.date_re.match(server["updated_at"]))
 
         # veriy that values for following keys are not empty
-        for k in ('host', 'id', 'project_id', 'status', 'share_network_name'):
+        for k in ('host', 'id', 'status'):
             self.assertGreater(len(server[k]), 0)
 
         # 'backend_details' should be a dict
