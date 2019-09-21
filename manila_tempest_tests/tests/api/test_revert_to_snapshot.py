@@ -22,6 +22,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -48,6 +49,8 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(RevertToSnapshotTest, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
+        cls.replication_multitenancy = (
+            utils.replication_with_multitenancy_support())
         pools = cls.admin_client.list_pools(detail=True)['pools']
         revert_support = [
             pool['capabilities'][constants.REVERT_TO_SNAPSHOT_SUPPORT]
@@ -91,6 +94,11 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
                 cls.replicated_share_type, client=cls.admin_client)
             cls.share_zone = cls.zones[0]
             cls.replica_zone = cls.zones[-1]
+            cls.sn_id = None
+            if cls.replication_multitenancy:
+                cls.share_network = cls.shares_v2_client.get_share_network(
+                    cls.shares_v2_client.share_network_id)
+                cls.sn_id = cls.share_network['id']
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
@@ -139,7 +147,8 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         """Test reverting to a replicated snapshot."""
         share = self.create_share(
             share_type_id=self.replicated_share_type['id'],
-            availability_zone=self.share_zone
+            availability_zone=self.share_zone,
+            share_network_id=self.sn_id
         )
 
         share_replica = self.create_share_replica(share["id"],

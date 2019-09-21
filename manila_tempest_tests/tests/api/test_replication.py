@@ -21,6 +21,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
@@ -41,6 +42,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
         name = data_utils.rand_name(constants.TEMPEST_MANILA_PREFIX)
         cls.admin_client = cls.admin_shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type
+        cls.multitenancy_enabled = (
+            utils.replication_with_multitenancy_support())
 
         if cls.replication_type not in constants.REPLICATION_TYPE_CHOICES:
             raise share_exceptions.ShareReplicationTypeException(
@@ -64,6 +67,13 @@ class ReplicationTest(base.BaseSharesMixedTest):
             'share_type_id': cls.share_type['id'],
             'availability_zone': cls.share_zone,
         }}
+        cls.sn_id = None
+        if cls.multitenancy_enabled:
+            cls.share_network = cls.shares_v2_client.get_share_network(
+                cls.shares_v2_client.share_network_id)
+            cls.creation_data['kwargs'].update({
+                'share_network_id': cls.share_network['id']})
+            cls.sn_id = cls.share_network['id']
 
         # Data for creating shares in parallel
         data = [cls.creation_data, cls.creation_data]
@@ -143,6 +153,28 @@ class ReplicationTest(base.BaseSharesMixedTest):
 
         # Delete the replica
         self.delete_share_replica(share_replica["id"])
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipIf(
+        not CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @base.skip_if_microversion_not_supported("2.51")
+    def test_add_delete_share_replica_different_subnet(self):
+        # Create new subnet in replica az
+        subnet = utils.share_network_get_default_subnet(self.share_network)
+        data = {
+            'neutron_net_id': subnet.get('neutron_net_id'),
+            'neutron_subnet_id': subnet.get('neutron_subnet_id'),
+            'share_network_id': self.sn_id,
+            'availability_zone': self.replica_zone,
+        }
+        subnet = self.create_share_network_subnet(**data)
+        # Create the replica
+        share_replica = self._verify_create_replica()
+
+        # Delete the replica
+        self.delete_share_replica(share_replica["id"])
+        # Delete subnet
+        self.shares_v2_client.delete_subnet(self.sn_id, subnet['id'])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_add_access_rule_create_replica_delete_rule(self):
@@ -260,7 +292,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
 
         share = self.create_share(
             share_type_id=self.share_type['id'], cleanup_in_class=False,
-            availability_zone=self.share_zone)
+            availability_zone=self.share_zone, share_network_id=self.sn_id)
         share = self.shares_v2_client.get_share(share['id'])
         replica = self.create_share_replica(share['id'], self.replica_zone)
         replica = self.shares_v2_client.get_share_replica(replica['id'])
@@ -328,6 +360,8 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
         name = data_utils.rand_name(constants.TEMPEST_MANILA_PREFIX)
         cls.admin_client = cls.admin_shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type
+        cls.multitenancy_enabled = (
+            utils.replication_with_multitenancy_support())
 
         if cls.replication_type not in constants.REPLICATION_TYPE_CHOICES:
             raise share_exceptions.ShareReplicationTypeException(
@@ -352,6 +386,13 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
             'availability_zone': cls.share_zone,
         }}
 
+        if cls.multitenancy_enabled:
+            cls.share_network = cls.shares_v2_client.get_share_network(
+                cls.shares_v2_client.share_network_id)
+            cls.creation_data['kwargs'].update({
+                'share_network_id': cls.share_network['id']})
+        cls.sn_id = (
+            cls.share_network['id'] if cls.multitenancy_enabled else None)
         # Data for creating shares in parallel
         data = [cls.creation_data, cls.creation_data]
         cls.shares = cls.create_shares(data)

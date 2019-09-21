@@ -22,6 +22,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
@@ -37,6 +38,8 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
         super(ReplicationNegativeTest, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type
+        cls.multitenancy_enabled = (
+            utils.replication_with_multitenancy_support())
 
         if cls.replication_type not in constants.REPLICATION_TYPE_CHOICES:
             raise share_exceptions.ShareReplicationTypeException(
@@ -47,7 +50,11 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
         extra_specs = {"replication_type": cls.replication_type}
         cls.share_type = cls._create_share_type(extra_specs)
         cls.share_type_id = cls.share_type['id']
-
+        cls.sn_id = None
+        if cls.multitenancy_enabled:
+            cls.share_network = cls.shares_v2_client.get_share_network(
+                cls.shares_v2_client.share_network_id)
+            cls.sn_id = cls.share_network['id']
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type, client=cls.admin_client)
         cls.share_zone = cls.zones[0]
@@ -57,9 +64,11 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
         cls.share1, cls.instance_id1 = cls._create_share_get_instance()
 
     @classmethod
-    def _create_share_get_instance(cls):
+    def _create_share_get_instance(cls, share_network_id=None):
+        sn_id = share_network_id if share_network_id else cls.sn_id
         share = cls.create_share(share_type_id=cls.share_type_id,
-                                 availability_zone=cls.share_zone)
+                                 availability_zone=cls.share_zone,
+                                 share_network_id=sn_id)
         share_instances = cls.admin_client.get_instances_of_share(
             share["id"], version=_MIN_SUPPORTED_MICROVERSION
         )
@@ -80,7 +89,8 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
             data_utils.rand_name(constants.TEMPEST_MANILA_PREFIX),
             extra_specs=self.add_extra_specs_to_dict(),
             client=self.admin_client)["share_type"]
-        share = self.create_share(share_type_id=share_type["id"])
+        share = self.create_share(share_type_id=share_type["id"],
+                                  share_network_id=self.sn_id)
         self.assertRaises(lib_exc.BadRequest,
                           self.create_share_replica,
                           share['id'],
@@ -205,6 +215,26 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.create_share_replica,
                           self.share1['id'],
+                          self.replica_zone)
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipIf(
+        not CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @base.skip_if_microversion_lt("2.51")
+    def test_try_add_replica_nonexistent_subnet(self):
+        # Create a new share network only for a specific az
+        data = self.generate_share_network_data()
+        subnet = utils.share_network_get_default_subnet(self.share_network)
+        data['neutron_net_id'] = subnet['neutron_net_id']
+        data['neutron_subnet_id'] = subnet['neutron_subnet_id']
+        data['availability_zone'] = self.share_zone
+        share_net = self.shares_v2_client.create_share_network(**data)
+        share, instance_id = self._create_share_get_instance(
+            share_network_id=share_net['id'])
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_share_replica,
+                          share['id'],
                           self.replica_zone)
 
 
