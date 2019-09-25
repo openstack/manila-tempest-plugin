@@ -72,6 +72,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           self.st['id'],
                           self.shares_client.tenant_id)
 
+    @base.skip_if_microversion_lt("2.50")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(
         ('2.50', '', None, None),
@@ -91,6 +92,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           st_id, st_name, st_is_public, st_description,
                           version)
 
+    @base.skip_if_microversion_lt("2.50")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data('2.50', LATEST_MICROVERSION)
     def test_share_type_update_conflict(self, version):

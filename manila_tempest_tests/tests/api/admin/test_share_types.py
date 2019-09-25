@@ -98,6 +98,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         # Check that backwards compatibility didn't break
         self.assertDictMatch(get["volume_type"], get["share_type"])
 
+    @base.skip_if_microversion_lt("2.50")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         ('2.50', data_utils.rand_name("type_updated"),
@@ -145,6 +146,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
                 st_is_public,
                 updated_st["share_type"]["share_type_access:is_public"])
 
+    @base.skip_if_microversion_lt("2.50")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         ('2.50', None, '', None),
