@@ -26,6 +26,7 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
 CONF = config.CONF
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
 @base.skip_if_microversion_lt("2.49")
@@ -82,6 +83,12 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
                       "share_network.")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_share_server_invalid_params(self, param, invalid_value):
+
+        sn_subnets_not_supported = utils.is_microversion_lt(
+            LATEST_MICROVERSION, utils.SHARE_NETWORK_SUBNETS_MICROVERSION)
+        if param == 'share_network_subnet_id' and sn_subnets_not_supported:
+            raise self.skipException("Share network subnets not supported by "
+                                     "microversion %s" % LATEST_MICROVERSION)
 
         # create share
         share = self._create_share_with_new_share_network()
