@@ -377,6 +377,13 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             locations = [x['path'] for x in exports]
         return locations
 
+    def _get_snapshot_export_locations(self, snapshot):
+        exports = (self.shares_v2_client.
+                   list_snapshot_export_locations(snapshot['id']))
+        locations = [x['path'] for x in exports]
+
+        return locations
+
     def _get_ipv6_server_ip(self, instance):
         ipv6_addrs = []
         for network_name, nic_list in instance['addresses'].items():
@@ -579,3 +586,51 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         LOG.info('Creating Glance image using the downloaded image file')
         return self._image_create('centos', 'bare', imagepath, 'qcow2')
+
+    def get_share_export_location_for_mount(self, share):
+        exports = self.get_user_export_locations(
+            share=share,
+            error_on_invalid_ip_version=True)
+        return exports[0]
+
+    def get_user_export_locations(self, share=None, snapshot=None,
+                                  error_on_invalid_ip_version=False):
+        locations = None
+        if share:
+            locations = self.get_share_export_locations(share)
+        elif snapshot:
+            locations = self._get_snapshot_export_locations(snapshot)
+
+        self.assertNotEmpty(locations)
+        locations = self._get_export_locations_according_to_ip_version(
+            locations, error_on_invalid_ip_version)
+        self.assertNotEmpty(locations)
+
+        return locations
+
+    def _get_export_locations_according_to_ip_version(
+            self, all_locations, error_on_invalid_ip_version):
+        locations = [
+            x for x in all_locations
+            if self.get_ip_and_version_from_export_location(
+                x)[1] == self.ip_version]
+
+        if len(locations) == 0 and not error_on_invalid_ip_version:
+            message = ("Configured backend does not support "
+                       "ip_version %s" % self.ip_version)
+            raise self.skipException(message)
+        return locations
+
+    def get_ip_and_version_from_export_location(self, export):
+        export = export.replace('[', '').replace(']', '')
+        if self.protocol == 'nfs' and ':/' in export:
+            ip = export.split(':/')[0]
+            version = 6 if ip.count(':') > 1 else 4
+        elif self.protocol == 'cifs' and export.startswith(r'\\'):
+            ip = export.split('\\')[2]
+            version = 6 if (ip.count(':') > 1 or
+                            ip.endswith('ipv6-literal.net')) else 4
+        else:
+            message = ("Protocol %s is not supported" % self.protocol)
+            raise self.skipException(message)
+        return ip, version

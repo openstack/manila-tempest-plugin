@@ -74,10 +74,9 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         LOG.debug('Step 4 - grant access')
         self.provide_access_to_auxiliary_instance(instance)
 
-        locations = self.get_share_export_locations(share)
-
         LOG.debug('Step 5 - mount')
-        self.mount_share(locations[0], remote_client)
+        location = self.get_share_export_location_for_mount(share)
+        self.mount_share(location, remote_client)
 
         total_blocks = (1024 * default_share_size) / 64
         blocks = total_blocks + 4
