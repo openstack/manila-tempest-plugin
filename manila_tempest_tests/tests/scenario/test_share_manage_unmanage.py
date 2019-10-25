@@ -183,7 +183,7 @@ class ShareManageUnmanageCIFS(ShareManageUnmanageBase):
 
 # NOTE(u_glide): this function is required to exclude ShareManageUnmanageBase
 # from executed test cases.
-# See: https://docs.python.org/2/library/unittest.html#load-tests-protocol
+# See: https://docs.python.org/3/library/unittest.html#load-tests-protocol
 # for details.
 def load_tests(loader, tests, _):
     result = []
