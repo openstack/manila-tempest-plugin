@@ -298,41 +298,14 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         sn2 = self.create_share_network(**data)
         self.assertDictContainsSubset(data, sn2)
 
-    @decorators.idempotent_id('50bac743-7ca9-409b-827f-f277da67e32e')
-    @testtools.skipUnless(CONF.share.create_networks_when_multitenancy_enabled,
-                          "Only for setups with network creation.")
-    @testtools.skipUnless(CONF.share.multitenancy_enabled,
-                          "Only for multitenancy.")
-    @testtools.skipUnless(CONF.service_available.neutron, "Only with neutron.")
-    @utils.skip_if_microversion_not_supported("2.18")
-    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_gateway_with_neutron(self):
-        subnet_client = self.subnets_client
-
-        self.create_share(share_type_id=self.share_type_id,
-                          cleanup_in_class=False)
-        share_net_details = self.shares_v2_client.get_share_network(
-            self.shares_v2_client.share_network_id)['share_network']
-        share_net_info = (
-            utils.share_network_get_default_subnet(share_net_details)
-            if utils.share_network_subnets_are_supported()
-            else share_net_details)
-        subnet_details = subnet_client.show_subnet(
-            share_net_info['neutron_subnet_id'])
-        self.assertEqual(subnet_details['subnet']['gateway_ip'],
-                         share_net_info['gateway'])
-
     @decorators.idempotent_id('2dbf91da-04ae-4f9f-a7b9-0299c6b2e02c')
     @testtools.skipUnless(CONF.share.create_networks_when_multitenancy_enabled,
                           "Only for setups with network creation.")
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           "Only for multitenancy.")
     @testtools.skipUnless(CONF.service_available.neutron, "Only with neutron.")
-    @utils.skip_if_microversion_not_supported("2.20")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_mtu_with_neutron(self):
-        network_client = self.networks_client
-
+    def test_gateway_mtu_neutron_net_id_with_neutron(self):
         self.create_share(share_type_id=self.share_type_id,
                           cleanup_in_class=False)
         share_net_details = self.shares_v2_client.get_share_network(
@@ -341,8 +314,17 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
             utils.share_network_get_default_subnet(share_net_details)
             if utils.share_network_subnets_are_supported()
             else share_net_details)
-        network_details = network_client.show_network(
-            share_net_info['neutron_net_id'])
 
-        self.assertEqual(network_details['network']['mtu'],
-                         share_net_info['mtu'])
+        if utils.is_microversion_supported('2.18'):
+            subnet_details = self.subnets_client.show_subnet(
+                share_net_info['neutron_subnet_id'])
+            self.assertEqual(subnet_details['subnet']['gateway_ip'],
+                             share_net_info['gateway'])
+
+        if utils.is_microversion_supported('2.20'):
+            network_details = self.networks_client.show_network(
+                share_net_info['neutron_net_id'])
+            self.assertEqual(network_details['network']['mtu'],
+                             share_net_info['mtu'])
+            self.assertEqual(network_details['network']['id'],
+                             share_net_info['neutron_net_id'])
