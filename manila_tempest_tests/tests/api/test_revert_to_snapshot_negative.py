@@ -22,12 +22,11 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
 
-@base.skip_if_microversion_not_supported(
-    constants.REVERT_TO_SNAPSHOT_MICROVERSION)
 @ddt.ddt
 class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
 
@@ -43,6 +42,9 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
         if not CONF.share.run_snapshot_tests:
             msg = "Snapshot tests are disabled."
             raise cls.skipException(msg)
+
+        utils.check_skip_if_microversion_not_supported(
+            constants.REVERT_TO_SNAPSHOT_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

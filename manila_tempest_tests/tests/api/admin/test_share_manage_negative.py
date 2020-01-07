@@ -34,9 +34,12 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
     # won't be deleted.
 
     @classmethod
-    @testtools.skipUnless(
-        CONF.share.run_manage_unmanage_tests,
-        "Manage/unmanage tests are disabled.")
+    def skip_checks(cls):
+        super(ManageNFSShareNegativeTest, cls).skip_checks()
+        if not CONF.share.run_manage_unmanage_tests:
+            raise cls.skipException('Manage/unmanage tests are disabled.')
+
+    @classmethod
     def resource_setup(cls):
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol

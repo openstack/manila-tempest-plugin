@@ -27,9 +27,13 @@ CONF = config.CONF
 LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
-@base.skip_if_microversion_not_supported("2.9")
 @ddt.ddt
 class ExportLocationsTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ExportLocationsTest, cls).skip_checks()
+        utils.check_skip_if_microversion_not_supported('2.9')
 
     @classmethod
     def resource_setup(cls):

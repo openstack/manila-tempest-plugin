@@ -25,14 +25,12 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@base.skip_if_microversion_lt(
-    constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
 @ddt.ddt
 class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(AccessesMetadataNegativeTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(AccessesMetadataNegativeTest, cls).skip_checks()
         if not (any(p in CONF.share.enable_ip_rules_for_protocols
                     for p in cls.protocols) or
                 any(p in CONF.share.enable_user_rules_for_protocols
@@ -43,6 +41,13 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
                     for p in cls.protocols)):
             cls.message = "Rule tests are disabled"
             raise cls.skipException(cls.message)
+
+        utils.check_skip_if_microversion_lt(
+            constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
+
+    @classmethod
+    def resource_setup(cls):
+        super(AccessesMetadataNegativeTest, cls).resource_setup()
         if CONF.share.enable_ip_rules_for_protocols:
             cls.protocol = CONF.share.enable_ip_rules_for_protocols[0]
             cls.access_type = "ip"

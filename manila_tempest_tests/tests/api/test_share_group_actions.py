@@ -17,7 +17,6 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
-import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -27,12 +26,18 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@testtools.skipUnless(
-    CONF.share.run_share_group_tests, 'Share Group tests disabled.')
-@base.skip_if_microversion_lt(constants.MIN_SHARE_GROUP_MICROVERSION)
 @ddt.ddt
 class ShareGroupActionsTest(base.BaseSharesMixedTest):
     """Covers share group functionality."""
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareGroupActionsTest, cls).skip_checks()
+        if not CONF.share.run_share_group_tests:
+            raise cls.skipException('Share Group tests disabled.')
+
+        utils.check_skip_if_microversion_lt(
+            constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
@@ -338,10 +343,16 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                         share['share_network_id'])
 
 
-@testtools.skipUnless(
-    CONF.share.run_share_group_tests, 'Share Group tests disabled.')
-@base.skip_if_microversion_lt(constants.MIN_SHARE_GROUP_MICROVERSION)
 class ShareGroupRenameTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareGroupRenameTest, cls).skip_checks()
+        if not CONF.share.run_share_group_tests:
+            raise cls.skipException('Share Group tests disabled.')
+
+        utils.check_skip_if_microversion_lt(
+            constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

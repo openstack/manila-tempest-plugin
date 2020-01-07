@@ -92,6 +92,19 @@ def skip_if_microversion_lt(microversion):
     return lambda f: f
 
 
+def check_skip_if_microversion_lt(microversion):
+    if is_microversion_lt(CONF.share.max_api_microversion, microversion):
+        reason = ("Skipped. Test requires microversion greater than or "
+                  "equal to '%s'." % microversion)
+        raise testtools.TestCase.skipException(reason)
+
+
+def check_skip_if_microversion_not_supported(microversion):
+    if not is_microversion_supported(microversion):
+        reason = ("Skipped. Test requires microversion '%s'." % microversion)
+        raise testtools.TestCase.skipException(reason)
+
+
 def rand_ip(network=False):
     """This uses the TEST-NET-3 range of reserved IP addresses.
 

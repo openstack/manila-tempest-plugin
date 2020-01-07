@@ -15,20 +15,26 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
-import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
 
-@testtools.skipUnless(
-    CONF.share.run_share_group_tests, 'Share Group tests disabled.')
-@base.skip_if_microversion_lt(constants.MIN_SHARE_GROUP_MICROVERSION)
 class ShareGroupsNegativeTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareGroupsNegativeTest, cls).skip_checks()
+        if not CONF.share.run_share_group_tests:
+            raise cls.skipException('Share Group tests disabled.')
+
+        utils.check_skip_if_microversion_lt(
+            constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_group_with_wrong_consistent_snapshot_spec(self):

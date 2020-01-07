@@ -28,10 +28,15 @@ CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
-@base.skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 class ReplicationNegativeTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationNegativeTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
+
+        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
@@ -238,10 +243,15 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
                           self.replica_zone)
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
-@base.skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 class ReplicationAPIOnlyNegativeTest(base.BaseSharesTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationAPIOnlyNegativeTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
+
+        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_replica_by_nonexistent_id(self):

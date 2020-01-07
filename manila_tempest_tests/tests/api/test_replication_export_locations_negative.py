@@ -24,9 +24,13 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
 class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationExportLocationsNegativeTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
 
     @classmethod
     def resource_setup(cls):

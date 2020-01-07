@@ -24,17 +24,12 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@base.skip_if_microversion_lt(
-    constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
 @ddt.ddt
 class AccessRulesMetadataTest(base.BaseSharesMixedTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(AccessRulesMetadataTest, cls).resource_setup()
-        # The share access rule metadata doesn't care about the value of
-        # access type, access protocol, access_to, so we only get one of
-        # the value that the driver support.
+    def skip_checks(cls):
+        super(AccessRulesMetadataTest, cls).skip_checks()
         if not (any(p in CONF.share.enable_ip_rules_for_protocols
                     for p in cls.protocols) or
                 any(p in CONF.share.enable_user_rules_for_protocols
@@ -45,6 +40,16 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
                     for p in cls.protocols)):
             cls.message = "Rule tests are disabled"
             raise cls.skipException(cls.message)
+
+        utils.check_skip_if_microversion_lt(
+            constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
+
+    @classmethod
+    def resource_setup(cls):
+        super(AccessRulesMetadataTest, cls).resource_setup()
+        # The share access rule metadata doesn't care about the value of
+        # access type, access protocol, access_to, so we only get one of
+        # the value that the driver support.
         if CONF.share.enable_ip_rules_for_protocols:
             cls.protocol = CONF.share.enable_ip_rules_for_protocols[0]
             cls.access_type = "ip"

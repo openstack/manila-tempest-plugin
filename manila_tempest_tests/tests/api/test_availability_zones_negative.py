@@ -17,10 +17,15 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
-@base.skip_if_microversion_not_supported("2.7")
 class AvailabilityZonesNegativeTest(base.BaseSharesTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(AvailabilityZonesNegativeTest, cls).skip_checks()
+        utils.check_skip_if_microversion_not_supported('2.7')
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_availability_zones_api_not_found_with_legacy_url(self):

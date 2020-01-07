@@ -16,14 +16,19 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
 MICROVERSION = '2.37'
 
 
-@base.skip_if_microversion_lt(MICROVERSION)
 class UserMessageNegativeTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(UserMessageNegativeTest, cls).skip_checks()
+        utils.check_skip_if_microversion_lt(MICROVERSION)
 
     def setUp(self):
         super(UserMessageNegativeTest, self).setUp()

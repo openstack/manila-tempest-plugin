@@ -15,11 +15,16 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
-@base.skip_if_microversion_not_supported("2.48")
 @ddt.ddt
 class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareTypeAvailabilityZonesNegativeTest, cls).skip_checks()
+        utils.check_skip_if_microversion_not_supported('2.48')
 
     @classmethod
     def resource_setup(cls):
@@ -52,7 +57,6 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
             client=self.admin_shares_v2_client)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported("2.48")
     def test_share_type_azs_filter_by_invalid_azs_extra_spec(self):
         self.admin_shares_v2_client.update_share_type_extra_spec(
             self.share_type_id, self.az_spec, self.valid_azs_spec)

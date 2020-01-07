@@ -24,17 +24,22 @@ CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
-@testtools.skipIf(
-    CONF.share.multitenancy_enabled,
-    "Only for driver_handles_share_servers = False driver mode.")
-@base.skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
-class ReplicationAdminTest(base.BaseSharesMixedTest):
+class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationActionsAdminTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
+        if CONF.share.multitenancy_enabled:
+            raise cls.skipException(
+                'Only for driver_handles_share_servers = False driver mode.')
+
+        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
-        super(ReplicationAdminTest, cls).resource_setup()
+        super(ReplicationActionsAdminTest, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
         cls.member_client = cls.shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type

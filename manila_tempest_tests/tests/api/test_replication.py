@@ -30,10 +30,15 @@ DETAIL_KEYS = SUMMARY_KEYS + ['availability_zone', 'updated_at',
                               'share_network_id', 'created_at']
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
-@base.skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 class ReplicationTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
+
+        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
@@ -348,10 +353,15 @@ class ReplicationTest(base.BaseSharesMixedTest):
             constants.REPLICATION_STATE_ACTIVE, replica['replica_state'])
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
-@base.skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 class ReplicationActionsTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationActionsTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
+
+        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

@@ -16,7 +16,6 @@
 import ddt
 from tempest import config
 from tempest.lib import exceptions as lib_exc
-import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -26,21 +25,27 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@base.skip_if_microversion_lt("2.32")
-@testtools.skipUnless(CONF.share.run_mount_snapshot_tests and
-                      CONF.share.run_snapshot_tests,
-                      'Mountable snapshots tests are disabled.')
 @ddt.ddt
 class SnapshotIpRulesForNFSNegativeTest(
         test_snapshot_rules.BaseShareSnapshotRulesTest):
     protocol = "nfs"
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(SnapshotIpRulesForNFSNegativeTest, cls).skip_checks()
+        if not CONF.share.run_snapshot_tests:
+            raise cls.skipException('Snapshot tests are disabled.')
+        if not CONF.share.run_mount_snapshot_tests:
+            raise cls.skipException('Mountable snapshots tests are disabled.')
         if not (cls.protocol in CONF.share.enable_protocols and
                 cls.protocol in CONF.share.enable_ip_rules_for_protocols):
             msg = "IP rule tests for %s protocol are disabled." % cls.protocol
             raise cls.skipException(msg)
+
+        utils.check_skip_if_microversion_lt('2.32')
+
+    @classmethod
+    def resource_setup(cls):
         super(SnapshotIpRulesForNFSNegativeTest, cls).resource_setup()
         # create share type
         extra_specs = {'mount_snapshot_support': 'True'}

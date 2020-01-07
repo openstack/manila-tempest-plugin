@@ -16,6 +16,7 @@ from tempest import config
 from tempest.lib import decorators
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -36,8 +37,12 @@ MESSAGE_KEYS = (
 )
 
 
-@base.skip_if_microversion_lt(MICROVERSION)
 class UserMessageTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(UserMessageTest, cls).skip_checks()
+        utils.check_skip_if_microversion_lt(MICROVERSION)
 
     def setUp(self):
         super(UserMessageTest, self).setUp()

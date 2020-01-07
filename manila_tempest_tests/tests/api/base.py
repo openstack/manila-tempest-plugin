@@ -257,6 +257,9 @@ class BaseSharesTest(test.BaseTestCase):
         super(BaseSharesTest, cls).skip_checks()
         if not CONF.service_available.manila:
             raise cls.skipException("Manila support is required")
+        if not any(p in CONF.share.enable_protocols for p in cls.protocols):
+            skip_msg = "%s tests are disabled" % CONF.share.enable_protocols
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def verify_nonempty(cls, *args):
@@ -300,15 +303,6 @@ class BaseSharesTest(test.BaseTestCase):
                 "client": cls.shares_v2_client,
             }
             cls.class_resources.insert(0, resource)
-
-    @classmethod
-    def resource_setup(cls):
-        if not (any(p in CONF.share.enable_protocols
-                    for p in cls.protocols) and
-                CONF.service_available.manila):
-            skip_msg = "Manila is disabled"
-            raise cls.skipException(skip_msg)
-        super(BaseSharesTest, cls).resource_setup()
 
     def setUp(self):
         super(BaseSharesTest, self).setUp()

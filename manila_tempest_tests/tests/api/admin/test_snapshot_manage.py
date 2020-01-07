@@ -17,7 +17,7 @@ import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
-import testtools
+
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -35,17 +35,20 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
     # because cinder volume snapshots won't be deleted.
 
     @classmethod
-    @base.skip_if_microversion_lt("2.12")
-    @testtools.skipUnless(
-        CONF.share.run_manage_unmanage_snapshot_tests,
-        "Manage/unmanage snapshot tests are disabled.")
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(ManageNFSSnapshotTest, cls).skip_checks()
+        if not CONF.share.run_manage_unmanage_snapshot_tests:
+            raise cls.skipException(
+                'Manage/unmanage snapshot tests are disabled.')
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
 
+        utils.check_skip_if_microversion_lt('2.12')
         utils.skip_if_manage_not_supported_for_version()
 
+    @classmethod
+    def resource_setup(cls):
         super(ManageNFSSnapshotTest, cls).resource_setup()
 
         # Create share type

@@ -29,11 +29,15 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@testtools.skipUnless(
-    CONF.share.multitenancy_enabled,
-    'Share servers can be tested only with multitenant drivers.')
 @ddt.ddt
 class ShareServersAdminTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareServersAdminTest, cls).skip_checks()
+        if not CONF.share.multitenancy_enabled:
+            raise cls.skipException(
+                'Share servers can be tested only with multitenant drivers.')
 
     @classmethod
     def resource_setup(cls):

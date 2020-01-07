@@ -26,12 +26,17 @@ CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
-@testtools.skipUnless(CONF.share.run_snapshot_tests,
-                      'Snapshot tests disabled.')
-@base.skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 class ReplicationSnapshotTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationSnapshotTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
+        if not CONF.share.run_snapshot_tests:
+            raise cls.skipException('Snapshot tests disabled.')
+
+        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

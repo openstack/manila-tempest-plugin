@@ -25,10 +25,14 @@ CONF = config.CONF
 LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
-@testtools.skipUnless(CONF.share.run_replication_tests,
-                      'Replication tests are disabled.')
 @ddt.ddt
 class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationExportLocationsTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException('Replication tests are disabled.')
 
     @classmethod
     def resource_setup(cls):

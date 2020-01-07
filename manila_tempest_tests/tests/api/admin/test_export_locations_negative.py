@@ -18,12 +18,17 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
 
-@base.skip_if_microversion_not_supported("2.9")
 class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ExportLocationsNegativeTest, cls).skip_checks()
+        utils.check_skip_if_microversion_lt("2.9")
 
     @classmethod
     def resource_setup(cls):
@@ -82,8 +87,12 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 )
 
 
-@base.skip_if_microversion_not_supported("2.9")
 class ExportLocationsAPIOnlyNegativeTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ExportLocationsAPIOnlyNegativeTest, cls).skip_checks()
+        utils.check_skip_if_microversion_lt("2.9")
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_export_locations_by_nonexistent_share(self):

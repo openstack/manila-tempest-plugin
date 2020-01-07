@@ -24,9 +24,13 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@base.skip_if_microversion_lt("2.51")
 @ddt.ddt
 class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareNetworkSubnetsTest, cls).skip_checks()
+        utils.check_skip_if_microversion_lt("2.51")
 
     @classmethod
     def resource_setup(cls):

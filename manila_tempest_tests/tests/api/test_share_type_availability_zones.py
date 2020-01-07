@@ -16,14 +16,19 @@ from tempest.lib.common.utils import data_utils
 import testtools
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 tc = testtools.testcase
 CONF = config.CONF
 
 
-@base.skip_if_microversion_not_supported("2.48")
 @ddt.ddt
 class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareTypeAvailabilityZonesTest, cls).skip_checks()
+        utils.check_skip_if_microversion_not_supported("2.48")
 
     @classmethod
     def resource_setup(cls):

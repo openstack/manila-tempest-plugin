@@ -15,19 +15,24 @@
 
 import ddt
 from tempest import config
-import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
 
-@testtools.skipUnless(CONF.share.run_snapshot_tests,
-                      'Snapshot tests are disabled.')
-@base.skip_if_microversion_lt("2.19")
 @ddt.ddt
 class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ShareSnapshotInstancesTest, cls).skip_checks()
+        if not CONF.share.run_snapshot_tests:
+            raise cls.skipException('Snapshot tests are disabled.')
+
+        utils.check_skip_if_microversion_lt("2.19")
 
     @classmethod
     def resource_setup(cls):

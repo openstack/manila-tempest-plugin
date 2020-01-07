@@ -17,21 +17,27 @@ import ddt
 from oslo_utils import uuidutils
 import six
 from tempest import config
-import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
-@base.skip_if_microversion_lt("2.32")
-@testtools.skipUnless(CONF.share.run_mount_snapshot_tests and
-                      CONF.share.run_snapshot_tests,
-                      "Mountable snapshots tests are disabled.")
 @ddt.ddt
 class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(SnapshotExportLocationsTest, cls).skip_checks()
+        if not CONF.share.run_snapshot_tests:
+            raise cls.skipException('Snapshot tests are disabled.')
+        if not CONF.share.run_mount_snapshot_tests:
+            raise cls.skipException('Mountable snapshots tests are disabled.')
+
+        utils.check_skip_if_microversion_lt("2.32")
 
     @classmethod
     def setup_clients(cls):

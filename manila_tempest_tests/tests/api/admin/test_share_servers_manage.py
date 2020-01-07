@@ -25,15 +25,18 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 
-@base.skip_if_microversion_lt("2.49")
-@testtools.skipUnless(
-    CONF.share.multitenancy_enabled,
-    'Multitenancy tests are disabled.')
-@testtools.skipUnless(
-    CONF.share.run_manage_unmanage_tests,
-    'Manage/unmanage tests are disabled.')
 @ddt.ddt
 class ManageShareServersTest(base.BaseSharesAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ManageShareServersTest, cls).skip_checks()
+        if not CONF.share.multitenancy_enabled:
+            raise cls.skipException('Multitenancy tests are disabled.')
+        if not CONF.share.run_manage_unmanage_tests:
+            raise cls.skipException('Manage/unmanage tests are disabled.')
+
+        utils.check_skip_if_microversion_lt('2.49')
 
     @classmethod
     def resource_setup(cls):
