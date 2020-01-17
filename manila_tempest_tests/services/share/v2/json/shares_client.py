@@ -56,6 +56,9 @@ class SharesV2Client(shares_client.SharesClient):
         return new_headers
 
     def verify_request_id(self, response):
+        # ccloud 'skip' in earlier releases
+        if utils.is_microversion_lt(LATEST_MICROVERSION, "2.49"):
+            return True
         response_headers = [r.lower() for r in response.keys()]
         assert_msg = ("Response is missing request ID. Response "
                       "headers are: %s") % response
