@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Fixed bug #1858024. Define a signle key for multiple instances.
+    Currently every instance initialization creates a unique keypair.
+    An unnecessary resource duplication, when a single user boots more
+    than one instance.
+    Depending on test flow this may also cause keypair mismatch.

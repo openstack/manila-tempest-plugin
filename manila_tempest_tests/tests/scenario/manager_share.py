@@ -132,7 +132,10 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return share_network
 
     def boot_instance(self, wait_until="ACTIVE"):
-        self.keypair = self.create_keypair()
+        # In case of multiple instances, use a single keypair to prevent a keys
+        # mismatch.
+        if not hasattr(self, 'keypair'):
+            self.keypair = self.create_keypair()
         security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'key_name': self.keypair['name'],
