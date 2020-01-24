@@ -236,6 +236,12 @@ ShareGroup = [
     cfg.BoolOpt("run_mount_snapshot_tests",
                 default=False,
                 help="Enable or disable mountable snapshot tests."),
+    cfg.BoolOpt("run_security_service_backend_tests",
+                default=False,
+                help="Defines whether to run tests that use security services "
+                     "at share networks and run the backend driver. You may "
+                     "disable this feature if the backend driver fails on "
+                     "wrong data."),
 
     cfg.StrOpt("image_with_share_tools",
                default="manila-service-image-master",

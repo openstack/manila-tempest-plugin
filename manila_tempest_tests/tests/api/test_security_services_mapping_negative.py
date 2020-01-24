@@ -96,6 +96,9 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @testtools.skipIf(
+        not CONF.share.run_security_service_backend_tests,
+        "No backend support for fake security service.")
     def test_delete_ss_from_sn_used_by_share_server(self):
         sn = self.shares_client.get_share_network(
             self.shares_client.share_network_id)

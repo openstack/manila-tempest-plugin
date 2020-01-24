@@ -83,6 +83,9 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @testtools.skipIf(
+        not CONF.share.run_security_service_backend_tests,
+        "No backend support for fake security service.")
     def test_try_update_invalid_keys_sh_server_exists(self):
         ss_data = self.generate_security_service_data()
         ss = self.create_security_service(**ss_data)
