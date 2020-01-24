@@ -124,6 +124,8 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(True, False)
+    @testtools.skipUnless(
+        CONF.share.run_share_group_tests, 'Share Group tests disabled.')
     def test_share_type_azs_share_groups_az_in_create_req(self, specify_az):
         self.admin_shares_v2_client.update_share_type_extra_spec(
             self.share_type_id, self.az_spec, self.valid_azs_spec)
