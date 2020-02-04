@@ -240,6 +240,11 @@ ShareGroup = [
     cfg.BoolOpt("run_mount_snapshot_tests",
                 default=False,
                 help="Enable or disable mountable snapshot tests."),
+    cfg.BoolOpt("run_create_share_from_snapshot_in_another_pool_or_az_tests",
+                default=False,
+                help="Defines whether to run tests that create share from "
+                     "snapshots in another pool or az. Enable this "
+                     "option if the used driver supports it."),
 
     cfg.StrOpt("image_with_share_tools",
                default="manila-service-image-master",

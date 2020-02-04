@@ -718,6 +718,7 @@ class BaseSharesTest(test.BaseTestCase):
         client = client or cls.admin_shares_v2_client
         if utils.is_microversion_supported('2.23'):
             return client.list_pools(
+                detail=True,
                 search_opts={'share_type': share_type['id']})['pools']
 
         pools = client.list_pools(detail=True)['pools']

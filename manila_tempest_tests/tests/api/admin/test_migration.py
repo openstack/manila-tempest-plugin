@@ -176,6 +176,11 @@ class MigrationBase(base.BaseSharesAdminTest):
                 self.assertIn(r, filtered_rules)
             self.assertEqual(len(expected_rules), len(filtered_rules))
 
+            # In v 2.54 and beyond, we expect key 'progress' in the destination
+            # share data
+            if utils.is_microversion_supported('2.54'):
+                self.assertEqual('100%', share['progress'])
+
         # Share not migrated yet
         else:
             self.assertNotEqual(dest_pool, share['host'])
