@@ -47,6 +47,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
      * Unmount share
      * Delete share
      * Attempt to manage share (fail expected)
+     * Delete failed managed share
      * Terminate the instance
     """
 
@@ -158,6 +159,11 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             remanaged_share['id'], 'manage_error')
 
         self.shares_admin_v2_client.reset_state(remanaged_share['id'])
+
+        LOG.debug('Step 16 - delete failed managed share')
+        self.shares_admin_v2_client.delete_share(remanaged_share['id'])
+        self.shares_admin_v2_client.wait_for_resource_deletion(
+            share_id=remanaged_share['id'])
 
 
 class ShareManageUnmanageNFS(ShareManageUnmanageBase):
