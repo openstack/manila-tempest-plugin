@@ -495,6 +495,12 @@ class SharesClient(rest_client.RestClient):
     def create_security_service(self, ss_type="ldap", **kwargs):
         # ss_type: ldap, kerberos, active_directory
         # kwargs: name, description, dns_ip, server, domain, user, password
+        kwargs_name = kwargs.pop('name', None)
+        if kwargs_name is None:
+            name = data_utils.rand_name("tempest-ss")
+        else:
+            name = kwargs_name
+        kwargs['name'] = name
         post_body = {"type": ss_type}
         post_body.update(kwargs)
         body = json.dumps({"security_service": post_body})
