@@ -24,6 +24,7 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
 CONF = config.CONF
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
 @ddt.ddt
@@ -81,7 +82,6 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                 'size': size,
                 'share_type_id': cls.share_type_id,
                 'share_group_id': sg_id,
-                'experimental': True,
             }} for size, sg_id in ((cls.share_size, cls.share_group['id']),
                                    (cls.share_size2, cls.share_group['id']),
                                    (cls.share_size, cls.share_group2['id']))
@@ -104,13 +104,15 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         )
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_get_share_group_min_supported_sg_microversion(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_get_share_group(self, version):
+        self.skip_if_microversion_not_supported(version)
 
         # Get share group
         share_group = self.shares_v2_client.get_share_group(
-            self.share_group['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
-        )
+            self.share_group['id'], version=version)
 
         # Verify keys
         actual_keys = set(share_group.keys())
@@ -132,8 +134,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         # Get share
         share = self.shares_v2_client.get_share(
             self.shares[0]['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
-            experimental=True)
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
         # Verify keys
         expected_keys = {
@@ -155,11 +156,15 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         self.assertEqual(self.share_group["id"], share["share_group_id"])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_list_share_groups_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_list_share_groups(self, version):
+        self.skip_if_microversion_not_supported(version)
 
         # List share groups
         share_groups = self.shares_v2_client.list_share_groups(
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=version)
 
         # Verify keys
         self.assertGreater(len(share_groups), 0)
@@ -181,8 +186,11 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             self.assertEqual(1, len(gen), msg)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(constants.MIN_SHARE_GROUP_MICROVERSION, '2.36')
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION, '2.36',
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
     def test_list_share_groups_with_detail_min(self, version):
+        self.skip_if_microversion_not_supported(version)
         params = None
         if utils.is_microversion_ge(version, '2.36'):
             params = {'name~': 'tempest', 'description~': 'tempest'}
@@ -218,7 +226,6 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             detailed=True,
             params={'share_group_id': self.share_group['id']},
             version=constants.MIN_SHARE_GROUP_MICROVERSION,
-            experimental=True,
         )
 
         share_ids = [share['id'] for share in shares]
@@ -237,11 +244,16 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                 self.shares[0]['id'], share_ids))
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_get_share_group_snapshot_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_get_share_group_snapshot(self, version):
+        self.skip_if_microversion_not_supported(version)
+
         # Get share group snapshot
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
         )
 
         # Verify keys
@@ -286,24 +298,29 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                     self.assertEqual(share['size'], member['size'])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_create_share_group_from_populated_share_group_snapshot_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_create_share_group_from_populated_share_group_snapshot(self,
+                                                                    version):
+        self.skip_if_microversion_not_supported(version)
 
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
         )
         snapshot_members = sg_snapshot['members']
 
         new_share_group = self.create_share_group(
             cleanup_in_class=False,
             source_share_group_snapshot_id=self.sg_snapshot['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
             share_group_type_id=self.share_group_type_id,
         )
 
         new_share_group = self.shares_v2_client.get_share_group(
             new_share_group['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
         )
 
         # Verify that share_network information matches source share group
@@ -314,8 +331,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         new_shares = self.shares_v2_client.list_shares(
             params={'share_group_id': new_share_group['id']},
             detailed=True,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
-            experimental=True,
+            version=version,
         )
 
         # Verify each new share is available
@@ -343,6 +359,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                         share['share_network_id'])
 
 
+@ddt.ddt
 class ShareGroupRenameTest(base.BaseSharesMixedTest):
 
     @classmethod
@@ -376,13 +393,25 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             share_type_ids=[cls.share_type_id]
         )
 
+    def _rollback_share_group_update(self, version):
+        self.shares_v2_client.update_share_group(
+            self.share_group["id"],
+            name=self.share_group_name,
+            description=self.share_group_desc,
+            version=version,
+        )
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_update_share_group_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_update_share_group(self, version):
+        self.skip_if_microversion_not_supported(version)
 
         # Get share_group
         share_group = self.shares_v2_client.get_share_group(
             self.share_group['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION
+            version=version
         )
         self.assertEqual(self.share_group_name, share_group["name"])
         self.assertEqual(self.share_group_desc, share_group["description"])
@@ -394,7 +423,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             share_group["id"],
             name=new_name,
             description=new_desc,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
         )
         self.assertEqual(new_name, updated["name"])
         self.assertEqual(new_desc, updated["description"])
@@ -402,13 +431,22 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
         # Get share_group
         share_group = self.shares_v2_client.get_share_group(
             self.share_group['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
         )
         self.assertEqual(new_name, share_group["name"])
         self.assertEqual(new_desc, share_group["description"])
 
+        # Rollback the update since this is a ddt and the class resources are
+        # going to be reused
+        self._rollback_share_group_update(version)
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_create_update_read_share_group_with_unicode_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_create_update_read_share_group_with_unicode(self, version):
+        self.skip_if_microversion_not_supported(version)
+
         value1 = u'ಠ_ಠ'
         value2 = u'ಠ_ರೃ'
 
@@ -417,7 +455,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             name=value1,
             description=value1,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
             share_group_type_id=self.share_group_type_id,
             share_type_ids=[self.share_type_id]
         )
@@ -429,13 +467,17 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             share_group["id"],
             name=value2,
             description=value2,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
+            version=version,
         )
         self.assertEqual(value2, updated["name"])
         self.assertEqual(value2, updated["description"])
 
         # Get share group
         share_group = self.shares_v2_client.get_share_group(
-            share_group['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            share_group['id'], version=version)
         self.assertEqual(value2, share_group["name"])
         self.assertEqual(value2, share_group["description"])
+
+        # Rollback the update since this is a ddt and the class resources are
+        # going to be reused
+        self._rollback_share_group_update(version)

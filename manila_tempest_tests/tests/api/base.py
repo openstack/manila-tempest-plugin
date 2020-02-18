@@ -609,8 +609,7 @@ class BaseSharesTest(test.BaseTestCase):
         if kwargs.get('source_share_group_snapshot_id'):
             new_share_group_shares = client.list_shares(
                 detailed=True,
-                params={'share_group_id': share_group['id']},
-                experimental=True)
+                params={'share_group_id': share_group['id']})
 
             for share in new_share_group_shares:
                 resource = {"type": "share",
