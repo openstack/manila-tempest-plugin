@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -45,6 +46,7 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         # Add security service to share network
         self.cl.add_sec_service_to_share_network(self.sn["id"], self.ss["id"])
 
+    @decorators.idempotent_id('e8c5b4d5-7ad2-4aa7-bab0-b454a2e150e9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_map_ss_to_sn_and_list(self):
 
@@ -54,6 +56,7 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         for key in ["status", "id", "name"]:
             self.assertIn(self.ss[key], ls[0][key])
 
+    @decorators.idempotent_id('9dd352b2-6d47-4cab-aa61-52d8081f67a2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_map_ss_to_sn_and_delete(self):
 
@@ -61,6 +64,7 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         self.cl.remove_sec_service_from_share_network(
             self.sn["id"], self.ss["id"])
 
+    @decorators.idempotent_id('2b0bd5cc-eb35-430f-acfd-f80a2e467667')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_remap_ss_to_sn(self):
 

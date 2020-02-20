@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -45,6 +46,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         cls.share_network = cls.create_share_network()
         cls.share_network_id = cls.share_network['id']
 
+    @decorators.idempotent_id('3e1e4da7-049f-404e-8673-142695a9a785')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_delete_subnet(self):
         share_network = self.shares_v2_client.create_share_network()
@@ -82,6 +84,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # Delete the subnets
         self.shares_v2_client.delete_subnet(share_network['id'], created['id'])
 
+    @decorators.idempotent_id('51c6836a-c6d2-4b80-a992-cf91f9a4332b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_share_network_subnet(self):
         share_network = self.create_share_network()
@@ -107,6 +110,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         self.shares_v2_client.delete_subnet(share_network['id'],
                                             created['id'])
 
+    @decorators.idempotent_id('89ed6115-eb1d-4a7e-a0a3-9b4a239fadc1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -174,6 +178,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # Delete the subnets
         self.shares_v2_client.delete_subnet(share_network['id'], subnet['id'])
 
+    @decorators.idempotent_id('043fbe02-466d-4344-8e2f-f02cb65132cb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")

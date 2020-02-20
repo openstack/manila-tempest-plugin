@@ -15,6 +15,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -151,6 +152,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
             raise self.skipException(
                 msg % ','.join(constants.REPLICATION_PROMOTION_CHOICES))
 
+    @decorators.idempotent_id('8858617f-292d-4e5c-9e15-794b7f1b2e3c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_add_delete_share_replica(self):
         # Create the replica
@@ -159,6 +161,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Delete the replica
         self.delete_share_replica(share_replica["id"])
 
+    @decorators.idempotent_id('58c3faf4-6c97-4fec-9a9b-7cff0d2035cd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -181,6 +184,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Delete subnet
         self.shares_v2_client.delete_subnet(self.sn_id, subnet['id'])
 
+    @decorators.idempotent_id('00e12b41-b95d-494a-99be-e584aae10f5c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_add_access_rule_create_replica_delete_rule(self):
         # Add access rule to the share
@@ -204,6 +208,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_resource_deletion(
             rule_id=rule["id"], share_id=self.shares[0]['id'])
 
+    @decorators.idempotent_id('3af3f19a-1195-464e-870b-1a3918914f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_replica_add_access_rule_delete_replica(self):
         access_type, access_to = self._get_access_rule_data_from_config()
@@ -221,6 +226,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Delete the replica
         self.delete_share_replica(share_replica["id"])
 
+    @decorators.idempotent_id('a542c179-ea41-4bc0-bd80-e06eaddf5253')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(CONF.share.run_multiple_share_replicas_tests,
                           'Multiple share replicas tests are disabled.')
@@ -252,6 +258,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.assertIn(share_replica1["id"], replica_ids)
         self.assertIn(share_replica2["id"], replica_ids)
 
+    @decorators.idempotent_id('98b7c1d6-02e8-425a-b697-db2d2671fa11')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_promote_in_sync_share_replica(self):
         # Test promote 'in_sync' share_replica to 'active' state
@@ -261,6 +268,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
             share["id"])[0]
         self._verify_in_sync_replica_promotion(share, original_replica)
 
+    @decorators.idempotent_id('3af912f4-b5d7-4241-b2b3-bdf12ff398a4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_add_rule_promote_share_replica_verify_rule(self):
         # Verify the access rule stays intact after share replica promotion
@@ -285,6 +293,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.assertEqual(access_to, rules_list[0]["access_to"])
         self.assertEqual('ro', rules_list[0]["access_level"])
 
+    @decorators.idempotent_id('7904e3c7-e6d0-472d-b9c9-c0772b4f9f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.48")
     def test_share_type_azs_share_replicas(self):
@@ -307,6 +316,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.assertIn(share['availability_zone'], self.zones)
         self.assertIn(replica['availability_zone'], self.zones)
 
+    @decorators.idempotent_id('b5ade58b-cb81-47eb-966b-28e6d85b5568')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_promote_and_promote_back(self):
         # Test promote back and forth between 2 share replicas
@@ -345,6 +355,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
             new_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
             status_attr='replica_state')
 
+    @decorators.idempotent_id('1452156b-75a5-4f3c-a921-834732a03b0a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_active_replication_state(self):
         # Verify the replica_state of first instance is set to active.
@@ -439,6 +450,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
                 replica['id'], len(replica_id_list))
             self.assertEqual(1, len(replica_id_list), msg)
 
+    @decorators.idempotent_id('abe0e49d-0b94-4b81-a220-ab047712492d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_replica(self):
         replica = self.shares_v2_client.get_share_replica(self.replica1["id"])
@@ -450,6 +462,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
                          'expected %s, got %s.' % (replica["id"],
                                                    detail_keys, actual_keys))
 
+    @decorators.idempotent_id('f5225fb7-fcbe-4825-bf5b-0e11c2d26e03')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_detail_list_share_replicas_for_share(self):
         # List replicas for share
@@ -462,6 +475,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
         # Verify keys
         self._validate_replica_list(replica_list)
 
+    @decorators.idempotent_id('e39aeb5d-fe4b-4896-8615-e6e7290bcb56')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_detail_list_share_replicas_for_all_shares(self):
         # List replicas for all available shares
@@ -474,6 +488,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
         # Verify keys
         self._validate_replica_list(replica_list)
 
+    @decorators.idempotent_id('8d11848a-7766-41e5-af09-6121e5bad447')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_summary_list_share_replicas_for_all_shares(self):
         # List replicas

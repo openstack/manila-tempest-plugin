@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions
 import testtools
 from testtools import testcase as tc
@@ -59,6 +60,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
         cls.sg_type_id = cls.sg_type['id']
 
+    @decorators.idempotent_id('79eaa86f-4c8f-49fd-acb2-ec051aa6bf93')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -96,6 +98,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
             'Expected %s, got %s' % (
                 share_group['id'], expected_share_types, actual_share_types))
 
+    @decorators.idempotent_id('ff6c17af-03ba-4506-923d-b6c229492d0e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_group_with_multiple_share_types_min(self):
         share_group = self.create_share_group(
@@ -129,6 +132,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
             'Expected %s, got %s' % (
                 share_group['id'], expected_share_types, actual_share_types))
 
+    @decorators.idempotent_id('99f0471c-e978-42ac-b50b-848b16692eab')
     @testtools.skipUnless(
         CONF.share.default_share_type_name, "Only if defaults are defined.")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -167,6 +171,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
             'Expected %s, got %s' % (
                 share_group['id'], expected_sg_type, actual_sg_type))
 
+    @decorators.idempotent_id('8ca1f0a0-2a36-4adb-af6b-6741b00307c5')
     @testtools.skipUnless(
         CONF.share.multitenancy_enabled, "Only for multitenancy.")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -201,6 +206,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
         self.assertEqual(
             orig_sg['share_server_id'], new_sg['share_server_id'])
 
+    @decorators.idempotent_id('93fd4a97-a25a-4a17-b5ae-c8894c1adfc5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_sg_type_but_without_any_group_specs(self):
         # Create share group type not specifying any group specs

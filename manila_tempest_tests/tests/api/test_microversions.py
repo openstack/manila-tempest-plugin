@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -33,6 +34,7 @@ class MicroversionsTest(base.BaseSharesTest):
     Sends HTTP GET requests to the version API to validate microversions.
     """
 
+    @decorators.idempotent_id('1b20943e-a398-49dd-a69d-513ce6ea01b4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_root_version(self):
 
@@ -55,6 +57,7 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual(_MIN_API_VERSION, v2.get('min_version'))
         self.assertNotIn(v2.get('version'), [None, ''])
 
+    @decorators.idempotent_id('6ccaae5f-2382-45a5-a844-6d31837beba8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v1_no_version(self):
 
@@ -73,6 +76,7 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual('', version_list[0].get('min_version'))
         self.assertEqual('', version_list[0].get('version'))
 
+    @decorators.idempotent_id('7b7e4ddf-08bb-4764-a94f-5f377da3b2cb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v1_with_version(self):
 
@@ -91,6 +95,7 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual('', version_list[0].get('min_version'))
         self.assertEqual('', version_list[0].get('version'))
 
+    @decorators.idempotent_id('9a8bd7fd-f9d0-4fc6-8e1c-0178d87ec7c1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_no_version(self):
 
@@ -110,6 +115,7 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
         self.assertNotIn(version_list[0].get('version'), [None, ''])
 
+    @decorators.idempotent_id('101574fd-9d47-4bd6-97f6-cde219f089ca')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_min_version(self):
 
@@ -129,6 +135,7 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
         self.assertNotIn(version_list[0].get('version'), [None, ''])
 
+    @decorators.idempotent_id('e0766a36-b57c-46f8-b474-a38b74f3b9ed')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_max_version(self):
 
@@ -148,6 +155,7 @@ class MicroversionsTest(base.BaseSharesTest):
         self.assertEqual(_MIN_API_VERSION, version_list[0].get('min_version'))
         self.assertNotIn(version_list[0].get('version'), [None, ''])
 
+    @decorators.idempotent_id('038ff428-edde-43ff-ae29-1b18676b61d5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_invalid_version(self):
 
@@ -156,6 +164,7 @@ class MicroversionsTest(base.BaseSharesTest):
 
         self.assertEqual(400, resp.status)
 
+    @decorators.idempotent_id('0d82fc0b-d24d-4d07-ab43-bd0895ec0c4c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_microversions_v2_unacceptable_version(self):
 

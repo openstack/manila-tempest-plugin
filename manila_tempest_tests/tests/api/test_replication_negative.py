@@ -15,6 +15,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -89,6 +90,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
             raise self.skipException(
                 msg % ','.join(constants.REPLICATION_PROMOTION_CHOICES))
 
+    @decorators.idempotent_id('90c5947d-b857-406c-b7dc-7010cbee6482')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_try_add_replica_to_share_with_no_replication_share_type(self):
         # Create share without replication type
@@ -103,6 +105,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           share['id'],
                           self.replica_zone)
 
+    @decorators.idempotent_id('d14ba73e-4f13-451e-86d5-ffeb188e51b7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_add_replica_to_share_with_error_state(self):
         # Set "error" state
@@ -116,12 +119,14 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           self.share1['id'],
                           self.replica_zone)
 
+    @decorators.idempotent_id('94b41c28-e7a9-4f19-9315-4a57210141af')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_try_delete_last_active_replica(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.delete_share_replica,
                           self.instance_id1)
 
+    @decorators.idempotent_id('6fbf984d-4efa-41d7-88bf-11ef2f078c02')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_try_delete_share_having_replica(self):
         self.create_share_replica(self.share1["id"], self.replica_zone,
@@ -130,6 +135,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           self.shares_v2_client.delete_share,
                           self.share1["id"])
 
+    @decorators.idempotent_id('b9c2e57b-f1ae-475c-9d0b-df75dbe93b61')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_promote_out_of_sync_share_replica(self):
         # Test promoting an out_of_sync share_replica to active state
@@ -148,6 +154,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           self.shares_v2_client.promote_share_replica,
                           replica['id'])
 
+    @decorators.idempotent_id('e525c3d0-9f45-489f-8e78-ed9e3ac540f7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_promote_active_share_replica(self):
         # Test promote active share_replica
@@ -157,6 +164,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         self.shares_v2_client.promote_share_replica(self.instance_id1,
                                                     expected_status=200)
 
+    @decorators.idempotent_id('37dc3f7e-5a36-4020-ae1b-3c5e6771f024')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_promote_share_replica_for_writable_share_type(self):
         # Test promote active share_replica for writable share
@@ -174,6 +182,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         # Try promoting the replica
         self.shares_v2_client.promote_share_replica(replica['id'])
 
+    @decorators.idempotent_id('600a13d2-5cf0-482e-97af-9f598b55a407')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_add_access_rule_share_replica_error_status(self):
         access_type, access_to = self._get_access_rule_data_from_config()
@@ -190,6 +199,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           self.admin_client.create_access_rule,
                           self.share1["id"], access_type, access_to, 'ro')
 
+    @decorators.idempotent_id('91b93b71-4048-412b-bb42-0fe88edfb987')
     @testtools.skipUnless(CONF.share.run_host_assisted_migration_tests or
                           CONF.share.run_driver_assisted_migration_tests,
                           "Share migration tests are disabled.")
@@ -211,6 +221,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
             lib_exc.Conflict, self.admin_client.migrate_share,
             self.share1['id'], dest_host)
 
+    @decorators.idempotent_id('bf01bcfc-57cb-4e56-957f-8aa9f1b9be1b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.48")
     def test_try_add_replica_share_type_azs_unsupported_az(self):
@@ -224,6 +235,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           self.share1['id'],
                           self.replica_zone)
 
+    @decorators.idempotent_id('97fc5ab3-c6e2-4da4-ae45-08d458a5ba0c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -255,12 +267,14 @@ class ReplicationAPIOnlyNegativeTest(base.BaseSharesTest):
 
         utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
 
+    @decorators.idempotent_id('72395c9b-4432-4a8b-84b4-60303e6bc962')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_replica_by_nonexistent_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.get_share_replica,
                           data_utils.rand_uuid())
 
+    @decorators.idempotent_id('41d45772-e021-4404-a991-85f7a6e6431b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_replica_by_nonexistent_id(self):
         self.assertRaises(lib_exc.NotFound,

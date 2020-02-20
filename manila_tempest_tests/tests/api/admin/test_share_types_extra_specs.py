@@ -18,6 +18,7 @@ import copy
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -46,6 +47,7 @@ class ExtraSpecsReadAdminTest(base.BaseSharesAdminTest):
         cls.shares_client.create_share_type_extra_specs(
             cls.st_id, cls.custom_extra_specs)
 
+    @decorators.idempotent_id('d4cae104-838b-4248-8c9c-125165710786')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_get_one_share_type_extra_spec(self):
         es_get_one = self.shares_client.get_share_type_extra_spec(
@@ -53,6 +55,7 @@ class ExtraSpecsReadAdminTest(base.BaseSharesAdminTest):
 
         self.assertEqual({"key1": self.custom_extra_specs["key1"]}, es_get_one)
 
+    @decorators.idempotent_id('508ceb85-5456-4db9-b33f-00620d7baea1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_get_all_share_type_extra_specs(self):
         es_get_all = self.shares_client.get_share_type_extra_specs(self.st_id)
@@ -79,6 +82,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
         self.shares_client.create_share_type_extra_specs(
             self.st_id, self.custom_extra_specs)
 
+    @decorators.idempotent_id('baba776b-1b05-42ca-a002-bff1f8f14e13')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_one_share_type_extra_spec(self):
         self.custom_extra_specs["key1"] = "fake_value1_updated"
@@ -93,6 +97,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
         expected_extra_specs.update(self.required_extra_specs)
         self.assertEqual(self.custom_extra_specs, get)
 
+    @decorators.idempotent_id('374e7ff5-0d26-4778-bbb5-4ffd28521ad9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_all_share_type_extra_specs(self):
         self.custom_extra_specs["key2"] = "value2_updated"
@@ -107,6 +112,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
         expected_extra_specs.update(self.required_extra_specs)
         self.assertEqual(self.custom_extra_specs, get)
 
+    @decorators.idempotent_id('129db0ce-9a4f-4a40-994f-e492174e0661')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_delete_one_share_type_extra_spec(self):
         # Delete one extra spec for share type
@@ -117,6 +123,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
 
         self.assertNotIn('key1', get)
 
+    @decorators.idempotent_id('1b9f501d-8f34-46d0-b318-83bdfed571ec')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(['2.24', LATEST_MICROVERSION]))
     def test_delete_snapshot_support_extra_spec(self, version):

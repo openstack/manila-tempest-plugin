@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -81,6 +82,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         ('share_network_subnet_id', 'invalid_share_network_subnet_id'),
     )
     @ddt.unpack
+    @decorators.idempotent_id('60b94091-f35d-42ac-a25a-ca1f7e66bb44')
     @testtools.skipIf(CONF.share.share_network_id != "",
                       "This test is not suitable for pre-existing "
                       "share_network.")
@@ -131,6 +133,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # delete share server
         self._delete_share_server_and_wait(managed_share_server['id'])
 
+    @decorators.idempotent_id('0f21aebe-e983-4112-a494-b287293112d2')
     @testtools.skipIf(CONF.share.share_network_id != "",
                       "This test is not suitable for pre-existing "
                       "share_network.")
@@ -172,6 +175,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # delete share server
         self._delete_share_server_and_wait(share['share_server_id'])
 
+    @decorators.idempotent_id('84f9a808-8bff-4652-8877-4c9f0dfeed8a')
     @testtools.skipIf(CONF.share.share_network_id != "",
                       "This test is not suitable for pre-existing "
                       "share_network.")
@@ -213,6 +217,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # delete share server
         self._delete_share_server_and_wait(share['share_server_id'])
 
+    @decorators.idempotent_id('fbe6cf2d-3e33-40d8-b420-b785d3cb7559')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_share_server_reset_state_invalid_state(self):
 
@@ -232,6 +237,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # delete share
         self._delete_share_and_wait(share)
 
+    @decorators.idempotent_id('c0a13fc4-9f30-483a-b473-0f0ce533f645')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_unmanage_share_server_with_share(self):
 
@@ -250,6 +256,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # delete share
         self._delete_share_and_wait(share)
 
+    @decorators.idempotent_id('d2feb338-5c78-4370-b5ba-c8b16df63b43')
     @testtools.skipIf(CONF.share.share_network_id != "",
                       "This test is not suitable for pre-existing "
                       "share_network.")
@@ -299,6 +306,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # delete share server
         self._delete_share_server_and_wait(managed_share_server['id'])
 
+    @decorators.idempotent_id('30606085-4b01-4489-a18c-22e67ed0e221')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_share_server_double_manage(self):
 

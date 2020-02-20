@@ -16,6 +16,7 @@
 import six
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -64,6 +65,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
             share_protocol=cls.protocol
         )
 
+    @decorators.idempotent_id('df7ac126-2c13-4902-b9c0-d103c71680ee')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_not_found(self):
         # Manage non-existing snapshot fails
@@ -74,6 +76,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
             'fake-provider-location',
         )
 
+    @decorators.idempotent_id('645a88f7-1eec-49a2-a232-757dc2112dd8')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_already_exists(self):
         # Manage already existing snapshot fails
@@ -95,6 +98,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
         # Delete snapshot
         self._delete_snapshot_and_wait(snap)
 
+    @decorators.idempotent_id('e94706f4-9c72-41f1-9ed4-09eb93d0b36f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_invalid_provider_location(self):
         # Manage a snapshot with wrong provider location fails
@@ -133,6 +137,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
         )
         self._delete_snapshot_and_wait(managed_snap)
 
+    @decorators.idempotent_id('d0049626-a524-4c8a-a58a-006ae2cdfea5')
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           'Multitenancy tests are disabled.')
     @utils.skip_if_microversion_not_supported("2.48")

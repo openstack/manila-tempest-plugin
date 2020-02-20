@@ -13,6 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -74,6 +75,7 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
             cls.sn_with_kerberos_ss["id"],
             cls.ss_kerberos["id"])
 
+    @decorators.idempotent_id('983fb22d-3057-402f-8988-62ce41a557fb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_all_tenants(self):
         listed = self.admin_shares_v2_client.list_share_networks_with_detail(
@@ -83,6 +85,7 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
         self.assertTrue(any(self.sn_with_kerberos_ss['id'] == sn['id']
                             for sn in listed))
 
+    @decorators.idempotent_id('36c26b6b-8984-4255-959b-74f6ef46c37b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_filter_by_project_id(self):
         listed = self.admin_shares_v2_client.list_share_networks_with_detail(

@@ -52,6 +52,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.message = self.create_user_message()
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
+    @decorators.idempotent_id('37127e11-7aa7-46b2-ab05-e3bf36d94fd8')
     def test_list_messages(self):
         body = self.shares_v2_client.list_messages()
         self.assertIsInstance(body, list)
@@ -60,6 +61,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertEqual(set(MESSAGE_KEYS), set(message.keys()))
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
+    @decorators.idempotent_id('ff938d3e-9cdd-470a-b091-d389be7be755')
     def test_list_messages_sorted_and_paginated(self):
         self.create_user_message()
         self.create_user_message()
@@ -77,6 +79,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertEqual(ids, sorted(ids))
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
+    @decorators.idempotent_id('292b0a2c-f066-48a6-9492-8dede87ee7b4')
     def test_list_messages_filtered(self):
         self.create_user_message()
         params = {'resource_id': self.message['resource_id']}
@@ -86,6 +89,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertEqual([self.message['id']], ids)
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
+    @decorators.idempotent_id('a92971c5-a72a-4de2-8e9b-dc612b798a7a')
     def test_show_message(self):
         self.addCleanup(self.shares_v2_client.delete_message,
                         self.message['id'])
@@ -110,6 +114,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertEqual(set(MESSAGE_KEYS), set(message.keys()))
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
+    @decorators.idempotent_id('88b2db98-8e33-4552-9225-c19a3b6f18e0')
     def test_delete_message(self):
         self.shares_v2_client.delete_message(self.message['id'])
         self.shares_v2_client.wait_for_resource_deletion(
@@ -117,6 +122,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
     @base.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
+    @decorators.idempotent_id('2ed0c40e-cdaa-471b-97d4-5ebe3fb040e9')
     def test_list_messages_with_since_and_before_filters(self):
         new_message = self.create_user_message()
         created_at_1 = timeutils.parse_strtime(self.message['created_at'])

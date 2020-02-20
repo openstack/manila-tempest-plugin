@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -33,17 +34,20 @@ class SharesQuotasNegativeTest(base.BaseSharesTest):
             raise cls.skipException(msg)
         super(SharesQuotasNegativeTest, cls).resource_setup()
 
+    @decorators.idempotent_id('d0dfe81d-8e8c-4847-a55f-95ba8a3d922c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_quotas_with_empty_tenant_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.show_quotas, "")
 
+    @decorators.idempotent_id('e7dbc580-1857-4f88-8886-988dc2f2c7b9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_reset_quotas_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_v2_client.reset_quotas,
                           self.shares_v2_client.tenant_id)
 
+    @decorators.idempotent_id('f1c8e16f-5406-4389-a29c-547cca8a56e0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_quotas_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -52,6 +56,7 @@ class SharesQuotasNegativeTest(base.BaseSharesTest):
                           shares=9)
 
     @ddt.data("2.6", "2.7", "2.24")
+    @decorators.idempotent_id('0f0033b3-357e-42e6-9c94-cac650e1cd50')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_quotas_detail_with_wrong_version(self, microversion):
         self.assertRaises(lib_exc.NotFound,

@@ -13,6 +13,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -118,6 +119,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         for export in expected_exports:
             self.assertIn(export['path'], share_export_paths)
 
+    @decorators.idempotent_id('da22cfb8-7dd8-4bf1-87fc-a1f7b51ebf8e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(*set(['2.46', '2.47', LATEST_MICROVERSION]))
     def test_replicated_share_export_locations(self, version):
@@ -135,6 +137,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
                                                     primary_replica_exports,
                                                     share_exports, version)
 
+    @decorators.idempotent_id('58430f57-c6eb-44e2-9583-eecb1dd10594')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(*set(['2.46', '2.47', LATEST_MICROVERSION]))
     @testtools.skipUnless(
@@ -184,6 +187,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         # Delete the secondary (the 'active' replica before promotion)
         self.delete_share_replica(primary_replica['id'])
 
+    @decorators.idempotent_id('10ab6304-a1cd-4e60-90e3-7f9358b8808a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.47')
     def test_replica_export_locations(self):

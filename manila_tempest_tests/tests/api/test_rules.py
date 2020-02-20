@@ -17,6 +17,7 @@ import itertools
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -102,6 +103,7 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
         cls.access_type = "ip"
         cls.access_to = "2.2.2.2"
 
+    @decorators.idempotent_id('3390df2d-f6f8-4634-a562-87c1be994f6a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*itertools.chain(
         itertools.product({'1.0', '2.9', '2.37', LATEST_MICROVERSION}, {4}),
@@ -156,6 +158,7 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
             self.shares_v2_client.wait_for_resource_deletion(
                 rule_id=rule["id"], share_id=self.share['id'], version=version)
 
+    @decorators.idempotent_id('5d25168a-d646-443e-8cf1-3151eb7887f5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*itertools.chain(
         itertools.product({'1.0', '2.9', '2.37', LATEST_MICROVERSION}, {4}),
@@ -208,6 +211,7 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
             self.shares_v2_client.wait_for_resource_deletion(
                 rule_id=rule["id"], share_id=self.share['id'], version=version)
 
+    @decorators.idempotent_id('187a4fb0-ba1d-45b9-83c9-f0272e7e6f3e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         "nfs" not in CONF.share.enable_ro_access_level_for_protocols,
@@ -221,6 +225,7 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
 class ShareIpRulesForCIFSTest(ShareIpRulesForNFSTest):
     protocol = "cifs"
 
+    @decorators.idempotent_id('8fa0a15f-c04c-4521-91e7-020943bede8a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         "cifs" not in CONF.share.enable_ro_access_level_for_protocols,
@@ -258,6 +263,7 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
         cls.access_type = "user"
         cls.access_to = CONF.share.username_for_user_rules
 
+    @decorators.idempotent_id('1f87565f-c3d9-448d-b89a-387d6c2fdae6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
     def test_create_delete_user_rule(self, version):
@@ -303,6 +309,7 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
             self.shares_v2_client.wait_for_resource_deletion(
                 rule_id=rule["id"], share_id=self.share['id'], version=version)
 
+    @decorators.idempotent_id('ccb08342-b7ef-4dda-84ba-8de9879d8862')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         "nfs" not in CONF.share.enable_ro_access_level_for_protocols,
@@ -316,6 +323,7 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
 class ShareUserRulesForCIFSTest(ShareUserRulesForNFSTest):
     protocol = "cifs"
 
+    @decorators.idempotent_id('ee11084d-6c1d-4856-8044-9aa9e6c670fb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         "cifs" not in CONF.share.enable_ro_access_level_for_protocols,
@@ -354,6 +362,7 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
         # certificate that it possesses.
         cls.access_to = "client1.com"
 
+    @decorators.idempotent_id('775ebc55-4a4d-4012-a030-2eeb7b6d2ce8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
     def test_create_delete_cert_rule(self, version):
@@ -399,6 +408,7 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
             self.shares_v2_client.wait_for_resource_deletion(
                 rule_id=rule["id"], share_id=self.share['id'], version=version)
 
+    @decorators.idempotent_id('cdd93d8e-7255-4ed4-8ef0-929a62bb302c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         "glusterfs" not in CONF.share.enable_ro_access_level_for_protocols,
@@ -474,6 +484,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         # Provide access to a client identified by a cephx auth id.
         cls.access_to = "bob"
 
+    @decorators.idempotent_id('4e636fd2-26ef-4b63-96eb-77860a8b6cdf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*itertools.product(
         set(['2.13', '2.27', '2.28', LATEST_MICROVERSION]),
@@ -496,6 +507,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_resource_deletion(
             rule_id=rule["id"], share_id=self.share['id'])
 
+    @decorators.idempotent_id('ad907303-a439-4fcb-8845-fe91ecab7dc2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_different_users_in_same_tenant_can_use_same_cephx_id(self):
         # Grant access to the share
@@ -556,6 +568,7 @@ class ShareRulesTest(base.BaseSharesMixedTest):
         cls.share_type_id = cls.share_type['id']
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
 
+    @decorators.idempotent_id('c52e95cc-d6ea-4d02-9b52-cd7c1913dfff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(*set(
         ['1.0', '2.9', '2.27', '2.28', '2.45', LATEST_MICROVERSION]))
@@ -649,6 +662,7 @@ class ShareRulesTest(base.BaseSharesMixedTest):
             self.shares_v2_client.wait_for_resource_deletion(
                 rule_id=rule["id"], share_id=self.share['id'], version=version)
 
+    @decorators.idempotent_id('b77bcbda-9754-48f0-9be6-79341ad1af64')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
     def test_access_rules_deleted_if_share_deleted(self, version):

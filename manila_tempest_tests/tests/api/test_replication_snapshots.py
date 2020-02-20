@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -66,6 +67,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         cls.share_zone = cls.zones[0]
         cls.replica_zone = cls.zones[-1]
 
+    @decorators.idempotent_id('67fce02a-1d46-4186-8260-69e30b26195d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_snapshot_after_share_replica(self):
         """Test the snapshot for replicated share.
@@ -100,6 +102,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                               snapshot_id=snapshot['id'],
                               share_network_id=self.sn_id)
 
+    @decorators.idempotent_id('ced8920b-6e3a-4bb4-9b3d-86e54377fcb7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_snapshot_before_share_replica(self):
         """Test the snapshot for replicated share.
@@ -138,6 +141,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                               snapshot_id=snapshot['id'],
                               share_network_id=self.sn_id)
 
+    @decorators.idempotent_id('a5372844-69ad-40e1-bbf3-265eb66af123')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_snapshot_before_and_after_share_replica(self):
         """Test the snapshot for replicated share.
@@ -187,6 +191,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                               snapshot_id=snapshot2['id'],
                               share_network_id=self.sn_id)
 
+    @decorators.idempotent_id('b4cd376b-1eb8-4780-801a-64b0c3bee1e4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_delete_snapshot_after_adding_replica(self):
         """Verify the snapshot delete.
@@ -208,6 +213,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_resource_deletion(
             snapshot_id=snapshot["id"])
 
+    @decorators.idempotent_id('913056a7-d897-4a1b-a7be-b2b2cf5d9572')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.capability_create_share_from_snapshot_support,

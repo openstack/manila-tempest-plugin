@@ -11,6 +11,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -76,6 +77,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         cls.replica = cls.admin_client.list_share_replicas(
             share_id=cls.share['id'])[0]
 
+    @decorators.idempotent_id('b39f319e-2515-42c0-85c4-21c2fb2123bf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_extend_tests,
                           'Extend share tests are disabled.')
@@ -88,6 +90,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         share = self.admin_client.get_share(self.share["id"])
         self.assertEqual(new_size, int(share["size"]))
 
+    @decorators.idempotent_id('743bfb8e-a314-4e8e-92b5-079bd3eae72d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_shrink_tests,
                           'Shrink share tests are disabled.')
@@ -99,6 +102,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         shrink_share = self.admin_client.get_share(self.share["id"])
         self.assertEqual(new_size, int(shrink_share["size"]))
 
+    @decorators.idempotent_id('84150cd6-2777-4806-8aa3-51359f16816e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(CONF.share.run_manage_unmanage_tests,
                           'Manage/Unmanage Tests are disabled.')
@@ -135,6 +139,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         self.create_share_replica(managed_share['id'], self.replica_zone,
                                   cleanup=True, client=self.admin_client)
 
+    @decorators.idempotent_id('cbbe2650-47bb-456b-8b41-74c66270ea97')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_manage_unmanage_tests,
                           'Manage/Unmanage Tests are disabled.')
@@ -148,6 +153,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
             self.admin_client.unmanage_share,
             share_id=self.share['id'])
 
+    @decorators.idempotent_id('796fb2a8-1ac3-4eee-b12e-da511eb52e87')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(CONF.share.run_manage_unmanage_tests,
                           'Manage/Unmanage Tests are disabled.')
@@ -161,6 +167,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         self.admin_client.unmanage_share(share['id'])
         self.admin_client.wait_for_resource_deletion(share_id=share['id'])
 
+    @decorators.idempotent_id('93220873-c6c4-40f7-840d-d0ff02e7cd7e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_manage_unmanage_snapshot_tests,
                           'Manage/Unmanage Snapshot Tests are disabled.')
@@ -176,6 +183,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
             provider_location="127.0.0.1:/fake_provider_location/"
                               "manila_share_9dc61f49_fbc8_48d7_9337_2f9593d9")
 
+    @decorators.idempotent_id('0b0cd350-8691-477b-adb1-5e79b92e3759')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_manage_unmanage_snapshot_tests,
                           'Manage/Unmanage Snapshot Tests are disabled.')

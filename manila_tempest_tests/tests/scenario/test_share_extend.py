@@ -15,6 +15,7 @@ from oslo_log import log as logging
 from oslo_utils import units
 import six
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from testtools import testcase as tc
 
@@ -45,6 +46,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
+    @decorators.idempotent_id('e1c0d614-c8f2-43cf-9c49-25808b07ba4a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_extend_and_write(self):
         default_share_size = CONF.share.share_size
@@ -197,6 +199,7 @@ class TestShareExtendCIFS(ShareExtendBase):
 class TestShareExtendCEPHFS(ShareExtendBase, manager.BaseShareCEPHFSTest):
     protocol = "cephfs"
 
+    @decorators.idempotent_id('9ca1e4a9-23e3-4da6-a63e-46e7919335e0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_extend_and_write_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'

@@ -18,6 +18,7 @@ import random
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -47,6 +48,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
         cls.st = cls._create_share_type()
         cls.st2 = cls._create_share_type()
 
+    @decorators.idempotent_id('d6a6ac4d-6582-408d-ba55-6f5128eb940e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_share_type_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -54,12 +56,14 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           data_utils.rand_name("used_user_creds"),
                           client=self.shares_client)
 
+    @decorators.idempotent_id('857c664f-e634-4865-ba05-bdcd4336725d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_share_type_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_client.delete_share_type,
                           self.st["id"])
 
+    @decorators.idempotent_id('06203276-f6a3-4a07-a014-8749763395d6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_add_access_to_share_type_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -67,6 +71,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           self.st['id'],
                           self.shares_client.tenant_id)
 
+    @decorators.idempotent_id('08b2d093-2ad8-46aa-8112-81d50547f36d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_remove_access_from_share_type_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -75,6 +80,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           self.shares_client.tenant_id)
 
     @base.skip_if_microversion_lt("2.50")
+    @decorators.idempotent_id('4a22945c-8988-43a1-88c9-eb86e6abcd8e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(
         ('2.50', '', None, None),
@@ -95,6 +101,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           version)
 
     @base.skip_if_microversion_lt("2.50")
+    @decorators.idempotent_id('7193465a-ed8e-44d5-9ca9-4e8a3c5958e0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data('2.50', LATEST_MICROVERSION)
     def test_share_type_update_conflict(self, version):

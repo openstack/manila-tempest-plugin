@@ -15,6 +15,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -45,6 +46,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         super(SchedulerStatsAdminTest, cls).resource_setup()
         cls.admin_client = cls.shares_v2_client
 
+    @decorators.idempotent_id('dab6d654-7d1c-4bc0-8017-1c4c072b49a1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_pool_list(self):
 
@@ -58,6 +60,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         actual_keys = set(pool.keys())
         self.assertTrue(actual_keys.issuperset(required_keys))
 
+    @decorators.idempotent_id('8f4582c4-df82-4b64-be79-a8c6fdc58eac')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_pool_list_with_filters(self):
 
@@ -87,6 +90,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         for k, v in search_opts.items():
             self.assertEqual(v[1:-1], filtered_pool_list[0][k])
 
+    @decorators.idempotent_id('1c2f1b0f-c509-4676-8335-bb6b10debea2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_pool_list_with_filters_negative(self):
 
@@ -103,6 +107,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         # Ensure we got no pools
         self.assertEmpty(pool_list)
 
+    @decorators.idempotent_id('b6fdd156-3923-495a-ab01-f94bfb5d7040')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_pool_list_detail(self):
 
@@ -116,6 +121,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         actual_keys = set(pool.keys())
         self.assertTrue(actual_keys.issuperset(required_keys))
 
+    @decorators.idempotent_id('071a1e47-959e-47df-ad19-335064bb25ff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_pool_list_detail_with_filters(self):
 
@@ -145,6 +151,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         for k, v in search_opts.items():
             self.assertEqual(v[1:-1], filtered_pool_list[0][k])
 
+    @decorators.idempotent_id('56f04711-7b57-4d2a-a4f3-96c82845208e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_pool_list_detail_with_filters_negative(self):
 
@@ -161,6 +168,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         # Ensure we got no pools
         self.assertEmpty(pool_list)
 
+    @decorators.idempotent_id('f027fb62-1ec3-4f52-a782-e9dd9db34fda')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.23")
     @ddt.data((True, "name"), (True, "id"), (False, "name"), (False, "id"))
@@ -186,6 +194,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
             self.assertIn("pool", pool_keys)
             self.assertIs(detail, "capabilities" in pool_keys)
 
+    @decorators.idempotent_id('31cb2c99-3abf-4dce-8e66-7fd30b168300')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.23")
     @ddt.data((True, "name"), (True, "id"), (False, "name"), (False, "id"))

@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -48,6 +49,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
             resource_id, s_type=resource_type, status="available")
         self._wait_for_resource_status(resource_id, resource_type[:-1])
 
+    @decorators.idempotent_id('4f8c6ae9-0656-445f-a911-fbf98fe761d0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data("error", "available", "error_deleting", "deleting", "creating")
     def test_reset_share_state(self, status):
@@ -55,6 +57,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.shares_v2_client.wait_for_share_status(self.sh["id"], status)
         self.addCleanup(self._reset_resource_available, self.sh["id"])
 
+    @decorators.idempotent_id('13075b2d-fe83-41bf-b6ef-99cfcc00257d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data("error", "available", "error_deleting", "deleting", "creating")
     def test_reset_share_instance_state(self, status):
@@ -68,6 +71,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.addCleanup(self._reset_resource_available,
                         share_instance_id, "share_instances")
 
+    @decorators.idempotent_id('3e16d990-fa19-45e9-893f-e0b7a90127bd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -81,6 +85,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.addCleanup(self._reset_resource_available,
                         snapshot["id"], "snapshots")
 
+    @decorators.idempotent_id('2e8fee75-6b7f-4b69-8f68-0646ce6a96e9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_force_delete_share(self):
         share = self.create_share(share_type_id=self.share_type_id)
@@ -96,6 +101,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.shares_v2_client.force_delete(share["id"])
         self.shares_v2_client.wait_for_resource_deletion(share_id=share["id"])
 
+    @decorators.idempotent_id('382fca90-746e-4ad1-a509-b82a643d4a03')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_force_delete_share_instance(self):
         share = self.create_share(share_type_id=self.share_type_id,
@@ -120,6 +126,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.shares_v2_client.wait_for_resource_deletion(
             share_instance_id=instance["id"])
 
+    @decorators.idempotent_id('d5a48182-ecd7-463e-a31a-148c81d3c5ed')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -138,6 +145,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.shares_v2_client.force_delete(sn["id"], s_type="snapshots")
         self.shares_v2_client.wait_for_resource_deletion(snapshot_id=sn["id"])
 
+    @decorators.idempotent_id('49a576eb-733a-4299-aa6f-918fe7c67a6a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.22")
     def test_reset_share_task_state(self):

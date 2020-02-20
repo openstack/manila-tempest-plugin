@@ -18,6 +18,7 @@ from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import six
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -109,6 +110,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
                     # it making assertion that it has proper date value.
                     timeutils.parse_strtime(time)
 
+    @decorators.idempotent_id('dfcb05af-369a-44c9-a06a-67d12a2a0917')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.13')
     def test_list_share_export_locations(self):
@@ -118,6 +120,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         self._verify_export_location_structure(export_locations,
                                                version='2.13')
 
+    @decorators.idempotent_id('032173d7-3ddf-4730-8524-d1a96a2a9e16')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.14')
     def test_list_share_export_locations_with_preferred_flag(self):
@@ -127,6 +130,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         self._verify_export_location_structure(export_locations,
                                                version='2.14')
 
+    @decorators.idempotent_id('814da2ce-2909-4b02-a92e-12bc1b640580')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_export_location(self):
         export_locations = self.admin_client.list_share_export_locations(
@@ -137,6 +141,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
                 self.share['id'], export_location['id'])
             self._verify_export_location_structure(el, format='detail')
 
+    @decorators.idempotent_id('397969c6-7fc8-4bf8-86c7-300b96857c54')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_export_locations_by_member(self):
         export_locations = self.member_client.list_share_export_locations(
@@ -144,6 +149,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
 
         self._verify_export_location_structure(export_locations, role='member')
 
+    @decorators.idempotent_id('66cef86f-5da8-4cb4-bc21-91f6c1e27cb5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_export_location_by_member(self):
         export_locations = self.admin_client.list_share_export_locations(
@@ -157,6 +163,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
             self._verify_export_location_structure(el, role='member',
                                                    format='detail')
 
+    @decorators.idempotent_id('06ea2636-1c9f-4889-8b5f-e10c2c2572cb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.13')
     def test_list_share_instance_export_locations(self):
@@ -167,6 +174,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
             self._verify_export_location_structure(export_locations,
                                                    version='2.13')
 
+    @decorators.idempotent_id('b93e4cba-ea98-4b1c-90f8-e0a8763033a3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.14')
     def test_list_share_instance_export_locations_with_preferred_flag(self):
@@ -177,6 +185,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
             self._verify_export_location_structure(export_locations,
                                                    version='2.14')
 
+    @decorators.idempotent_id('59421c43-293f-41fd-8ac6-e856deeceac9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_instance_export_location(self):
         for share_instance in self.share_instances:
@@ -188,6 +197,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
                     share_instance['id'], el['id'])
                 self._verify_export_location_structure(el, format='detail')
 
+    @decorators.idempotent_id('581acd8d-b89d-4684-8310-b910b46acc7a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_contains_all_export_locations_of_all_share_instances(self):
         share_export_locations = self.admin_client.list_share_export_locations(

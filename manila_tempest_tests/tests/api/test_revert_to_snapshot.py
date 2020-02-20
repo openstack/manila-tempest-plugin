@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -101,6 +102,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
                     cls.shares_v2_client.share_network_id)
                 cls.sn_id = cls.share_network['id']
 
+    @decorators.idempotent_id('196f2bc5-e13a-4730-ac51-61e339068a06')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
@@ -116,6 +118,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_share_status(self.share['id'],
                                                     constants.STATUS_AVAILABLE)
 
+    @decorators.idempotent_id('09bd9942-7ef9-4d24-b2dd-f83bdda27b50')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
@@ -137,6 +140,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_share_status(self.share['id'],
                                                     constants.STATUS_AVAILABLE)
 
+    @decorators.idempotent_id('146de138-d351-49dc-a13a-5cdbed40b9ac')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @tc.skipUnless(CONF.share.run_replication_tests,
                    'Replication tests are disabled.')

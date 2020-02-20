@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -50,6 +51,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             cls.snap = cls.create_snapshot_wait_for_active(
                 cls.share["id"], cls.snap_name, cls.snap_desc)
 
+    @decorators.idempotent_id('c4481ba3-0cff-448b-a728-69a9a34e3aa6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_extend_tests,
@@ -68,6 +70,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           new_size)
 
+    @decorators.idempotent_id('3448cd2b-34eb-453f-b72f-39fbea778e42')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_extend_tests,
@@ -81,6 +84,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           new_size)
 
+    @decorators.idempotent_id('79f2304a-7959-4169-8a76-b67814e0733a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_extend_tests,
@@ -94,6 +98,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           new_size)
 
+    @decorators.idempotent_id('067c4b10-4324-45ac-8365-5d446b66c18a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_extend_tests,
@@ -112,6 +117,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           share['id'],
                           new_size)
 
+    @decorators.idempotent_id('99d42f94-8da1-4c04-ad5b-9738d6acc139')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests,
@@ -125,6 +131,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           new_size)
 
+    @decorators.idempotent_id('3d4c8f34-49b8-4628-b1cb-652ae67473a5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests,
@@ -138,6 +145,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           new_size)
 
+    @decorators.idempotent_id('d53ece5c-70e4-4953-a1d7-7d4384510519')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests,
@@ -158,6 +166,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           share['id'],
                           new_size)
 
+    @decorators.idempotent_id('ff307c91-3bb9-48b5-926c-5a2747320151')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.34")
     @ddt.data('path', 'id')
@@ -174,6 +183,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertGreater(len(shares), 0)
 
+    @decorators.idempotent_id('ffc3dc76-2f92-4308-a125-1d3905ed72ba')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.35")
     @ddt.data('path', 'id')
@@ -187,6 +197,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('3dbcf17b-cc63-43ea-b45f-eae12300729e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_like_filter_and_invalid_version(self):
@@ -202,6 +213,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertGreater(len(shares), 0)
 
+    @decorators.idempotent_id('f41c6cd2-62cf-4bba-a26e-21a6e86eae15')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_like_filter_not_exist(self):
@@ -213,6 +225,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('31e33495-5ec3-4658-bdef-d9d1e034705a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_name_not_exist(self):
         filters = {
@@ -222,6 +235,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('5b0ceae1-357f-4b51-81a6-88973ea20c16')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_description_not_exist(self):
@@ -232,6 +246,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('061ee37a-96b2-4b4f-9cfe-2c8c80ed4370')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.36")
     def test_list_snapshots_with_description_not_exist(self):
@@ -243,6 +258,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('9d3c3158-1a92-4e37-b00f-a4a40b813109')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshots_with_name_not_exist(self):
         filters = {

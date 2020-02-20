@@ -16,6 +16,7 @@
 import ddt
 import six
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -83,6 +84,7 @@ class ShareSnapshotIpRulesForNFSTest(BaseShareSnapshotRulesTest):
         super(ShareSnapshotIpRulesForNFSTest, cls).resource_setup()
         cls.access_type = "ip"
 
+    @decorators.idempotent_id('bdce2be8-80b9-4f68-bdc0-09a52ba0e6fd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data("1.1.1.1", "1.2.3.4/32")
     def test_create_delete_access_rules(self, access_to):
@@ -110,6 +112,7 @@ class ShareSnapshotUserRulesForCIFSTest(BaseShareSnapshotRulesTest):
         super(ShareSnapshotUserRulesForCIFSTest, cls).resource_setup()
         cls.access_type = "user"
 
+    @decorators.idempotent_id('c2625cd2-4dc0-431d-b47b-8f097e22f16d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_delete_access_rules(self):
         access_to = CONF.share.username_for_user_rules

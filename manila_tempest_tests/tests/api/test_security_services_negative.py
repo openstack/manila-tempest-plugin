@@ -16,6 +16,7 @@
 from oslo_log import log
 import six
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -35,51 +36,60 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
 
+    @decorators.idempotent_id('f5cdf074-f5d4-4d9e-990b-c3d9385dfc2b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_security_service_with_empty_type(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_client.create_security_service, "")
 
+    @decorators.idempotent_id('6a7efebc-989a-42b3-a971-c28af1e209f5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_security_service_with_wrong_type(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_client.create_security_service,
                           "wrong_type")
 
+    @decorators.idempotent_id('2935de41-40b1-4907-8ab5-f4921f670bfd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_security_service_without_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.get_security_service, "")
 
+    @decorators.idempotent_id('34e923a4-e5b4-4375-88b4-8bb05e8f010d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_security_service_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.get_security_service,
                           "wrong_id")
 
+    @decorators.idempotent_id('887e0c2c-6658-442d-92e7-3b0c86a2dfcd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_security_service_without_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.delete_security_service, "")
 
+    @decorators.idempotent_id('c94eb229-5caf-4e81-b8a9-d73c0b63a93b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_security_service_with_wrong_type(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.delete_security_service,
                           "wrong_id")
 
+    @decorators.idempotent_id('60e51b95-af7f-463d-8d8e-6bca4ed3bec8')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_nonexistant_security_service(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.update_security_service,
                           "wrong_id", name="name")
 
+    @decorators.idempotent_id('e4554b3b-bc74-4204-8596-d502149bb408')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_security_service_with_empty_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.update_security_service,
                           "", name="name")
 
+    @decorators.idempotent_id('ab62240a-219c-4fa7-b1ca-08f91bec76f0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -116,6 +126,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
                           ss["id"],
                           user="new_user")
 
+    @decorators.idempotent_id('288dbf42-ee22-4445-8363-7ebb1c3d89c9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_deleted_security_service(self):
         data = self.generate_security_service_data()

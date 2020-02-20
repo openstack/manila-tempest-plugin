@@ -17,6 +17,7 @@ import ddt
 from oslo_utils import uuidutils
 import six
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -95,6 +96,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
                 self.assertTrue(uuidutils.is_uuid_like(
                     export_location['share_snapshot_instance_id']))
 
+    @decorators.idempotent_id('18287f50-0e12-463d-906f-5c7cba256288')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot_export_location(self):
         export_locations = (
@@ -104,6 +106,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
         for el in export_locations:
             self._verify_export_location_structure(el)
 
+    @decorators.idempotent_id('6272b60b-31a1-41c1-86f5-af28926898e6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_export_location(self):
         export_locations = (
@@ -115,6 +118,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
                 self.snapshot['id'], export_location['id'])
             self._verify_export_location_structure(el, detail=True)
 
+    @decorators.idempotent_id('03be6418-5ba3-4919-a798-89d7e5ffb925')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_instance_export_location(self):
         for snapshot_instance in self.snapshot_instances:
@@ -126,6 +130,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
                     snapshot_instance['id'], el['id'])
                 self._verify_export_location_structure(el, detail=True)
 
+    @decorators.idempotent_id('cdf444ea-95a3-4f7b-ae48-6b027a6b9529')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_snapshot_contains_all_export_locations_of_all_snapshot_instances(
             self):

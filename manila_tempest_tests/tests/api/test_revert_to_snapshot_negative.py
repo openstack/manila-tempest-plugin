@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from testtools import testcase as tc
 
@@ -73,6 +74,7 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
         cls.share = cls.create_share(share_type_id=cls.st_id)
         cls.share2 = cls.create_share(share_type_id=cls.st_id)
 
+    @decorators.idempotent_id('21dd8561-8913-42a2-a95c-74b536964c94')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
@@ -90,6 +92,7 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
                           snapshot1['id'],
                           version=version)
 
+    @decorators.idempotent_id('7360ee16-ac7d-46ce-9c81-251d64fb7434')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
@@ -109,6 +112,7 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
                           snapshot['id'],
                           version=version)
 
+    @decorators.idempotent_id('108a451e-a8e9-450f-8f75-53883d58c6be')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
@@ -133,6 +137,7 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
                           snapshot['id'],
                           version=version)
 
+    @decorators.idempotent_id('29024057-dbbd-4cf6-a796-207dfbd4c3ff')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
@@ -145,6 +150,7 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           version=version)
 
+    @decorators.idempotent_id('ef706fad-5ac4-41dc-af81-5aa0331560cf')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,

@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -130,6 +131,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
                           self.shares_v2_client.get_snapshot,
                           get_snapshot['id'])
 
+    @decorators.idempotent_id('5fb65a19-fb73-4b5a-9210-010f93e0304f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data('2.12', '2.16', CONF.share.max_api_microversion)
     def test_manage_different_versions(self, version):

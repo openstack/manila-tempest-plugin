@@ -15,6 +15,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -36,6 +37,7 @@ class ShareGroupsNegativeTest(base.BaseSharesAdminTest):
         utils.check_skip_if_microversion_lt(
             constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('b90537b7-634d-4fca-b451-770fbcca7927')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_group_with_wrong_consistent_snapshot_spec(self):
         # Create valid share type for share group type

@@ -17,6 +17,7 @@ import ddt
 from oslo_log import log
 import six
 from tempest import config
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -31,6 +32,7 @@ LOG = log.getLogger(__name__)
 @ddt.ddt
 class SecurityServiceListMixin(object):
 
+    @decorators.idempotent_id('f6f5657c-a93c-49ed-86e3-b351a92734d5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services(self):
         listed = self.shares_client.list_security_services()
@@ -42,6 +44,7 @@ class SecurityServiceListMixin(object):
         keys = ["name", "id", "status", "type", ]
         [self.assertIn(key, s_s.keys()) for s_s in listed for key in keys]
 
+    @decorators.idempotent_id('22b22937-7436-458c-ac22-8ff19feab253')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(['1.0', '2.42', '2.44', LATEST_MICROVERSION]))
     def test_list_security_services_with_detail(self, version):
@@ -68,6 +71,7 @@ class SecurityServiceListMixin(object):
         for ss in listed:
             self.assertEqual(with_ou, 'ou' in ss.keys())
 
+    @decorators.idempotent_id('88f62835-0aee-4bed-a37f-ffd99430da8a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -95,6 +99,7 @@ class SecurityServiceListMixin(object):
         keys = ["name", "id", "status", "type", ]
         [self.assertIn(key, s_s.keys()) for s_s in listed for key in keys]
 
+    @decorators.idempotent_id('f055faad-dd36-4eed-9b50-61280931dea2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_detailed_filter_by_ss_attributes(self):
         search_opts = {
@@ -151,6 +156,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         self.ss_kerberos = self.create_security_service(
             'kerberos', **ss_kerberos_data)
 
+    @decorators.idempotent_id('70927e29-4a6a-431a-bbc1-76bc419e0579')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_delete_security_service(self):
         data = self.generate_security_service_data()
@@ -161,6 +167,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             self.assertEqual(ss_name, ss["type"])
             self.shares_client.delete_security_service(ss["id"])
 
+    @decorators.idempotent_id('bb052be4-0176-4613-b7d5-e12bef391ddb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(['1.0', '2.43', '2.44', LATEST_MICROVERSION]))
     def test_get_security_service(self, version):
@@ -182,6 +189,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         self.assertDictContainsSubset(data, get)
         self.assertEqual(with_ou, 'ou' in get)
 
+    @decorators.idempotent_id('84d47747-13c8-4ab9-9fc4-a43fbb29ad18')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_security_service(self):
         data = self.generate_security_service_data()
@@ -206,6 +214,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             self.assertDictContainsSubset(upd_data_ou, updated_ou)
             self.assertDictContainsSubset(upd_data_ou, get_ou)
 
+    @decorators.idempotent_id('c3c04992-da11-4677-9098-eff3f4231a4b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -245,6 +254,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             ss["id"], **update_data)
         self.assertDictContainsSubset(update_data, updated)
 
+    @decorators.idempotent_id('8d9af272-df89-470d-9ff8-92ba774c9fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_filter_by_invalid_opt(self):
         listed = self.shares_client.list_security_services(
@@ -253,6 +263,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
                             for ss in listed))
 
+    @decorators.idempotent_id('d501710e-4710-4c13-a373-75ed6ababb13')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_security_services_all_tenants(self):
         listed = self.shares_client.list_security_services(

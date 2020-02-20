@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -77,6 +78,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         return [replica['id'] for replica in replica_list
                 if replica['replica_state'] == r_state]
 
+    @decorators.idempotent_id('0213cdfd-6a0f-4f24-a154-69796888a64a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_promote_out_of_sync_share_replica(self):
         """Test promote 'out_of_sync' share replica to active state."""
@@ -130,6 +132,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             replica_list, constants.REPLICATION_STATE_ACTIVE)
         self.assertEqual(1, len(new_active_replicas))
 
+    @decorators.idempotent_id('22a199b7-f4f6-4ede-b09f-8047a9d01cad')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_force_delete_share_replica(self):
         """Test force deleting a replica that is in 'error_deleting' status."""
@@ -144,6 +147,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         self.admin_client.force_delete_share_replica(replica['id'])
         self.admin_client.wait_for_resource_deletion(replica_id=replica['id'])
 
+    @decorators.idempotent_id('16bd90f0-c478-4a99-8633-b18703ff56fa')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_reset_share_replica_status(self):
         """Test resetting a replica's 'status' attribute."""
@@ -156,6 +160,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.STATUS_ERROR)
 
+    @decorators.idempotent_id('258844da-a853-42b6-87db-b16e616018c6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_reset_share_replica_state(self):
         """Test resetting a replica's 'replica_state' attribute."""
@@ -168,6 +173,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.STATUS_ERROR, status_attr='replica_state')
 
+    @decorators.idempotent_id('2969565a-85e8-4c61-9dfb-cc7f7ca9f6dd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_resync_share_replica(self):
         """Test resyncing a replica."""

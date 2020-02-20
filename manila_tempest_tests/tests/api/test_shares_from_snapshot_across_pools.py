@@ -16,6 +16,7 @@
 from collections import defaultdict
 
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -69,6 +70,7 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
                 'disabled.')
         utils.check_skip_if_microversion_lt("2.54")
 
+    @decorators.idempotent_id('6f1fa7d0-94f2-4373-8730-b0986781cc88')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_share_from_snapshot_across_pools_within_backend(self):
         backends = [pool['backend'] for pool in self.pools]
@@ -133,6 +135,7 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
                " source share %s" % pool_name_a)
         self.assertNotEqual(pool_name_a, pool_name_b, msg)
 
+    @decorators.idempotent_id('46f33338-d70d-4c9a-ae27-3dd5b7bd1531')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_share_from_snapshot_across_azs(self):
         azs = next((self.rep_domain_azs[rep] for rep in self.rep_domain_azs if

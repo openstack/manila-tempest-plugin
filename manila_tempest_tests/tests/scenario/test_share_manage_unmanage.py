@@ -13,6 +13,7 @@
 import ddt
 from oslo_log import log as logging
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 import testtools
 from testtools import testcase as tc
@@ -59,6 +60,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
                        cls.protocol)
             raise cls.skipException(message)
 
+    @decorators.idempotent_id('165f22b4-9417-45ee-8e1d-2b8669ac2f00')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_manage_unmanage_tests,

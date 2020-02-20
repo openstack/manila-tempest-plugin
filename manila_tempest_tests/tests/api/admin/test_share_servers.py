@@ -18,6 +18,7 @@ import re
 import ddt
 import six
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -69,6 +70,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         cls.date_re = re.compile("^([0-9]{4}-[0-9]{2}-[0-9]{2}[A-Z]{1}"
                                  "[0-9]{2}:[0-9]{2}:[0-9]{2}).*$")
 
+    @decorators.idempotent_id('3f821248-2c05-4323-a95f-a0216a537b0a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_without_filters(self):
         servers = self.shares_v2_client.list_share_servers()
@@ -99,6 +101,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # Server we used is present.
         any(s["share_network_name"] in self.sn_name_and_id for s in servers)
 
+    @decorators.idempotent_id('515e3332-cce9-4a28-ad2e-96dbb2cc672e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_host_filter(self):
         # Get list of share servers and remember 'host' name
@@ -124,6 +127,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         for server in servers:
             self.assertEqual(server["host"], host)
 
+    @decorators.idempotent_id('77a5c1c5-db2f-4ff6-872c-ed73a575acd0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_status_filter(self):
         search_opts = {"status": "active"}
@@ -135,6 +139,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         for server in servers:
             self.assertEqual(server["status"], "active")
 
+    @decorators.idempotent_id('ed671cbb-7732-4966-9f1e-b997b8aa05ff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_project_id_filter(self):
         search_opts = {"project_id": self.share_network["project_id"]}
@@ -145,6 +150,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertEqual(server["project_id"],
                              self.share_network["project_id"])
 
+    @decorators.idempotent_id('70064129-df97-4dba-9482-2819558111ec')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_share_network_name_filter(self):
         search_opts = {"share_network": self.share_network["name"]}
@@ -155,6 +161,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertEqual(server["share_network_name"],
                              self.share_network["name"])
 
+    @decorators.idempotent_id('f64e8024-eb42-4a4c-be6b-97d35633a019')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_share_network_id_filter(self):
         search_opts = {"share_network": self.share_network["id"]}
@@ -165,6 +172,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertIn(server["share_network_name"],
                           self.sn_name_and_id)
 
+    @decorators.idempotent_id('e1af24f4-bf63-467d-a857-3a402fa9b65b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_server(self):
         share = self.shares_v2_client.get_share(self.share["id"])
@@ -203,6 +211,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # 'backend_details' should be a dict
         self.assertIsInstance(server["backend_details"], dict)
 
+    @decorators.idempotent_id('782d8f5f-2c02-44dd-8d43-e06b651a71be')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_server_details(self):
         share = self.shares_v2_client.get_share(self.share['id'])
@@ -214,6 +223,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertIsInstance(k, six.string_types)
             self.assertIsInstance(v, six.string_types)
 
+    @decorators.idempotent_id('2fdf8d29-3ab8-4424-b684-6253f45b9666')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(True, False)
     @testtools.skipIf(CONF.share.share_network_id != "",
@@ -280,6 +290,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
                 self.shares_v2_client.wait_for_resource_deletion(
                     sn_id=new_sn["id"])
 
+    @decorators.idempotent_id('960d49c5-f8d6-42be-aaf4-b7890a55df03')
     @testtools.skipIf(CONF.share.share_network_id != "",
                       "This test is not suitable for pre-existing "
                       "share_network.")

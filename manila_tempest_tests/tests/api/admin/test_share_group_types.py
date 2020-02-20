@@ -18,6 +18,7 @@ import itertools
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -56,6 +57,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         share_type = cls.create_share_type(name, extra_specs=extra_specs)
         cls.share_type2 = share_type['share_type']
 
+    @decorators.idempotent_id('e2ba1754-cecc-4178-ad39-eefbb59e4d6d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         *itertools.product(('id', 'name'), set(
@@ -95,6 +97,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         self.shares_v2_client.wait_for_resource_deletion(
             share_group_type_id=sg_type_r['id'])
 
+    @decorators.idempotent_id('65cf04d6-0620-4e0d-96f2-456946e8a552')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('id', 'name')
     def test_create_share_group_type_multiple_share_types_min(self, st_key):
@@ -111,6 +114,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             set(sg_type['share_types']),
             'Share types not applied correctly.')
 
+    @decorators.idempotent_id('6e103b7b-cd01-4edb-91e7-a16681781b36')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_share_group_type_with_one_spec_min(self):
         name = data_utils.rand_name("tempest-manila")
@@ -125,6 +129,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
+    @decorators.idempotent_id('ec459ebb-5c45-4d4f-95f0-3bbf2974366c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_share_group_type_with_multiple_specs_min(self):
         name = data_utils.rand_name("tempest-manila")
@@ -139,6 +144,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
+    @decorators.idempotent_id('15b44580-a34d-4e0d-a77b-0e76b45d6199')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -168,6 +174,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         self.assertEqual('value3', sg_type['group_specs']['key1'])
         self.assertEqual(group_specs['key2'], sg_type['group_specs']['key2'])
 
+    @decorators.idempotent_id('3ed054c5-d0ab-4a73-b704-994eb7f9c46c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_all_share_group_type_specs_min(self):
         name = data_utils.rand_name("tempest-manila")
@@ -192,6 +199,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             self.assertIn(k, sg_type['group_specs'])
             self.assertEqual(v, sg_type['group_specs'][k])
 
+    @decorators.idempotent_id('efddee69-ca23-4681-8247-94ded81c4c3a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -220,6 +228,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
+    @decorators.idempotent_id('c2d34b42-e3ec-404e-8b7a-0fe9b1560507')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -280,6 +289,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             sgt_id, version=version)
         self.assertEmpty(access)
 
+    @decorators.idempotent_id('b8b20a96-cecc-4677-8a77-aae3b93e5b96')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(('2.45', '2.46', LATEST_MICROVERSION)))
     def test_share_group_type_create_show_list_with_is_default_key(self,

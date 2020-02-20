@@ -15,6 +15,7 @@ import time
 from oslo_log import log as logging
 import six
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 import testtools
 from testtools import testcase as tc
@@ -47,6 +48,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
+    @decorators.idempotent_id('ed0f9c0c-5302-4cc9-9f5d-f7641cc3b83b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests, 'Shrink share tests are disabled.')
@@ -212,6 +214,7 @@ class TestShareShrinkCIFS(ShareShrinkBase):
 class TestShareShrinkCEPHFS(ShareShrinkBase, manager.BaseShareCEPHFSTest):
     protocol = "cephfs"
 
+    @decorators.idempotent_id('7fb324ed-7479-4bd9-b022-b3739dee9bcb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_shrink_and_write_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'

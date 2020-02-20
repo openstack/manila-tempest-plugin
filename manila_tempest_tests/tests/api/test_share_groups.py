@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -49,6 +50,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
         cls.share_group_type = cls._create_share_group_type()
         cls.share_group_type_id = cls.share_group_type['id']
 
+    @decorators.idempotent_id('809d5e3d-5a4b-458a-a985-853d59800da5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_create_populate_delete_share_group_min(self):
         # Create a share group
@@ -93,6 +95,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
         self.assertRaises(
             lib_exc.NotFound, self.shares_client.get_share, share['id'])
 
+    @decorators.idempotent_id('cf7984af-1e1d-4eaf-bf9a-d8ddf5cebd01')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_create_delete_empty_share_group_snapshot_min(self):
         # Create base share group
@@ -133,6 +136,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             sg_snapshot['id'],
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('727d9c69-4c3b-4375-a91b-8b3efd349976')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_group_from_empty_share_group_snapshot_min(self):
         # Create base share group
@@ -193,6 +197,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             msg)
 
     @base.skip_if_microversion_lt("2.34")
+    @decorators.idempotent_id('14fd6d88-87ff-4af2-ad17-f95dbd8dcd61')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         'sg', 'sg_and_share', 'none',

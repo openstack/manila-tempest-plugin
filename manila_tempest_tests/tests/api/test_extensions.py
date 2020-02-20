@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -20,6 +21,7 @@ from manila_tempest_tests.tests.api import base
 
 class ExtensionsTest(base.BaseSharesTest):
 
+    @decorators.idempotent_id('befd2105-c9f6-4eca-a693-9900eb0fb37a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_extensions(self):
 

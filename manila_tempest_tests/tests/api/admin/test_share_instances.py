@@ -14,6 +14,7 @@
 #    under the License.
 
 import ddt
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -32,6 +33,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
 
+    @decorators.idempotent_id('b5211759-17ab-4806-a58c-c65bc8a06087')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_instances_of_share_v2_3(self):
         """Test that we get only the 1 share instance back for the share."""
@@ -50,6 +52,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
                                                    self.share['id'],
                                                    si['share_id']))
 
+    @decorators.idempotent_id('b2d8ccba-5973-4e72-b3df-52555ce40b4f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_instances_v2_3(self):
         """Test that we list the share instance back."""
@@ -62,6 +65,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
         msg = 'Share instance for share %s was not found.' % self.share['id']
         self.assertIn(self.share['id'], share_ids, msg)
 
+    @decorators.idempotent_id('d4b2544a-96ce-41ed-8b8e-e46ceef91462')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data('2.3', '2.9', '2.10', '2.30', '2.54')
     def test_get_share_instance(self, version):
@@ -99,6 +103,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
                              si['id'], expected_keys, actual_keys))
 
     @ddt.data('path', 'id')
+    @decorators.idempotent_id('c27b415d-341c-42f0-a269-2c94f69fbee1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.35")
     def test_list_share_instances_with_export_location_path_and_id(

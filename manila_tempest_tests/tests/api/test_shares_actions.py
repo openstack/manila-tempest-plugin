@@ -17,6 +17,7 @@ import ddt
 import six
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -130,50 +131,60 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             CONF.share.share_size, share["size"])
         self.assertEqual(CONF.share.share_size, int(share["size"]), msg)
 
+    @decorators.idempotent_id('188badb2-0ca3-44e5-abca-3029475d7f73')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_v2_1(self):
         self._get_share('2.1')
 
+    @decorators.idempotent_id('45ec8e36-cb8a-4a03-8c41-ba5d5dc2a5c5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_with_snapshot_support_key(self):
         self._get_share('2.2')
 
+    @decorators.idempotent_id('b803a076-593a-469d-ab75-7e67ac294dd5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.6')
     def test_get_share_with_share_type_name_key(self):
         self._get_share('2.6')
 
+    @decorators.idempotent_id('c13c1cf5-c708-4e62-8b71-c47dbb45a7a0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.9')
     def test_get_share_export_locations_removed(self):
         self._get_share('2.9')
 
+    @decorators.idempotent_id('2c439716-c34e-46f1-b055-41e411fb4e66')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.10')
     def test_get_share_with_access_rules_status(self):
         self._get_share('2.10')
 
+    @decorators.idempotent_id('67c9ad27-f26d-4ff9-a528-a35b4c5a55c1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.11')
     def test_get_share_with_replication_type_key(self):
         self._get_share('2.11')
 
+    @decorators.idempotent_id('2a61703d-5a62-49c5-b143-fea0c9125cd9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.16')
     def test_get_share_with_user_id(self):
         self._get_share('2.16')
 
+    @decorators.idempotent_id('2899055e-607d-4423-b1b7-27eefa6ce5f0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.24')
     def test_get_share_with_create_share_from_snapshot_support(self):
         self._get_share('2.24')
 
+    @decorators.idempotent_id('04c359b5-74b3-4a07-9f9e-f0ac1867d58d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported(
         constants.REVERT_TO_SNAPSHOT_MICROVERSION)
     def test_get_share_with_revert_to_snapshot_support(self):
         self._get_share(constants.REVERT_TO_SNAPSHOT_MICROVERSION)
 
+    @decorators.idempotent_id('7d61311a-81b0-481c-abb9-cfb0b4f82e29')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares(self):
 
@@ -228,44 +239,53 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             msg = "expected id lists %s times in share list" % (len(gen))
             self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('d88a157a-fe4d-456e-90ba-f0bd9e5d02ec')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_v2_1(self):
         self._list_shares_with_detail('2.1')
 
+    @decorators.idempotent_id('ee57db25-0fbf-40ce-8dc1-070845d245a7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_and_snapshot_support_key(self):
         self._list_shares_with_detail('2.2')
 
+    @decorators.idempotent_id('38a4cf70-8ed9-4a82-a338-9f20463b1147')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.6')
     def test_list_shares_with_detail_share_type_name_key(self):
         self._list_shares_with_detail('2.6')
 
+    @decorators.idempotent_id('a313cd85-53e5-48b7-b4a7-14e9273e843d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.9')
     def test_list_shares_with_detail_export_locations_removed(self):
         self._list_shares_with_detail('2.9')
 
+    @decorators.idempotent_id('0de4dc84-bace-4b9a-8470-a40c4a9b14b4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.10')
     def test_list_shares_with_detail_with_access_rules_status(self):
         self._list_shares_with_detail('2.10')
 
+    @decorators.idempotent_id('70097cf3-76b8-49d2-b1c7-ad59394dd978')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.11')
     def test_list_shares_with_detail_replication_type_key(self):
         self._list_shares_with_detail('2.11')
 
+    @decorators.idempotent_id('f8e57190-b105-4937-b96e-55725eb64739')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.16')
     def test_list_shares_with_user_id(self):
         self._list_shares_with_detail('2.16')
 
+    @decorators.idempotent_id('21410324-e0b5-452a-8c7e-599a27267e1d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_and_create_share_from_snapshot_support(
             self):
         self._list_shares_with_detail('2.24')
 
+    @decorators.idempotent_id('45041fc9-bb0d-4dd6-ac0d-a40a22a91f3f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported(
         constants.REVERT_TO_SNAPSHOT_MICROVERSION)
@@ -273,6 +293,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         self._list_shares_with_detail(
             constants.REVERT_TO_SNAPSHOT_MICROVERSION)
 
+    @decorators.idempotent_id('bc24dc42-050b-4105-a90a-f5649cbd8e49')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_metadata(self):
         filters = {'metadata': self.metadata}
@@ -288,6 +309,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         if CONF.share.capability_create_share_from_snapshot_support:
             self.assertFalse(self.shares[1]['id'] in [s['id'] for s in shares])
 
+    @decorators.idempotent_id('685286c7-1df6-48c3-839d-8162737446b8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -304,6 +326,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             self.assertEqual(
                 filters['share_network_id'], share['share_network_id'])
 
+    @decorators.idempotent_id('fd87884d-71a4-4ca8-8b2b-07b4df2de3bd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -322,6 +345,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             self.assertEqual(filters['snapshot_id'], share['snapshot_id'])
         self.assertFalse(self.shares[0]['id'] in [s['id'] for s in shares])
 
+    @decorators.idempotent_id('70a9d947-bd45-46db-b529-6c48c0ff8985')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_with_asc_sorting(self):
         filters = {'sort_key': 'created_at', 'sort_dir': 'asc'}
@@ -334,6 +358,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         sorted_list = [share['created_at'] for share in shares]
         self.assertEqual(sorted(sorted_list), sorted_list)
 
+    @decorators.idempotent_id('866194c6-3910-409e-ad81-2cff223cfaaf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_existed_name(self):
         # list shares by name, at least one share is expected
@@ -341,6 +366,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         shares = self.shares_client.list_shares_with_detail(params)
         self.assertEqual(self.share_name, shares[0]["name"])
 
+    @decorators.idempotent_id('f446e8cb-5bef-45ac-8b87-f4136f44ca69')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.36")
     def test_list_shares_with_detail_filter_by_existed_description(self):
@@ -349,6 +375,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         shares = self.shares_v2_client.list_shares_with_detail(params)
         self.assertEqual(self.share_name, shares[0]["name"])
 
+    @decorators.idempotent_id('1276b97b-cf46-4953-973f-f995985a1ce4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.36")
     def test_list_shares_with_detail_filter_by_inexact_name(self):
@@ -358,6 +385,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         for share in shares:
             self.assertIn('tempest-share', share["name"])
 
+    @decorators.idempotent_id('56416b95-949f-4b09-9a5e-377b674efd25')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_fake_name(self):
         # list shares by fake name, no shares are expected
@@ -365,6 +393,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         shares = self.shares_client.list_shares_with_detail(params)
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('708e3e2e-8761-4d16-b18d-a834ee7ca69e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_active_status(self):
         # list shares by active status, at least one share is expected
@@ -374,6 +403,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         for share in shares:
             self.assertEqual(params["status"], share["status"])
 
+    @decorators.idempotent_id('5ec2fcf8-18d4-4790-95de-45c8a05582c7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_fake_status(self):
         # list shares by fake status, no shares are expected
@@ -381,6 +411,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         shares = self.shares_client.list_shares_with_detail(params)
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('7609b7bb-613e-474d-a9b3-e41584842503')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_all_tenants(self):
         # non-admin user can get shares only from his project
@@ -394,6 +425,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         for share in shares:
             self.assertEqual(project_id, share["project_id"])
 
+    @decorators.idempotent_id('0019afa2-fae2-417f-a7e0-2af665a966b0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_lt("2.42")
     def test_list_shares_with_detail_with_count(self):
@@ -402,6 +434,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         shares = self.shares_v2_client.list_shares_with_detail(params)
         self.assertGreater(shares["count"], 0)
 
+    @decorators.idempotent_id('557a0474-9e30-47b4-a766-19e2afb13e66')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_public_with_detail(self):
         public_share = self.create_share(
@@ -435,6 +468,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         self.assertFalse(any([s["id"] == private_share["id"] for s in shares]))
 
+    @decorators.idempotent_id('174829eb-fd3e-46ef-880b-f05c3d44d1fe')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -491,6 +525,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
                                  'actual': snapshot['project_id'],
                                  'key': 'project_id'})
 
+    @decorators.idempotent_id('3d5d85ff-6158-4af2-a765-cfa07a46adde')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -508,6 +543,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         msg = "expected id lists %s times in share list" % (len(gen))
         self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('4d717665-e4ca-47df-b4b9-f6d096159779')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -539,6 +575,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         msg = "expected id lists %s times in share list" % (len(gen))
         self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('80497a21-7533-47b5-93aa-29e0f7924cb9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -565,6 +602,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         self.assertEqual(1, len(snaps['snapshots']))
         self.assertEqual(self.snap['id'], snaps['snapshots'][0]['id'])
 
+    @decorators.idempotent_id('0a94e996-c4db-4fef-b486-4004ea65c11a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -581,6 +619,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             self.assertEqual(filters['status'], snap['status'])
             self.assertEqual(filters['name'], snap['name'])
 
+    @decorators.idempotent_id('f969aba1-d293-48e3-a638-a89785bb41ef')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -597,6 +636,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         for snap in snaps:
             self.assertEqual(filters['description'], snap['description'])
 
+    @decorators.idempotent_id('59968026-12af-4029-a3d0-42c291b7db96')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -612,6 +652,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         sorted_list = [snap['share_id'] for snap in snaps]
         self.assertEqual(sorted(sorted_list), sorted_list)
 
+    @decorators.idempotent_id('17e6f579-e0d7-4724-a639-4974e82bb5ed')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_extend_tests,
@@ -636,6 +677,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         )
         self.assertEqual(new_size, share_get['size'], msg)
 
+    @decorators.idempotent_id('8f64b930-9b4e-41d7-bbd6-82d9951931f3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests,
@@ -689,6 +731,7 @@ class SharesRenameTest(base.BaseSharesMixedTest):
             cls.snap = cls.create_snapshot_wait_for_active(
                 cls.share["id"], cls.snap_name, cls.snap_desc)
 
+    @decorators.idempotent_id('7661d042-8222-483c-9249-9f53931e7347')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_update_share(self):
 
@@ -713,6 +756,7 @@ class SharesRenameTest(base.BaseSharesMixedTest):
         self.assertEqual(new_desc, share["description"])
         self.assertTrue(share["is_public"])
 
+    @decorators.idempotent_id('20f299f6-2441-4629-b44e-d791d57f413c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")

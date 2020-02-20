@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -30,6 +31,7 @@ LATEST_MICROVERSION = CONF.share.max_api_microversion
 @ddt.ddt
 class ShareTypesAdminTest(base.BaseSharesAdminTest):
 
+    @decorators.idempotent_id('34000fb9-b595-4a10-8306-7465f9ebc45d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_share_type_create_delete(self):
         name = data_utils.rand_name("tempest-manila")
@@ -66,6 +68,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         else:
             self.assertNotIn('description', share_type)
 
+    @decorators.idempotent_id('228d8bab-0b31-433e-956f-9db9877e6573')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('2.0', '2.6', '2.7', '2.40', '2.41')
     def test_share_type_create_get(self, version):
@@ -99,6 +102,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertDictMatch(get["volume_type"], get["share_type"])
 
     @base.skip_if_microversion_lt("2.50")
+    @decorators.idempotent_id('a9af19e1-e789-4c4f-a39b-dd8df6ed00b1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         ('2.50', data_utils.rand_name("type_updated"),
@@ -147,6 +151,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
                 updated_st["share_type"]["share_type_access:is_public"])
 
     @base.skip_if_microversion_lt("2.50")
+    @decorators.idempotent_id('9019dc61-b2b1-472d-9b15-a3986439d4c3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
         ('2.50', None, '', None),
@@ -176,6 +181,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
 
         self._verify_description(None, updated_st['share_type'], version)
 
+    @decorators.idempotent_id('5cc4c2e5-d2a4-4bfc-9208-3455ac551f20')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('2.0', '2.6', '2.7', '2.40', '2.41')
     def test_share_type_create_list(self, version):
@@ -208,6 +214,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         for i in range(len(sts)):
             self.assertDictMatch(sts[i], vts[i])
 
+    @decorators.idempotent_id('4e2ad320-9f3d-4797-a3ad-bf800bcd1831')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_with_share_type(self):
 
@@ -238,6 +245,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertEqual(st_create["share_type"]["id"], get["share_type"])
         self.assertEqual(shr_type_name, get["share_type_name"])
 
+    @decorators.idempotent_id('d2261a27-d4a4-4237-9fad-f6fd8f27783a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_private_share_type_access(self):
         name = data_utils.rand_name("tempest-manila")
@@ -286,6 +294,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         access = self.shares_v2_client.list_access_to_share_type(st_id)
         self.assertEmpty(access)
 
+    @decorators.idempotent_id('90dca5c5-f28e-4f16-90ed-78f5d725664e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*set(('2.45', '2.46', LATEST_MICROVERSION)))
     def test_share_type_create_show_list_with_is_default_key(self, version):
