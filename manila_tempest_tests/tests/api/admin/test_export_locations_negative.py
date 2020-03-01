@@ -33,8 +33,12 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ExportLocationsNegativeTest, cls).resource_setup()
+        # admin_client and different_project_client pertain to isolated
+        # projects, admin_member_client is a regular user in admin's project
         cls.admin_client = cls.admin_shares_v2_client
-        cls.member_client = cls.shares_v2_client
+        cls.admin_member_client = (
+            cls.admin_project_member_client.shares_v2_client)
+        cls.different_project_client = cls.shares_v2_client
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
@@ -65,26 +69,43 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
             )
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_list_share_instance_export_locations_by_member(self):
+    def test_list_share_instance_export_locations_as_member(self):
         for share_instance in self.share_instances:
             self.assertRaises(
                 lib_exc.Forbidden,
-                self.member_client.list_share_instance_export_locations,
-                "fake-inexistent-share-instance-id",
-            )
+                self.admin_member_client.list_share_instance_export_locations,
+                share_instance['id'])
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_get_share_instance_export_location_by_member(self):
+    def test_get_share_instance_export_locations_as_member(self):
         for share_instance in self.share_instances:
             export_locations = (
                 self.admin_client.list_share_instance_export_locations(
                     share_instance['id']))
             for el in export_locations:
-                self.assertRaises(
-                    lib_exc.Forbidden,
-                    self.member_client.get_share_instance_export_location,
-                    share_instance['id'], el['id'],
-                )
+                self.assertRaises(lib_exc.Forbidden,
+                                  (self.admin_member_client.
+                                   get_share_instance_export_location),
+                                  share_instance['id'], el['id'])
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_list_share_export_locations_by_different_project_user(self):
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.different_project_client.list_share_export_locations,
+            self.share['id'])
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_get_share_export_location_by_different_project_user(self):
+        export_locations = self.admin_client.list_share_export_locations(
+            self.share['id'])
+
+        for export_location in export_locations:
+            self.assertRaises(
+                lib_exc.Forbidden,
+                self.different_project_client.get_share_export_location,
+                self.share['id'],
+                export_location['id'])
 
 
 class ExportLocationsAPIOnlyNegativeTest(base.BaseSharesAdminTest):
