@@ -14,6 +14,7 @@
 #    under the License.
 
 import ddt
+import manila_tempest_tests.tests.api.test_replication_negative as rep_neg_test
 from tempest import config
 from tempest.lib import exceptions as lib_exc
 import testtools
@@ -25,6 +26,8 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 PRE_SHARE_GROUPS_MICROVERSION = "2.39"
 SHARE_GROUPS_MICROVERSION = "2.40"
+PRE_SHARE_REPLICA_QUOTAS_MICROVERSION = "2.52"
+SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
 
 
 @ddt.ddt
@@ -83,6 +86,21 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_update_sg_quota_with_wrong_data(self, kwargs):
         # -1 is acceptable value as unlimited
+        client = self.get_client_with_isolated_creds(client_version='2')
+        self.assertRaises(
+            lib_exc.BadRequest,
+            client.update_quotas, client.tenant_id, **kwargs)
+
+    @ddt.data(
+        {"share_replicas": -2},
+        {"replica_gigabytes": -2},
+    )
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @utils.skip_if_microversion_not_supported(
+        SHARE_REPLICA_QUOTAS_MICROVERSION)
+    def test_update_replica_quotas_wrong_data(self, kwargs):
+        # -1 is acceptable value as unlimited
+
         client = self.get_client_with_isolated_creds(client_version='2')
         self.assertRaises(
             lib_exc.BadRequest,
@@ -196,6 +214,26 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
                           force=False,
                           share_networks=bigger_value)
 
+    @ddt.data("share_replicas", "replica_gigabytes")
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @utils.skip_if_microversion_not_supported(
+        SHARE_REPLICA_QUOTAS_MICROVERSION)
+    def test_try_set_user_quota_replicas_bigger_than_tenant_quota(self, key):
+        client = self.get_client_with_isolated_creds(client_version='2')
+
+        # get current quotas for tenant
+        tenant_quotas = client.show_quotas(client.tenant_id)
+
+        # try set user quota for snapshots bigger than tenant quota
+        bigger_value = int(tenant_quotas[key]) + 2
+        kwargs = {key: bigger_value}
+        self.assertRaises(lib_exc.BadRequest,
+                          client.update_quotas,
+                          client.tenant_id,
+                          client.user_id,
+                          force=False,
+                          **kwargs)
+
     @ddt.data(
         ('quota-sets', '2.0', 'show_quotas'),
         ('quota-sets', '2.0', 'default_quotas'),
@@ -302,6 +340,24 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
             client.tenant_id,
             **kwargs)
 
+    @ddt.data("share_replicas", "replica_gigabytes")
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @base.skip_if_microversion_not_supported(SHARE_REPLICA_QUOTAS_MICROVERSION)
+    def test_share_replica_quotas_using_too_old_microversion(self, quota_key):
+        client = self.get_client_with_isolated_creds(client_version='2')
+        tenant_quotas = client.show_quotas(
+            client.tenant_id, version=SHARE_REPLICA_QUOTAS_MICROVERSION)
+        kwargs = {
+            "version": PRE_SHARE_REPLICA_QUOTAS_MICROVERSION,
+            quota_key: tenant_quotas[quota_key],
+        }
+
+        self.assertRaises(
+            lib_exc.BadRequest,
+            client.update_quotas,
+            client.tenant_id,
+            **kwargs)
+
     @ddt.data('show', 'reset', 'update')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @base.skip_if_microversion_lt("2.38")
@@ -366,3 +422,77 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         self.assertRaises(lib_exc.OverLimit,
                           self.create_share,
                           share_type_id=self.share_type_id)
+
+
+@ddt.ddt
+class ReplicaQuotasNegativeTest(rep_neg_test.ReplicationNegativeBase):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicaQuotasNegativeTest, cls).skip_checks()
+        if not CONF.share.run_quota_tests:
+            msg = "Quota tests are disabled."
+            raise cls.skipException(msg)
+
+        utils.check_skip_if_microversion_lt(SHARE_REPLICA_QUOTAS_MICROVERSION)
+
+    def _modify_quotas_for_test(self, quota_key, new_limit):
+        kwargs = {quota_key: new_limit}
+
+        # Get the original quota values
+        original_quota = self.admin_client.show_quotas(self.tenant_id)
+
+        # Update the current quotas
+        self.admin_client.update_quotas(self.tenant_id, **kwargs)
+
+        # Save the previous value
+        old_quota_values = {quota_key: original_quota[quota_key]}
+
+        # Get the updated quotas and add a cleanup
+        updated_quota = self.admin_client.show_quotas(self.tenant_id)
+        self.addCleanup(self.admin_client.update_quotas,
+                        self.tenant_id,
+                        **old_quota_values)
+
+        # Make sure that the new value was properly set
+        self.assertEqual(new_limit, updated_quota[quota_key])
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data(('share_replicas', 2), ('replica_gigabytes', None))
+    @ddt.unpack
+    def test_create_replica_over_replica_limit(self, quota_key, new_limit):
+        # Define the quota values to be updated
+        new_limit = (int(self.share1['size'] * 2)
+                     if quota_key == 'replica_gigabytes' else new_limit)
+
+        # Create an inactive share replica
+        self.create_share_replica(
+            self.share1["id"], self.replica_zone, cleanup_in_class=False)
+
+        # Modify the quota limit for this test
+        self._modify_quotas_for_test(quota_key, new_limit)
+
+        # Make sure that the request to create a third one will fail
+        self.assertRaises(lib_exc.OverLimit,
+                          self.create_share_replica,
+                          self.share1['id'],
+                          availability_zone=self.replica_zone)
+
+    @testtools.skipUnless(
+        CONF.share.run_extend_tests,
+        "Share extend tests are disabled.")
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_extend_replica_over_limit(self):
+        # Define the quota values to be updated
+        quota_key = 'replica_gigabytes'
+
+        # Modify the quota limit for this test
+        self._modify_quotas_for_test(quota_key, new_limit=self.share1['size'])
+
+        new_size = self.share1['size'] + 1
+
+        # Make sure that the request to create a third one will fail
+        self.assertRaises(lib_exc.OverLimit,
+                          self.shares_v2_client.extend_share,
+                          self.share1['id'],
+                          new_size)

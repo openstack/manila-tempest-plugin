@@ -1032,8 +1032,9 @@ class SharesV2Client(shares_client.SharesClient):
                       snapshots=None, gigabytes=None, snapshot_gigabytes=None,
                       share_networks=None,
                       share_groups=None, share_group_snapshots=None,
-                      force=True, share_type=None,
-                      url=None, version=LATEST_MICROVERSION):
+                      force=True, share_type=None, share_replicas=None,
+                      replica_gigabytes=None, url=None,
+                      version=LATEST_MICROVERSION):
         if url is None:
             url = self._get_quotas_url(version)
         url += '/%s' % tenant_id
@@ -1056,6 +1057,10 @@ class SharesV2Client(shares_client.SharesClient):
             put_body["share_groups"] = share_groups
         if share_group_snapshots is not None:
             put_body["share_group_snapshots"] = share_group_snapshots
+        if share_replicas is not None:
+            put_body["share_replicas"] = share_replicas
+        if replica_gigabytes is not None:
+            put_body["replica_gigabytes"] = replica_gigabytes
         put_body = json.dumps({"quota_set": put_body})
 
         resp, body = self.put(url, put_body, version=version)

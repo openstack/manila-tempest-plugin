@@ -23,6 +23,7 @@ import testtools
 
 CONF = config.CONF
 SHARE_NETWORK_SUBNETS_MICROVERSION = '2.51'
+SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
 
 
 def get_microversion_as_tuple(microversion_str):
@@ -200,6 +201,10 @@ def skip_if_manage_not_supported_for_version(
 
 def share_network_subnets_are_supported():
     return is_microversion_supported(SHARE_NETWORK_SUBNETS_MICROVERSION)
+
+
+def share_replica_quotas_are_supported():
+    return is_microversion_supported(SHARE_REPLICA_QUOTAS_MICROVERSION)
 
 
 def share_network_get_default_subnet(share_network):

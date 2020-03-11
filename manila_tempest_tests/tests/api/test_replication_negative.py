@@ -28,11 +28,10 @@ CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
 
 
-class ReplicationNegativeTest(base.BaseSharesMixedTest):
-
+class ReplicationNegativeBase(base.BaseSharesMixedTest):
     @classmethod
     def skip_checks(cls):
-        super(ReplicationNegativeTest, cls).skip_checks()
+        super(ReplicationNegativeBase, cls).skip_checks()
         if not CONF.share.run_replication_tests:
             raise cls.skipException('Replication tests are disabled.')
 
@@ -40,7 +39,7 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
 
     @classmethod
     def resource_setup(cls):
-        super(ReplicationNegativeTest, cls).resource_setup()
+        super(ReplicationNegativeBase, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type
         cls.multitenancy_enabled = (
@@ -79,6 +78,9 @@ class ReplicationNegativeTest(base.BaseSharesMixedTest):
         )
         instance_id = share_instances[0]["id"]
         return share, instance_id
+
+
+class ReplicationNegativeTest(ReplicationNegativeBase):
 
     def _is_replication_type_promotable(self):
         if (self.replication_type
