@@ -20,7 +20,8 @@ STATUS_MIGRATING_TO = 'migrating_to'
 STATUS_CREATING = 'creating'
 STATUS_DELETING = 'deleting'
 STATUS_SHRINKING = 'shrinking'
-
+STATUS_SHRINKING_POSSIBLE_DATA_LOSS_ERROR = (
+    'shrinking_possible_data_loss_error')
 TEMPEST_MANILA_PREFIX = 'tempest-manila'
 
 # Replication
