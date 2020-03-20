@@ -24,6 +24,7 @@ import six
 from tempest.common import credentials_factory as common_creds
 
 from tempest import config
+from tempest.lib.common import cred_client
 from tempest.lib.common import dynamic_creds
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
@@ -1258,6 +1259,21 @@ class BaseSharesMixedTest(BaseSharesTest):
     """Base test case class for all Shares API tests with all user roles."""
     credentials = ('primary', 'alt', 'admin')
 
+    # Will be cleaned up in resource_cleanup if the class
+    class_project_users_created = []
+
+    @classmethod
+    def resource_cleanup(cls):
+        cls.clear_project_users(cls.class_project_users_created)
+        super(BaseSharesMixedTest, cls).resource_cleanup()
+
+    @classmethod
+    def clear_project_users(cls, users=None):
+        users = users or cls.class_project_users_created
+        for user in users:
+            with handle_cleanup_exceptions():
+                cls.os_admin.creds_client.delete_user(user['id'])
+
     @classmethod
     def setup_clients(cls):
         super(BaseSharesMixedTest, cls).setup_clients()
@@ -1269,6 +1285,18 @@ class BaseSharesMixedTest(BaseSharesTest):
         # Initialise network clients
         cls.os_admin.networks_client = cls.os_admin.network.NetworksClient()
         cls.os_alt.networks_client = cls.os_alt.network.NetworksClient()
+        # Initialise identity clients
+        cls.admin_project = cls.os_admin.auth_provider.auth_data[1]['project']
+        identity_clients = getattr(
+            cls.os_admin, 'identity_%s' % CONF.identity.auth_version)
+        cls.os_admin.identity_client = identity_clients.IdentityClient()
+        cls.os_admin.projects_client = identity_clients.ProjectsClient()
+        cls.os_admin.users_client = identity_clients.UsersClient()
+        cls.os_admin.roles_client = identity_clients.RolesClient()
+        cls.os_admin.domains_client = (
+            cls.os_admin.identity_v3.DomainsClient() if
+            CONF.identity.auth_version == 'v3' else None)
+        cls.admin_project_member_client = cls.create_user_and_get_client()
 
         if CONF.share.multitenancy_enabled:
             admin_share_network_id = cls.provide_share_network(
@@ -1287,6 +1315,43 @@ class BaseSharesMixedTest(BaseSharesTest):
                 "client": cls.alt_shares_v2_client,
             }
             cls.class_resources.insert(0, resource)
+
+    @classmethod
+    def create_user_and_get_client(cls, project=None):
+        """Create a user in specified project & set share clients for user
+
+        The user will have all roles specified in tempest.conf
+        :param: project: a dictionary with project ID and name, if not
+            specified, the value will be cls.admin_project
+        """
+        project_domain_name = (
+            cls.os_admin.identity_client.auth_provider.credentials.get(
+                'project_domain_name', 'Default'))
+        cls.os_admin.creds_client = cred_client.get_creds_client(
+            cls.os_admin.identity_client, cls.os_admin.projects_client,
+            cls.os_admin.users_client, cls.os_admin.roles_client,
+            cls.os_admin.domains_client, project_domain_name)
+
+        # User info
+        project = project or cls.admin_project
+        username = data_utils.rand_name('manila_%s' % project['id'])
+        password = data_utils.rand_password()
+        email = '%s@example.org' % username
+
+        user = cls.os_admin.creds_client.create_user(
+            username, password, project, email)
+        cls.class_project_users_created.append(user)
+
+        for conf_role in CONF.auth.tempest_roles:
+            cls.os_admin.creds_client.assign_user_role(
+                user, project, conf_role)
+
+        user_creds = cls.os_admin.creds_client.get_credentials(
+            user, project, password)
+        os = clients.Clients(user_creds)
+        os.shares_v1_client = os.share_v1.SharesClient()
+        os.shares_v2_client = os.share_v2.SharesV2Client()
+        return os
 
     @classmethod
     def _create_share_type(cls, specs=None):

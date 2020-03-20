@@ -39,7 +39,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ExportLocationsTest, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
-        cls.member_client = cls.shares_v2_client
+        cls.member_client = cls.admin_project_member_client.shares_v2_client
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
