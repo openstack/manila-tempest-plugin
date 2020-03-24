@@ -86,6 +86,15 @@ ShareGroup = [
                help="Forces access rules to be as specified on NFS scenario"
                     " tests. This can used for working around multiple "
                     "NATs between the VMs and the storage controller."),
+    cfg.StrOpt("storage_network",
+               help="Name or UUID of a neutron network that is used to access "
+                    "shared file systems over. If specified, test virtual "
+                    "machines are created with two NICs, the primary NIC is "
+                    "attached to the private project network and the "
+                    "secondary NIC is attached to the specified storage "
+                    "network. If using NFS, access control is done with the "
+                    "help of the IP address assigned to the virtual machine's "
+                    "storage network NIC."),
     cfg.ListOpt("enable_ro_access_level_for_protocols",
                 default=["nfs", ],
                 help="List of protocols to run tests with ro access level."),

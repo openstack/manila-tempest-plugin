@@ -19,6 +19,7 @@ import subprocess
 import netaddr
 from oslo_log import log
 from oslo_utils import netutils
+from oslo_utils import uuidutils
 import six
 
 from tempest.common import compute
@@ -721,12 +722,20 @@ class NetworkScenarioTest(ScenarioTest):
                          % port_map)
         return port_map[0]
 
-    def _get_network_by_name(self, network_name):
-        net = self.os_admin.networks_client.list_networks(
-            name=network_name)['networks']
-        self.assertNotEqual(len(net), 0,
-                            "Unable to get network by name: %s" % network_name)
-        return net[0]
+    def _get_network_by_name_or_id(self, identifier):
+
+        if uuidutils.is_uuid_like(identifier):
+            return self.os_admin.networks_client.show_network(
+                identifier)['network']
+
+        networks = self.os_admin.networks_client.list_networks(
+            name=identifier)['networks']
+        self.assertNotEqual(len(networks), 0,
+                            "Unable to get network by name: %s" % identifier)
+        return networks[0]
+
+    def get_networks(self):
+        return self.os_admin.networks_client.list_networks()['networks']
 
     def create_floating_ip(self, thing, external_network_id=None,
                            port_id=None, client=None):
@@ -1111,7 +1120,7 @@ class NetworkScenarioTest(ScenarioTest):
             if not CONF.compute.fixed_network_name:
                 m = 'fixed_network_name must be specified in config'
                 raise lib_exc.InvalidConfiguration(m)
-            network = self._get_network_by_name(
+            network = self._get_network_by_name_or_id(
                 CONF.compute.fixed_network_name)
             router = None
             subnet = None

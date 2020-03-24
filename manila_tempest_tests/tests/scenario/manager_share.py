@@ -79,6 +79,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         # Setup image and flavor the test instance
         # Support both configured and injected values
         self.floating_ips = {}
+        self.storage_network_nic_ips = {}
 
         if not hasattr(self, 'flavor_ref'):
             self.flavor_ref = CONF.share.client_vm_flavor_ref
@@ -113,6 +114,14 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         self._create_router_interface(subnet_id=self.subnet['id'],
                                       router_id=router['id'])
 
+        self.storage_network = (
+            self._get_network_by_name_or_id(CONF.share.storage_network)
+            if CONF.share.storage_network else None
+        )
+        self.storage_network_name = (
+            self.storage_network['name'] if self.storage_network else None
+        )
+
         if CONF.share.multitenancy_enabled:
             # Skip if DHSS=False
             self.share_network = self.create_share_network()
@@ -137,25 +146,39 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         if not hasattr(self, 'keypair'):
             self.keypair = self.create_keypair()
         security_groups = [{'name': self.security_group['name']}]
+        networks = [{'uuid': self.network['id']}]
+        if self.storage_network:
+            networks.append({'uuid': self.storage_network['id']})
+
         create_kwargs = {
             'key_name': self.keypair['name'],
             'security_groups': security_groups,
             'wait_until': wait_until,
-            'networks': [{'uuid': self.network['id']}, ],
+            'networks': networks,
         }
         instance = self.create_server(
             image_id=self.image_id, flavor=self.flavor_ref, **create_kwargs)
         return instance
 
     def init_remote_client(self, instance):
+        server_ip = None
         if self.ipv6_enabled:
             server_ip = self._get_ipv6_server_ip(instance)
-        else:
+        if not server_ip:
             # Obtain a floating IP
             floating_ip = (
                 self.compute_floating_ips_client.create_floating_ip()
                 ['floating_ip'])
             self.floating_ips[instance['id']] = floating_ip
+
+            if self.storage_network:
+                storage_net_nic = instance['addresses'].get(
+                    self.storage_network_name)
+                if storage_net_nic:
+                    self.storage_network_nic_ips[instance['id']] = (
+                        storage_net_nic[0]['addr']
+                    )
+
             self.addCleanup(
                 test_utils.call_and_ignore_notfound_exc,
                 self.compute_floating_ips_client.delete_floating_ip,
@@ -286,7 +309,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 LOG.exception("Instance has no valid IP address. "
                               "Falling back to default")
         if not ip:
-            ip = '0.0.0.0/0'
+            ip = '::/0' if self.ipv6_enabled else '0.0.0.0/0'
 
         if snapshot:
             self._allow_access_snapshot(snapshot['id'], access_type='ip',
@@ -315,10 +338,12 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         share = share or self.share
         client = client or self.shares_v2_client
         if not CONF.share.multitenancy_enabled:
-            if self.ipv6_enabled:
+            if self.ipv6_enabled and not self.storage_network:
                 server_ip = self._get_ipv6_server_ip(instance)
             else:
                 server_ip = (CONF.share.override_ip_for_nfs_access or
+                             self.storage_network_nic_ips.get(
+                                 instance['id']) or
                              self.floating_ips[instance['id']]['ip'])
             self.assertIsNotNone(server_ip)
             return self.allow_access_ip(
@@ -357,10 +382,14 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return locations
 
     def _get_ipv6_server_ip(self, instance):
-        for net_list in instance['addresses'].values():
-            for net_data in net_list:
-                if net_data['version'] == 6:
-                    return net_data['addr']
+        ipv6_addrs = []
+        for network_name, nic_list in instance['addresses'].items():
+            if network_name == self.storage_network_name:
+                continue
+            for nic_data in nic_list:
+                if nic_data['version'] == 6:
+                    ipv6_addrs.append(nic_data['addr'])
+        return ipv6_addrs[0] if ipv6_addrs else None
 
     def _create_share(self, share_protocol=None, size=None, name=None,
                       snapshot_id=None, description=None, metadata=None,
