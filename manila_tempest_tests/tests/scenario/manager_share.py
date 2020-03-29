@@ -61,18 +61,14 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         super(ShareScenarioTest, cls).skip_checks()
         if not CONF.service_available.manila:
             raise cls.skipException("Manila support is required")
+        if cls.ipv6_enabled and not CONF.share.run_ipv6_tests:
+            raise cls.skipException("IPv6 tests are disabled")
+        if cls.protocol not in CONF.share.enable_protocols:
+            message = "%s tests are disabled" % cls.protocol
+            raise cls.skipException(message)
 
     def setUp(self):
         base.verify_test_has_appropriate_tags(self)
-        if self.ipv6_enabled and not CONF.share.run_ipv6_tests:
-            raise self.skipException("IPv6 tests are disabled")
-        if self.protocol not in CONF.share.enable_protocols:
-            message = "%s tests are disabled" % self.protocol
-            raise self.skipException(message)
-        if self.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       self.protocol)
-            raise self.skipException(message)
         super(ShareScenarioTest, self).setUp()
 
         self.image_id = None

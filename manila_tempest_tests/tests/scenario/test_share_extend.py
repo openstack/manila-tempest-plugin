@@ -45,6 +45,14 @@ class ShareExtendBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(ShareExtendBase, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_extend_and_write(self):
         default_share_size = CONF.share.share_size

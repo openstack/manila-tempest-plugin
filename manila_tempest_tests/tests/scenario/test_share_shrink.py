@@ -46,6 +46,14 @@ class ShareShrinkBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(ShareShrinkBase, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests, 'Shrink share tests are disabled.')
