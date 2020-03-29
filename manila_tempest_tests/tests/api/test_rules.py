@@ -81,12 +81,16 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
     protocol = "nfs"
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareIpRulesForNFSTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(ShareIpRulesForNFSTest, cls).skip_checks()
         if (cls.protocol not in CONF.share.enable_protocols or
                 cls.protocol not in CONF.share.enable_ip_rules_for_protocols):
             msg = "IP rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareIpRulesForNFSTest, cls).resource_setup()
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
@@ -230,13 +234,18 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
     protocol = "nfs"
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareUserRulesForNFSTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(ShareUserRulesForNFSTest, cls).skip_checks()
         if (cls.protocol not in CONF.share.enable_protocols or
                 cls.protocol not in
                 CONF.share.enable_user_rules_for_protocols):
             msg = "USER rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareUserRulesForNFSTest, cls).resource_setup()
+
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
@@ -320,13 +329,17 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
     protocol = "glusterfs"
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareCertRulesForGLUSTERFSTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(ShareCertRulesForGLUSTERFSTest, cls).skip_checks()
         if (cls.protocol not in CONF.share.enable_protocols or
                 cls.protocol not in
                 CONF.share.enable_cert_rules_for_protocols):
             msg = "Cert rule tests for %s protocol are disabled" % cls.protocol
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareCertRulesForGLUSTERFSTest, cls).resource_setup()
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
@@ -436,14 +449,18 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
     protocol = "cephfs"
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareCephxRulesForCephFSTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(ShareCephxRulesForCephFSTest, cls).skip_checks()
         if (cls.protocol not in CONF.share.enable_protocols or
                 cls.protocol not in
                 CONF.share.enable_cephx_rules_for_protocols):
             msg = ("Cephx rule tests for %s protocol are disabled." %
                    cls.protocol)
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareCephxRulesForCephFSTest, cls).resource_setup()
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
@@ -483,8 +500,8 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
 class ShareRulesTest(base.BaseSharesMixedTest):
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareRulesTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(ShareRulesTest, cls).skip_checks()
         if not (any(p in CONF.share.enable_ip_rules_for_protocols
                     for p in cls.protocols) or
                 any(p in CONF.share.enable_user_rules_for_protocols
@@ -495,6 +512,10 @@ class ShareRulesTest(base.BaseSharesMixedTest):
                     for p in cls.protocols)):
             cls.message = "Rule tests are disabled"
             raise cls.skipException(cls.message)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareRulesTest, cls).resource_setup()
         if CONF.share.enable_ip_rules_for_protocols:
             cls.protocol = CONF.share.enable_ip_rules_for_protocols[0]
             cls.access_type = "ip"
