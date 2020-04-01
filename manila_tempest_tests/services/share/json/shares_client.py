@@ -467,9 +467,9 @@ class SharesClient(rest_client.RestClient):
             metadata = {}
         post_body = {"metadata": metadata}
         body = json.dumps(post_body)
-        if method is "post":
+        if method == "post":
             resp, metadata = self.post(uri, body)
-        if method is "put":
+        if method == "put":
             resp, metadata = self.put(uri, body)
         self.expected_success(200, resp.status)
         return self._parse_resp(metadata)

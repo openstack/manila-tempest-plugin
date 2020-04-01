@@ -187,8 +187,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         if (force_host_assisted and
                 not CONF.share.run_host_assisted_migration_tests):
-                raise self.skipException("Host-assisted migration tests are "
-                                         "disabled.")
+            raise self.skipException("Host-assisted migration tests are "
+                                     "disabled.")
         elif (not force_host_assisted and
               not CONF.share.run_driver_assisted_migration_tests):
             raise self.skipException("Driver-assisted migration tests are "

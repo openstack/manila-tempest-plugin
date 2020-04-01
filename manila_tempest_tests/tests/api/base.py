@@ -980,7 +980,7 @@ class BaseSharesTest(test.BaseTestCase):
                 res_id = res['id']
                 client = res["client"]
                 with handle_cleanup_exceptions():
-                    if res["type"] is "share":
+                    if res["type"] == "share":
                         cls.clear_share_replicas(res_id)
                         share_group_id = res.get('share_group_id')
                         if share_group_id:
@@ -989,35 +989,35 @@ class BaseSharesTest(test.BaseTestCase):
                         else:
                             client.delete_share(res_id)
                         client.wait_for_resource_deletion(share_id=res_id)
-                    elif res["type"] is "snapshot":
+                    elif res["type"] == "snapshot":
                         client.delete_snapshot(res_id)
                         client.wait_for_resource_deletion(snapshot_id=res_id)
-                    elif (res["type"] is "share_network" and
+                    elif (res["type"] == "share_network" and
                             res_id != CONF.share.share_network_id):
                         client.delete_share_network(res_id)
                         client.wait_for_resource_deletion(sn_id=res_id)
-                    elif res["type"] is "security_service":
+                    elif res["type"] == "security_service":
                         client.delete_security_service(res_id)
                         client.wait_for_resource_deletion(ss_id=res_id)
-                    elif res["type"] is "share_type":
+                    elif res["type"] == "share_type":
                         client.delete_share_type(res_id)
                         client.wait_for_resource_deletion(st_id=res_id)
-                    elif res["type"] is "share_group":
+                    elif res["type"] == "share_group":
                         client.delete_share_group(res_id)
                         client.wait_for_resource_deletion(
                             share_group_id=res_id)
-                    elif res["type"] is "share_group_type":
+                    elif res["type"] == "share_group_type":
                         client.delete_share_group_type(res_id)
                         client.wait_for_resource_deletion(
                             share_group_type_id=res_id)
-                    elif res["type"] is "share_group_snapshot":
+                    elif res["type"] == "share_group_snapshot":
                         client.delete_share_group_snapshot(res_id)
                         client.wait_for_resource_deletion(
                             share_group_snapshot_id=res_id)
-                    elif res["type"] is "share_replica":
+                    elif res["type"] == "share_replica":
                         client.delete_share_replica(res_id)
                         client.wait_for_resource_deletion(replica_id=res_id)
-                    elif res["type"] is "share_network_subnet":
+                    elif res["type"] == "share_network_subnet":
                         sn_id = res["extra_params"]["share_network_id"]
                         client.delete_subnet(sn_id, res_id)
                         client.wait_for_resource_deletion(

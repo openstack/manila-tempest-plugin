@@ -869,7 +869,6 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(200, resp.status)
         return body
 
-
 ###############
 
     def list_availability_zones(self, url='availability-zones',
