@@ -330,31 +330,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return image['id']
 
     def glance_image_create(self):
-        img_path = CONF.scenario.img_dir + "/" + CONF.scenario.img_file
-        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
-        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
-        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
+        img_path = CONF.scenario.img_file
         img_container_format = CONF.scenario.img_container_format
         img_disk_format = CONF.scenario.img_disk_format
         img_properties = CONF.scenario.img_properties
         LOG.debug("paths: img: %s, container_format: %s, disk_format: %s, "
-                  "properties: %s, ami: %s, ari: %s, aki: %s",
+                  "properties: %s",
                   img_path, img_container_format, img_disk_format,
-                  img_properties, ami_img_path, ari_img_path, aki_img_path)
-        try:
-            image = self._image_create('scenario-img',
-                                       img_container_format,
-                                       img_path,
-                                       disk_format=img_disk_format,
-                                       properties=img_properties)
-        except IOError:
-            LOG.debug("A qcow2 image was not found. Try to get a uec image.")
-            kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
-            ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
-            properties = {'kernel_id': kernel, 'ramdisk_id': ramdisk}
-            image = self._image_create('scenario-ami', 'ami',
-                                       path=ami_img_path,
-                                       properties=properties)
+                  img_properties)
+        image = self._image_create('scenario-img',
+                                   img_container_format,
+                                   img_path,
+                                   disk_format=img_disk_format,
+                                   properties=img_properties)
         LOG.debug("image:%s", image)
 
         return image
