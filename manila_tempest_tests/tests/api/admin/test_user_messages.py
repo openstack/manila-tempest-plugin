@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import datetime
+
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from tempest import config
@@ -21,6 +23,7 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 MICROVERSION = '2.37'
+QUERY_BY_TIMESTAMP_MICROVERSION = '2.52'
 MESSAGE_KEYS = (
     'created_at',
     'action_id',
@@ -111,3 +114,40 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.shares_v2_client.delete_message(self.message['id'])
         self.shares_v2_client.wait_for_resource_deletion(
             message_id=self.message['id'])
+
+    @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
+    @base.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
+    def test_list_messages_with_since_and_before_filters(self):
+        new_message = self.create_user_message()
+        created_at_1 = timeutils.parse_strtime(self.message['created_at'])
+        created_at_2 = timeutils.parse_strtime(new_message['created_at'])
+        time_1 = created_at_1 - datetime.timedelta(seconds=1)
+        time_2 = created_at_2 - datetime.timedelta(seconds=1)
+
+        params1 = {'created_since': str(created_at_1)}
+        # should return all user messages created by this test including
+        # self.message
+        messages = self.shares_v2_client.list_messages(params=params1)
+        ids = [x['id'] for x in messages]
+        self.assertGreaterEqual(len(ids), 2)
+        self.assertIn(self.message['id'], ids)
+        self.assertIn(new_message['id'], ids)
+
+        params2 = {'created_since': str(time_1),
+                   'created_before': str(time_2)}
+        # should not return new_message, but return a list that is equal to 1
+        # and include self.message
+        messages = self.shares_v2_client.list_messages(params=params2)
+        self.assertIsInstance(messages, list)
+        ids = [x['id'] for x in messages]
+        self.assertGreaterEqual(len(ids), 1)
+        self.assertIn(self.message['id'], ids)
+        self.assertNotIn(new_message['id'], ids)
+
+        params3 = {'created_before': str(time_2)}
+        # should not include self.message
+        messages = self.shares_v2_client.list_messages(params=params3)
+        ids = [x['id'] for x in messages]
+        self.assertGreaterEqual(len(ids), 1)
+        self.assertNotIn(new_message['id'], ids)
+        self.assertIn(self.message['id'], ids)

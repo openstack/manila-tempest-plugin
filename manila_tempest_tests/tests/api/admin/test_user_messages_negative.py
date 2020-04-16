@@ -21,6 +21,7 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 
 MICROVERSION = '2.37'
+QUERY_BY_TIMESTAMP_MICROVERSION = '2.52'
 
 
 class UserMessageNegativeTest(base.BaseSharesAdminTest):
@@ -61,3 +62,13 @@ class UserMessageNegativeTest(base.BaseSharesAdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.delete_message,
                           six.text_type(uuidutils.generate_uuid()))
+
+    @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
+    @base.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
+    def test_list_messages_with_invalid_time_format(self):
+        params_key = ['created_since', 'created_before']
+        for key in params_key:
+            params = {key: 'invalid_time'}
+            self.assertRaises(lib_exc.BadRequest,
+                              self.shares_v2_client.list_messages,
+                              params=params)
