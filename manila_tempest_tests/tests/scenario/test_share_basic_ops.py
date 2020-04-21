@@ -44,6 +44,14 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(ShareBasicOpsBase, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
     def get_ip_and_version_from_export_location(self, export):
         export = export.replace('[', '').replace(']', '')
         if self.protocol == 'nfs' and ':/' in export:
@@ -116,11 +124,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
     def test_write_with_ro_access(self):
         '''Test if an instance with ro access can write on the share.'''
-        if self.protocol.upper() == 'CIFS':
-            msg = ("Skipped for CIFS protocol because RO access is not "
-                   "supported for shares by IP.")
-            raise self.skipException(msg)
-
         test_data = "Some test data to write"
 
         instance = self.boot_instance(wait_until="BUILD")
@@ -289,10 +292,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
     @testtools.skipUnless(
         CONF.share.run_snapshot_tests, "Snapshot tests are disabled.")
     def test_write_data_to_share_created_from_snapshot(self):
-        if self.protocol.upper() == 'CIFS':
-            msg = "Skipped for CIFS protocol because of bug/1649573"
-            raise self.skipException(msg)
-
         # 1 - Create UVM, ok, created
         instance = self.boot_instance(wait_until="BUILD")
 
@@ -377,10 +376,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
     def test_read_mountable_snapshot(self):
-        if self.protocol.upper() == 'CIFS':
-            msg = "Skipped for CIFS protocol because of bug/1649573"
-            raise self.skipException(msg)
-
         # 1 - Create UVM, ok, created
         instance = self.boot_instance(wait_until="BUILD")
 
@@ -462,6 +457,22 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
         remote_client.exec_command(
             "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
         )
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
+    def test_write_with_ro_access(self):
+        msg = ("Skipped for CIFS protocol because RO access is not "
+               "supported for shares by IP.")
+        raise self.skipException(msg)
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_read_mountable_snapshot(self):
+        msg = "Skipped for CIFS protocol because of bug/1649573"
+        raise self.skipException(msg)
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_write_data_to_share_created_from_snapshot(self):
+        msg = "Skipped for CIFS protocol because of bug/1649573"
+        raise self.skipException(msg)
 
 
 class TestShareBasicOpsNFSIPv6(TestShareBasicOpsNFS):
