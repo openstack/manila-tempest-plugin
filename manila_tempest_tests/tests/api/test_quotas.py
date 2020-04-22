@@ -82,15 +82,13 @@ class SharesQuotasTest(base.BaseSharesTest):
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 
     @ddt.data(
-        *itertools.product(set(("2.25", CONF.share.max_api_microversion)),
-                           (True, False)),
-        *itertools.product(set(("2.53", CONF.share.max_api_microversion)),
-                           (True, False))
+        *itertools.product(set(
+            ["2.25", "2.53", CONF.share.max_api_microversion]), (True, False))
     )
     @ddt.unpack
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported("2.25")
     def test_show_quotas_detail(self, microversion, with_user):
+        self.skip_if_microversion_not_supported(microversion)
         quota_args = {"tenant_id": self.tenant_id, "version": microversion, }
         keys = ['gigabytes', 'snapshot_gigabytes', 'shares',
                 'snapshots', 'share_networks']
