@@ -124,7 +124,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         time_1 = created_at_1 - datetime.timedelta(seconds=1)
         time_2 = created_at_2 - datetime.timedelta(seconds=1)
 
-        params1 = {'created_since': str(created_at_1)}
+        params1 = {'created_since': str(time_1)}
         # should return all user messages created by this test including
         # self.message
         messages = self.shares_v2_client.list_messages(params=params1)
@@ -132,6 +132,10 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertGreaterEqual(len(ids), 2)
         self.assertIn(self.message['id'], ids)
         self.assertIn(new_message['id'], ids)
+        for message in messages:
+            time_diff_with_created_since = timeutils.delta_seconds(
+                time_1, timeutils.parse_strtime(message['created_at']))
+            self.assertGreaterEqual(time_diff_with_created_since, 0)
 
         params2 = {'created_since': str(time_1),
                    'created_before': str(time_2)}
@@ -143,6 +147,13 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertGreaterEqual(len(ids), 1)
         self.assertIn(self.message['id'], ids)
         self.assertNotIn(new_message['id'], ids)
+        for message in messages:
+            time_diff_with_created_since = timeutils.delta_seconds(
+                time_1, timeutils.parse_strtime(message['created_at']))
+            time_diff_with_created_before = timeutils.delta_seconds(
+                time_2, timeutils.parse_strtime(message['created_at']))
+            self.assertGreaterEqual(time_diff_with_created_since, 0)
+            self.assertGreaterEqual(0, time_diff_with_created_before)
 
         params3 = {'created_before': str(time_2)}
         # should not include self.message
@@ -151,3 +162,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.assertGreaterEqual(len(ids), 1)
         self.assertNotIn(new_message['id'], ids)
         self.assertIn(self.message['id'], ids)
+        for message in messages:
+            time_diff_with_created_before = timeutils.delta_seconds(
+                time_2, timeutils.parse_strtime(message['created_at']))
+            self.assertGreaterEqual(0, time_diff_with_created_before)
