@@ -61,7 +61,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         super(ShareScenarioTest, cls).skip_checks()
         if not CONF.service_available.manila:
             raise cls.skipException("Manila support is required")
-        if cls.ipv6_enabled and not CONF.share.run_ipv6_tests:
+        if cls.ip_version == 6 and not CONF.share.run_ipv6_tests:
             raise cls.skipException("IPv6 tests are disabled")
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
