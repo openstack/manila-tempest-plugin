@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
 import testtools
@@ -23,8 +24,10 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
 CONF = config.CONF
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
+@ddt.ddt
 class ShareGroupsTest(base.BaseSharesAdminTest):
 
     @classmethod
@@ -56,12 +59,16 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
         cls.sg_type_id = cls.sg_type['id']
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_create_share_group_with_single_share_type_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_create_share_group_with_single_share_type_min(self, version):
+        self.skip_if_microversion_not_supported(version)
         share_group = self.create_share_group(
             share_group_type_id=self.sg_type_id,
             cleanup_in_class=False,
             share_type_ids=[self.share_type_id],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=version)
 
         keys = set(share_group.keys())
         self.assertTrue(
@@ -124,14 +131,21 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
     @testtools.skipUnless(
         CONF.share.default_share_type_name, "Only if defaults are defined.")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_default_share_group_type_applied(self):
-        default_type = self.shares_v2_client.get_default_share_group_type()
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_default_share_group_type_applied(self, version):
+        self.skip_if_microversion_not_supported(version)
+
+        default_type = self.shares_v2_client.get_default_share_group_type(
+            version=version
+        )
         default_share_types = default_type['share_types']
 
         share_group = self.create_share_group(
             cleanup_in_class=False,
             share_type_ids=default_share_types,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=version)
 
         keys = set(share_group.keys())
         self.assertTrue(

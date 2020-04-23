@@ -70,6 +70,7 @@ STATUS_REVERTING_ERROR = 'reverting_error'
 
 # Share groups
 MIN_SHARE_GROUP_MICROVERSION = '2.31'
+SHARE_GROUPS_GRADUATION_VERSION = '2.55'
 SHARE_GROUP_SIMPLE_KEYS = {
     'id', 'name', 'links',
 }

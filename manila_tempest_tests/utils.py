@@ -24,6 +24,7 @@ import testtools
 CONF = config.CONF
 SHARE_NETWORK_SUBNETS_MICROVERSION = '2.51'
 SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
+EXPERIMENTAL = {'X-OpenStack-Manila-API-Experimental': 'True'}
 
 
 def get_microversion_as_tuple(microversion_str):
@@ -211,3 +212,12 @@ def share_network_get_default_subnet(share_network):
     return next((
         subnet for subnet in share_network.get('share_network_subnets', [])
         if subnet['availability_zone'] is None), None)
+
+
+def get_extra_headers(request_version, graduation_version):
+    headers = None
+    extra_headers = False
+    if is_microversion_lt(request_version, graduation_version):
+        headers = EXPERIMENTAL
+        extra_headers = True
+    return headers, extra_headers

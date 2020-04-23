@@ -14,6 +14,7 @@
 #    under the License.
 
 import ddt
+import itertools
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from testtools import testcase as tc
@@ -54,8 +55,13 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         cls.share_type2 = share_type['share_type']
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data('id', 'name')
-    def test_create_get_delete_share_group_type_min(self, st_key):
+    @ddt.data(
+        *itertools.product(('id', 'name'), set(
+            [LATEST_MICROVERSION, constants.MIN_SHARE_GROUP_MICROVERSION,
+             constants.SHARE_GROUPS_GRADUATION_VERSION])))
+    @ddt.unpack
+    def test_create_get_delete_share_group_type(self, st_key, version):
+        self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
 
         # Create share group type
@@ -63,7 +69,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             name=name,
             share_types=self.share_type[st_key],
             cleanup_in_class=False,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=version)
 
         self.assertEqual(
             [self.share_type['id']],
@@ -71,7 +77,8 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             'Share type not applied correctly.')
 
         # Read share group type
-        sg_type_r = self.shares_v2_client.get_share_group_type(sg_type_c['id'])
+        sg_type_r = self.shares_v2_client.get_share_group_type(
+            sg_type_c['id'], version=version)
         keys = set(sg_type_r.keys())
         self.assertTrue(
             constants.SHARE_GROUP_TYPE_REQUIRED_KEYS.issubset(keys),
@@ -82,7 +89,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         # Delete share group type
         self.shares_v2_client.delete_share_group_type(
-            sg_type_r['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            sg_type_r['id'], version=version)
         self.shares_v2_client.wait_for_resource_deletion(
             share_group_type_id=sg_type_r['id'])
 
@@ -131,7 +138,11 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_update_single_share_group_type_spec_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_update_single_share_group_type_spec(self, version):
+        self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         group_specs = {'key1': 'value1', 'key2': 'value2'}
 
@@ -140,14 +151,14 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             share_types=self.share_type['id'],
             group_specs=group_specs,
             cleanup_in_class=False,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=version)
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
         group_specs = {'key1': 'value1', 'key2': 'value2'}
 
         self.shares_v2_client.update_share_group_type_spec(
-            sg_type['id'], 'key1', 'value3')
+            sg_type['id'], 'key1', 'value3', version=version)
         sg_type = self.shares_v2_client.get_share_group_type(sg_type['id'])
 
         self.assertIn('key1', sg_type['group_specs'])
@@ -180,7 +191,11 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             self.assertEqual(v, sg_type['group_specs'][k])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_delete_single_share_group_type_spec_min(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_delete_single_share_group_type_spec_min(self, version):
+        self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         group_specs = {'key1': 'value1', 'key2': 'value2'}
 
@@ -189,7 +204,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             share_types=self.share_type['id'],
             group_specs=group_specs,
             cleanup_in_class=False,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=version)
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
@@ -197,14 +212,18 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         group_specs.pop(key_to_delete)
 
         self.shares_v2_client.delete_share_group_type_spec(
-            sg_type['id'], key_to_delete)
+            sg_type['id'], key_to_delete, version=version)
         sg_type = self.shares_v2_client.get_share_group_type(
-            sg_type['id'])
+            sg_type['id'], version=version)
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_private_share_group_type_access(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
+              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+    def test_private_share_group_type_access(self, version):
+        self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         group_specs = {"key1": "value1", "key2": "value2"}
         project_id = self.shares_v2_client.tenant_id
@@ -215,41 +234,48 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
             share_types=[self.share_type['id']],
             is_public=False,
             group_specs=group_specs,
+            version=version
         )
         self.assertEqual(name, sgt_create['name'])
         sgt_id = sgt_create["id"]
 
         # It should not be listed without access
-        sgt_list = self.shares_v2_client.list_share_group_types()
+        sgt_list = self.shares_v2_client.list_share_group_types(
+            version=version)
         self.assertFalse(any(sgt_id == sgt["id"] for sgt in sgt_list))
 
         # List projects that have access for share group type - none expected
-        access = self.shares_v2_client.list_access_to_share_group_type(sgt_id)
+        access = self.shares_v2_client.list_access_to_share_group_type(
+            sgt_id, version=version)
         self.assertEmpty(access)
 
         # Add project access to share group type
         access = self.shares_v2_client.add_access_to_share_group_type(
-            sgt_id, project_id)
+            sgt_id, project_id, version=version)
 
         # Now it should be listed
-        sgt_list = self.shares_v2_client.list_share_group_types()
+        sgt_list = self.shares_v2_client.list_share_group_types(
+            version=version)
         self.assertTrue(any(sgt_id == sgt["id"] for sgt in sgt_list))
 
         # List projects that have access for share group type - one expected
-        access = self.shares_v2_client.list_access_to_share_group_type(sgt_id)
+        access = self.shares_v2_client.list_access_to_share_group_type(
+            sgt_id, version=version)
         expected = [{'share_group_type_id': sgt_id, 'project_id': project_id}]
         self.assertEqual(expected, access)
 
         # Remove project access from share group type
         access = self.shares_v2_client.remove_access_from_share_group_type(
-            sgt_id, project_id)
+            sgt_id, project_id, version=version)
 
         # It should not be listed without access
-        sgt_list = self.shares_v2_client.list_share_group_types()
+        sgt_list = self.shares_v2_client.list_share_group_types(
+            version=version)
         self.assertFalse(any(sgt_id == sgt["id"] for sgt in sgt_list))
 
         # List projects that have access for share group type - none expected
-        access = self.shares_v2_client.list_access_to_share_group_type(sgt_id)
+        access = self.shares_v2_client.list_access_to_share_group_type(
+            sgt_id, version=version)
         self.assertEmpty(access)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)

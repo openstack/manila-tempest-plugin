@@ -1078,6 +1078,8 @@ class SharesV2Client(shares_client.SharesClient):
         """Create a new share group."""
         uri = 'share-groups'
         post_body = {}
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         if name:
             post_body['name'] = name
         if description:
@@ -1095,8 +1097,8 @@ class SharesV2Client(shares_client.SharesClient):
             post_body['availability_zone'] = availability_zone
         body = json.dumps({'share_group': post_body})
 
-        resp, body = self.post(uri, body, headers=EXPERIMENTAL,
-                               extra_headers=True, version=version)
+        resp, body = self.post(uri, body, headers=headers,
+                               extra_headers=extra_headers, version=version)
 
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
@@ -1104,8 +1106,10 @@ class SharesV2Client(shares_client.SharesClient):
     def delete_share_group(self, share_group_id, version=LATEST_MICROVERSION):
         """Delete a share group."""
         uri = 'share-groups/%s' % share_group_id
-        resp, body = self.delete(uri, headers=EXPERIMENTAL,
-                                 extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.delete(uri, headers=headers,
+                                 extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
 
@@ -1114,16 +1118,20 @@ class SharesV2Client(shares_client.SharesClient):
         """Get list of share groups w/o filters."""
         uri = 'share-groups%s' % ('/detail' if detailed else '')
         uri += '?%s' % (parse.urlencode(params) if params else '')
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def get_share_group(self, share_group_id, version=LATEST_MICROVERSION):
         """Get share group info."""
         uri = 'share-groups/%s' % share_group_id
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1131,6 +1139,8 @@ class SharesV2Client(shares_client.SharesClient):
                            version=LATEST_MICROVERSION, **kwargs):
         """Update an existing share group."""
         uri = 'share-groups/%s' % share_group_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = {}
         if name:
             post_body['name'] = name
@@ -1140,21 +1150,25 @@ class SharesV2Client(shares_client.SharesClient):
             post_body.update(kwargs)
         body = json.dumps({'share_group': post_body})
 
-        resp, body = self.put(uri, body, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        resp, body = self.put(uri, body, headers=headers,
+                              extra_headers=extra_headers, version=version)
 
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def share_group_reset_state(self, share_group_id, status='error',
                                 version=LATEST_MICROVERSION):
+        headers, _junk = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         self.reset_state(share_group_id, status=status, s_type='groups',
-                         headers=EXPERIMENTAL, version=version)
+                         headers=headers, version=version)
 
     def share_group_force_delete(self, share_group_id,
                                  version=LATEST_MICROVERSION):
+        headers, _junk = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         self.force_delete(share_group_id, s_type='share-groups',
-                          headers=EXPERIMENTAL, version=version)
+                          headers=headers, version=version)
 
     def wait_for_share_group_status(self, share_group_id, status):
         """Waits for a share group to reach a given status."""
@@ -1186,6 +1200,8 @@ class SharesV2Client(shares_client.SharesClient):
                                 version=LATEST_MICROVERSION):
         """Create a new share group type."""
         uri = 'share-group-types'
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = {}
         if isinstance(share_types, (tuple, list)):
             share_types = list(share_types)
@@ -1200,8 +1216,8 @@ class SharesV2Client(shares_client.SharesClient):
         if group_specs:
             post_body['group_specs'] = group_specs
         body = json.dumps({'share_group_type': post_body})
-        resp, body = self.post(uri, body, headers=EXPERIMENTAL,
-                               extra_headers=True, version=version)
+        resp, body = self.post(uri, body, headers=headers,
+                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1210,8 +1226,10 @@ class SharesV2Client(shares_client.SharesClient):
         """Get list of share group types."""
         uri = 'share-group-types%s' % ('/detail' if detailed else '')
         uri += '?%s' % (parse.urlencode(params) if params else '')
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1219,16 +1237,20 @@ class SharesV2Client(shares_client.SharesClient):
                              version=LATEST_MICROVERSION):
         """Get share group type info."""
         uri = 'share-group-types/%s' % share_group_type_id
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def get_default_share_group_type(self, version=LATEST_MICROVERSION):
         """Get default share group type info."""
         uri = 'share-group-types/default'
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1236,18 +1258,22 @@ class SharesV2Client(shares_client.SharesClient):
                                 version=LATEST_MICROVERSION):
         """Delete an existing share group type."""
         uri = 'share-group-types/%s' % share_group_type_id
-        resp, body = self.delete(uri, headers=EXPERIMENTAL,
-                                 extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.delete(uri, headers=headers,
+                                 extra_headers=extra_headers, version=version)
         self.expected_success(204, resp.status)
         return self._parse_resp(body)
 
     def add_access_to_share_group_type(self, share_group_type_id, project_id,
                                        version=LATEST_MICROVERSION):
         uri = 'share-group-types/%s/action' % share_group_type_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = {'project': project_id}
         post_body = json.dumps({'addProjectAccess': post_body})
-        resp, body = self.post(uri, post_body, headers=EXPERIMENTAL,
-                               extra_headers=True, version=version)
+        resp, body = self.post(uri, post_body, headers=headers,
+                               extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
 
@@ -1255,18 +1281,22 @@ class SharesV2Client(shares_client.SharesClient):
                                             project_id,
                                             version=LATEST_MICROVERSION):
         uri = 'share-group-types/%s/action' % share_group_type_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = {'project': project_id}
         post_body = json.dumps({'removeProjectAccess': post_body})
-        resp, body = self.post(uri, post_body, headers=EXPERIMENTAL,
-                               extra_headers=True, version=version)
+        resp, body = self.post(uri, post_body, headers=headers,
+                               extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
 
     def list_access_to_share_group_type(self, share_group_type_id,
                                         version=LATEST_MICROVERSION):
         uri = 'share-group-types/%s/access' % share_group_type_id
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1276,9 +1306,11 @@ class SharesV2Client(shares_client.SharesClient):
                                       group_specs_dict,
                                       version=LATEST_MICROVERSION):
         url = "share-group-types/%s/group-specs" % share_group_type_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = json.dumps({'group_specs': group_specs_dict})
-        resp, body = self.post(url, post_body, headers=EXPERIMENTAL,
-                               extra_headers=True, version=version)
+        resp, body = self.post(url, post_body, headers=headers,
+                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1286,18 +1318,22 @@ class SharesV2Client(shares_client.SharesClient):
                                   version=LATEST_MICROVERSION):
         uri = "group-types/%s/group_specs/%s" % (
             share_group_type_id, group_spec_key)
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def list_share_group_type_specs(self, share_group_type_id, params=None,
                                     version=LATEST_MICROVERSION):
         uri = "share-group-types/%s/group_specs" % share_group_type_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         if params is not None:
             uri += '?%s' % parse.urlencode(params)
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1306,10 +1342,12 @@ class SharesV2Client(shares_client.SharesClient):
                                      version=LATEST_MICROVERSION):
         uri = "share-group-types/%s/group-specs/%s" % (
             share_group_type_id, group_spec_key)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         group_spec = {group_spec_key: group_spec_value}
         post_body = json.dumps(group_spec)
-        resp, body = self.put(uri, post_body, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        resp, body = self.put(uri, post_body, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1323,8 +1361,10 @@ class SharesV2Client(shares_client.SharesClient):
                                      version=LATEST_MICROVERSION):
         uri = "share-group-types/%s/group-specs/%s" % (
             share_type_id, group_spec_key)
-        resp, body = self.delete(uri, headers=EXPERIMENTAL, extra_headers=True,
-                                 version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.delete(uri, headers=headers,
+                                 extra_headers=extra_headers, version=version)
         self.expected_success(204, resp.status)
         return body
 
@@ -1335,14 +1375,16 @@ class SharesV2Client(shares_client.SharesClient):
                                     version=LATEST_MICROVERSION):
         """Create a new share group snapshot of an existing share group."""
         uri = 'share-group-snapshots'
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = {'share_group_id': share_group_id}
         if name:
             post_body['name'] = name
         if description:
             post_body['description'] = description
         body = json.dumps({'share_group_snapshot': post_body})
-        resp, body = self.post(uri, body, headers=EXPERIMENTAL,
-                               extra_headers=True, version=version)
+        resp, body = self.post(uri, body, headers=headers,
+                               extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
 
@@ -1350,8 +1392,10 @@ class SharesV2Client(shares_client.SharesClient):
                                     version=LATEST_MICROVERSION):
         """Delete an existing share group snapshot."""
         uri = 'share-group-snapshots/%s' % share_group_snapshot_id
-        resp, body = self.delete(uri, headers=EXPERIMENTAL,
-                                 extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.delete(uri, headers=headers,
+                                 extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
         return body
 
@@ -1360,8 +1404,10 @@ class SharesV2Client(shares_client.SharesClient):
         """Get list of share group snapshots w/o filters."""
         uri = 'share-group-snapshots%s' % ('/detail' if detailed else '')
         uri += '?%s' % (parse.urlencode(params) if params else '')
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1369,8 +1415,10 @@ class SharesV2Client(shares_client.SharesClient):
                                  version=LATEST_MICROVERSION):
         """Get share group snapshot info."""
         uri = 'share-group-snapshots/%s' % share_group_snapshot_id
-        resp, body = self.get(uri, headers=EXPERIMENTAL, extra_headers=True,
-                              version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1379,29 +1427,35 @@ class SharesV2Client(shares_client.SharesClient):
                                     version=LATEST_MICROVERSION):
         """Update an existing share group snapshot."""
         uri = 'share-group-snapshots/%s' % share_group_snapshot_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         post_body = {}
         if name:
             post_body['name'] = name
         if description:
             post_body['description'] = description
         body = json.dumps({'share_group_snapshot': post_body})
-        resp, body = self.put(uri, body, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        resp, body = self.put(uri, body, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def share_group_snapshot_reset_state(self, share_group_snapshot_id,
                                          status='error',
                                          version=LATEST_MICROVERSION):
+        headers, _junk = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         self.reset_state(
             share_group_snapshot_id, status=status,
-            s_type='group-snapshots', headers=EXPERIMENTAL, version=version)
+            headers=headers, s_type='group-snapshots', version=version)
 
     def share_group_snapshot_force_delete(self, share_group_snapshot_id,
                                           version=LATEST_MICROVERSION):
+        headers, _junk = utils.get_extra_headers(
+            version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         self.force_delete(
             share_group_snapshot_id, s_type='share-group-snapshots',
-            headers=EXPERIMENTAL, version=version)
+            headers=headers, version=version)
 
     def wait_for_share_group_snapshot_status(self, share_group_snapshot_id,
                                              status):

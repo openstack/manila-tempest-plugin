@@ -72,8 +72,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             share_type_id=self.share_type_id,
             share_group_id=share_group['id'],
             cleanup_in_class=False,
-            version=constants.MIN_SHARE_GROUP_MICROVERSION,
-            experimental=True)
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
         # Delete
         params = {"share_group_id": share_group['id']}
@@ -163,7 +162,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
 
         new_shares = self.shares_v2_client.list_shares(
             params={'share_group_id': new_share_group['id']},
-            version=constants.MIN_SHARE_GROUP_MICROVERSION, experimental=True)
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
         self.assertEmpty(
             new_shares, 'Expected 0 new shares, got %s' % len(new_shares))
@@ -236,7 +235,6 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             'share_group_id': share_group['id'],
             'version': '2.33',
             'cleanup_in_class': False,
-            'experimental': True,
         }
         if where_specify_az == 'sg_and_share':
             s_kwargs['availability_zone'] = azs[0]

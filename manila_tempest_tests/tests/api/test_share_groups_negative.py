@@ -67,7 +67,6 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             size=cls.share_size,
             share_type_id=cls.share_type_id,
             share_group_id=cls.share_group['id'],
-            experimental=True,
         )
         # Create a share group snapshot of the share group
         cls.sg_snap_name = data_utils.rand_name("tempest-sg-snap-name")
