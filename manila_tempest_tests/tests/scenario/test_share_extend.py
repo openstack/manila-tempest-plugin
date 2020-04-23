@@ -71,10 +71,9 @@ class ShareExtendBase(manager.ShareScenarioTest):
         LOG.debug('Step 4 - grant access')
         self.provide_access_to_auxiliary_instance(instance, share=share)
 
-        locations = self.get_share_export_locations(share)
-
         LOG.debug('Step 5 - mount')
-        self.mount_share(locations[0], remote_client)
+        location = self.get_share_export_location_for_mount(share)
+        self.mount_share(location, remote_client)
 
         total_blocks = (units.Ki * default_share_size) / 64
         three_quarter_blocks = (total_blocks / 4) * 3
@@ -107,7 +106,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
         self.assertEqual(extended_share_size, int(share["size"]))
 
         LOG.debug('Step 8 - writing more data, should succeed')
-        self.write_data_with_remount(locations[0], remote_client, '/mnt/t3',
+        self.write_data_with_remount(location, remote_client, '/mnt/t3',
                                      '64M', over_one_quarter_blocks)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)

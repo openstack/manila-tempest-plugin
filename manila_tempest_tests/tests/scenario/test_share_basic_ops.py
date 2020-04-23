@@ -52,20 +52,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                        cls.protocol)
             raise cls.skipException(message)
 
-    def get_ip_and_version_from_export_location(self, export):
-        export = export.replace('[', '').replace(']', '')
-        if self.protocol == 'nfs' and ':/' in export:
-            ip = export.split(':/')[0]
-            version = 6 if ip.count(':') > 1 else 4
-        elif self.protocol == 'cifs' and export.startswith(r'\\'):
-            ip = export.split('\\')[2]
-            version = 6 if (ip.count(':') > 1 or
-                            ip.endswith('ipv6-literal.net')) else 4
-        else:
-            message = ("Protocol %s is not supported" % self.protocol)
-            raise self.skipException(message)
-        return ip, version
-
     def _ping_host_from_export_location(self, export, remote_client):
         ip, version = self.get_ip_and_version_from_export_location(export)
         if version == 6:
@@ -73,46 +59,11 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         else:
             remote_client.exec_command("ping -c 5 %s" % ip)
 
-    def _get_export_locations_according_to_ip_version(
-            self, all_locations, error_on_invalid_ip_version):
-        locations = [
-            x for x in all_locations
-            if self.get_ip_and_version_from_export_location(
-                x)[1] == self.ip_version]
-
-        if len(locations) == 0 and not error_on_invalid_ip_version:
-            message = ("Configured backend does not support "
-                       "ip_version %s" % self.ip_version)
-            raise self.skipException(message)
-        return locations
-
-    def _get_user_export_locations(self, share=None, snapshot=None,
-                                   error_on_invalid_ip_version=False):
-        locations = None
-        if share:
-            locations = self.get_share_export_locations(share)
-        elif snapshot:
-            locations = self._get_snapshot_export_locations(snapshot)
-
-        self.assertNotEmpty(locations)
-        locations = self._get_export_locations_according_to_ip_version(
-            locations, error_on_invalid_ip_version)
-        self.assertNotEmpty(locations)
-
-        return locations
-
-    def _get_snapshot_export_locations(self, snapshot):
-        exports = (self.shares_v2_client.
-                   list_snapshot_export_locations(snapshot['id']))
-        locations = [x['path'] for x in exports]
-
-        return locations
-
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
         instance = self.boot_instance(wait_until="BUILD")
         self.create_share()
-        locations = self._get_user_export_locations(self.share)
+        locations = self.get_user_export_locations(self.share)
         instance = self.wait_for_active_instance(instance["id"])
         remote_client = self.init_remote_client(instance)
         self.provide_access_to_auxiliary_instance(instance)
@@ -128,7 +79,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         instance = self.boot_instance(wait_until="BUILD")
         self.create_share()
-        location = self._get_user_export_locations(self.share)[0]
+        location = self.get_user_export_locations(self.share)[0]
         instance = self.wait_for_active_instance(instance["id"])
 
         remote_client_inst = self.init_remote_client(instance)
@@ -156,7 +107,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         instance1 = self.boot_instance(wait_until="BUILD")
         instance2 = self.boot_instance(wait_until="BUILD")
         self.create_share()
-        location = self._get_user_export_locations(self.share)[0]
+        location = self.get_user_export_locations(self.share)[0]
         instance1 = self.wait_for_active_instance(instance1["id"])
         instance2 = self.wait_for_active_instance(instance2["id"])
 
@@ -213,7 +164,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         instance = self.boot_instance(wait_until="BUILD")
         self.create_share()
-        exports = self._get_user_export_locations(self.share)
+        exports = self.get_user_export_locations(self.share)
         instance = self.wait_for_active_instance(instance["id"])
         self.share = self.shares_admin_v2_client.get_share(self.share['id'])
 
@@ -269,7 +220,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         self.share = self.migration_complete(self.share['id'], dest_pool)
 
-        new_exports = self._get_user_export_locations(
+        new_exports = self.get_user_export_locations(
             self.share, error_on_invalid_ip_version=True)
 
         self.assertEqual(dest_pool, self.share['host'])
@@ -307,7 +258,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance, parent_share)
 
         # 5 - Try mount S1 to UVM, ok, mounted
-        user_export_location = self._get_user_export_locations(parent_share)[0]
+        user_export_location = self.get_user_export_locations(parent_share)[0]
         parent_share_dir = "/mnt/parent"
         remote_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
 
@@ -329,7 +280,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 10 - Try mount S2 - fail, access denied. We test that child share
         #      did not get access rules from parent share.
-        user_export_location = self._get_user_export_locations(child_share)[0]
+        user_export_location = self.get_user_export_locations(child_share)[0]
         child_share_dir = "/mnt/child"
         remote_client.exec_command("sudo mkdir -p %s" % child_share_dir)
 
@@ -391,7 +342,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance, parent_share)
 
         # 5 - Try mount S1 to UVM, ok, mounted
-        user_export_location = self._get_user_export_locations(parent_share)[0]
+        user_export_location = self.get_user_export_locations(parent_share)[0]
         parent_share_dir = "/mnt/parent"
         snapshot_dir = "/mnt/snapshot_dir"
         remote_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
@@ -414,7 +365,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.provide_access_to_auxiliary_instance(instance, snapshot=snapshot)
 
         # 10 - Mount SS1
-        user_export_location = self._get_user_export_locations(
+        user_export_location = self.get_user_export_locations(
             snapshot=snapshot)[0]
         self.mount_share(user_export_location, remote_client, snapshot_dir)
         self.addCleanup(self.unmount_share, remote_client, snapshot_dir)
