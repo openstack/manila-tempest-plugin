@@ -711,7 +711,7 @@ class BaseSharesTest(test.BaseTestCase):
                  service['binary'] == 'manila-share' and
                  service['state'] == 'up' and
                  re.search(backends, service['host'])]
-        return zones
+        return list(set(zones))
 
     @classmethod
     def get_pools_matching_share_type(cls, share_type, client=None):
