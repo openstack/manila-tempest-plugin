@@ -91,7 +91,16 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         self.shares_v2_client.shrink_share(share['id'],
                                            new_size=default_share_size)
         self.shares_v2_client.wait_for_share_status(
-            share['id'], 'shrinking_possible_data_loss_error')
+            share['id'], ['shrinking_possible_data_loss_error', 'available'])
+
+        share = self.shares_v2_client.get_share(share["id"])
+
+        if share["status"] == constants.STATUS_AVAILABLE:
+            params = {'resource_id': share['id']}
+            messages = self.shares_v2_client.list_messages(params=params)
+            self.assertIn('009',
+                          [message['action_id'] for message in messages])
+            self.assertEqual(share_size, int(share["size"]))
 
         LOG.debug('Step 9 - delete data')
         remote_client.exec_command("sudo rm /mnt/t1")
@@ -99,9 +108,12 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
+        # Deletion of files can be an asynchronous activity on the backend.
+        # Thus we need to wait until timeout for the space to be released
+        # and repeating the shrink request until success
         LOG.debug('Step 10 - reset and shrink')
         self.share_shrink_retry_until_success(share["id"],
-                                              share_size=default_share_size)
+                                              new_size=default_share_size)
 
         share = self.shares_v2_client.get_share(share["id"])
         self.assertEqual(default_share_size, int(share["size"]))
@@ -115,37 +127,39 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         LOG.debug('Step 12 - unmount')
         self.unmount_share(remote_client)
 
-    def share_shrink_retry_until_success(self, share_id, share_size,
+    def share_shrink_retry_until_success(self, share_id, new_size,
                                          status_attr='status'):
         """Try share reset, followed by shrink, until timeout"""
 
         check_interval = CONF.share.build_interval * 2
-        body = self.shares_v2_client.get_share(share_id)
-        share_status = body[status_attr]
+        share = self.shares_v2_client.get_share(share_id)
+        share_current_size = share["size"]
+        share_status = share[status_attr]
         start = int(time.time())
-
-        while share_status != constants.STATUS_AVAILABLE:
-            if share_status != constants.STATUS_SHRINKING:
+        while share_current_size != new_size:
+            if (share_status ==
+                    constants.STATUS_SHRINKING_POSSIBLE_DATA_LOSS_ERROR):
                 self.shares_admin_v2_client.reset_state(
                     share_id, status=constants.STATUS_AVAILABLE)
+            elif share_status != constants.STATUS_SHRINKING:
                 try:
                     self.shares_v2_client.shrink_share(share_id,
-                                                       new_size=share_size)
+                                                       new_size=new_size)
                 except exceptions.BadRequest as e:
-                    if ('New size for shrink must be less '
-                       'than current size') in six.text_type(e):
+                    if ('New size for shrink must be less than current size'
+                            in six.text_type(e)):
                         break
-            time.sleep(check_interval)
-            body = self.shares_v2_client.get_share(share_id)
-            share_status = body[status_attr]
-            if share_status == constants.STATUS_AVAILABLE:
-                return
 
+            time.sleep(check_interval)
+            share = self.shares_v2_client.get_share(share_id)
+            share_status = share[status_attr]
+            share_current_size = share["size"]
+            if share_current_size == new_size:
+                return
             if int(time.time()) - start >= CONF.share.build_timeout:
-                message = ("Share's %(status_attr)s failed to transition to "
-                           "%(status)s within the required time %(seconds)s." %
-                           {"status_attr": status_attr,
-                            "status": constants.STATUS_AVAILABLE,
+                message = ("Share %(share_id)s failed to shrink within the "
+                           "required time %(seconds)s." %
+                           {"share_id": share["id"],
                             "seconds": CONF.share.build_timeout})
                 raise exceptions.TimeoutException(message)
 

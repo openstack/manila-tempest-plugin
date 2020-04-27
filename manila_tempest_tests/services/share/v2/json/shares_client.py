@@ -403,20 +403,21 @@ class SharesV2Client(shares_client.SharesClient):
         share_status = body[status_attr]
         start = int(time.time())
 
-        while share_status != status:
+        exp_status = status if isinstance(status, list) else [status]
+        while share_status not in exp_status:
             time.sleep(self.build_interval)
             body = self.get_share(share_id, version=version)
             share_status = body[status_attr]
-            if share_status == status:
+            if share_status in exp_status:
                 return
             elif 'error' in share_status.lower():
                 raise share_exceptions.ShareBuildErrorException(
                     share_id=share_id)
-
             if int(time.time()) - start >= self.build_timeout:
                 message = ("Share's %(status_attr)s failed to transition to "
-                           "%(status)s within the required time %(seconds)s." %
-                           {"status_attr": status_attr, "status": status,
+                           "%(status)s within the required "
+                           "time %(seconds)s." %
+                           {"status_attr": status_attr, "status": exp_status,
                             "seconds": self.build_timeout})
                 raise exceptions.TimeoutException(message)
 
