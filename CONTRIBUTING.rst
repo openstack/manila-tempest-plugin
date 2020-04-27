@@ -1,17 +1,35 @@
-If you would like to contribute to the development of OpenStack, you must
-follow the steps in this page:
+Contributor Guidelines
+======================
 
-   https://docs.openstack.org/infra/manual/developers.html
+The source repository for this project can be found at:
 
-If you already have a good understanding of how the system works and your
-OpenStack accounts are set up, you can skip to the development workflow
-section of this documentation to learn how changes to OpenStack should be
-submitted for review via the Gerrit tool:
+   https://opendev.org/openstack/manila-tempest-plugin
 
-   https://docs.openstack.org/infra/manual/developers.html#development-workflow
+Pull requests submitted through GitHub are not monitored.
 
-Pull requests submitted through GitHub will be ignored.
+To start contributing to OpenStack, follow the steps in the contribution guide
+to set up and use Gerrit:
 
-Bugs should be filed on Launchpad, not GitHub:
+   https://docs.openstack.org/contributors/code-and-documentation/quick-start.html
 
-   https://bugs.launchpad.net/manila-tempest-plugin
+Bugs should be filed against the Manila project on Launchpad:
+
+   https://bugs.launchpad.net/manila
+
+For more specific information about contributing to this repository, see the
+manila contributor guide. That guide has information regarding the team's task
+trackers, communicating with other project developers and contacting the
+core team. It also has plenty of tips and tricks to get started with a
+development environment to contribute to, and test changes within this
+tempest plugin repository:
+
+   https://docs.openstack.org/manila/latest/contributor/contributing.html
+
+Information regarding running tests from this repository is here:
+
+   https://docs.openstack.org/manila/latest/contributor/tempest_tests.html
+
+This project makes extensive use of tempest-lib, a stable interface to the
+Tempest project. You can read more about it here:
+
+   https://docs.openstack.org/tempest/latest/library.html
