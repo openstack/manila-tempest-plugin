@@ -63,9 +63,11 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
         self.assertIn(self.share['id'], share_ids, msg)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('2.3', '2.9', '2.10', '2.30')
+    @ddt.data('2.3', '2.9', '2.10', '2.30', '2.54')
     def test_get_share_instance(self, version):
         """Test that we get the proper keys back for the instance."""
+        self.skip_if_microversion_not_supported(version)
+
         share_instances = self.shares_v2_client.get_instances_of_share(
             self.share['id'], version=version,
         )
@@ -87,6 +89,8 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
             expected_keys.append("share_type_id")
         if utils.is_microversion_ge(version, '2.30'):
             expected_keys.append("cast_rules_to_readonly")
+        if utils.is_microversion_ge(version, '2.54'):
+            expected_keys.append("progress")
         expected_keys = sorted(expected_keys)
         actual_keys = sorted(si.keys())
         self.assertEqual(expected_keys, actual_keys,

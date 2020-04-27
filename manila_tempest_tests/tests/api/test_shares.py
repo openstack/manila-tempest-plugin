@@ -104,6 +104,12 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             detailed_elements.add('create_share_from_snapshot_support')
             self.assertTrue(detailed_elements.issubset(share.keys()), msg)
 
+        # In v 2.54 and beyond, we expect key 'progress' in the share data
+        # returned by the share create API.
+        if utils.is_microversion_supported('2.54'):
+            detailed_elements.add('progress')
+            self.assertTrue(detailed_elements.issubset(share.keys()), msg)
+
         # Delete share
         self.shares_v2_client.delete_share(share['id'])
         self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
