@@ -4,11 +4,11 @@
       - tempest-plugin-jobs
     check:
       jobs:
+        - manila-tempest-plugin-zfsonlinux:
+            voting: false
         - manila-tempest-dsvm-mysql-generic:
             voting: false
         - manila-tempest-dsvm-postgres-container:
-            voting: false
-        - manila-tempest-dsvm-postgres-zfsonlinux:
             voting: false
         - manila-tempest-dsvm-postgres-generic-singlebackend:
             voting: false
