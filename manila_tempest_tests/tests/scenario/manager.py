@@ -734,14 +734,15 @@ class NetworkScenarioTest(ScenarioTest):
         return self.os_admin.networks_client.list_networks()['networks']
 
     def create_floating_ip(self, thing, external_network_id=None,
-                           port_id=None, client=None):
+                           port_id=None, ip_addr=None, client=None):
         """Create a floating IP and associates to a resource/port on Neutron"""
         if not external_network_id:
             external_network_id = CONF.network.public_network_id
         if not client:
             client = self.floating_ips_client
         if not port_id:
-            port_id, ip4 = self._get_server_port_id_and_ip4(thing)
+            port_id, ip4 = self._get_server_port_id_and_ip4(thing,
+                                                            ip_addr=ip_addr)
         else:
             ip4 = None
         result = client.create_floatingip(

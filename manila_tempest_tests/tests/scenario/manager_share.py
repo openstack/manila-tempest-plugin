@@ -158,10 +158,11 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def init_remote_client(self, instance):
         server_ip = None
         if self.ipv6_enabled:
-            server_ip = self._get_ipv6_server_ip(instance)
+            server_ip = self._get_ip_server_ip(instance, ip_version=6)
         if not server_ip:
+            ip_addr = self._get_ip_server_ip(instance)
             # Obtain a floating IP
-            floating_ip = self.create_floating_ip(instance)
+            floating_ip = self.create_floating_ip(instance, ip_addr=ip_addr)
             self.floating_ips[instance['id']] = floating_ip
             server_ip = floating_ip['floating_ip_address']
 
@@ -328,7 +329,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         client = client or self.shares_v2_client
         if not CONF.share.multitenancy_enabled:
             if self.ipv6_enabled and not self.storage_network:
-                server_ip = self._get_ipv6_server_ip(instance)
+                server_ip = self._get_ip_server_ip(instance, ip_version=6)
             else:
                 server_ip = (
                     CONF.share.override_ip_for_nfs_access
@@ -379,15 +380,15 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         return locations
 
-    def _get_ipv6_server_ip(self, instance):
-        ipv6_addrs = []
+    def _get_ip_server_ip(self, instance, ip_version=4):
+        ip_addrs = []
         for network_name, nic_list in instance['addresses'].items():
             if network_name == self.storage_network_name:
                 continue
             for nic_data in nic_list:
-                if nic_data['version'] == 6:
-                    ipv6_addrs.append(nic_data['addr'])
-        return ipv6_addrs[0] if ipv6_addrs else None
+                if nic_data['version'] == ip_version:
+                    ip_addrs.append(nic_data['addr'])
+        return ip_addrs[0] if ip_addrs else None
 
     def _create_share(self, share_protocol=None, size=None, name=None,
                       snapshot_id=None, description=None, metadata=None,
