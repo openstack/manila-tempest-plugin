@@ -158,9 +158,9 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def init_remote_client(self, instance):
         server_ip = None
         if self.ipv6_enabled:
-            server_ip = self._get_ip_server_ip(instance, ip_version=6)
+            server_ip = self._get_server_ip(instance, ip_version=6)
         if not server_ip:
-            ip_addr = self._get_ip_server_ip(instance)
+            ip_addr = self._get_server_ip(instance)
             # Obtain a floating IP
             floating_ip = self.create_floating_ip(instance, ip_addr=ip_addr)
             self.floating_ips[instance['id']] = floating_ip
@@ -329,7 +329,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         client = client or self.shares_v2_client
         if not CONF.share.multitenancy_enabled:
             if self.ipv6_enabled and not self.storage_network:
-                server_ip = self._get_ip_server_ip(instance, ip_version=6)
+                server_ip = self._get_server_ip(instance, ip_version=6)
             else:
                 server_ip = (
                     CONF.share.override_ip_for_nfs_access
@@ -380,7 +380,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         return locations
 
-    def _get_ip_server_ip(self, instance, ip_version=4):
+    def _get_server_ip(self, instance, ip_version=4):
         ip_addrs = []
         for network_name, nic_list in instance['addresses'].items():
             if network_name == self.storage_network_name:
