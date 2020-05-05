@@ -8,11 +8,11 @@
         - manila-tempest-minimal-dsvm-dummy
         - manila-tempest-plugin-zfsonlinux:
             voting: false
+        - manila-tempest-plugin-cephfs-native:
+            voting: false
         - manila-tempest-plugin-container:
             voting: false
         - manila-tempest-plugin-generic:
-            voting: false
-        - manila-tempest-minimal-dsvm-cephfs-native:
             voting: false
         - manila-tempest-minimal-dsvm-cephfs-nfs:
             voting: false

@@ -225,3 +225,37 @@
               backend_names: LONDON,PARIS
               multi_backend: true
               image_password: manila
+
+- job:
+    name: manila-tempest-plugin-cephfs-native
+    description: Test CephFS Native (DHSS=False)
+    parent: manila-tempest-plugin-base
+    required-projects:
+      - openstack/devstack-plugin-ceph
+    vars:
+      devstack_plugins:
+        devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
+      tempest_test_regex: manila_tempest_tests.tests.api
+      devstack_localrc:
+        SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
+        MANILA_ENABLED_BACKENDS: cephfsnative
+        ENABLED_SHARE_PROTOCOLS: CEPHFS
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=False'
+        MANILA_SERVICE_IMAGE_ENABLED: false
+        MANILA_OPTGROUP_cephfsnative_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
+        MANILA_OPTGROUP_cephfsnative_driver_handles_share_servers: false
+        MANILA_OPTGROUP_cephfsnative_cephfs_conf_path: /etc/ceph/ceph.conf
+        MANILA_OPTGROUP_cephfsnative_cephfs_auth_id: manila
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              enable_cephx_rules_for_protocols: cephfs
+              run_share_group_tests: false
+              run_snapshot_tests: false
+              multitenancy_enabled: false
+              suppress_errors_in_cleanup: true
+              backend_names: CEPHFSNATIVE
+              capability_snapshot_support: false
+              capability_storage_protocol: CEPHFS
+              enable_protocols: cephfs
