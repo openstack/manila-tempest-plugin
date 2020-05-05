@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from __future__ import print_function
-
 from oslo_config import cfg
 
 service_option = cfg.BoolOpt("manila",
