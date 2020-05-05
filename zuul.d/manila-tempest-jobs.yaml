@@ -1,0 +1,94 @@
+- job:
+    name: manila-tempest-plugin-base
+    abstract: true
+    description: Base job for devstack/tempest based manila jobs.
+    parent: devstack-tempest
+    timeout: 10800
+    required-projects:
+      - openstack/manila
+      - openstack/manila-image-elements
+      - openstack/manila-tempest-plugin
+      - openstack/python-manilaclient
+      - openstack/tempest
+    irrelevant-files:
+      - ^(test-|)requirements.txt$
+      - ^.*\.rst$
+      - ^api-ref/.*$
+      - ^doc/.*$
+      - ^manila/hacking/.*$
+      - ^manila/tests/.*$
+      - ^releasenotes/.*$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
+    vars:
+      tox_envlist: all
+      tempest_test_regex: manila_tempest_tests
+      tempest_concurrency: 8
+      tempest_plugins:
+        - manila-tempest-plugin
+      devstack_plugins:
+        manila: https://opendev.org/openstack/manila
+        manila-tempest-plugin: https://opendev.org/openstack/manila-tempest-plugin
+      devstack_services:
+        cinder: false
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        horizon: false
+        tls-proxy: true
+      devstack_localrc:
+        USE_PYTHON3: true
+        TEMPEST_USE_TEST_ACCOUNTS: true
+        MANILA_USE_DOWNGRADE_MIGRATIONS: true
+        MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
+        MANILA_ALLOW_NAS_SERVER_PORTS_ON_HOST: true
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
+
+
+- job:
+    name: manila-tempest-plugin-zfsonlinux
+    description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
+    parent: manila-tempest-plugin-base
+    vars:
+      tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
+      devstack_localrc:
+        SHARE_DRIVER: manila.share.drivers.zfsonlinux.driver.ZFSonLinuxShareDriver
+        MANILA_ENABLED_BACKENDS: london,paris
+        MANILA_BACKEND1_CONFIG_GROUP_NAME: london
+        MANILA_BACKEND2_CONFIG_GROUP_NAME: paris
+        MANILA_SHARE_BACKEND1_NAME: LONDON
+        MANILA_SHARE_BACKEND2_NAME: PARIS
+        MANILA_OPTGROUP_london_driver_handles_share_servers: false
+        MANILA_OPTGROUP_paris_driver_handles_share_servers: false
+        MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
+        MANILA_REPLICA_STATE_UPDATE_INTERVAL: 60
+        MANILA_ZFSONLINUX_SERVICE_IP: 127.0.0.1
+        MANILA_ZFSONLINUX_USE_SSH: true
+        MANILA_CONFIGURE_DEFAULT_TYPES: true
+        MANILA_USE_SCHEDULER_CREATING_SHARE_FROM_SNAPSHOT: true
+      devstack_services:
+        mysql: false
+        postgresql: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              default_share_type_name: default
+              run_driver_assisted_migration_tests: true
+              run_host_assisted_migration_tests: true
+              run_replication_tests: true
+              run_manage_unmanage_snapshot_tests: true
+              run_manage_unmanage_tests: true
+              run_multiple_share_replicas_tests: false
+              run_create_share_from_snapshot_in_another_pool_or_az_tests: true
+              backend_replication_type: readable
+              enable_protocols: nfs
+              capability_storage_protocol: NFS
+              build_timeout: 180
+              enable_ip_rules_for_protocols: nfs
+              multitenancy_enabled: False
+              backend_names: LONDON,PARIS
+              multi_backend: true
+              image_password: manila
