@@ -4,6 +4,8 @@
       - tempest-plugin-jobs
     check:
       jobs:
+        - manila-tempest-plugin-lvm
+        - manila-tempest-minimal-dsvm-dummy
         - manila-tempest-plugin-zfsonlinux:
             voting: false
         - manila-tempest-dsvm-mysql-generic:
@@ -20,13 +22,11 @@
             voting: false
         - manila-tempest-minimal-dsvm-cephfs-nfs:
             voting: false
-        - manila-tempest-minimal-dsvm-dummy
-        - manila-tempest-minimal-dsvm-lvm
     gate:
       queue: manila
       jobs:
         - manila-tempest-minimal-dsvm-dummy
-        - manila-tempest-minimal-dsvm-lvm
+        - manila-tempest-plugin-lvm
     experimental:
       jobs:
         - manila-tempest-dsvm-glusterfs-nfs:
