@@ -124,6 +124,9 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def mount_share(self, location, remote_client, target_dir=None):
         raise NotImplementedError
 
+    def allow_access(self, **kwargs):
+        raise NotImplementedError
+
     def unmount_share(self, remote_client, target_dir=None):
         target_dir = target_dir or "/mnt"
         remote_client.exec_command("sudo umount %s" % target_dir)
@@ -346,6 +349,54 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             return self.allow_access_ip(
                 share['id'], instance=instance, cleanup=False,
                 snapshot=snapshot, access_level=access_level, client=client)
+
+    def provide_access_to_client_identified_by_cephx(self, share=None,
+                                                     access_level='rw',
+                                                     access_to=None,
+                                                     remote_client=None,
+                                                     locations=None,
+                                                     client=None,
+                                                     oc_size=20971520):
+        share = share or self.share
+        client = client or self.shares_v2_client
+        access_to = access_to or data_utils.rand_name(
+            self.__class__.__name__ + '-cephx-id')
+        # Check if access is already granted to the client
+        access = self.shares_v2_client.list_access_rules(
+            share['id'], metadata={'metadata': {'access_to': access_to}})
+        access = access[0] if access else None
+
+        if not access:
+            access = self._allow_access(
+                share['id'], access_level=access_level, access_to=access_to,
+                access_type="cephx", cleanup=False, client=client)
+            # Set metadata to access rule to be filtered if necessary.
+            # This is necessary to prevent granting access to a client who
+            # already has.
+            self.shares_v2_client.update_access_metadata(
+                metadata={"access_to": "{}".format(access_to)},
+                access_id=access['id'])
+        get_access = self.shares_v2_client.get_access(access['id'])
+        # Set 'access_key' and 'access_to' attributes for being use in mount
+        # operation.
+        setattr(self, 'access_key', get_access['access_key'])
+        setattr(self, 'access_to', access_to)
+
+        remote_client.exec_command(
+            "sudo crudini --set {access_to}.keyring client.{access_to} key "
+            "{access_key}"
+            .format(access_to=access_to, access_key=self.access_key))
+        remote_client.exec_command(
+            "sudo crudini --set ceph.conf client \"client quota\" true")
+        remote_client.exec_command(
+            "sudo crudini --set ceph.conf client \"client oc size\" {}"
+            .format(oc_size))
+        if not isinstance(locations, list):
+            locations = [locations]
+        remote_client.exec_command(
+            "sudo crudini --set ceph.conf client \"mon host\" {}"
+            .format(locations[0].split(':/')[0]))
+        return access
 
     def wait_for_active_instance(self, instance_id):
         waiters.wait_for_server_status(
@@ -598,9 +649,10 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             locations = self._get_snapshot_export_locations(snapshot)
 
         self.assertNotEmpty(locations)
-        locations = self._get_export_locations_according_to_ip_version(
-            locations, error_on_invalid_ip_version)
-        self.assertNotEmpty(locations)
+        if self.protocol != 'cephfs':
+            locations = self._get_export_locations_according_to_ip_version(
+                locations, error_on_invalid_ip_version)
+            self.assertNotEmpty(locations)
 
         return locations
 
@@ -630,3 +682,39 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             message = ("Protocol %s is not supported" % self.protocol)
             raise self.skipException(message)
         return ip, version
+
+
+class BaseShareCEPHFSTest(ShareScenarioTest):
+
+    def allow_access(self, access_level='rw', **kwargs):
+        return self.provide_access_to_client_identified_by_cephx(
+            remote_client=kwargs['remote_client'],
+            locations=kwargs['locations'], access_level=access_level)
+
+    def _fuse_client(self, mountpoint, remote_client, target_dir, access_to):
+        remote_client.exec_command(
+            "sudo ceph-fuse {target_dir} --id={access_to} --conf=ceph.conf "
+            "--keyring={access_to}.keyring --client-mountpoint={mountpoint}"
+            .format(target_dir=target_dir, access_to=access_to,
+                    mountpoint=mountpoint))
+
+    def mount_share(self, location, remote_client, target_dir=None,
+                    access_to=None):
+        target_dir = target_dir or "/mnt"
+        access_to = access_to or self.access_to
+        mountpoint = location.split(':')[-1]
+        if getattr(self, 'mount_client', None):
+            return self._fuse_client(mountpoint, remote_client, target_dir,
+                                     access_to=access_to)
+        remote_client.exec_command(
+            "sudo mount -t ceph {location} {target_dir} -o name={access_to},"
+            "secret={access_key}"
+            .format(location=location, target_dir=target_dir,
+                    access_to=access_to, access_key=self.access_key))
+
+    def unmount_share(self, remote_client, target_dir=None):
+        target_dir = target_dir or "/mnt"
+        if getattr(self, 'mount_client', None):
+            return remote_client.exec_command(
+                "sudo fusermount -uz %s" % target_dir)
+        super(BaseShareCEPHFSTest, self).unmount_share(remote_client)
