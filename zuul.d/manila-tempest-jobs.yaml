@@ -187,3 +187,41 @@
               multitenancy_enabled: true
               backend_names: LONDON,PARIS
               multi_backend: true
+
+- job:
+    name: manila-tempest-plugin-generic
+    description: |
+      Test the generic driver multibackend (DHSS=True) with NFS and CIFS
+    parent: manila-tempest-plugin-base
+    vars:
+      tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
+      # The generic driver uses nova VMs as share servers; running with a
+      # high concurrency could starve the driver of RAM/Disk/CPUs to
+      # function properly in a small single node devstack VM.
+      tempest_concurrency: 2
+      devstack_localrc:
+        VOLUME_BACKING_FILE_SIZE: 24G
+        SHARE_DRIVER: manila.share.drivers.generic.GenericShareDriver
+        MANILA_ENABLED_BACKENDS: london,paris
+        MANILA_BACKEND1_CONFIG_GROUP_NAME: london
+        MANILA_BACKEND2_CONFIG_GROUP_NAME: paris
+        MANILA_SHARE_BACKEND1_NAME: LONDON
+        MANILA_SHARE_BACKEND2_NAME: PARIS
+        MANILA_OPTGROUP_london_driver_handles_share_servers: true
+        MANILA_OPTGROUP_paris_driver_handles_share_servers: true
+        MANILA_USE_SERVICE_INSTANCE_PASSWORD: true
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
+      devstack_services:
+        cinder: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              default_share_type_name: default
+              run_share_group_tests: false
+              multitenancy_enabled: true
+              suppress_errors_in_cleanup: true
+              share_creation_retry_number: 2
+              backend_names: LONDON,PARIS
+              multi_backend: true
+              image_password: manila
