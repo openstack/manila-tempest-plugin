@@ -147,3 +147,43 @@
               backend_names: LONDON,PARIS
               multi_backend: true
               image_password: manila
+
+- job:
+    name: manila-tempest-plugin-container
+    description: |
+      Test the container driver multibackend (DHSS=False) with CIFS
+      and postgresql db. API only, in a minimal devstack
+    parent: manila-tempest-plugin-base
+    vars:
+      tempest_test_regex: manila_tempest_tests.tests.api
+      devstack_localrc:
+        SHARE_DRIVER: manila.share.drivers.container.driver.ContainerShareDriver
+        MANILA_SERVICE_IMAGE_ENABLED: false
+        MANILA_ENABLED_BACKENDS: london,paris
+        MANILA_BACKEND1_CONFIG_GROUP_NAME: london
+        MANILA_BACKEND2_CONFIG_GROUP_NAME: paris
+        MANILA_SHARE_BACKEND1_NAME: LONDON
+        MANILA_SHARE_BACKEND2_NAME: PARIS
+        MANILA_OPTGROUP_london_driver_handles_share_servers: true
+        MANILA_OPTGROUP_paris_driver_handles_share_servers: true
+        SHARE_BACKING_FILE_SIZE: 64000M
+        MANILA_CONFIGURE_DEFAULT_TYPES: false
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=false'
+      devstack_services:
+        mysql: false
+        postgresql: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              enable_ip_rules_for_protocols: ""
+              run_share_group_tests: false
+              run_manage_unmanage_tests: true
+              run_snapshot_tests: false
+              run_shrink_tests: false
+              enable_user_rules_for_protocols: cifs
+              enable_protocols: cifs
+              capability_storage_protocol: CIFS
+              multitenancy_enabled: true
+              backend_names: LONDON,PARIS
+              multi_backend: true

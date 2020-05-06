@@ -8,9 +8,9 @@
         - manila-tempest-minimal-dsvm-dummy
         - manila-tempest-plugin-zfsonlinux:
             voting: false
-        - manila-tempest-dsvm-mysql-generic:
+        - manila-tempest-plugin-container:
             voting: false
-        - manila-tempest-dsvm-postgres-container:
+        - manila-tempest-dsvm-mysql-generic:
             voting: false
         - manila-tempest-dsvm-postgres-generic-singlebackend:
             voting: false
