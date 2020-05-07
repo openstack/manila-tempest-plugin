@@ -267,3 +267,47 @@
               capability_storage_protocol: CEPHFS
               enable_protocols: cephfs
               image_password: manila
+
+
+- job:
+    name: manila-tempest-plugin-cephfs-nfs
+    description: Test CephFS NFS (DHSS=False)
+    parent: manila-tempest-plugin-base
+    required-projects:
+      - openstack/devstack-plugin-ceph
+      - openstack/neutron-dynamic-routing
+    vars:
+      devstack_plugins:
+        devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
+        neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
+      devstack_localrc:
+        SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
+        MANILA_ENABLED_BACKENDS: cephfsnfs
+        ENABLED_SHARE_PROTOCOLS: NFS
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True'
+        MANILA_SERVICE_IMAGE_ENABLED: true
+        MANILA_OPTGROUP_cephfsnfs_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
+        MANILA_OPTGROUP_cephfsnfs_driver_handles_share_servers: false
+        MANILA_OPTGROUP_cephfsnfs_cephfs_protocol_helper_type: NFS
+        MANILA_OPTGROUP_cephfsnfs_cephfs_conf_path: /etc/ceph/ceph.conf
+        MANILA_OPTGROUP_cephfsnfs_cephfs_auth_id: manila
+        MANILA_CEPH_DRIVER: cephfsnfs
+        MANILA_SETUP_IPV6: true
+        NEUTRON_CREATE_INITIAL_NETWORKS: false
+        MANILA_RESTORE_IPV6_DEFAULT_ROUTE: false
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              default_share_type_name: default
+              run_ipv6_tests: true
+              run_share_group_tests: false
+              multitenancy_enabled: false
+              suppress_errors_in_cleanup: true
+              backend_names: CEPHFSNFS
+              enable_protocols: nfs
+              capability_storage_protocol: NFS
+              capability_create_share_from_snapshot_support: false
+              image_password: manila
+
+
