@@ -4,13 +4,12 @@
     description: Base job for devstack/tempest based manila jobs.
     parent: devstack-tempest
     timeout: 10800
-    required-projects:
+    required-projects: &manila-tempest-required-projects
       - openstack/manila
-      - openstack/manila-image-elements
       - openstack/manila-tempest-plugin
       - openstack/python-manilaclient
       - openstack/tempest
-    irrelevant-files:
+    irrelevant-files: &irrelevant-files
       - ^(test-|)requirements.txt$
       - ^.*\.rst$
       - ^api-ref/.*$
@@ -21,7 +20,7 @@
       - ^setup.cfg$
       - ^tools/.*$
       - ^tox.ini$
-    vars:
+    vars: &manila-tempest-base-vars
       tox_envlist: all
       tempest_test_regex: manila_tempest_tests
       tempest_concurrency: 8
@@ -45,7 +44,20 @@
         MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_ALLOW_NAS_SERVER_PORTS_ON_HOST: true
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
+        MANILA_CONFIGURE_DEFAULT_TYPES: true
 
+
+- job:
+    name: manila-tempest-plugin-ipv6-base
+    abstract: true
+    description: |
+      Base job for devstack/tempest based manila jobs in a 4+6 (dual-stack)
+      devstack environment with IPv6 control plane endpoints.
+    parent: devstack-tempest-ipv6
+    timeout: 10800
+    irrelevant-files: *irrelevant-files
+    required-projects: *manila-tempest-required-projects
+    vars: *manila-tempest-base-vars
 
 - job:
     name: manila-tempest-plugin-zfsonlinux
@@ -66,7 +78,6 @@
         MANILA_REPLICA_STATE_UPDATE_INTERVAL: 60
         MANILA_ZFSONLINUX_SERVICE_IP: 127.0.0.1
         MANILA_ZFSONLINUX_USE_SSH: true
-        MANILA_CONFIGURE_DEFAULT_TYPES: true
         MANILA_USE_SCHEDULER_CREATING_SHARE_FROM_SNAPSHOT: true
       devstack_services:
         mysql: false
@@ -87,6 +98,50 @@
               enable_protocols: nfs
               capability_storage_protocol: NFS
               build_timeout: 180
+              enable_ip_rules_for_protocols: nfs
+              multitenancy_enabled: False
+              backend_names: LONDON,PARIS
+              multi_backend: true
+              image_password: manila
+
+- job:
+    name: manila-tempest-plugin-lvm
+    description: |
+      Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
+      environment with IPv6 control plane endpoints.
+    parent: manila-tempest-plugin-ipv6-base
+    required-projects:
+      - openstack/neutron-dynamic-routing
+    vars:
+      tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
+      devstack_localrc:
+        SHARE_DRIVER: manila.share.drivers.lvm.LVMShareDriver
+        MANILA_ENABLED_BACKENDS: london,paris
+        MANILA_BACKEND1_CONFIG_GROUP_NAME: london
+        MANILA_BACKEND2_CONFIG_GROUP_NAME: paris
+        MANILA_SHARE_BACKEND1_NAME: LONDON
+        MANILA_SHARE_BACKEND2_NAME: PARIS
+        MANILA_OPTGROUP_london_driver_handles_share_servers: false
+        MANILA_OPTGROUP_paris_driver_handles_share_servers: false
+        SHARE_BACKING_FILE_SIZE: 32000M
+        MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True revert_to_snapshot_support=True mount_snapshot_support=True'
+        MANILA_SETUP_IPV6: true
+        NEUTRON_CREATE_INITIAL_NETWORKS: false
+        MANILA_RESTORE_IPV6_DEFAULT_ROUTE: false
+      devstack_plugins:
+        neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              default_share_type_name: default
+              run_ipv6_tests: true
+              run_mount_snapshot_tests: true
+              run_host_assisted_migration_tests: true
+              run_shrink_tests: false
+              run_revert_to_snapshot_tests: true
+              enable_user_rules_for_protocols: cifs
               enable_ip_rules_for_protocols: nfs
               multitenancy_enabled: False
               backend_names: LONDON,PARIS
