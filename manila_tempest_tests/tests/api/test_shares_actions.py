@@ -545,10 +545,10 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
     def test_list_snapshots_with_detail_use_limit(self):
-        for l, o in [('1', '1'), ('0', '1')]:
+        for limit, offset in [('1', '1'), ('0', '1')]:
             filters = {
-                'limit': l,
-                'offset': o,
+                'limit': limit,
+                'offset': offset,
                 'share_id': self.shares[0]['id'],
             }
 

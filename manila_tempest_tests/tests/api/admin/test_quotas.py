@@ -118,7 +118,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
             self.tenant_id, self.user_id,
             version=PRE_SHARE_REPLICA_QUOTAS_MICROVERSION)
 
-        for key in('share_replicas', 'replica_gigabytes'):
+        for key in ('share_replicas', 'replica_gigabytes'):
             self.assertNotIn(key, quotas)
 
     @ddt.data(
