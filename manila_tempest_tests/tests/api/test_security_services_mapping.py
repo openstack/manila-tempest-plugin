@@ -31,7 +31,9 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         # create share network
         data = self.generate_share_network_data()
 
-        self.sn = self.create_share_network(client=self.cl, **data)
+        self.sn = self.create_share_network(client=self.cl,
+                                            add_security_services=False,
+                                            **data)
         self.assertDictContainsSubset(data, self.sn)
 
         # create security service

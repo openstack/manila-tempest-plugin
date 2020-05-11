@@ -439,11 +439,6 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
     def test_migration_opposite_driver_modes(self, force_host_assisted):
         self._check_migration_enabled(force_host_assisted)
 
-        share = self.create_share(self.protocol,
-                                  share_type_id=self.share_type_id)
-        share = self.shares_v2_client.get_share(share['id'])
-        share, dest_pool = self._setup_migration(share, opposite=True)
-
         if not CONF.share.multitenancy_enabled:
             # If currently configured is DHSS=False,
             # then we need it for DHSS=True
@@ -456,6 +451,12 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
             # If currently configured is DHSS=True,
             # then we must pass None for DHSS=False
             new_share_network_id = None
+
+        share = self.create_share(self.protocol,
+                                  share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+        share = self.shares_v2_client.get_share(share['id'])
+        share, dest_pool = self._setup_migration(share, opposite=True)
 
         old_share_network_id = share['share_network_id']
         old_share_type_id = share['share_type']
