@@ -495,6 +495,31 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_resource_deletion(
             rule_id=rule["id"], share_id=self.share['id'])
 
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_different_users_in_same_tenant_can_use_same_cephx_id(self):
+        # Grant access to the share
+        access1 = self.shares_v2_client.create_access_rule(
+            self.share['id'], self.access_type, self.access_to, 'rw')
+        self.shares_v2_client.wait_for_access_rule_status(
+            self.share['id'], access1['id'], 'active')
+
+        # Create a new user in the current project
+        project = self.os_admin.projects_client.show_project(
+            self.tenant_id)['project']
+        user_client = self.create_user_and_get_client(project)
+
+        # Create second share by the new user
+        share2 = self.create_share(client=user_client.shares_v2_client,
+                                   share_protocol=self.protocol,
+                                   share_type_id=self.share_type_id)
+
+        # Grant access to the second share using the same cephx ID that was
+        # used in access1
+        access2 = user_client.shares_v2_client.create_access_rule(
+            share2['id'], self.access_type, self.access_to, 'rw')
+        user_client.shares_v2_client.wait_for_access_rule_status(
+            share2['id'], access2['id'], 'active')
+
 
 @ddt.ddt
 class ShareRulesTest(base.BaseSharesMixedTest):
