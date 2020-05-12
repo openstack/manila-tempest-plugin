@@ -291,7 +291,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         if instance and not ip:
             try:
                 net_addresses = instance['addresses']
-                first_address = net_addresses.values()[0][0]
+                first_address = list(net_addresses.values())[0][0]
                 ip = first_address['addr']
             except Exception:
                 LOG.debug("Instance has no valid IP address: %s", instance)
