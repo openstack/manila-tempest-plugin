@@ -135,8 +135,8 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_share_from_snapshot_across_azs(self):
-        azs = next(self.rep_domain_azs[rep] for rep in self.rep_domain_azs if
-                   len(self.rep_domain_azs[rep]) > 1)
+        azs = next((self.rep_domain_azs[rep] for rep in self.rep_domain_azs if
+                    len(self.rep_domain_azs[rep]) > 1), None)
         if azs is None:
             msg = ("Could not find the necessary azs. At least two azs "
                    "are needed to run the test to create share from snapshot "
