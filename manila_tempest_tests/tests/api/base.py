@@ -799,14 +799,15 @@ class BaseSharesTest(test.BaseTestCase):
             status_attr="replica_state")
         return replica
 
-    def _get_access_rule_data_from_config(self):
+    @classmethod
+    def _get_access_rule_data_from_config(cls):
         """Get the first available access type/to combination from config.
 
         This method opportunistically picks the first configured protocol
         to create the share. Do not use this method in tests where you need
         to test depth and breadth in the access types and access recipients.
         """
-        protocol = self.shares_v2_client.share_protocol
+        protocol = cls.shares_v2_client.share_protocol
 
         if protocol in CONF.share.enable_ip_rules_for_protocols:
             access_type = "ip"
@@ -822,7 +823,7 @@ class BaseSharesTest(test.BaseTestCase):
             access_to = "eve"
         else:
             message = "Unrecognized protocol and access rules configuration."
-            raise self.skipException(message)
+            raise cls.skipException(message)
 
         return access_type, access_to
 

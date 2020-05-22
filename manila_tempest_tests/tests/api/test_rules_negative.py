@@ -386,18 +386,6 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
                           access_level="su")
 
 
-def skip_if_cephx_access_type_not_supported_by_client(self, client):
-    if client == 'shares_client':
-        version = '1.0'
-    else:
-        version = LATEST_MICROVERSION
-    if (CONF.share.enable_cephx_rules_for_protocols and
-            utils.is_microversion_lt(version, '2.13')):
-        msg = ("API version %s does not support cephx access type, need "
-               "version >= 2.13." % version)
-        raise self.skipException(msg)
-
-
 @ddt.ddt
 class ShareRulesNegativeTest(base.BaseSharesMixedTest):
     # Tests independent from rule type and share protocol
@@ -427,7 +415,6 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_delete_access_rule_with_wrong_id(self, client_name):
-        skip_if_cephx_access_type_not_supported_by_client(self, client_name)
         self.assertRaises(lib_exc.NotFound,
                           getattr(self, client_name).delete_access_rule,
                           self.share["id"], "wrong_rule_id")
@@ -435,7 +422,6 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_create_access_rule_ip_with_wrong_type(self, client_name):
-        skip_if_cephx_access_type_not_supported_by_client(self, client_name)
         self.assertRaises(lib_exc.BadRequest,
                           getattr(self, client_name).create_access_rule,
                           self.share["id"], "wrong_type", "1.2.3.4")
@@ -445,7 +431,6 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
     def test_create_access_rule_ip_to_snapshot(self, client_name):
-        skip_if_cephx_access_type_not_supported_by_client(self, client_name)
         self.assertRaises(lib_exc.NotFound,
                           getattr(self, client_name).create_access_rule,
                           self.snap["id"])
@@ -457,7 +442,6 @@ class ShareRulesAPIOnlyNegativeTest(base.BaseSharesTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_create_access_rule_ip_with_wrong_share_id(self, client_name):
-        skip_if_cephx_access_type_not_supported_by_client(self, client_name)
         self.assertRaises(lib_exc.NotFound,
                           getattr(self, client_name).create_access_rule,
                           "wrong_share_id")

@@ -498,6 +498,12 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
 
 @ddt.ddt
 class ShareRulesTest(base.BaseSharesMixedTest):
+    """A Test class to test access rules generically.
+
+    Tests in this class don't care about the type of access rule or the
+    protocol of the share created. They are meant to test the API semantics
+    of the access rules APIs.
+    """
 
     @classmethod
     def skip_checks(cls):
@@ -516,23 +522,10 @@ class ShareRulesTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ShareRulesTest, cls).resource_setup()
-        if CONF.share.enable_ip_rules_for_protocols:
-            cls.protocol = CONF.share.enable_ip_rules_for_protocols[0]
-            cls.access_type = "ip"
-            cls.access_to = "8.8.8.8"
-        elif CONF.share.enable_user_rules_for_protocols:
-            cls.protocol = CONF.share.enable_user_rules_for_protocols[0]
-            cls.access_type = "user"
-            cls.access_to = CONF.share.username_for_user_rules
-        elif CONF.share.enable_cert_rules_for_protocols:
-            cls.protocol = CONF.share.enable_cert_rules_for_protocols[0]
-            cls.access_type = "cert"
-            cls.access_to = "client3.com"
-        elif CONF.share.enable_cephx_rules_for_protocols:
-            cls.protocol = CONF.share.enable_cephx_rules_for_protocols[0]
-            cls.access_type = "cephx"
-            cls.access_to = "eve"
-        cls.shares_v2_client.share_protocol = cls.protocol
+        cls.protocol = cls.shares_v2_client.share_protocol
+        cls.access_type, cls.access_to = (
+            cls._get_access_rule_data_from_config()
+        )
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
         cls.share = cls.create_share(share_type_id=cls.share_type_id)

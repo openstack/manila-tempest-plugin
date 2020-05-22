@@ -26,6 +26,12 @@ CONF = config.CONF
 
 @ddt.ddt
 class AccessRulesMetadataTest(base.BaseSharesMixedTest):
+    """A Test class to test access rule metadata generically.
+
+    Tests in this class don't care about the type of access rule or the
+    protocol of the share created. They are meant to test the API semantics
+    of the access rule metadata APIs.
+    """
 
     @classmethod
     def skip_checks(cls):
@@ -47,22 +53,8 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(AccessRulesMetadataTest, cls).resource_setup()
-        # The share access rule metadata doesn't care about the value of
-        # access type, access protocol, access_to, so we only get one of
-        # the value that the driver support.
-        if CONF.share.enable_ip_rules_for_protocols:
-            cls.protocol = CONF.share.enable_ip_rules_for_protocols[0]
-            cls.access_type = "ip"
-        elif CONF.share.enable_user_rules_for_protocols:
-            cls.protocol = CONF.share.enable_user_rules_for_protocols[0]
-            cls.access_type = "user"
-        elif CONF.share.enable_cert_rules_for_protocols:
-            cls.protocol = CONF.share.enable_cert_rules_for_protocols[0]
-            cls.access_type = "cert"
-        elif CONF.share.enable_cephx_rules_for_protocols:
-            cls.protocol = CONF.share.enable_cephx_rules_for_protocols[0]
-            cls.access_type = "cephx"
-        cls.shares_v2_client.share_protocol = cls.protocol
+        cls.protocol = cls.shares_v2_client.share_protocol
+        cls.access_type, __ = cls._get_access_rule_data_from_config()
         int_range = range(20, 50)
         cls.access_to = {
             # list of unique values is required for ability to create lots
