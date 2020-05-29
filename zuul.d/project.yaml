@@ -10,13 +10,7 @@
             voting: false
         - manila-tempest-plugin-container:
             voting: false
-        - manila-tempest-dsvm-mysql-generic:
-            voting: false
-        - manila-tempest-dsvm-postgres-generic-singlebackend:
-            voting: false
-        - manila-tempest-dsvm-generic-no-share-servers:
-            voting: false
-        - manila-tempest-dsvm-scenario:
+        - manila-tempest-plugin-generic:
             voting: false
         - manila-tempest-minimal-dsvm-cephfs-native:
             voting: false
