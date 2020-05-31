@@ -235,21 +235,27 @@
     vars:
       devstack_plugins:
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
-      tempest_test_regex: manila_tempest_tests.tests.api
+      tempest_test_regex: manila_tempest_tests
+      # Those tests fail when using kernel client, because right now CephFS quotas
+      # is not supported. So for now those tests should be blacklisted.
+      # TODO(lkuchlan) un-blacklist those test when https://review.opendev.org/#/c/676722 will land.
+      tempest_black_regex: '(TestShareShrinkCEPHFS.test_create_shrink_and_write|TestShareExtendCEPHFS.test_create_extend_and_write)(\[.*\bbackend\b.*\])'
       devstack_localrc:
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnative
         ENABLED_SHARE_PROTOCOLS: CEPHFS
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=False'
-        MANILA_SERVICE_IMAGE_ENABLED: false
         MANILA_OPTGROUP_cephfsnative_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_OPTGROUP_cephfsnative_driver_handles_share_servers: false
         MANILA_OPTGROUP_cephfsnative_cephfs_conf_path: /etc/ceph/ceph.conf
         MANILA_OPTGROUP_cephfsnative_cephfs_auth_id: manila
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-master
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
             share:
+              default_share_type_name: default
               enable_cephx_rules_for_protocols: cephfs
               run_share_group_tests: false
               run_snapshot_tests: false
@@ -259,3 +265,4 @@
               capability_snapshot_support: false
               capability_storage_protocol: CEPHFS
               enable_protocols: cephfs
+              image_password: manila
