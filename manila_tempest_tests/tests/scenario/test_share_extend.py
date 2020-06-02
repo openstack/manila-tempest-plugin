@@ -45,14 +45,6 @@ class ShareExtendBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
-    @classmethod
-    def skip_checks(cls):
-        super(ShareExtendBase, cls).skip_checks()
-        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       cls.protocol)
-            raise cls.skipException(message)
-
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_extend_and_write(self):
         default_share_size = CONF.share.share_size
@@ -69,10 +61,11 @@ class ShareExtendBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         LOG.debug('Step 4 - grant access')
-        self.provide_access_to_auxiliary_instance(instance, share=share)
+        location = self.get_share_export_location_for_mount(share)
+        self.allow_access(instance=instance, remote_client=remote_client,
+                          locations=location)
 
         LOG.debug('Step 5 - mount')
-        location = self.get_share_export_location_for_mount(share)
         self.mount_share(location, remote_client)
 
         total_blocks = (units.Ki * default_share_size) / 64
@@ -153,6 +146,18 @@ class ShareExtendBase(manager.ShareScenarioTest):
 class TestShareExtendNFS(ShareExtendBase):
     protocol = "nfs"
 
+    @classmethod
+    def skip_checks(cls):
+        super(ShareExtendBase, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
+    def allow_access(self, access_level='rw', **kwargs):
+        return self.provide_access_to_auxiliary_instance(
+            instance=kwargs['instance'], access_level=access_level)
+
     def mount_share(self, location, remote_client, target_dir=None):
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
@@ -163,12 +168,33 @@ class TestShareExtendNFS(ShareExtendBase):
 class TestShareExtendCIFS(ShareExtendBase):
     protocol = "cifs"
 
+    @classmethod
+    def skip_checks(cls):
+        super(ShareExtendBase, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
+    def allow_access(self, access_level='rw', **kwargs):
+        return self.provide_access_to_auxiliary_instance(
+            instance=kwargs['instance'], access_level=access_level)
+
     def mount_share(self, location, remote_client, target_dir=None):
         location = location.replace("\\", "/")
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
             "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
         )
+
+
+class TestShareExtendCEPHFS(ShareExtendBase, manager.BaseShareCEPHFSTest):
+    protocol = "cephfs"
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_create_extend_and_write_with_ceph_fuse_client(self):
+        self.mount_client = 'fuse'
+        super(TestShareExtendCEPHFS, self).test_create_extend_and_write()
 
 
 # NOTE(u_glide): this function is required to exclude ShareExtendBase

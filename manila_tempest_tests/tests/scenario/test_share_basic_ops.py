@@ -44,14 +44,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
-    @classmethod
-    def skip_checks(cls):
-        super(ShareBasicOpsBase, cls).skip_checks()
-        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       cls.protocol)
-            raise cls.skipException(message)
-
     def _ping_host_from_export_location(self, export, remote_client):
         ip, version = self.get_ip_and_version_from_export_location(export)
         if version == 6:
@@ -66,7 +58,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         locations = self.get_user_export_locations(self.share)
         instance = self.wait_for_active_instance(instance["id"])
         remote_client = self.init_remote_client(instance)
-        self.provide_access_to_auxiliary_instance(instance)
+        self.allow_access(instance=instance, remote_client=remote_client,
+                          locations=locations)
 
         for location in locations:
             self.mount_share(location, remote_client)
@@ -85,12 +78,17 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client_inst = self.init_remote_client(instance)
 
         # First, check if write works RW access.
-        acc_rule_id = self.provide_access_to_auxiliary_instance(instance)['id']
+        acc_rule_id = self.allow_access(
+            instance=instance, remote_client=remote_client_inst,
+            locations=location)['id']
+
         self.mount_share(location, remote_client_inst)
         self.write_data_to_mounted_share(test_data, remote_client_inst)
         self.deny_access(self.share['id'], acc_rule_id)
 
-        self.provide_access_to_auxiliary_instance(instance, access_level='ro')
+        self.allow_access(instance=instance, remote_client=remote_client_inst,
+                          locations=location, access_level='ro')
+
         self.addCleanup(self.unmount_share, remote_client_inst)
 
         # Test if write with RO access fails.
@@ -113,7 +111,9 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # Write data to first VM
         remote_client_inst1 = self.init_remote_client(instance1)
-        self.provide_access_to_auxiliary_instance(instance1)
+        self.allow_access(instance=instance1,
+                          remote_client=remote_client_inst1,
+                          locations=location)
 
         self.mount_share(location, remote_client_inst1)
         self.addCleanup(self.unmount_share,
@@ -123,7 +123,9 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         # Read from second VM
         remote_client_inst2 = self.init_remote_client(instance2)
         if not CONF.share.override_ip_for_nfs_access or self.ipv6_enabled:
-            self.provide_access_to_auxiliary_instance(instance2)
+            self.allow_access(instance=instance2,
+                              remote_client=remote_client_inst2,
+                              locations=location)
 
         self.mount_share(location, remote_client_inst2)
         self.addCleanup(self.unmount_share,
@@ -387,6 +389,18 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 class TestShareBasicOpsNFS(ShareBasicOpsBase):
     protocol = "nfs"
 
+    @classmethod
+    def skip_checks(cls):
+        super(TestShareBasicOpsNFS, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
+    def allow_access(self, access_level='rw', **kwargs):
+        return self.provide_access_to_auxiliary_instance(
+            instance=kwargs['instance'], access_level=access_level)
+
     def mount_share(self, location, remote_client, target_dir=None):
 
         self._ping_host_from_export_location(location, remote_client)
@@ -398,6 +412,18 @@ class TestShareBasicOpsNFS(ShareBasicOpsBase):
 
 class TestShareBasicOpsCIFS(ShareBasicOpsBase):
     protocol = "cifs"
+
+    @classmethod
+    def skip_checks(cls):
+        super(TestShareBasicOpsCIFS, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
+    def allow_access(self, access_level='rw', **kwargs):
+        return self.provide_access_to_auxiliary_instance(
+            instance=kwargs['instance'], access_level=access_level)
 
     def mount_share(self, location, remote_client, target_dir=None):
 
@@ -424,6 +450,25 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
     def test_write_data_to_share_created_from_snapshot(self):
         msg = "Skipped for CIFS protocol because of bug/1649573"
         raise self.skipException(msg)
+
+
+class TestShareBasicOpsCEPHFS(ShareBasicOpsBase, manager.BaseShareCEPHFSTest):
+    protocol = "cephfs"
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_mount_share_one_vm_with_ceph_fuse_client(self):
+        self.mount_client = 'fuse'
+        super(TestShareBasicOpsCEPHFS, self).test_mount_share_one_vm()
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_write_with_ro_access_with_ceph_fuse_client(self):
+        self.mount_client = 'fuse'
+        super(TestShareBasicOpsCEPHFS, self).test_write_with_ro_access()
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_read_write_two_vms_with_ceph_fuse_client(self):
+        self.mount_client = 'fuse'
+        super(TestShareBasicOpsCEPHFS, self).test_read_write_two_vms()
 
 
 class TestShareBasicOpsNFSIPv6(TestShareBasicOpsNFS):
