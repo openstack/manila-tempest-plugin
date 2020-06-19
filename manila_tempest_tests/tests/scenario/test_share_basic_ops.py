@@ -243,7 +243,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
-        CONF.share.run_snapshot_tests, "Snapshot tests are disabled.")
+        CONF.share.capability_create_share_from_snapshot_support,
+        "Create share from snapshot tests are disabled.")
     def test_write_data_to_share_created_from_snapshot(self):
         # 1 - Create UVM, ok, created
         instance = self.boot_instance(wait_until="BUILD")
