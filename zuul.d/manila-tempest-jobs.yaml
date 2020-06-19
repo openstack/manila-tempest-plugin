@@ -245,7 +245,7 @@
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnative
         ENABLED_SHARE_PROTOCOLS: CEPHFS
-        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=False'
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True'
         MANILA_OPTGROUP_cephfsnative_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_OPTGROUP_cephfsnative_driver_handles_share_servers: false
         MANILA_OPTGROUP_cephfsnative_cephfs_conf_path: /etc/ceph/ceph.conf
@@ -259,11 +259,10 @@
               default_share_type_name: default
               enable_cephx_rules_for_protocols: cephfs
               run_share_group_tests: false
-              run_snapshot_tests: false
               multitenancy_enabled: false
+              capability_create_share_from_snapshot_support: false
               suppress_errors_in_cleanup: true
               backend_names: CEPHFSNATIVE
-              capability_snapshot_support: false
               capability_storage_protocol: CEPHFS
               enable_protocols: cephfs
               image_password: manila
