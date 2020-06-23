@@ -39,7 +39,6 @@
         tls-proxy: true
       devstack_localrc:
         USE_PYTHON3: true
-        TEMPEST_USE_TEST_ACCOUNTS: true
         MANILA_USE_DOWNGRADE_MIGRATIONS: true
         MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_ALLOW_NAS_SERVER_PORTS_ON_HOST: true
@@ -151,7 +150,7 @@
 - job:
     name: manila-tempest-plugin-container
     description: |
-      Test the container driver multibackend (DHSS=False) with CIFS
+      Test the container driver multibackend (DHSS=True) with CIFS
       and postgresql db. API only, in a minimal devstack
     parent: manila-tempest-plugin-base
     vars:
@@ -169,6 +168,7 @@
         SHARE_BACKING_FILE_SIZE: 64000M
         MANILA_CONFIGURE_DEFAULT_TYPES: false
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=false'
+        TEMPEST_USE_TEST_ACCOUNTS: true
       devstack_services:
         mysql: false
         postgresql: true
@@ -211,6 +211,7 @@
         MANILA_OPTGROUP_paris_driver_handles_share_servers: true
         MANILA_USE_SERVICE_INSTANCE_PASSWORD: true
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
+        TEMPEST_USE_TEST_ACCOUNTS: true
       devstack_services:
         cinder: true
       devstack_local_conf:
