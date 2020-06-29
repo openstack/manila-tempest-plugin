@@ -50,7 +50,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             )
 
         extra_specs = {"replication_type": cls.replication_type}
-        cls.share_type = cls._create_share_type(extra_specs)
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         cls.sn_id = None
         if cls.multitenancy_enabled:

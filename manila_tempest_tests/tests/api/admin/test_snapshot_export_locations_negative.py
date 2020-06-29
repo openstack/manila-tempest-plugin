@@ -39,7 +39,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
     def setup_clients(cls):
         super(SnapshotExportLocationsNegativeTest, cls).setup_clients()
         cls.admin_client = cls.admin_shares_v2_client
-        cls.isolated_client = cls.alt_shares_v2_client
+        cls.different_project_client = cls.alt_shares_v2_client
 
     @classmethod
     def resource_setup(cls):
@@ -66,15 +66,15 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
         )
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_list_snapshot_export_locations_by_member(self):
+    def test_list_snapshot_export_locations_by_different_project_user(self):
         self.assertRaises(
             lib_exc.NotFound,
-            self.isolated_client.list_snapshot_export_locations,
+            self.different_project_client.list_snapshot_export_locations,
             self.snapshot['id']
         )
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_get_snapshot_export_location_by_member(self):
+    def test_get_snapshot_export_location_by_different_project_user(self):
         export_locations = (
             self.admin_client.list_snapshot_export_locations(
                 self.snapshot['id']))
@@ -84,10 +84,9 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 continue
             self.assertRaises(
                 lib_exc.NotFound,
-                self.isolated_client.get_snapshot_export_location,
+                self.different_project_client.get_snapshot_export_location,
                 self.snapshot['id'],
-                export_location['id']
-            )
+                export_location['id'])
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_inexistent_snapshot_instance_export_location(self):
@@ -108,7 +107,8 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
             for el in export_locations:
                 self.assertRaises(
                     lib_exc.Forbidden,
-                    self.isolated_client.get_snapshot_instance_export_location,
+                    (self.different_project_client.
+                     get_snapshot_instance_export_location),
                     snapshot_instance['id'], el['id'],
                 )
 
@@ -129,7 +129,9 @@ class SnapshotExportLocationsAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     def setup_clients(cls):
         super(SnapshotExportLocationsAPIOnlyNegativeTest, cls).setup_clients()
         cls.admin_client = cls.admin_shares_v2_client
-        cls.isolated_client = cls.alt_shares_v2_client
+        # admin_member_client is a regular user in admin's project
+        cls.admin_member_client = (
+            cls.admin_project_member_client.shares_v2_client)
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_export_locations_by_nonexistent_snapshot(self):
@@ -152,6 +154,6 @@ class SnapshotExportLocationsAPIOnlyNegativeTest(base.BaseSharesMixedTest):
             self):
         self.assertRaises(
             lib_exc.Forbidden,
-            self.isolated_client.list_snapshot_instance_export_locations,
+            self.admin_member_client.list_snapshot_instance_export_locations,
             "fake-inexistent-snapshot-instance-id"
         )

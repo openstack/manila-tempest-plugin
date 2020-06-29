@@ -420,9 +420,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         )
 
         params = {"is_public": True}
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt')
-        shares = isolated_client.list_shares_with_detail(params)
+        shares = self.alt_shares_client.list_shares_with_detail(params)
 
         keys = [
             "status", "description", "links", "availability_zone",
