@@ -14,21 +14,15 @@
 #    under the License.
 
 import copy
-import inspect
-import ipaddress
 import re
 import traceback
 
-from oslo_concurrency import lockutils
 from oslo_log import log
 import six
-from tempest.common import credentials_factory as common_creds
 
 from tempest import config
 from tempest.lib.common import cred_client
-from tempest.lib.common import dynamic_creds
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 from tempest import test
 
@@ -99,20 +93,6 @@ class handle_cleanup_exceptions(object):
         return True  # Suppress error if any
 
 
-def network_synchronized(f):
-
-    def wrapped_func(self, *args, **kwargs):
-
-        # Use lock assuming reusage of common network.
-        @lockutils.synchronized("manila_network_lock", external=True)
-        def source_func(self, *args, **kwargs):
-            return f(self, *args, **kwargs)
-
-        return source_func(self, *args, **kwargs)
-
-    return wrapped_func
-
-
 skip_if_microversion_not_supported = utils.skip_if_microversion_not_supported
 skip_if_microversion_lt = utils.skip_if_microversion_lt
 
@@ -147,36 +127,6 @@ class BaseSharesTest(test.BaseTestCase):
                 microversion)
 
     @classmethod
-    def _get_dynamic_creds(cls, name, network_resources=None):
-        identity_version = CONF.identity.auth_version
-        if identity_version == 'v3':
-            identity_uri = CONF.identity.uri_v3
-            identity_admin_endpoint_type = CONF.identity.v3_endpoint_type
-        elif identity_version == 'v2':
-            identity_uri = CONF.identity.uri
-            identity_admin_endpoint_type = CONF.identity.v2_admin_endpoint_type
-
-        return dynamic_creds.DynamicCredentialProvider(
-            identity_version=identity_version,
-            name=name,
-            network_resources=network_resources,
-            credentials_domain=CONF.auth.default_credentials_domain_name,
-            admin_role=CONF.identity.admin_role,
-            admin_creds=common_creds.get_configured_admin_credentials(),
-            identity_admin_domain_scope=CONF.identity.admin_domain_scope,
-            identity_admin_role=CONF.identity.admin_role,
-            extra_roles=None,
-            neutron_available=CONF.service_available.neutron,
-            create_networks=(
-                CONF.share.create_networks_when_multitenancy_enabled),
-            project_network_cidr=CONF.network.project_network_cidr,
-            project_network_mask_bits=CONF.network.project_network_mask_bits,
-            public_network_id=CONF.network.public_network_id,
-            resource_prefix='tempest',
-            identity_admin_endpoint_type=identity_admin_endpoint_type,
-            identity_uri=identity_uri)
-
-    @classmethod
     def skip_checks(cls):
         super(BaseSharesTest, cls).skip_checks()
         if not CONF.service_available.manila:
@@ -192,52 +142,50 @@ class BaseSharesTest(test.BaseTestCase):
             raise cls.skipException(msg)
 
     @classmethod
+    def setup_credentials(cls):
+        # This call is used to tell the credential allocator to create
+        # network resources for this test case. NOTE: it must go before the
+        # super call, to override decisions in the base classes.
+        network_resources = {}
+        if (CONF.share.multitenancy_enabled and
+                CONF.share.create_networks_when_multitenancy_enabled):
+            # We're testing a DHSS=True driver, and manila is configured with
+            # NeutronNetworkPlugin (or a derivative) that supports creating
+            # share networks with project neutron networks, so lets ask for
+            # neutron network resources to be created with test credentials
+            network_resources.update({'network': True,
+                                      'subnet': True,
+                                      'router': True})
+        cls.set_network_resources(**network_resources)
+        super(BaseSharesTest, cls).setup_credentials()
+
+    @classmethod
     def setup_clients(cls):
         super(BaseSharesTest, cls).setup_clients()
         os = getattr(cls, 'os_%s' % cls.credentials[0])
         # Initialise share clients for test credentials
         cls.shares_client = os.share_v1.SharesClient()
         cls.shares_v2_client = os.share_v2.SharesV2Client()
-        cls.admin_nc = cls.admin_snc = cls.admin_rc = cls.admin_net_cred = None
         # Initialise network clients for test credentials
+        cls.networks_client = None
+        cls.subnets_client = None
         if CONF.service_available.neutron:
             cls.networks_client = os.network.NetworksClient()
             cls.subnets_client = os.network.SubnetsClient()
-            if CONF.share.multitenancy_enabled and (
-                    CONF.auth.use_dynamic_credentials):
-                # Get admin credentials so we can create neutron networks
-                # dynamically if/when needed
-                (cls.admin_nc, cls.admin_snc,
-                    cls.admin_rc, cls.admin_net_cred) = (
-                        cls.get_network_clients_with_isolated_creds())
-        else:
-            cls.networks_client = None
-            cls.subnets_client = None
 
-        cls.project_network_cidr = CONF.network.project_network_cidr
-        cls.public_network_id = CONF.network.public_network_id
-
-        if CONF.identity.auth_version == 'v3':
-            project_id = os.auth_provider.auth_data[1]['project']['id']
-        else:
-            project_id = os.auth_provider.auth_data[1]['token']['tenant']['id']
-        cls.tenant_id = project_id
-        cls.user_id = os.auth_provider.auth_data[1]['user']['id']
-
+        # If DHSS=True, create a share network and set it in the client
+        # for easy access.
         if CONF.share.multitenancy_enabled:
             if (not CONF.service_available.neutron and
                     CONF.share.create_networks_when_multitenancy_enabled):
-                raise cls.skipException("Neutron support is required")
+                raise cls.skipException(
+                    "Neutron support is required when "
+                    "CONF.share.create_networks_when_multitenancy_enabled "
+                    "is set to True")
             share_network_id = cls.provide_share_network(
-                cls.shares_v2_client, cls.networks_client)
+                cls.shares_client, cls.networks_client)
             cls.shares_client.share_network_id = share_network_id
             cls.shares_v2_client.share_network_id = share_network_id
-            resource = {
-                "type": "share_network",
-                "id": share_network_id,
-                "client": cls.shares_v2_client,
-            }
-            cls.class_resources.insert(0, resource)
 
     def setUp(self):
         super(BaseSharesTest, self).setUp()
@@ -247,8 +195,6 @@ class BaseSharesTest(test.BaseTestCase):
     @classmethod
     def resource_cleanup(cls):
         cls.clear_resources(cls.class_resources)
-        if cls.admin_net_cred:
-            cls.admin_net_cred.clear_creds()
         super(BaseSharesTest, cls).resource_cleanup()
 
     @classmethod
@@ -335,170 +281,73 @@ class BaseSharesTest(test.BaseTestCase):
             cls.method_resources.insert(0, resource)
 
     @classmethod
-    @network_synchronized
     def provide_share_network(cls, shares_client, networks_client,
                               ignore_multitenancy_config=False):
-        """Used for finding/creating share network for multitenant driver.
+        """Get or create share network for DHSS=True drivers
 
-        This method creates/gets entity share-network for one tenant. This
-        share-network will be used for creation of service vm.
-
-        :param shares_client: shares client, which requires share-network
-        :param networks_client: network client from same tenant as shares
-        :param ignore_multitenancy_config: provide a share network regardless
-            of 'multitenancy_enabled' configuration value.
+        When testing DHSS=True (multitenancy_enabled) drivers, shares must
+        be requested on share networks.
         :returns: str -- share network id for shares_client tenant
-        :returns: None -- if single-tenant driver used
+        :returns: None -- if single-tenant driver (DHSS=False) is used
         """
-
-        sc = shares_client
-        sn_name = "autogenerated_by_tempest"
 
         if (not ignore_multitenancy_config and
                 not CONF.share.multitenancy_enabled):
-            # Assumed usage of a single-tenant driver
+            # Assumed usage of a single-tenant driver (DHSS=False)
             return None
-        else:
-            if sc.share_network_id:
-                # Share-network already exists, use it
-                return sc.share_network_id
-            elif not CONF.share.create_networks_when_multitenancy_enabled:
-                # We need a new share network, but don't need to associate
-                # any neutron networks to it - this configuration is used
-                # when manila is configured with "StandaloneNetworkPlugin"
-                # or "NeutronSingleNetworkPlugin" where all tenants share
-                # a single backend network where shares are exported.
-                sn_desc = "This share-network was created by tempest"
-                sn = cls.create_share_network(cleanup_in_class=True,
-                                              add_security_services=True,
-                                              name=sn_name,
-                                              description=sn_desc)
-                return sn['id']
-            else:
-                net_id = subnet_id = None
-                # Retrieve non-public network list owned by the tenant
-                search_opts = {'tenant_id': sc.tenant_id, 'shared': False}
-                tenant_networks = (
-                    networks_client.list_networks(
-                        **search_opts).get('networks', [])
-                )
-                tenant_networks_with_subnet = (
-                    [n for n in tenant_networks if n['subnets']]
-                )
 
-                if tenant_networks_with_subnet:
-                    net_id = tenant_networks_with_subnet[0]['id']
-                    subnet_id = tenant_networks_with_subnet[0]['subnets'][0]
+        if shares_client.share_network_id:
+            # Share-network already exists, use it
+            return shares_client.share_network_id
 
-                if net_id is None or subnet_id is None:
-                    network, subnet, router = (
-                        cls.provide_network_resources_for_tenant_id(
-                            sc.tenant_id)
-                    )
-                    net_id = network['network']['id']
-                    subnet_id = subnet['subnet']['id']
+        sn_name = "autogenerated_by_tempest"
+        sn_desc = "This share-network was created by tempest"
 
-                # Create suitable share-network
-                sn_desc = "This share-network was created by tempest"
-                sn = cls.create_share_network(cleanup_in_class=True,
-                                              add_security_services=True,
-                                              name=sn_name,
-                                              description=sn_desc,
-                                              neutron_net_id=net_id,
-                                              neutron_subnet_id=subnet_id)
+        if not CONF.share.create_networks_when_multitenancy_enabled:
+            # We need a new share network, but don't need to associate
+            # any neutron networks to it - this configuration is used
+            # when manila is configured with "StandaloneNetworkPlugin"
+            # or "NeutronSingleNetworkPlugin" where all tenants share
+            # a single backend network where shares are exported.
+            sn = cls.create_share_network(cleanup_in_class=True,
+                                          client=shares_client,
+                                          add_security_services=True,
+                                          name=sn_name,
+                                          description=sn_desc)
+            return sn['id']
 
-                return sn['id']
+        # Retrieve non-public network list owned by the tenant
+        filters = {'project_id': shares_client.tenant_id,
+                   'shared': False}
+        tenant_networks = (
+            networks_client.list_networks(**filters).get('networks', [])
+        )
+        tenant_networks_with_subnet = (
+            [n for n in tenant_networks if n['subnets']]
+        )
 
-    @classmethod
-    def provide_network_resources_for_tenant_id(cls, tenant_id):
-        """Used for creating neutron network resources.
+        if not tenant_networks_with_subnet:
+            # This can only occur if using tempest's pre-provisioned
+            # credentials and not allocating networks to them
+            raise cls.skipException(
+                "Test credentials must provide at least one "
+                "non-shared project network with a valid subnet when "
+                "CONF.share.create_networks_when_multitenancy_enabled is "
+                "set to True.")
 
-        This method creates a suitable network, subnet and router
-        to be used when providing a new share network in the tempest.
-        The tempest conf project_network_cidr is very important
-        in order to create a reachable network. Also, this method will
-        cleanup the neutron resources in the class teardown.
+        net_id = tenant_networks_with_subnet[0]['id']
+        subnet_id = tenant_networks_with_subnet[0]['subnets'][0]
 
-        :param tenant_id: tenant_id to be used for network resources creation
-        :returns network, subnet, router: the neutron resources created
-        """
+        # Create suitable share-network
+        sn = cls.create_share_network(cleanup_in_class=True,
+                                      client=shares_client,
+                                      add_security_services=True,
+                                      name=sn_name,
+                                      description=sn_desc,
+                                      neutron_net_id=net_id,
+                                      neutron_subnet_id=subnet_id)
 
-        network = cls.admin_nc.create_network(
-            tenant_id=tenant_id,
-            name="tempest-net")
-        cls.addClassResourceCleanup(
-            test_utils.call_and_ignore_notfound_exc,
-            cls.admin_nc.delete_network,
-            network['network']['id'])
-
-        subnet = cls.admin_snc.create_subnet(
-            network_id=network['network']['id'],
-            tenant_id=tenant_id,
-            cidr=str(cls.project_network_cidr),
-            name="tempest-subnet",
-            ip_version=(ipaddress.ip_network(
-                six.text_type(cls.project_network_cidr)).version))
-        cls.addClassResourceCleanup(
-            test_utils.call_and_ignore_notfound_exc,
-            cls.admin_snc.delete_subnet,
-            subnet['subnet']['id'])
-
-        router = None
-        if cls.public_network_id:
-            kwargs = {'name': "tempest-router",
-                      'tenant_id': tenant_id,
-                      'external_gateway_info': cls.public_network_id}
-            body = cls.routers_client.create_router(**kwargs)
-            router = body['router']
-
-            cls.admin_rc.add_router_interface(
-                router['id'],
-                subnet_id=subnet['subnet']['id'])
-            cls.addClassResourceCleanup(
-                test_utils.call_and_ignore_notfound_exc,
-                cls.admin_rc.delete_router, router)
-            cls.addClassResourceCleanup(
-                test_utils.call_and_ignore_notfound_exc,
-                cls.admin_rc.remove_router_interface,
-                router['id'],
-                subnet_id=subnet['subnet']['id'])
-
-        return network, subnet, router
-
-    @classmethod
-    def get_network_clients_with_isolated_creds(cls,
-                                                name=None,
-                                                type_of_creds='admin'):
-        """Creates isolated creds and provide network clients.
-
-        :param name: name, will be used for naming ic and related stuff
-        :param type_of_creds: defines the type of creds to be created
-        :returns: NetworksClient, SubnetsClient, RoutersClient,
-            Isolated Credentials
-        """
-
-        if name is None:
-            # Get name of test method
-            name = inspect.stack()[1][3]
-            if len(name) > 32:
-                name = name[0:32]
-        # Choose type of isolated creds
-        ic = cls._get_dynamic_creds(name)
-        if "admin" in type_of_creds:
-            creds = ic.get_admin_creds().credentials
-        elif "alt" in type_of_creds:
-            creds = ic.get_alt_creds().credentials
-        else:
-            creds = ic.get_credentials(type_of_creds).credentials
-        ic.type_of_creds = type_of_creds
-        # create client with isolated creds
-        os = clients.Clients(creds)
-
-        net_client = os.network.NetworksClient()
-        subnet_client = os.network.SubnetsClient()
-        router_client = os.network.RoutersClient()
-
-        return net_client, subnet_client, router_client, ic
+        return sn['id']
 
     @classmethod
     def _create_share(cls, share_protocol=None, size=None, name=None,
@@ -1403,12 +1252,6 @@ class BaseSharesMixedTest(BaseSharesTest):
                 cls.alt_shares_v2_client, cls.os_alt.networks_client)
             cls.alt_shares_client.share_network_id = alt_share_network_id
             cls.alt_shares_v2_client.share_network_id = alt_share_network_id
-            resource = {
-                "type": "share_network",
-                "id": alt_share_network_id,
-                "client": cls.alt_shares_v2_client,
-            }
-            cls.class_resources.insert(0, resource)
 
     @classmethod
     def create_user_and_get_client(cls, project=None):
