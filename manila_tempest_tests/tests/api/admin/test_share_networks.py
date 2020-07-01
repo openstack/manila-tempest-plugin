@@ -19,9 +19,8 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.api import test_share_networks
 
 
-class ShareNetworkAdminTest(
-        base.BaseSharesAdminTest,
-        test_share_networks.ShareNetworkListMixin):
+class ShareNetworkAdminTest(base.BaseSharesMixedTest,
+                            test_share_networks.ShareNetworkListMixin):
 
     @classmethod
     def resource_setup(cls):
@@ -49,8 +48,6 @@ class ShareNetworkAdminTest(
             cls.sn_with_ldap_ss["id"],
             cls.ss_ldap["id"])
 
-        cls.isolated_client = cls.get_client_with_isolated_creds(
-            type_of_creds='alt')
         cls.data_sn_with_kerberos_ss = {
             'name': 'sn_with_kerberos_ss',
             'created_at': '2003-03-03',
@@ -64,21 +61,22 @@ class ShareNetworkAdminTest(
             'description': 'fake description',
         }
 
-        cls.ss_kerberos = cls.isolated_client.create_security_service(
+        cls.ss_kerberos = cls.alt_shares_v2_client.create_security_service(
             ss_type='kerberos',
             **cls.data_sn_with_ldap_ss)
 
-        cls.sn_with_kerberos_ss = cls.isolated_client.create_share_network(
-            cleanup_in_class=True,
-            **cls.data_sn_with_kerberos_ss)
+        cls.sn_with_kerberos_ss = (
+            cls.alt_shares_v2_client.create_share_network(
+                cleanup_in_class=True, **cls.data_sn_with_kerberos_ss)
+        )
 
-        cls.isolated_client.add_sec_service_to_share_network(
+        cls.alt_shares_v2_client.add_sec_service_to_share_network(
             cls.sn_with_kerberos_ss["id"],
             cls.ss_kerberos["id"])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_all_tenants(self):
-        listed = self.shares_client.list_share_networks_with_detail(
+        listed = self.admin_shares_v2_client.list_share_networks_with_detail(
             {'all_tenants': 1})
         self.assertTrue(any(self.sn_with_ldap_ss['id'] == sn['id']
                             for sn in listed))
@@ -87,7 +85,7 @@ class ShareNetworkAdminTest(
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_filter_by_project_id(self):
-        listed = self.shares_client.list_share_networks_with_detail(
+        listed = self.admin_shares_v2_client.list_share_networks_with_detail(
             {'project_id': self.sn_with_kerberos_ss['project_id']})
         self.assertTrue(any(self.sn_with_kerberos_ss['id'] == sn['id']
                             for sn in listed))

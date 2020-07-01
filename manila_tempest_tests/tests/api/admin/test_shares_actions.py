@@ -36,7 +36,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
 
         # create share type for share filtering purposes
         specs = {"storage_protocol": CONF.share.capability_storage_protocol}
-        cls.share_type = cls._create_share_type(specs)
+        cls.share_type = cls._create_share_type(specs=specs)
         cls.share_type_id = cls.share_type['id']
 
         # create share

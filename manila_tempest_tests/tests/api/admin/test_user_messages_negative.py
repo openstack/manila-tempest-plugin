@@ -24,7 +24,7 @@ MICROVERSION = '2.37'
 QUERY_BY_TIMESTAMP_MICROVERSION = '2.52'
 
 
-class UserMessageNegativeTest(base.BaseSharesAdminTest):
+class UserMessageNegativeTest(base.BaseSharesMixedTest):
 
     @classmethod
     def skip_checks(cls):
@@ -37,10 +37,8 @@ class UserMessageNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
     def test_show_message_of_other_tenants(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt', client_version='2')
         self.assertRaises(lib_exc.NotFound,
-                          isolated_client.get_message,
+                          self.alt_shares_v2_client.get_message,
                           self.message['id'])
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
@@ -51,10 +49,8 @@ class UserMessageNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
     def test_delete_message_of_other_tenants(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt', client_version='2')
         self.assertRaises(lib_exc.NotFound,
-                          isolated_client.delete_message,
+                          self.alt_shares_v2_client.delete_message,
                           self.message['id'])
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])

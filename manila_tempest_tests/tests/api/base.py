@@ -14,7 +14,6 @@
 #    under the License.
 
 import copy
-import inspect
 import re
 import traceback
 
@@ -100,12 +99,6 @@ class handle_cleanup_exceptions(object):
 def network_synchronized(f):
 
     def wrapped_func(self, *args, **kwargs):
-        with_isolated_creds = True if len(args) > 2 else False
-        no_lock_required = kwargs.get(
-            "isolated_creds_client", with_isolated_creds)
-        if no_lock_required:
-            # Usage of not reusable network. No need in lock.
-            return f(self, *args, **kwargs)
 
         # Use lock assuming reusage of common network.
         @lockutils.synchronized("manila_network_lock", external=True)
@@ -133,12 +126,6 @@ class BaseSharesTest(test.BaseTestCase):
 
     # Will be cleaned up in tearDown method
     method_resources = []
-
-    # Will be cleaned up in resource_cleanup
-    class_isolated_creds = []
-
-    # Will be cleaned up in tearDown method
-    method_isolated_creds = []
 
     # NOTE(andreaf) Override the client manager class to be used, so that
     # a stable class is used, which includes plugin registered services as well
@@ -185,73 +172,6 @@ class BaseSharesTest(test.BaseTestCase):
             resource_prefix='tempest',
             identity_admin_endpoint_type=identity_admin_endpoint_type,
             identity_uri=identity_uri)
-
-    @classmethod
-    def get_client_with_isolated_creds(cls,
-                                       name=None,
-                                       type_of_creds="admin",
-                                       cleanup_in_class=False,
-                                       client_version='1'):
-        """Creates isolated creds.
-
-        :param name: name, will be used for naming ic and related stuff
-        :param type_of_creds: admin, alt or primary
-        :param cleanup_in_class: defines place where to delete
-        :returns: SharesClient -- shares client with isolated creds.
-        :returns: To client added dict attr 'creds' with
-        :returns: key elements 'tenant' and 'user'.
-        """
-        if name is None:
-            # Get name of test method
-            name = inspect.stack()[1][3]
-            if len(name) > 32:
-                name = name[0:32]
-
-        # Choose type of isolated creds
-        ic = cls._get_dynamic_creds(name)
-        if "admin" in type_of_creds:
-            creds = ic.get_admin_creds().credentials
-        elif "alt" in type_of_creds:
-            creds = ic.get_alt_creds().credentials
-        else:
-            creds = ic.get_credentials(type_of_creds).credentials
-        ic.type_of_creds = type_of_creds
-
-        # create client with isolated creds
-        os = clients.Clients(creds)
-        if client_version == '1':
-            client = os.share_v1.SharesClient()
-        elif client_version == '2':
-            client = os.share_v2.SharesV2Client()
-
-        # Set place where will be deleted isolated creds
-        ic_res = {
-            "method": ic.clear_creds,
-            "deleted": False,
-        }
-        if cleanup_in_class:
-            cls.class_isolated_creds.insert(0, ic_res)
-        else:
-            cls.method_isolated_creds.insert(0, ic_res)
-
-        # Provide share network
-        if CONF.share.multitenancy_enabled:
-            if (not CONF.service_available.neutron and
-                    CONF.share.create_networks_when_multitenancy_enabled):
-                raise cls.skipException("Neutron support is required")
-            nc = os.network.NetworksClient()
-            share_network_id = cls.provide_share_network(client, nc, ic)
-            client.share_network_id = share_network_id
-            resource = {
-                "type": "share_network",
-                "id": client.share_network_id,
-                "client": client,
-            }
-            if cleanup_in_class:
-                cls.class_resources.insert(0, resource)
-            else:
-                cls.method_resources.insert(0, resource)
-        return client
 
     @classmethod
     def skip_checks(cls):
@@ -307,20 +227,17 @@ class BaseSharesTest(test.BaseTestCase):
 
     def setUp(self):
         super(BaseSharesTest, self).setUp()
-        self.addCleanup(self.clear_isolated_creds)
         self.addCleanup(self.clear_resources)
         verify_test_has_appropriate_tags(self)
 
     @classmethod
     def resource_cleanup(cls):
         cls.clear_resources(cls.class_resources)
-        cls.clear_isolated_creds(cls.class_isolated_creds)
         super(BaseSharesTest, cls).resource_cleanup()
 
     @classmethod
     @network_synchronized
     def provide_share_network(cls, shares_client, networks_client,
-                              isolated_creds_client=None,
                               ignore_multitenancy_config=False):
         """Used for finding/creating share network for multitenant driver.
 
@@ -329,9 +246,6 @@ class BaseSharesTest(test.BaseTestCase):
 
         :param shares_client: shares client, which requires share-network
         :param networks_client: network client from same tenant as shares
-        :param isolated_creds_client: DynamicCredentialProvider instance
-            If provided, then its networking will be used if needed.
-            If not provided, then common network will be used if needed.
         :param ignore_multitenancy_config: provide a share network regardless
             of 'multitenancy_enabled' configuration value.
         :returns: str -- share network id for shares_client tenant
@@ -375,50 +289,41 @@ class BaseSharesTest(test.BaseTestCase):
                     share_network_id = sn["id"]
             else:
                 net_id = subnet_id = share_network_id = None
-
-                if not isolated_creds_client:
-                    # Search for networks, created in previous runs
-                    service_net_name = "share-service"
-                    networks = networks_client.list_networks()
-                    if "networks" in networks.keys():
-                        networks = networks["networks"]
-                    for network in networks:
-                        if (service_net_name in network["name"] and
-                                sc.tenant_id == network['tenant_id']):
-                            net_id = network["id"]
-                            if len(network["subnets"]) > 0:
-                                subnet_id = network["subnets"][0]
-                                break
-
-                    # Create suitable network
-                    if net_id is None or subnet_id is None:
-                        ic = cls._get_dynamic_creds(service_net_name)
-                        net_data = ic._create_network_resources(sc.tenant_id)
-                        network, subnet, router = net_data
+                # Search for networks, created in previous runs
+                service_net_name = "share-service"
+                networks = networks_client.list_networks()
+                if "networks" in networks.keys():
+                    networks = networks["networks"]
+                for network in networks:
+                    if (service_net_name in network["name"] and
+                            sc.tenant_id == network['tenant_id']):
                         net_id = network["id"]
-                        subnet_id = subnet["id"]
-
-                    # Try get suitable share-network
-                    share_networks = sc.list_share_networks_with_detail()
-                    for sn in share_networks:
-                        net_info = (
-                            utils.share_network_get_default_subnet(sn)
-                            if utils.share_network_subnets_are_supported()
-                            else sn)
-                        if net_info is None:
-                            continue
-                        if (net_id == net_info["neutron_net_id"] and
-                                subnet_id == net_info["neutron_subnet_id"] and
-                                sn["name"] and search_word in sn["name"]):
-                            share_network_id = sn["id"]
+                        if len(network["subnets"]) > 0:
+                            subnet_id = network["subnets"][0]
                             break
-                else:
-                    sn_name = "autogenerated_by_tempest_for_isolated_creds"
-                    # Use precreated network and subnet from isolated creds
-                    net_id = isolated_creds_client.get_credentials(
-                        isolated_creds_client.type_of_creds).network['id']
-                    subnet_id = isolated_creds_client.get_credentials(
-                        isolated_creds_client.type_of_creds).subnet['id']
+
+                # Create suitable network
+                if net_id is None or subnet_id is None:
+                    ic = cls._get_dynamic_creds(service_net_name)
+                    net_data = ic._create_network_resources(sc.tenant_id)
+                    network, subnet, router = net_data
+                    net_id = network["id"]
+                    subnet_id = subnet["id"]
+
+                # Try get suitable share-network
+                share_networks = sc.list_share_networks_with_detail()
+                for sn in share_networks:
+                    net_info = (
+                        utils.share_network_get_default_subnet(sn)
+                        if utils.share_network_subnets_are_supported()
+                        else sn)
+                    if net_info is None:
+                        continue
+                    if (net_id == net_info["neutron_net_id"] and
+                            subnet_id == net_info["neutron_subnet_id"] and
+                            sn["name"] and search_word in sn["name"]):
+                        share_network_id = sn["id"]
+                        break
 
                 # Create suitable share-network
                 if share_network_id is None:
@@ -908,6 +813,23 @@ class BaseSharesTest(test.BaseTestCase):
                                               is_public, description)
         return share_type
 
+    @classmethod
+    def update_quotas(cls, project_id, user_id=None, cleanup=True,
+                      client=None, **kwargs):
+        client = client or cls.shares_v2_client
+        updated_quotas = client.update_quotas(project_id,
+                                              user_id=user_id,
+                                              **kwargs)
+        resource = {
+            "type": "quotas",
+            "id": project_id,
+            "client": client,
+            "user_id": user_id,
+        }
+        if cleanup:
+            cls.method_resources.insert(0, resource)
+        return updated_quotas
+
     @staticmethod
     def add_extra_specs_to_dict(extra_specs=None):
         """Add any required extra-specs to share type dictionary"""
@@ -933,18 +855,6 @@ class BaseSharesTest(test.BaseTestCase):
             extra_specs_dict.update(extra_specs)
 
         return extra_specs_dict
-
-    @classmethod
-    def clear_isolated_creds(cls, creds=None):
-        if creds is None:
-            creds = cls.method_isolated_creds
-        for ic in creds:
-            if "deleted" not in ic.keys():
-                ic["deleted"] = False
-            if not ic["deleted"]:
-                with handle_cleanup_exceptions():
-                    ic["method"]()
-                ic["deleted"] = True
 
     @classmethod
     def clear_share_replicas(cls, share_id, client=None):
@@ -1024,6 +934,9 @@ class BaseSharesTest(test.BaseTestCase):
                         client.wait_for_resource_deletion(
                             share_network_subnet_id=res_id,
                             sn_id=sn_id)
+                    elif res["type"] == "quotas":
+                        user_id = res.get('user_id')
+                        client.reset_quotas(res_id, user_id=user_id)
                     else:
                         LOG.warning("Provided unsupported resource type for "
                                     "cleanup '%s'. Skipping.", res["type"])
@@ -1130,6 +1043,7 @@ class BaseSharesTest(test.BaseTestCase):
         share_type_name = data_utils.rand_name("share-type")
 
         bogus_type = self.create_share_type(
+            client=self.admin_shares_v2_client,
             name=share_type_name,
             extra_specs=extra_specs)['share_type']
 
@@ -1157,11 +1071,11 @@ class BaseSharesAdminTest(BaseSharesTest):
         cls.admin_shares_v2_client = cls.os_admin.share_v2.SharesV2Client()
 
     @classmethod
-    def _create_share_type(cls, specs=None):
+    def _create_share_type(cls, is_public=True, specs=None):
         name = data_utils.rand_name("unique_st_name")
         extra_specs = cls.add_extra_specs_to_dict(specs)
         return cls.create_share_type(
-            name, extra_specs=extra_specs,
+            name, extra_specs=extra_specs, is_public=is_public,
             client=cls.admin_shares_v2_client)['share_type']
 
     @classmethod
@@ -1355,11 +1269,11 @@ class BaseSharesMixedTest(BaseSharesTest):
         return os
 
     @classmethod
-    def _create_share_type(cls, specs=None):
+    def _create_share_type(cls, is_public=True, specs=None):
         name = data_utils.rand_name("unique_st_name")
         extra_specs = cls.add_extra_specs_to_dict(specs)
         return cls.create_share_type(
-            name, extra_specs=extra_specs,
+            name, extra_specs=extra_specs, is_public=is_public,
             client=cls.admin_shares_v2_client)['share_type']
 
     @classmethod

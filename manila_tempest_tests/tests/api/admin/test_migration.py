@@ -450,7 +450,6 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
             new_share_network_id = self.provide_share_network(
                 self.shares_v2_client,
                 self.networks_client,
-                isolated_creds_client=None,
                 ignore_multitenancy_config=True,
             )
         else:

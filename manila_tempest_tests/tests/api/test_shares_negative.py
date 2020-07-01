@@ -150,43 +150,35 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_other_tenants_public_share(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt')
-        self.assertRaises(lib_exc.Forbidden, isolated_client.update_share,
-                          self.share["id"], name="new_name")
+        self.assertRaises(lib_exc.Forbidden,
+                          self.alt_shares_v2_client.update_share,
+                          self.share["id"],
+                          name="new_name")
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_other_tenants_public_share(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt')
         self.assertRaises(lib_exc.Forbidden,
-                          isolated_client.delete_share,
+                          self.alt_shares_v2_client.delete_share,
                           self.share['id'])
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_of_other_tenants_public_share(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt')
         self.assertRaises(lib_exc.Forbidden,
-                          isolated_client.set_metadata,
+                          self.alt_shares_v2_client.set_metadata,
                           self.share['id'],
                           {'key': 'value'})
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_metadata_of_other_tenants_public_share(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt')
         self.assertRaises(lib_exc.Forbidden,
-                          isolated_client.update_all_metadata,
+                          self.alt_shares_v2_client.update_all_metadata,
                           self.share['id'],
                           {'key': 'value'})
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_metadata_of_other_tenants_public_share(self):
-        isolated_client = self.get_client_with_isolated_creds(
-            type_of_creds='alt')
         self.assertRaises(lib_exc.Forbidden,
-                          isolated_client.delete_metadata,
+                          self.alt_shares_v2_client.delete_metadata,
                           self.share['id'],
                           'key')
 
