@@ -4,8 +4,9 @@
       - tempest-plugin-jobs
     check:
       jobs:
+        - manila-tempest-plugin-dummy-no-dhss
+        - manila-tempest-plugin-dummy-dhss
         - manila-tempest-plugin-lvm
-        - manila-tempest-minimal-dsvm-dummy
         - manila-tempest-plugin-zfsonlinux:
             voting: false
         - manila-tempest-plugin-cephfs-native:
@@ -19,7 +20,8 @@
     gate:
       queue: manila
       jobs:
-        - manila-tempest-minimal-dsvm-dummy
+        - manila-tempest-plugin-dummy-no-dhss
+        - manila-tempest-plugin-dummy-dhss
         - manila-tempest-plugin-lvm
     experimental:
       jobs:
