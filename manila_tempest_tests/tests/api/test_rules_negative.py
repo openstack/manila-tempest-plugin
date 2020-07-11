@@ -20,6 +20,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -384,6 +385,28 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
                           self.shares_v2_client.create_access_rule,
                           self.share["id"], self.access_type, self.access_to,
                           access_level="su")
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_different_tenants_cannot_use_same_cephx_id(self):
+        # Grant access to the share
+        access1 = self.shares_v2_client.create_access_rule(
+            self.share['id'], self.access_type, self.access_to, 'rw')
+        self.shares_v2_client.wait_for_access_rule_status(
+            self.share['id'], access1['id'], 'active')
+
+        # Create second share by the new user
+        share2 = self.create_share(client=self.alt_shares_v2_client,
+                                   share_protocol=self.protocol,
+                                   share_type_id=self.share_type_id)
+
+        # Try grant access to the second share using the same cephx id as used
+        # on the first share
+        access2 = self.alt_shares_v2_client.create_access_rule(
+            share2['id'], self.access_type, self.access_to, 'rw')
+        self.assertRaises(
+            share_exceptions.AccessRuleBuildErrorException,
+            self.alt_shares_v2_client.wait_for_access_rule_status,
+            share2['id'], access2['id'], 'active')
 
 
 @ddt.ddt
