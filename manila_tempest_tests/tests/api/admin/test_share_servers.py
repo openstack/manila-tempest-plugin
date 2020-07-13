@@ -45,14 +45,17 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
-        # create share
-        cls.share = cls.create_share(share_type_id=cls.share_type_id)
+        # create share in this new share network
+        cls.share = cls.create_share(
+            share_type_id=cls.share_type_id)
         cls.share_network = cls.shares_v2_client.get_share_network(
             cls.shares_v2_client.share_network_id)
+
         if not cls.share_network["name"]:
             sn_id = cls.share_network["id"]
             cls.share_network = cls.shares_v2_client.update_share_network(
                 sn_id, name="sn_%s" % sn_id)
+
         cls.sn_name_and_id = [
             cls.share_network["name"],
             cls.share_network["id"],
@@ -222,6 +225,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # TODO(vponomaryov): attach security-services too. If any exist from
         #                    donor share-network.
         new_sn = self.create_share_network(
+            add_security_services=True,
             neutron_net_id=self.share_net_info['neutron_net_id'],
             neutron_subnet_id=self.share_net_info['neutron_subnet_id'])
 
@@ -285,6 +289,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         # Get network and subnet from existing share_network and reuse it
         # to be able to delete share_server after test ends.
         new_sn = self.create_share_network(
+            add_security_services=True,
             neutron_net_id=self.share_net_info['neutron_net_id'],
             neutron_subnet_id=self.share_net_info['neutron_subnet_id'])
         share = self.create_share(

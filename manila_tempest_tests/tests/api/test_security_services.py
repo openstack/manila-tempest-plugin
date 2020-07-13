@@ -77,6 +77,7 @@ class SecurityServiceListMixin(object):
         fresh_sn = []
         for i in range(2):
             sn = self.create_share_network(
+                add_security_services=False,
                 neutron_net_id=sn["neutron_net_id"],
                 neutron_subnet_id=sn["neutron_subnet_id"])
             fresh_sn.append(sn)

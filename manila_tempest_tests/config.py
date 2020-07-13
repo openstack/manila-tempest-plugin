@@ -14,6 +14,7 @@
 #    under the License.
 
 from oslo_config import cfg
+from oslo_config import types
 
 service_option = cfg.BoolOpt("manila",
                              default=True,
@@ -174,6 +175,24 @@ ShareGroup = [
                 help="Whether to suppress errors with clean up operation "
                      "or not. There are cases when we may want to skip "
                      "such errors and catch only test errors."),
+    cfg.MultiOpt("security_service",
+                 item_type=types.Dict(),
+                 secret=True,
+                 help="This option enables specifying security service "
+                      "parameters needed to create security services "
+                      "dynamically in order to run the tempest tests. "
+                      "The configured security service must be reachable by "
+                      "the project share networks created by the tests. So, "
+                      "ideally project networks must be able to route to the "
+                      "network where the pre-existing security services has "
+                      "been deployed. The set of parameters that can be "
+                      "configured is the same used in the security service "
+                      "creation. You can repeat this option many times, and "
+                      "each entry takes the standard dict config parameters: "
+                      "security_service = "
+                      "ss_type:<ldap, kerberos or active_directory>, "
+                      "ss_dns_ip:value, ss_user:value, ss_password=value, "
+                      "ss_domain:value, ss_server:value"),
 
     # Switching ON/OFF test suites filtered by features
     cfg.BoolOpt("run_quota_tests",
@@ -272,5 +291,4 @@ ShareGroup = [
     cfg.BoolOpt("run_ipv6_tests",
                 default=False,
                 help="Enable or disable running IPv6 tests."),
-
 ]
