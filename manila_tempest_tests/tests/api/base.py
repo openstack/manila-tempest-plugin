@@ -738,7 +738,8 @@ class BaseSharesTest(test.BaseTestCase):
             access_to = "client3.com"
         elif protocol in CONF.share.enable_cephx_rules_for_protocols:
             access_type = "cephx"
-            access_to = "eve"
+            access_to = data_utils.rand_name(
+                cls.__class__.__name__ + '-cephx-id')
         else:
             message = "Unrecognized protocol and access rules configuration."
             raise cls.skipException(message)
@@ -1081,6 +1082,25 @@ class BaseSharesTest(test.BaseTestCase):
         self.addCleanup(self.shares_v2_client.delete_share, share['id'])
         self.shares_v2_client.wait_for_share_status(share['id'], "error")
         return self.shares_v2_client.wait_for_message(share['id'])
+
+    def allow_access(self, share_id, client=None, access_type=None,
+                     access_level='rw', access_to=None, status='active',
+                     raise_rule_in_error_state=True, cleanup=True):
+
+        client = client or self.shares_v2_client
+        a_type, a_to = self._get_access_rule_data_from_config()
+        access_type = access_type or a_type
+        access_to = access_to or a_to
+
+        rule = client.create_access_rule(share_id, access_type, access_to,
+                                         access_level)
+        client.wait_for_access_rule_status(share_id, rule['id'], status,
+                                           raise_rule_in_error_state)
+        if cleanup:
+            self.addCleanup(client.wait_for_resource_deletion,
+                            rule_id=rule['id'], share_id=share_id)
+            self.addCleanup(client.delete_access_rule, share_id, rule['id'])
+        return rule
 
 
 class BaseSharesAltTest(BaseSharesTest):
