@@ -505,7 +505,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
 
         # Create a new user in the current project
         project = self.os_admin.projects_client.show_project(
-            self.tenant_id)['project']
+            self.shares_v2_client.tenant_id)['project']
         user_client = self.create_user_and_get_client(project)
 
         # Create second share by the new user
