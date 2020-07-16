@@ -405,6 +405,13 @@ class ReplicaQuotasNegativeTest(rep_neg_test.ReplicationNegativeBase):
     force_tenant_isolation = True
 
     @classmethod
+    def resource_setup(cls):
+        super(ReplicaQuotasNegativeTest, cls).resource_setup()
+        cls.client = cls.shares_v2_client
+        cls.user_id = cls.client.user_id
+        cls.tenant_id = cls.client.tenant_id
+
+    @classmethod
     def skip_checks(cls):
         super(ReplicaQuotasNegativeTest, cls).skip_checks()
         if not CONF.auth.use_dynamic_credentials:
