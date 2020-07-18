@@ -112,7 +112,7 @@
     required-projects:
       - openstack/neutron-dynamic-routing
     vars:
-      tempest_test_regex: '(^manila_tempest_tests.tests.api)(?=.*\[.*\bbackend\b.*\])'
+      tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
       devstack_localrc:
         SHARE_DRIVER: manila.share.drivers.lvm.LVMShareDriver
         MANILA_ENABLED_BACKENDS: london,paris
