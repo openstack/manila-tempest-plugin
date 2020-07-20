@@ -262,7 +262,8 @@ class SharesClient(rest_client.RestClient):
                            (snapshot_name, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
-    def wait_for_access_rule_status(self, share_id, rule_id, status):
+    def wait_for_access_rule_status(self, share_id, rule_id, status,
+                                    raise_rule_in_error_state=True):
         """Waits for an access rule to reach a given status."""
         rule_status = "new"
         start = int(time.time())
@@ -273,7 +274,7 @@ class SharesClient(rest_client.RestClient):
                 if rule["id"] in rule_id:
                     rule_status = rule['state']
                     break
-            if 'error' in rule_status:
+            if 'error' in rule_status and raise_rule_in_error_state:
                 raise share_exceptions.AccessRuleBuildErrorException(
                     rule_id=rule_id)
 

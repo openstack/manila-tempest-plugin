@@ -20,7 +20,6 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
-from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -389,10 +388,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_different_tenants_cannot_use_same_cephx_id(self):
         # Grant access to the share
-        access1 = self.shares_v2_client.create_access_rule(
-            self.share['id'], self.access_type, self.access_to, 'rw')
-        self.shares_v2_client.wait_for_access_rule_status(
-            self.share['id'], access1['id'], 'active')
+        self.allow_access(self.share['id'], access_to=self.access_to)
 
         # Create second share by the new user
         share2 = self.create_share(client=self.alt_shares_v2_client,
@@ -400,13 +396,47 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
                                    share_type_id=self.share_type_id)
 
         # Try grant access to the second share using the same cephx id as used
-        # on the first share
-        access2 = self.alt_shares_v2_client.create_access_rule(
-            share2['id'], self.access_type, self.access_to, 'rw')
-        self.assertRaises(
-            share_exceptions.AccessRuleBuildErrorException,
-            self.alt_shares_v2_client.wait_for_access_rule_status,
-            share2['id'], access2['id'], 'active')
+        # on the first share.
+        # Rule must be set to "error" status.
+        self.allow_access(share2['id'], client=self.alt_shares_v2_client,
+                          access_to=self.access_to, status='error',
+                          raise_rule_in_error_state=False)
+
+        share_alt_updated = self.alt_shares_v2_client.get_share(
+            share2['id'])
+        self.assertEqual('error', share_alt_updated['access_rules_status'])
+
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_can_apply_new_cephx_rules_when_one_is_in_error_state(self):
+        # Create share on "primary" tenant
+        share_primary = self.create_share()
+        # Add access rule to "Joe" by "primary" user
+        self.allow_access(share_primary['id'], access_to='Joe')
+
+        # Create share on "alt" tenant
+        share_alt = self.create_share(client=self.alt_shares_v2_client)
+        # Add access rule to "Joe" by "alt" user.
+        # Rule must be set to "error" status.
+        rule1 = self.allow_access(share_alt['id'],
+                                  client=self.alt_shares_v2_client,
+                                  access_to='Joe',
+                                  status='error',
+                                  raise_rule_in_error_state=False,
+                                  cleanup=False)
+
+        # Share's "access_rules_status" must be in "error" status
+        share_alt_updated = self.alt_shares_v2_client.get_share(
+            share_alt['id'])
+        self.assertEqual('error', share_alt_updated['access_rules_status'])
+
+        # Add second access rule to different client by "alt" user.
+        self.allow_access(share_alt['id'], client=self.alt_shares_v2_client)
+
+        # Check share's access_rules_status has transitioned to "active" status
+        self.alt_shares_v2_client.delete_access_rule(
+            share_alt['id'], rule1['id'])
+        self.alt_shares_v2_client.wait_for_share_status(
+            share_alt['id'], 'active', status_attr='access_rules_status')
 
 
 @ddt.ddt
