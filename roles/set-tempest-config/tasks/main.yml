@@ -1,0 +1,14 @@
+- name: Install required pip packages
+  pip:
+    name: devstack-tools
+    state: "latest"
+    virtualenv: /var/tmp/venv
+
+- name: Copy tempest config
+  shell: >-
+    . /var/tmp/venv/bin/activate && \
+    dsconf extract {{ devstack_local_conf_path }} \
+      test-config \
+      '$TEMPEST_CONFIG' \
+      {{ devstack_base_dir }}/tempest/etc/tempest.conf
+  become: yes
