@@ -17,6 +17,8 @@
             voting: false
         - manila-tempest-plugin-generic:
             voting: false
+        - manila-tempest-plugin-glusterfs-nfs:
+            voting: false
     gate:
       queue: manila
       jobs:
@@ -25,11 +27,5 @@
         - manila-tempest-plugin-lvm
     experimental:
       jobs:
-        - manila-tempest-dsvm-glusterfs-nfs:
-            voting: false
-        - manila-tempest-dsvm-glusterfs-native:
-            voting: false
-        - manila-tempest-dsvm-glusterfs-nfs-heketi:
-            voting: false
-        - manila-tempest-dsvm-glusterfs-native-heketi:
+        - manila-tempest-plugin-glusterfs-native:
             voting: false

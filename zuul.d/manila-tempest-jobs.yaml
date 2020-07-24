@@ -481,3 +481,68 @@
               run_mount_snapshot_tests: true
               run_replication_tests: true
               run_revert_to_snapshot_tests: true
+
+- job:
+    name: manila-tempest-plugin-glusterfs-native
+    description: |
+      Test the GlusterFS driver (DHSS=False) with the native GlusterFS protocol
+    parent: manila-tempest-plugin-standalone-base
+    required-projects:
+      - x/devstack-plugin-glusterfs
+    vars:
+      tempest_concurrency: 8
+      devstack_plugins:
+        devstack-plugin-glusterfs: https://opendev.org/x/devstack-plugin-glusterfs
+      devstack_localrc:
+        CONFIGURE_GLUSTERFS_MANILA: true
+        GLUSTERFS_MANILA_DRIVER_TYPE: glusterfs-native
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              run_share_group_tests: false
+              run_snapshot_tests: false
+              multitenancy_enabled: false
+              run_shrink_tests: false
+              run_extend_tests: false
+              multi_backend: false
+              suppress_errors_in_cleanup: True
+              share_creation_retry_number: 2
+              backend_names: GLUSTERNATIVE
+              enable_cert_rules_for_protocols: glusterfs
+              capability_storage_protocol: glusterfs
+              enable_protocols: glusterfs
+
+- job:
+    name: manila-tempest-plugin-glusterfs-nfs
+    description: |
+      Test the GlusterFS driver (DHSS=False) with the native NFS protocol
+    parent: manila-tempest-plugin-standalone-base
+    required-projects:
+      - x/devstack-plugin-glusterfs
+    vars:
+      tempest_concurrency: 8
+      devstack_plugins:
+        devstack-plugin-glusterfs: https://opendev.org/x/devstack-plugin-glusterfs
+      devstack_localrc:
+        CONFIGURE_GLUSTERFS_MANILA: true
+        GLUSTERFS_MANILA_DRIVER_TYPE: glusterfs-nfs
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=False'
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              run_share_group_tests: false
+              run_snapshot_tests: false
+              multitenancy_enabled: False
+              run_shrink_tests: true
+              multi_backend: false
+              suppress_errors_in_cleanup: True
+              share_creation_retry_number: 2
+              backend_names: GLUSTERFS
+              enable_ip_rules_for_protocols: nfs
+              capability_storage_protocol: NFS
+              enable_protocols: nfs
+              # read-only access rules not supported
+              enable_ro_access_level_for_protocols: ""
