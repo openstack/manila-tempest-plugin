@@ -10,10 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import time
 
 from oslo_log import log as logging
+import six
 from tempest import config
 from tempest.lib import exceptions
 import testtools
@@ -22,6 +22,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager_share as manager
+
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

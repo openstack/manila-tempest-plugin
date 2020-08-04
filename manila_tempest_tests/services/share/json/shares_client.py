@@ -18,13 +18,13 @@ import time
 
 import six
 from six.moves.urllib import parse as urlparse
-
 from tempest import config
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 
 from manila_tempest_tests import share_exceptions
+
 
 CONF = config.CONF
 

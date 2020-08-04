@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from netaddr import ip
 import random
 import re
 
+from netaddr import ip
 import six
 from tempest import config
 import testtools

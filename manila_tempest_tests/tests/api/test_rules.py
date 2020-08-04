@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import itertools
 
 import ddt
-import itertools
 from tempest import config
 from tempest.lib import exceptions as lib_exc
 import testtools
@@ -23,6 +23,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
+
 
 CONF = config.CONF
 LATEST_MICROVERSION = CONF.share.max_api_microversion

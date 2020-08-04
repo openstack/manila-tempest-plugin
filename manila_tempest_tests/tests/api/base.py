@@ -19,7 +19,6 @@ import traceback
 
 from oslo_log import log
 import six
-
 from tempest import config
 from tempest.lib.common import cred_client
 from tempest.lib.common.utils import data_utils
@@ -30,6 +29,7 @@ from manila_tempest_tests import clients
 from manila_tempest_tests.common import constants
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests import utils
+
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)

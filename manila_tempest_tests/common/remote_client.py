@@ -10,15 +10,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import sys
 
 from oslo_log import log
-
+import six
 from tempest import config
 from tempest.lib.common import ssh
 from tempest.lib.common.utils import test_utils
-import tempest.lib.exceptions
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
@@ -30,7 +29,7 @@ def debug_ssh(function):
     def wrapper(self, *args, **kwargs):
         try:
             return function(self, *args, **kwargs)
-        except tempest.lib.exceptions.SSHTimeout:
+        except exceptions.SSHTimeout:
             try:
                 original_exception = sys.exc_info()
                 caller = test_utils.find_test_caller() or "not found"

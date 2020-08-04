@@ -14,11 +14,11 @@
 #    under the License.
 
 import ddt
+from tempest import config
 import testtools
+from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
-from tempest import config
-from testtools import testcase as tc
 
 CONF = config.CONF
 

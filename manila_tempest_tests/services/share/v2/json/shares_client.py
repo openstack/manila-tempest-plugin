@@ -15,9 +15,9 @@
 
 import json
 import re
-import six
 import time
 
+import six
 from six.moves.urllib import parse
 from tempest import config
 from tempest.lib.common.utils import data_utils
