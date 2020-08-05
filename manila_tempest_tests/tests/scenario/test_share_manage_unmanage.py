@@ -178,6 +178,9 @@ class ShareManageUnmanageNFS(ShareManageUnmanageBase):
     protocol = "nfs"
 
     def mount_share(self, location, remote_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, remote_client)
+
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
             "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
@@ -188,11 +191,18 @@ class ShareManageUnmanageCIFS(ShareManageUnmanageBase):
     protocol = "cifs"
 
     def mount_share(self, location, remote_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, remote_client)
+
         location = location.replace("\\", "/")
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
             "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
         )
+
+
+class ShareManageUnmanageNFSIPv6(ShareManageUnmanageNFS):
+    ip_version = 6
 
 
 # NOTE(u_glide): this function is required to exclude ShareManageUnmanageBase

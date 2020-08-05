@@ -21,6 +21,7 @@ from six.moves.urllib.request import urlopen
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
 from manila_tempest_tests.common import constants
@@ -28,7 +29,6 @@ from manila_tempest_tests.common import remote_client
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager
 from manila_tempest_tests import utils
-
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -199,6 +199,24 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         self.share = self.shares_client.get_share(self.share['id'])
         return remote_client
+
+    def validate_ping_to_export_location(self, export, remote_client,
+                                         ping_timeout=None):
+        timeout = ping_timeout or CONF.validation.ping_timeout
+
+        def ping_to_export_location(export, remote_client):
+            ip, version = self.get_ip_and_version_from_export_location(export)
+            try:
+                remote_client.exec_command(
+                    "ping{} -c5 -w1 {}".format(
+                        '6' if version == 6 else '', ip))
+                return True
+            except exceptions.SSHExecCommandFailed:
+                return False
+
+        test_utils.call_until_true(ping_to_export_location,
+                                   timeout, 1, export=export,
+                                   remote_client=remote_client)
 
     def write_data_to_mounted_share(self, escaped_string, remote_client,
                                     mount_point='/mnt/t1'):

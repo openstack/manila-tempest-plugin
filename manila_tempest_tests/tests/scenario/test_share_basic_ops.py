@@ -44,13 +44,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
-    def _ping_host_from_export_location(self, export, remote_client):
-        ip, version = self.get_ip_and_version_from_export_location(export)
-        if version == 6:
-            remote_client.exec_command("ping6 -c 5 %s" % ip)
-        else:
-            remote_client.exec_command("ping -c 5 %s" % ip)
-
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
         instance = self.boot_instance(wait_until="BUILD")
@@ -404,7 +397,7 @@ class TestShareBasicOpsNFS(ShareBasicOpsBase):
 
     def mount_share(self, location, remote_client, target_dir=None):
 
-        self._ping_host_from_export_location(location, remote_client)
+        self.validate_ping_to_export_location(location, remote_client)
 
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
@@ -428,7 +421,7 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
 
     def mount_share(self, location, remote_client, target_dir=None):
 
-        self._ping_host_from_export_location(location, remote_client)
+        self.validate_ping_to_export_location(location, remote_client)
 
         location = location.replace("\\", "/")
         target_dir = target_dir or "/mnt"

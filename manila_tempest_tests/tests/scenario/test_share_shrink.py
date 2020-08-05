@@ -174,6 +174,9 @@ class TestShareShrinkNFS(ShareShrinkBase):
             instance=kwargs['instance'], access_level=access_level)
 
     def mount_share(self, location, ssh_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, ssh_client)
+
         target_dir = target_dir or "/mnt"
         ssh_client.exec_command(
             "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
@@ -196,6 +199,9 @@ class TestShareShrinkCIFS(ShareShrinkBase):
             instance=kwargs['instance'], access_level=access_level)
 
     def mount_share(self, location, ssh_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, ssh_client)
+
         location = location.replace("\\", "/")
         target_dir = target_dir or "/mnt"
         ssh_client.exec_command(
@@ -210,6 +216,10 @@ class TestShareShrinkCEPHFS(ShareShrinkBase, manager.BaseShareCEPHFSTest):
     def test_create_shrink_and_write_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
         super(TestShareShrinkCEPHFS, self).test_create_shrink_and_write()
+
+
+class TestShareShrinkNFSIPv6(TestShareShrinkNFS):
+    ip_version = 6
 
 
 # NOTE(u_glide): this function is required to exclude ShareShrinkBase from

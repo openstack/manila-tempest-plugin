@@ -159,6 +159,9 @@ class TestShareExtendNFS(ShareExtendBase):
             instance=kwargs['instance'], access_level=access_level)
 
     def mount_share(self, location, remote_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, remote_client)
+
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
             "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
@@ -181,6 +184,9 @@ class TestShareExtendCIFS(ShareExtendBase):
             instance=kwargs['instance'], access_level=access_level)
 
     def mount_share(self, location, remote_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, remote_client)
+
         location = location.replace("\\", "/")
         target_dir = target_dir or "/mnt"
         remote_client.exec_command(
@@ -195,6 +201,10 @@ class TestShareExtendCEPHFS(ShareExtendBase, manager.BaseShareCEPHFSTest):
     def test_create_extend_and_write_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
         super(TestShareExtendCEPHFS, self).test_create_extend_and_write()
+
+
+class TestShareExtendNFSIPv6(TestShareExtendNFS):
+    ip_version = 6
 
 
 # NOTE(u_glide): this function is required to exclude ShareExtendBase
