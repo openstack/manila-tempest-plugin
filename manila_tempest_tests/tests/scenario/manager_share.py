@@ -91,7 +91,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 msg = ("Image %s not found. Expecting an image including "
                        "required share tools." %
                        CONF.share.image_with_share_tools)
-                raise exceptions.InvalidConfiguration(message=msg)
+                raise exceptions.InvalidConfiguration(msg)
         self.ssh_user = CONF.share.image_username
         LOG.debug('Starting test for i:{image_id}, f:{flavor}. '
                   'user: {ssh_user}'.format(image_id=self.image_id,
