@@ -295,6 +295,7 @@
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
       tempest_test_regex: manila_tempest_tests.tests
       devstack_localrc:
+        VOLUME_BACKING_FILE_SIZE: 60GB
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnative
         ENABLED_SHARE_PROTOCOLS: CEPHFS
@@ -336,6 +337,7 @@
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
         neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
       devstack_localrc:
+        VOLUME_BACKING_FILE_SIZE: 60GB
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnfs
         ENABLED_SHARE_PROTOCOLS: NFS
