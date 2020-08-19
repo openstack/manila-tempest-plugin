@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
 import testtools
 from testtools import testcase as tc
 
@@ -136,10 +137,13 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
               constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
     def test_default_share_group_type_applied(self, version):
         self.skip_if_microversion_not_supported(version)
-
-        default_type = self.shares_v2_client.get_default_share_group_type(
-            version=version
-        )
+        try:
+            default_type = self.shares_v2_client.get_default_share_group_type(
+                version=version
+            )
+        except exceptions.NotFound:
+            msg = "There is no default share group type"
+            raise self.skipException(msg)
         default_share_types = default_type['share_types']
 
         share_group = self.create_share_group(
