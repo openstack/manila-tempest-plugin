@@ -45,6 +45,7 @@
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
         MANILA_CONFIGURE_DEFAULT_TYPES: true
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
+        MANILA_SERVER_MIGRATION_PERIOD_TASK_INTERVAL: 10
         MANILA_REPLICA_STATE_UPDATE_INTERVAL: 10
 
 
@@ -106,6 +107,7 @@
         MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_SERVICE_IMAGE_ENABLED: false
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
+        MANILA_SERVER_MIGRATION_PERIOD_TASK_INTERVAL: 10
         MANILA_REPLICA_STATE_UPDATE_INTERVAL: 10
       devstack_services:
         tls-proxy: true
@@ -241,6 +243,7 @@
               multitenancy_enabled: true
               backend_names: LONDON,PARIS
               multi_backend: true
+              run_share_servers_migration_tests: true
 
 - job:
     name: manila-tempest-plugin-generic
@@ -480,6 +483,7 @@
               run_mount_snapshot_tests: true
               run_replication_tests: true
               run_revert_to_snapshot_tests: true
+              run_share_servers_migration_tests: true
 
 - job:
     name: manila-tempest-plugin-glusterfs-native

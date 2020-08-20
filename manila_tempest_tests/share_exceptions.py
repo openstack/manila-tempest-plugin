@@ -80,3 +80,8 @@ class ShareReplicationTypeException(exceptions.TempestException):
 class ShareServerBuildErrorException(exceptions.TempestException):
     message = ("Share server %(server_id)s failed to build and is in ERROR "
                "status")
+
+
+class ShareServerMigrationException(exceptions.TempestException):
+    message = ("Share server %(server_id)s failed to migrate and is in ERROR "
+               "status")

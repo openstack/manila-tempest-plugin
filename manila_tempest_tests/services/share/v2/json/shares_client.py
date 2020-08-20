@@ -578,7 +578,7 @@ class SharesV2Client(shares_client.SharesClient):
             time.sleep(self.build_interval)
             body = self.get_snapshot(snapshot_id, version=version)
             snapshot_status = body['status']
-            if snapshot_status == status:
+            if snapshot_status in status:
                 return
             if 'error' in snapshot_status:
                 raise (share_exceptions.
@@ -1522,7 +1522,7 @@ class SharesV2Client(shares_client.SharesClient):
             time.sleep(self.build_interval)
             body = self.show_share_server(server_id)
             server_status = body[status_attr]
-            if server_status == status:
+            if server_status in status:
                 return
             elif constants.STATUS_ERROR in server_status.lower():
                 raise share_exceptions.ShareServerBuildErrorException(
@@ -2107,3 +2107,90 @@ class SharesV2Client(shares_client.SharesClient):
         return body
 
 ###############
+
+    def share_server_migration_check(
+        self, share_server_id, host, writable=False,
+        preserve_snapshots=False, nondisruptive=False,
+        new_share_network_id=None, version=LATEST_MICROVERSION):
+        body = {
+            'migration_check': {
+                'host': host,
+                'writable': writable,
+                'preserve_snapshots': preserve_snapshots,
+                'nondisruptive': nondisruptive,
+                'new_share_network_id': new_share_network_id,
+            }
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post('share-servers/%s/action' % share_server_id,
+                               body, headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        self.expected_success(200, resp.status)
+
+        return json.loads(body)
+
+    def share_server_migration_start(self, share_server_id, host,
+                                     writable=False, new_share_network_id=None,
+                                     preserve_snapshots=False,
+                                     nondisruptive=False,
+                                     version=LATEST_MICROVERSION):
+        body = {
+            'migration_start': {
+                'host': host,
+                'writable': writable,
+                'preserve_snapshots': preserve_snapshots,
+                'nondisruptive': nondisruptive,
+                'new_share_network_id': new_share_network_id,
+            }
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post('share-servers/%s/action' % share_server_id,
+                               body, headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        self.expected_success(202, resp.status)
+
+        return body
+
+    def share_server_migration_complete(self, share_server_id,
+                                        version=LATEST_MICROVERSION):
+        body = {
+            'migration_complete': None
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post('share-servers/%s/action' % share_server_id,
+                               body, headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        self.expected_success(200, resp.status)
+
+        return body
+
+    def share_server_migration_cancel(self, share_server_id,
+                                      version=LATEST_MICROVERSION):
+        body = {
+            'migration_cancel': None
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post('share-servers/%s/action' % share_server_id,
+                               body, headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        self.expected_success(202, resp.status)
+
+        return body
+
+    def share_server_migration_get_progress(self, share_server_id,
+                                            version=LATEST_MICROVERSION):
+        body = {
+            'migration_get_progress': None
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post('share-servers/%s/action' % share_server_id,
+                               body, headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        self.expected_sucess(200, resp.status)
+
+        return json.loads(body)

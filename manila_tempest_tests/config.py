@@ -29,7 +29,7 @@ ShareGroup = [
                help="The minimum api microversion is configured to be the "
                     "value of the minimum microversion supported by Manila."),
     cfg.StrOpt("max_api_microversion",
-               default="2.56",
+               default="2.57",
                help="The maximum api microversion is configured to be the "
                     "value of the latest microversion supported by Manila."),
     cfg.StrOpt("region",
@@ -262,6 +262,10 @@ ShareGroup = [
                 help="Defines whether to run tests that create share from "
                      "snapshots in another pool or az. Enable this "
                      "option if the used driver supports it."),
+    cfg.BoolOpt("run_share_servers_migration_tests",
+                default=False,
+                help="Defines whether to run share servers migration tests. "
+                     "Enable this option if the used driver supports it."),
 
     cfg.StrOpt("image_with_share_tools",
                default="manila-service-image-master",
@@ -278,6 +282,10 @@ ShareGroup = [
     cfg.IntOpt("migration_timeout",
                default=1500,
                help="Time to wait for share migration before "
+                    "timing out (seconds)."),
+    cfg.IntOpt("share_server_migration_timeout",
+               default="1500",
+               help="Time to wait for share server migration before "
                     "timing out (seconds)."),
     cfg.StrOpt("default_share_type_name",
                help="Default share type name to use in tempest tests."),
