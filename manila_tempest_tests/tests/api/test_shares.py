@@ -110,6 +110,16 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             detailed_elements.add('progress')
             self.assertTrue(detailed_elements.issubset(share.keys()), msg)
 
+        # This check will ensure that when a share creation request is handled,
+        # if the driver has the "driver handles share servers" option enabled,
+        # that a share server will be created, otherwise, not.
+        share_get = self.admin_shares_v2_client.get_share(share['id'])
+        share_server = share_get['share_server_id']
+        if CONF.share.multitenancy_enabled:
+            self.assertNotEmpty(share_server)
+        else:
+            self.assertEmpty(share_server)
+
         # Delete share
         self.shares_v2_client.delete_share(share['id'])
         self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
