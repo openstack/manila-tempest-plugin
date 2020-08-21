@@ -98,17 +98,6 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                                             flavor=self.flavor_ref,
                                             ssh_user=self.ssh_user))
 
-        self.security_group = self._create_security_group()
-        self.network = self._create_network(namestart="manila-share")
-        self.subnet = self._create_subnet(
-            network=self.network,
-            namestart="manila-share-sub",
-            ip_version=self.ip_version,
-            use_default_subnetpool=self.ipv6_enabled)
-        router = self._get_router()
-        self._create_router_interface(subnet_id=self.subnet['id'],
-                                      router_id=router['id'])
-
         self.storage_network = (
             self._get_network_by_name_or_id(CONF.share.storage_network)
             if CONF.share.storage_network else None
@@ -116,6 +105,24 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         self.storage_network_name = (
             self.storage_network['name'] if self.storage_network else None
         )
+
+        # Tests need to be able to ssh into the VM - so we need
+        # a security group, and a tenant private network
+        self.security_group = self._create_security_group()
+        self.network = self._create_network(namestart="manila-share")
+        # When not using a "storage network" to connect shares to VMs,
+        # we need the subnet to match the IP version we're testing
+        subnet_ip_params = {} if self.storage_network else {
+            'ip_version': self.ip_version,
+            'use_default_subnetpool': self.ipv6_enabled
+        }
+        self.subnet = self._create_subnet(
+            network=self.network,
+            namestart="manila-share-sub",
+            **subnet_ip_params)
+        router = self._get_router()
+        self._create_router_interface(subnet_id=self.subnet['id'],
+                                      router_id=router['id'])
 
         if CONF.share.multitenancy_enabled:
             # Skip if DHSS=False
