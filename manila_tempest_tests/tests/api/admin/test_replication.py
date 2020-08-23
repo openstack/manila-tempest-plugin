@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ddt
 from tempest import config
 from testtools import testcase as tc
 
@@ -23,8 +24,10 @@ from manila_tempest_tests import utils
 
 CONF = config.CONF
 _MIN_SUPPORTED_MICROVERSION = '2.11'
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
+@ddt.ddt
 class ReplicationAdminTest(base.BaseSharesMixedTest):
 
     @classmethod
@@ -78,8 +81,13 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                 if replica['replica_state'] == r_state]
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_promote_out_of_sync_share_replica(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_REPLICATION_VERSION,
+              constants.SHARE_REPLICA_GRADUATION_VERSION,
+              LATEST_MICROVERSION]))
+    def test_promote_out_of_sync_share_replica(self, version):
         """Test promote 'out_of_sync' share replica to active state."""
+        self.skip_if_microversion_not_supported(version)
         if (self.replication_type
                 not in constants.REPLICATION_PROMOTION_CHOICES):
             msg = "Option backend_replication_type should be one of (%s)!"
@@ -89,13 +97,13 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             share_type_id=self.share_type_id, client=self.admin_client,
             availability_zone=self.share_zone, share_network_id=self.sn_id)
         original_replica = self.admin_client.list_share_replicas(
-            share_id=share['id'])[0]
+            share_id=share['id'], version=version)[0]
 
         # NOTE(Yogi1): Cleanup needs to be disabled for replica that is
         # being promoted since it will become the 'primary'/'active' replica.
         replica = self.create_share_replica(
             share["id"], self.replica_zone, cleanup=False,
-            client=self.admin_client)
+            client=self.admin_client, version=version)
         # Wait for replica state to update after creation
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.REPLICATION_STATE_IN_SYNC,
@@ -103,7 +111,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
 
         # List replicas
         replica_list = self.admin_client.list_share_replicas(
-            share_id=share['id'])
+            share_id=share['id'], version=version)
 
         # Check if there is only 1 'active' replica before promotion.
         active_replicas = self._filter_share_replica_list(
@@ -112,82 +120,112 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
 
         # Set replica_state to 'out_of_sync'
         self.admin_client.reset_share_replica_state(
-            replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC)
+            replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
+            version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
             status_attr='replica_state')
 
         # Promote 'out_of_sync' replica to 'active' state.
-        self.promote_share_replica(replica['id'], self.admin_client)
+        self.promote_share_replica(replica['id'], self.admin_client,
+                                   version=version)
         # Original replica will need to be cleaned up before the promoted
         # replica can be deleted.
         self.addCleanup(self.delete_share_replica, original_replica['id'])
 
         # Check if there is still only 1 'active' replica after promotion.
         replica_list = self.admin_client.list_share_replicas(
-            share_id=self.share["id"])
+            share_id=self.share["id"], version=version)
         new_active_replicas = self._filter_share_replica_list(
             replica_list, constants.REPLICATION_STATE_ACTIVE)
         self.assertEqual(1, len(new_active_replicas))
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_force_delete_share_replica(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_REPLICATION_VERSION,
+              constants.SHARE_REPLICA_GRADUATION_VERSION,
+              LATEST_MICROVERSION]))
+    def test_force_delete_share_replica(self, version):
         """Test force deleting a replica that is in 'error_deleting' status."""
+        self.skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
-                                            client=self.admin_client)
+                                            client=self.admin_client,
+                                            version=version)
         self.admin_client.reset_share_replica_status(
-            replica['id'], constants.STATUS_ERROR_DELETING)
+            replica['id'], constants.STATUS_ERROR_DELETING, version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.STATUS_ERROR_DELETING)
-        self.admin_client.force_delete_share_replica(replica['id'])
+        self.admin_client.force_delete_share_replica(replica['id'],
+                                                     version=version)
         self.admin_client.wait_for_resource_deletion(replica_id=replica['id'])
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_reset_share_replica_status(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_REPLICATION_VERSION,
+              constants.SHARE_REPLICA_GRADUATION_VERSION,
+              LATEST_MICROVERSION]))
+    def test_reset_share_replica_status(self, version):
         """Test resetting a replica's 'status' attribute."""
+        self.skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
-                                            client=self.admin_client)
+                                            client=self.admin_client,
+                                            version=version)
         self.admin_client.reset_share_replica_status(replica['id'],
-                                                     constants.STATUS_ERROR)
+                                                     constants.STATUS_ERROR,
+                                                     version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.STATUS_ERROR)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_reset_share_replica_state(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_REPLICATION_VERSION,
+              constants.SHARE_REPLICA_GRADUATION_VERSION,
+              LATEST_MICROVERSION]))
+    def test_reset_share_replica_state(self, version):
         """Test resetting a replica's 'replica_state' attribute."""
+        self.skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
-                                            client=self.admin_client)
+                                            client=self.admin_client,
+                                            version=version)
         self.admin_client.reset_share_replica_state(replica['id'],
-                                                    constants.STATUS_ERROR)
+                                                    constants.STATUS_ERROR,
+                                                    version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.STATUS_ERROR, status_attr='replica_state')
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_resync_share_replica(self):
+    @ddt.data(
+        *set([constants.MIN_SHARE_REPLICATION_VERSION,
+              constants.SHARE_REPLICA_GRADUATION_VERSION,
+              LATEST_MICROVERSION]))
+    def test_resync_share_replica(self, version):
         """Test resyncing a replica."""
+        self.skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
-                                            client=self.admin_client)
+                                            client=self.admin_client,
+                                            version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.REPLICATION_STATE_IN_SYNC,
             status_attr='replica_state')
 
         # Set replica_state to 'out_of_sync'.
         self.admin_client.reset_share_replica_state(
-            replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC)
+            replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
+            version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
             status_attr='replica_state')
 
         # Attempt resync
-        self.admin_client.resync_share_replica(replica['id'])
+        self.admin_client.resync_share_replica(replica['id'], version=version)
         self.admin_client.wait_for_share_replica_status(
             replica['id'], constants.REPLICATION_STATE_IN_SYNC,
             status_attr='replica_state')
