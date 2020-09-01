@@ -14,13 +14,14 @@
 #    under the License.
 
 import ddt
-import manila_tempest_tests.tests.api.test_replication_negative as rep_neg_test
 from tempest import config
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests.tests.api import test_replication_negative as \
+    rep_neg_test
 from manila_tempest_tests import utils
 
 CONF = config.CONF

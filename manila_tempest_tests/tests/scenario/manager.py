@@ -21,7 +21,6 @@ from oslo_log import log
 from oslo_utils import netutils
 from oslo_utils import uuidutils
 import six
-
 from tempest.common import compute
 from tempest.common import image as common_image
 from tempest.common.utils.linux import remote_client
@@ -32,14 +31,14 @@ from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
-import tempest.test
+from tempest import test
 
 CONF = config.CONF
 
 LOG = log.getLogger(__name__)
 
 
-class ScenarioTest(tempest.test.BaseTestCase):
+class ScenarioTest(test.BaseTestCase):
     """Base class for scenario tests. Uses tempest own clients. """
 
     credentials = ['primary']

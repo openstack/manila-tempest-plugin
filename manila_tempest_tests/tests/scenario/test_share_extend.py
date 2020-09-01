@@ -11,10 +11,9 @@
 #    under the License.
 
 import ddt
-import six
-
 from oslo_log import log as logging
 from oslo_utils import units
+import six
 from tempest import config
 from tempest.lib import exceptions
 from testtools import testcase as tc
@@ -22,6 +21,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager_share as manager
+
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

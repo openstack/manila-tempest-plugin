@@ -13,9 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempfile import mkstemp
+
 from oslo_log import log
 import six
 from six.moves.urllib.request import urlopen
+from tempest.common import waiters
+from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import remote_client
@@ -23,12 +29,6 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager
 from manila_tempest_tests import utils
 
-from tempest.common import waiters
-from tempest import config
-from tempest.lib.common.utils import data_utils
-from tempest.lib import exceptions
-
-from tempfile import mkstemp
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)

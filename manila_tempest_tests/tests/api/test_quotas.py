@@ -13,13 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import ddt
 import itertools
-from manila_tempest_tests import utils
+
+import ddt
 from tempest import config
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
+
 
 CONF = config.CONF
 PRE_SHARE_REPLICAS_MICROVERSION = "2.52"

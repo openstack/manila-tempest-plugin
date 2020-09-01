@@ -16,12 +16,12 @@
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
-
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
+
 
 CONF = config.CONF
 
