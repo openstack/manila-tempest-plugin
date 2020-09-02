@@ -290,11 +290,7 @@
     vars:
       devstack_plugins:
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
-      tempest_test_regex: manila_tempest_tests.tests.scenario
-      # Those tests fail when using kernel client, because right now CephFS quotas
-      # is not supported. So for now those tests should be blacklisted.
-      # TODO(lkuchlan) un-blacklist those test when https://review.opendev.org/#/c/676722 will land.
-      tempest_black_regex: '(TestShareShrinkCEPHFS.test_create_shrink_and_write|TestShareExtendCEPHFS.test_create_extend_and_write)(\[.*\bbackend\b.*\])'
+      tempest_test_regex: manila_tempest_tests.tests
       devstack_localrc:
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnative
@@ -306,7 +302,7 @@
         MANILA_OPTGROUP_cephfsnative_cephfs_auth_id: manila
         # NOTE(gouthamr): The following need to use the latest images, however, there's a bug
         # with cephfs on Ubuntu 20.04 LTS: https://tracker.ceph.com/issues/47236
-        # the latest image is built as https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2 
+        # the latest image is built as https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
         MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-1.3.0-58-g2859569.qcow2
         MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-1.3.0-58-g2859569
       devstack_local_conf:
