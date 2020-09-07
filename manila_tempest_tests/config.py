@@ -290,5 +290,11 @@ ShareGroup = [
                help="Default size in GB for shares created by share tests."),
     cfg.BoolOpt("run_ipv6_tests",
                 default=False,
-                help="Enable or disable running IPv6 tests."),
+                help="Enable or disable running IPv6 NFS scenario tests. "
+                     "These tests validate that IPv6 export locations work, "
+                     "and that access can be provided to IPv6 clients. When "
+                     "you do not specify a storage_network, the tests will "
+                     "attempt to create an IPv6 subnet on the project network "
+                     "they create for ping and SSH to the client test VM "
+                     "where data path testing is performed."),
 ]
