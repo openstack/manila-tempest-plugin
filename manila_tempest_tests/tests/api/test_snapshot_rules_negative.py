@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -56,6 +57,7 @@ class SnapshotIpRulesForNFSNegativeTest(
                                      share_type_id=cls.share_type_id)
         cls.snap = cls.create_snapshot_wait_for_active(cls.share["id"])
 
+    @decorators.idempotent_id('a877276e-03d4-4fc5-b4b4-c8874d23f1dc')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data("1.2.3.256", "1.1.1.-", "1.2.3.4/33", "1.2.3.*", "1.2.3.*/23",
               "1.2.3.1|23", "1.2.3.1/", "1.2.3.1/-1",
@@ -67,6 +69,7 @@ class SnapshotIpRulesForNFSNegativeTest(
                           self.shares_v2_client.create_snapshot_access_rule,
                           self.snap["id"], "ip", target)
 
+    @decorators.idempotent_id('dd93150f-8081-4533-abb3-f99a03652a87')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data("1.2.3.4", "fd8c:b029:bba6:ac54::1",
               "fd8c:b029:bba6:ac54::1/128", "1.2.3.4/32")

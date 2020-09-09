@@ -12,6 +12,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -63,6 +64,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
         cls.share_zone = cls.zones[0]
         cls.replica_zone = cls.zones[-1]
 
+    @decorators.idempotent_id('7a6318c2-71e9-45d2-aafe-5dcc0810a14a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.47')
     @testtools.skipUnless(
@@ -85,6 +87,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
                               self.shares_v2_client.get_share_export_location,
                               share['id'], export['id'])
 
+    @decorators.idempotent_id('f1b89548-4da7-4ce1-a3c0-363a6c1ea726')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.47')
     def test_get_replica_export_location_for_non_replica(self):
@@ -101,6 +104,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 self.shares_v2_client.list_share_replica_export_locations,
                 instance['id'])
 
+    @decorators.idempotent_id('f60d7eec-ec29-4767-985f-ff8c9e771cae')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported('2.47')
     def test_list_replica_export_locations_for_invalid_replica(self):
@@ -110,6 +114,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
             self.shares_v2_client.list_share_replica_export_locations,
             'invalid-replica-id')
 
+    @decorators.idempotent_id('29ec890e-e324-4487-b2e3-f87642b6a58d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported('2.47')
     def test_get_replica_export_location_for_invalid_export_id(self):

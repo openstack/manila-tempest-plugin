@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -80,6 +81,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
                     share_type_id=cls.share_type_id,
                 ))
 
+    @decorators.idempotent_id('5f61f5dd-891e-478f-b102-803096820882')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share(self):
 
@@ -107,6 +109,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
             CONF.share.share_size, share["size"])
         self.assertEqual(CONF.share.share_size, int(share["size"]), msg)
 
+    @decorators.idempotent_id('60d34573-8452-47ab-9455-0067bdd3ed9c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares(self):
 
@@ -123,6 +126,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
             msg = "expected id lists %s times in share list" % (len(gen))
             self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('85f9438d-d3f6-4f3a-8134-e89915373df3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail(self):
 
@@ -143,6 +147,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
             msg = "expected id lists %s times in share list" % (len(gen))
             self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('47dad08b-0c36-428f-8ab9-5eba92ffc995')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_metadata(self):
         filters = {'metadata': self.metadata}
@@ -158,6 +163,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         if CONF.share.capability_create_share_from_snapshot_support:
             self.assertFalse(self.shares[1]['id'] in [s['id'] for s in shares])
 
+    @decorators.idempotent_id('d884c91e-88f5-4e42-83d9-ec3b440af893')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_extra_specs(self):
         filters = {
@@ -191,6 +197,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
             extra_specs = self.shares_client.get_share_type_extra_specs(st_id)
             self.assertDictContainsSubset(filters["extra_specs"], extra_specs)
 
+    @decorators.idempotent_id('76fbe8ba-f1d3-4446-b9b8-55617762a2c7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_share_type_id(self):
         filters = {'share_type_id': self.share_type_id}
@@ -221,6 +228,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         for share in self.shares:
             self.assertIn(share['id'], share_ids)
 
+    @decorators.idempotent_id('04afc330-78ee-494f-a660-7670c877a440')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_host(self):
         base_share = self.shares_client.get_share(self.shares[0]['id'])
@@ -237,6 +245,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     @base.skip_if_microversion_lt("2.35")
     @ddt.data(('path', True), ('id', True), ('path', False), ('id', False))
     @ddt.unpack
+    @decorators.idempotent_id('a27e5e3f-451f-4200-af38-99a562ccbe86')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_or_with_detail_filter_by_export_location(
             self, export_location_type, enable_detail):
@@ -260,6 +269,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         self.assertEqual(1, len(shares))
         self.assertEqual(self.shares[0]['id'], shares[0]['id'])
 
+    @decorators.idempotent_id('4582de51-1dcd-4c44-b550-eca9a9685038')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -276,6 +286,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
             self.assertEqual(
                 filters['share_network_id'], share['share_network_id'])
 
+    @decorators.idempotent_id('645aebc4-55ac-406d-b7ab-5614c4fc12e6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.capability_create_share_from_snapshot_support,
@@ -292,6 +303,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
             self.assertEqual(filters['snapshot_id'], share['snapshot_id'])
         self.assertFalse(self.shares[0]['id'] in [s['id'] for s in shares])
 
+    @decorators.idempotent_id('87659cee-4692-412a-9bfe-06fc97d30ba0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_with_asc_sorting(self):
         filters = {'sort_key': 'created_at', 'sort_dir': 'asc'}
@@ -304,6 +316,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         sorted_list = [share['created_at'] for share in shares]
         self.assertEqual(sorted(sorted_list), sorted_list)
 
+    @decorators.idempotent_id('631f4226-f1ea-47b1-a472-8f12da2d05c4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_existed_name(self):
         # list shares by name, at least one share is expected
@@ -311,6 +324,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         shares = self.shares_client.list_shares_with_detail(params)
         self.assertEqual(self.share_name, shares[0]["name"])
 
+    @decorators.idempotent_id('d0dae9e5-a826-48e4-b7b7-24b08ad5a7cb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_fake_name(self):
         # list shares by fake name, no shares are expected
@@ -318,6 +332,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         shares = self.shares_client.list_shares_with_detail(params)
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('8eac9b63-666f-4c52-8c5f-58b1fdf201e2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_active_status(self):
         # list shares by active status, at least one share is expected
@@ -327,6 +342,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         for share in shares:
             self.assertEqual(params["status"], share["status"])
 
+    @decorators.idempotent_id('e94f41c0-f6c4-4d77-b4f9-2c796c27e348')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_fake_status(self):
         # list shares by fake status, no shares are expected
@@ -334,6 +350,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         shares = self.shares_client.list_shares_with_detail(params)
         self.assertEqual(0, len(shares))
 
+    @decorators.idempotent_id('d24a438e-4622-48ac-993e-a30d04746745')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -364,6 +381,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
                                           get["share_id"]))
         self.assertEqual(self.shares[0]["id"], get["share_id"], msg)
 
+    @decorators.idempotent_id('9fae88a5-dd95-40ba-96e2-ac3694cf455f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -381,6 +399,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         msg = "expected id lists %s times in share list" % (len(gen))
         self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('84013334-5985-4067-8b54-4c633f6022f3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")

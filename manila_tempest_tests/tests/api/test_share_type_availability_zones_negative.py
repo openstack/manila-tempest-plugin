@@ -11,6 +11,7 @@
 #    under the License.
 import ddt
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -42,6 +43,7 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
         cls.valid_azs_spec = ', '.join(cls.valid_azs)
         cls.invalid_azs_spec = ', '.join(cls.invalid_azs)
 
+    @decorators.idempotent_id('7a23af8d-a995-43ac-a381-2cd5c5f57f39')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data('az1,     az2, az 3,  ', 'az1,,az 3', ',az2,  az 3')
     def test_share_type_azs_create_with_invalid_az_spec(self, spec):
@@ -56,6 +58,7 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
             extra_specs=extra_specs,
             client=self.admin_shares_v2_client)
 
+    @decorators.idempotent_id('78f1afba-6087-415c-aaa1-a880ae341bfc')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_type_azs_filter_by_invalid_azs_extra_spec(self):
         self.admin_shares_v2_client.update_share_type_extra_spec(
@@ -73,6 +76,7 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
         self.assertNotIn(self.share_type_id, share_type_ids)
         self.assertIn(share_type_no_az_spec['id'], share_type_ids)
 
+    @decorators.idempotent_id('9285d7d5-cb40-462d-998c-891f0f934fdd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_type_azs_shares_unsupported_az(self):
         """Test using an AZ not supported by the share type."""
@@ -84,6 +88,7 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
             availability_zone=self.valid_azs[0],
             cleanup_in_class=False)
 
+    @decorators.idempotent_id('5712abae-52a5-46ec-8850-46e732b18b06')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_type_azs_share_groups_unsupported(self):
         self.admin_shares_v2_client.update_share_type_extra_spec(

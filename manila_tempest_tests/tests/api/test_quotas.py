@@ -17,6 +17,7 @@ import itertools
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -40,6 +41,7 @@ class SharesQuotasTest(base.BaseSharesTest):
         cls.user_id = cls.shares_v2_client.user_id
         cls.tenant_id = cls.shares_v2_client.tenant_id
 
+    @decorators.idempotent_id('a4649f11-41d0-4e73-ab5a-1466f2339b2f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_default_quotas(self, client_name):
@@ -54,6 +56,7 @@ class SharesQuotasTest(base.BaseSharesTest):
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 
+    @decorators.idempotent_id('19525293-2b32-48c3-a7cd-cab279ac4631')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_show_quotas(self, client_name):
@@ -68,6 +71,7 @@ class SharesQuotasTest(base.BaseSharesTest):
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 
+    @decorators.idempotent_id('1e670af7-9734-42a8-97b7-3080526f3aca')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_show_quotas_for_user(self, client_name):
@@ -88,6 +92,7 @@ class SharesQuotasTest(base.BaseSharesTest):
             ["2.25", "2.53", CONF.share.max_api_microversion]), (True, False))
     )
     @ddt.unpack
+    @decorators.idempotent_id('795614f6-4a18-47d5-b817-0b294e9d4c48')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_quotas_detail(self, microversion, with_user):
         self.skip_if_microversion_not_supported(microversion)
@@ -108,6 +113,7 @@ class SharesQuotasTest(base.BaseSharesTest):
                 self.assertIn(inner, outer_keys)
                 self.assertGreater(int(quotas[outer][inner]), -2)
 
+    @decorators.idempotent_id('7bd5ac42-9fcb-477f-a253-02cde2bde661')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @base.skip_if_microversion_not_supported(PRE_SHARE_REPLICAS_MICROVERSION)
     def test_quota_detail_2_52_no_share_replica_quotas(self):

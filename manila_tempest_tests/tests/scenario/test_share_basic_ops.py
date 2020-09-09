@@ -16,6 +16,7 @@
 import ddt
 from oslo_log import log as logging
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 import testtools
 from testtools import testcase as tc
@@ -44,6 +45,14 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
+    def _ping_host_from_export_location(self, export, remote_client):
+        ip, version = self.get_ip_and_version_from_export_location(export)
+        if version == 6:
+            remote_client.exec_command("ping6 -c 5 %s" % ip)
+        else:
+            remote_client.exec_command("ping -c 5 %s" % ip)
+
+    @decorators.idempotent_id('825be71c-cf14-4884-a0ad-cf47d511df9a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
         instance = self.boot_instance(wait_until="BUILD")
@@ -58,6 +67,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             self.mount_share(location, remote_client)
             self.unmount_share(remote_client)
 
+    @decorators.idempotent_id('7cc61131-90e1-42fb-9f07-d3786efb338f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
     def test_write_with_ro_access(self):
         '''Test if an instance with ro access can write on the share.'''
@@ -89,6 +99,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                           self.write_data_to_mounted_share,
                           test_data, remote_client_inst)
 
+    @decorators.idempotent_id('5e184576-c7d1-4c16-9b7c-bc9bcd65ba58')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_read_write_two_vms(self):
         """Boots two vms and writes/reads data on it."""
@@ -126,6 +137,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         data = self.read_data_from_mounted_share(remote_client_inst2)
         self.assertEqual(test_data, data)
 
+    @decorators.idempotent_id('15d42949-545e-4ad8-b06e-bb2556c54375')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(CONF.share.run_host_assisted_migration_tests or
@@ -234,6 +246,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.assertIn('1m4.bin', output)
         self.assertIn('1m5.bin', output)
 
+    @decorators.idempotent_id('87b803bf-679a-492b-a538-af4c9ff013c8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(
         CONF.share.capability_create_share_from_snapshot_support,
@@ -316,6 +329,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         self.assertNotIn('file2', output)
         self.assertIn('file3', output)
 
+    @decorators.idempotent_id('c98e6876-3a4f-40e8-8b4f-023c94c242c3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.32")
     @testtools.skipUnless(CONF.share.run_mount_snapshot_tests,
@@ -429,17 +443,20 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
             "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
         )
 
+    @decorators.idempotent_id('4344a47a-d316-496b-97a4-12a59297950a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
     def test_write_with_ro_access(self):
         msg = ("Skipped for CIFS protocol because RO access is not "
                "supported for shares by IP.")
         raise self.skipException(msg)
 
+    @decorators.idempotent_id('a691332b-dd7a-4041-9bbd-3893e168aefa')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_read_mountable_snapshot(self):
         msg = "Skipped for CIFS protocol because of bug/1649573"
         raise self.skipException(msg)
 
+    @decorators.idempotent_id('8c936c3e-4793-49d2-8409-4038f03e7012')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_write_data_to_share_created_from_snapshot(self):
         msg = "Skipped for CIFS protocol because of bug/1649573"
@@ -449,16 +466,19 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
 class TestShareBasicOpsCEPHFS(ShareBasicOpsBase, manager.BaseShareCEPHFSTest):
     protocol = "cephfs"
 
+    @decorators.idempotent_id('9fb12879-45b3-4042-acac-82be338dbde1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
         super(TestShareBasicOpsCEPHFS, self).test_mount_share_one_vm()
 
+    @decorators.idempotent_id('a2a70b94-f5fc-438a-9dfa-53aa60ee3949')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_write_with_ro_access_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
         super(TestShareBasicOpsCEPHFS, self).test_write_with_ro_access()
 
+    @decorators.idempotent_id('c247f51f-0ffc-4a4f-894c-781647619faf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_read_write_two_vms_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'

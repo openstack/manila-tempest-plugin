@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -47,6 +48,7 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
         cls.snapshot = cls.create_snapshot_wait_for_active(
             cls.share["id"], client=cls.admin_client)
 
+    @decorators.idempotent_id('6e371aac-ff8b-4eac-abc9-b8d777448ff3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot_instances_with_snapshot_by_non_admin(self):
         self.assertRaises(
@@ -54,6 +56,7 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
             self.member_client.list_snapshot_instances,
             snapshot_id=self.snapshot['id'])
 
+    @decorators.idempotent_id('d80331e4-8738-46c7-b726-1e716acef738')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_instance_by_non_admin(self):
         instances = self.admin_client.list_snapshot_instances(
@@ -63,6 +66,7 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
             self.member_client.get_snapshot_instance,
             instance_id=instances[0]['id'])
 
+    @decorators.idempotent_id('666a6caf-31b0-45d9-808c-e590250cffd4')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_reset_snapshot_instance_status_by_non_admin(self):
         instances = self.admin_client.list_snapshot_instances(
@@ -90,12 +94,14 @@ class SnapshotInstancesNegativeNoResourceTest(base.BaseSharesMixedTest):
         cls.admin_client = cls.admin_shares_v2_client
         cls.member_client = cls.shares_v2_client
 
+    @decorators.idempotent_id('abded04d-40c0-4eb9-b2be-58b4efb16244')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_snapshot_instance_with_non_existent_instance(self):
         self.assertRaises(lib_exc.NotFound,
                           self.admin_client.get_snapshot_instance,
                           instance_id="nonexistent_instance")
 
+    @decorators.idempotent_id('1609702b-de87-4d12-9a9c-78077d4676f3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_snapshot_instances_by_non_admin(self):
         self.assertRaises(

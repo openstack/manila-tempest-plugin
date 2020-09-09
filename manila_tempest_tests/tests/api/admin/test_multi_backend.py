@@ -15,6 +15,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -56,6 +57,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
         # Create shares using precreated share types
         cls.shares = cls.create_shares(share_data_list)
 
+    @decorators.idempotent_id('888add9d-4ad0-4d88-a62f-af7ee1d9f9ab')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_backend_name_reporting(self):
         # Share's 'host' should be like "hostname@backend_name"
@@ -63,6 +65,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
             get = self.shares_client.get_share(share['id'])
             self.assertEqual(2, len(get["host"].split("@")))
 
+    @decorators.idempotent_id('691fbcef-6d8d-4ad9-b493-501bbb3dcf3c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_share_type(self):
         # Share type should be the same as provided with share creation
@@ -71,6 +74,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
                                                   version="2.5")
             self.assertEqual(self.sts[i]["name"], get["share_type"])
 
+    @decorators.idempotent_id('f25e0cb0-d656-4f16-a761-ec23992cd9e7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_share_type_v_2_6(self):
         # Share type should be the same as provided with share creation
@@ -80,6 +84,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
             self.assertEqual(self.sts[i]["id"], get["share_type"])
             self.assertEqual(self.sts[i]["name"], get["share_type_name"])
 
+    @decorators.idempotent_id('bfa0c056-0a15-40e1-bdff-f1e10b95736c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_backend_name_distinction(self):
         # Different share backends should have different host records

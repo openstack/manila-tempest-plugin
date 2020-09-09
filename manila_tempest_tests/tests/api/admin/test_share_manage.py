@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -142,21 +143,25 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             self._delete_share_server_and_wait(
                 managed_share['share_server_id'])
 
+    @decorators.idempotent_id('15b654d0-34ed-4154-9f5f-b96d2e4e9d1c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.5")
     def test_manage_with_os_share_manage_url(self):
         self._test_manage(version="2.5")
 
+    @decorators.idempotent_id('8c0beefb-19da-441e-b73f-d90eb8000ff3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.8")
     def test_manage_with_is_public_True(self):
         self._test_manage(is_public=True, version="2.8")
 
+    @decorators.idempotent_id('da7b7a4f-6693-4460-bdb7-1f8d42032bc6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @base.skip_if_microversion_not_supported("2.16")
     def test_manage_show_user_id(self):
         self._test_manage(version="2.16")
 
+    @decorators.idempotent_id('24ec7840-0174-484f-8b3a-8c6f162bf576')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_manage(self):
         self._test_manage(check_manage=True)

@@ -15,6 +15,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -78,6 +79,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             description=cls.sg_snap_desc
         )
 
+    @decorators.idempotent_id('7ce3fb52-1bec-42b1-9b4f-671c8465764b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_invalid_source_sg_snapshot_id_value_min(self):
         self.assertRaises(
@@ -87,6 +89,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('43c7a454-06b4-4c6e-8aaf-34709db64e28')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_nonexistent_source_sg_snapshot_id_value_min(self):
         self.assertRaises(
@@ -96,6 +99,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('aae1b1db-ea04-4a53-88ad-e5ee648fe938')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_invalid_share_network_id_value_min(self):
         self.assertRaises(
@@ -105,6 +109,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('ea817e28-08b9-40c1-bbab-a8820ec564ac')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_group_with_nonexistent_share_network_id_value_min(self):
         self.assertRaises(
@@ -114,6 +119,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('8bc89858-61de-49f3-868c-394841a93503')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_invalid_share_type_id_value_min(self):
         self.assertRaises(
@@ -123,6 +129,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('97183b15-d150-4c6b-b812-734c2500afe7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_nonexistent_share_type_id_value_min(self):
         self.assertRaises(
@@ -132,6 +139,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('25a829e2-be7d-4a4d-881e-bc0634515985')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_snapshot_with_invalid_sg_id_value_min(self):
         self.assertRaises(
@@ -141,6 +149,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('16ad5a77-0ef7-4906-8e14-56703c2c9d71')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_snapshot_with_nonexistent_sg_id_value_min(self):
         self.assertRaises(
@@ -150,6 +159,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             cleanup_in_class=False,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('d486a184-1160-4664-ad9b-6f8974685343')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_sg_with_invalid_id_min(self):
         self.assertRaises(
@@ -158,6 +168,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             "invalid_share_group_id",
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('7a5dcec1-27cc-4bfe-a166-d8c1832a4dc7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_sg_without_passing_group_id_min(self):
         self.assertRaises(
@@ -165,6 +176,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             self.shares_v2_client.get_share_group,
             '', version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('9127933a-1960-415e-bf21-8bcb5720e371')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_sg_with_invalid_id_min(self):
         self.assertRaises(
@@ -175,6 +187,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             description='new_description',
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('bf8f9865-a906-4d55-b233-fec57cf43b66')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_sg_with_invalid_id_min(self):
         self.assertRaises(
@@ -183,6 +196,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             "invalid_share_group_id",
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('16431501-800f-4695-bae6-6a4c715c2fbf')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_sg_without_passing_sg_id_min(self):
         self.assertRaises(
@@ -190,6 +204,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             self.shares_v2_client.delete_share_group,
             '', version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('18fe2dee-4a07-484e-8f0f-bbc238500dc3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_sg_in_use_by_sg_snapshot_min(self):
         self.assertRaises(
@@ -198,6 +213,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             self.share_group['id'],
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('d2a58f10-cc86-498d-a5e0-1468d4345852')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_share_in_use_by_sg_snapshot_min(self):
         params = {'share_group_id': self.share['share_group_id']}
@@ -208,6 +224,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             params=params,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
+    @decorators.idempotent_id('c2225b19-d5f5-4d15-bb9a-de63bfce6760')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_sg_containing_a_share_min(self):
         self.assertRaises(
@@ -222,6 +239,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
         self.assertEqual('available', sg['status'])
 
+    @decorators.idempotent_id('edd329b8-7188-481f-9445-8f6d913538fa')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_filter_shares_on_invalid_group_id_min(self):
         shares = self.shares_v2_client.list_shares(
@@ -231,6 +249,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
         )
         self.assertEqual(0, len(shares), 'Incorrect number of shares returned')
 
+    @decorators.idempotent_id('5dc10968-cbff-46d9-a1aa-bafccc7a1905')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_filter_shares_on_nonexistent_group_id_min(self):
         shares = self.shares_v2_client.list_shares(
@@ -240,6 +259,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
         )
         self.assertEqual(0, len(shares), 'Incorrect number of shares returned')
 
+    @decorators.idempotent_id('f805f683-fe05-4534-9f40-a74be42ff82b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_filter_shares_on_empty_share_group_id_min(self):
         share_group = self.create_share_group(
@@ -257,6 +277,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
         )
         self.assertEqual(0, len(shares), 'Incorrect number of shares returned')
 
+    @decorators.idempotent_id('8fc20c22-082f-4851-bcc3-d2f3af57f027')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_with_nonexistent_az_min(self):
         self.assertRaises(
@@ -270,6 +291,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @base.skip_if_microversion_lt("2.34")
+    @decorators.idempotent_id('64527564-9cd6-42db-8897-910f4fc1a151')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_and_share_with_different_azs(self):
         azs = self.shares_v2_client.list_availability_zones()

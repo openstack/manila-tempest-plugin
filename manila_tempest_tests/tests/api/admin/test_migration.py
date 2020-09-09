@@ -17,6 +17,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -361,6 +362,7 @@ class MigrationBase(base.BaseSharesAdminTest):
 class MigrationCancelNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('d39dfa1b-6e91-4efc-84f1-76f878b51f2a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @ddt.data(True, False)
@@ -398,6 +400,7 @@ class MigrationCancelNFSTest(MigrationBase):
             dest_pool, share, constants.TASK_STATE_MIGRATION_CANCELLED,
             complete=False)
 
+    @decorators.idempotent_id('640dce56-2084-488d-8dea-456840ff397e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(
@@ -433,6 +436,7 @@ class MigrationCancelNFSTest(MigrationBase):
 class MigrationOppositeDriverModesNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('d8cce50d-e8da-4fbc-8f94-0827bf277b6c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @ddt.data(True, False)
@@ -500,6 +504,7 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
 class MigrationTwoPhaseNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('e6cf0e4d-bdf3-49c1-b6ba-56d1ad6c81d2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @ddt.data(True, False)
@@ -551,6 +556,7 @@ class MigrationTwoPhaseNFSTest(MigrationBase):
 class MigrationWithShareExtendingNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('0e3d75e0-385a-4f7a-889f-2a3db79db8c2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(
@@ -564,6 +570,7 @@ class MigrationWithShareExtendingNFSTest(MigrationBase):
 class MigrationWithShareShrinkingNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('58c72e51-d217-48bc-8155-5a010912312e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(
@@ -577,6 +584,7 @@ class MigrationWithShareShrinkingNFSTest(MigrationBase):
 class MigrationOfShareWithSnapshotNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('a95eb701-626a-4175-967b-4880d3716857')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(
@@ -618,6 +626,7 @@ class MigrationOfShareWithSnapshotNFSTest(MigrationBase):
 class MigrationWithDifferentSnapshotSupportNFSTest(MigrationBase):
     protocol = "nfs"
 
+    @decorators.idempotent_id('a18b3637-2070-4a1b-acd9-c392eb7963b5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
@@ -630,6 +639,7 @@ class MigrationWithDifferentSnapshotSupportNFSTest(MigrationBase):
         self._validate_share_migration_with_different_snapshot_capability_type(
             force_host_assisted, True)
 
+    @decorators.idempotent_id('59313673-6576-4163-ab96-41bafcdad63a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @base.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(CONF.share.run_snapshot_tests,

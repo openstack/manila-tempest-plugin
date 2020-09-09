@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -41,6 +42,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         cls.share = cls.create_share(cls.protocol,
                                      share_type_id=cls.share_type_id)
 
+    @decorators.idempotent_id('21ad41fb-04cf-493c-bc2f-66c80220898b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_get_delete_share(self):
 
@@ -127,6 +129,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
                           self.shares_v2_client.get_share,
                           share['id'])
 
+    @decorators.idempotent_id('775f8f87-5727-4bb7-b69f-9ce6b9bdb140')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -161,6 +164,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.get_snapshot, snap['id'])
 
+    @decorators.idempotent_id('8a14831d-ad1f-447f-b5de-2b8a233b24c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -192,6 +196,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
                "source of share %s" % (snap["id"], get["snapshot_id"]))
         self.assertEqual(get["snapshot_id"], snap["id"], msg)
 
+    @decorators.idempotent_id('c609c0b2-d649-4ca3-8334-629b213f5c72')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(not CONF.share.multitenancy_enabled,
                       "Only for multitenancy.")

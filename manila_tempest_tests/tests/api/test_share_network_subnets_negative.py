@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -46,6 +47,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         cls.az = cls.shares_v2_client.list_availability_zones()[0]
         cls.az_name = cls.az['name']
 
+    @decorators.idempotent_id('d20b6105-22d1-4fc0-8468-45dd019240c0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_share_network_subnet_share_network_not_found(self):
         data = self.generate_subnet_data()
@@ -54,6 +56,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           'fake_inexistent_id',
                           **data)
 
+    @decorators.idempotent_id('68264ac2-57e5-47ea-aa71-198c020be975')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_share_network_subnet_az_not_found(self):
         data = {'availability_zone': 'non-existent-az'}
@@ -62,6 +65,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           self.shares_v2_client.create_subnet,
                           self.share_network_id, **data)
 
+    @decorators.idempotent_id('13f397bf-5e3a-42b0-b4f9-9cd2dbbb0955')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(True, False)
     def test_add_share_network_subnet_in_same_az_exists(self, is_default):
@@ -79,6 +83,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           self.shares_v2_client.create_subnet,
                           share_network['id'], **data)
 
+    @decorators.idempotent_id('36e991c1-f09b-47dc-adc9-3da388b14612')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_share_network_subnet_missing_parameters(self):
         # Generate subnet data
@@ -90,6 +95,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           self.shares_v2_client.create_subnet,
                           self.share_network_id, **data)
 
+    @decorators.idempotent_id('11e76b07-f3e3-401f-9469-256b93a768e6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_show_subnet_share_network_not_found(self):
         self.assertRaises(lib_exc.NotFound,
@@ -97,6 +103,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           'fake-subnet',
                           'fake-sn')
 
+    @decorators.idempotent_id('22d4528b-39ae-4f97-b1b2-1b9d65146c97')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_show_subnet_not_found(self):
         self.assertRaises(lib_exc.NotFound,
@@ -104,6 +111,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           'fake-subnet',
                           self.share_network_id)
 
+    @decorators.idempotent_id('9dfc6ba3-c7be-4a6d-b104-ce77d2337bb3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_deleted_subnet(self):
         # Generate subnet data
@@ -130,6 +138,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           subnet['id'],
                           self.share_network['id'])
 
+    @decorators.idempotent_id('bf9d63c4-37fb-4646-add7-905b196316f1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(not CONF.share.multitenancy_enabled,
                       'Can run only with drivers that do handle share servers '
@@ -202,6 +211,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         self.shares_v2_client.delete_subnet(share_network_id,
                                             subnet['id'])
 
+    @decorators.idempotent_id('5088edfe-2800-4dec-a982-42c864bba954')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(not CONF.share.multitenancy_enabled,
                       'Can run only with drivers that do handle share servers '
@@ -271,6 +281,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         self.shares_v2_client.delete_subnet(share_network_id,
                                             subnet['id'])
 
+    @decorators.idempotent_id('1025b69b-f1fd-4e44-b749-33779545ffe8')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_subnet_share_network_not_found(self):
         self.assertRaises(lib_exc.NotFound,
@@ -278,6 +289,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           'fake-sn',
                           'fake-subnet')
 
+    @decorators.idempotent_id('a5bdc817-0c34-4856-9732-f561e6ab5a83')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_subnet_not_found(self):
         self.assertRaises(lib_exc.NotFound,

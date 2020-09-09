@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -56,6 +57,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
         cls.snapshot_instances = cls.admin_client.list_snapshot_instances(
             snapshot_id=cls.snapshot['id'])
 
+    @decorators.idempotent_id('53f0f184-7398-4e7a-ac21-fa432570db7f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_inexistent_snapshot_export_location(self):
         self.assertRaises(
@@ -65,6 +67,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
             "fake-inexistent-snapshot-export-location-id",
         )
 
+    @decorators.idempotent_id('43229517-bf93-4be7-9f89-a69034d2f03c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot_export_locations_by_different_project_user(self):
         self.assertRaises(
@@ -73,6 +76,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
             self.snapshot['id']
         )
 
+    @decorators.idempotent_id('66839514-796a-4ee9-a8ed-7614521d01d5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_export_location_by_different_project_user(self):
         export_locations = (
@@ -88,6 +92,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 self.snapshot['id'],
                 export_location['id'])
 
+    @decorators.idempotent_id('52e0b807-7b29-4795-960a-518bcadc1503')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_inexistent_snapshot_instance_export_location(self):
         for snapshot_instance in self.snapshot_instances:
@@ -98,6 +103,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 "fake-inexistent-snapshot-export-location-id",
             )
 
+    @decorators.idempotent_id('3f4e2a0e-1522-47fb-b770-9d7a0651dde2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_instance_export_location_by_member(self):
         for snapshot_instance in self.snapshot_instances:
@@ -133,6 +139,7 @@ class SnapshotExportLocationsAPIOnlyNegativeTest(base.BaseSharesMixedTest):
         cls.admin_member_client = (
             cls.admin_project_member_client.shares_v2_client)
 
+    @decorators.idempotent_id('37901216-b574-4786-9b1d-9b1ccdf123d2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_export_locations_by_nonexistent_snapshot(self):
         self.assertRaises(
@@ -141,6 +148,7 @@ class SnapshotExportLocationsAPIOnlyNegativeTest(base.BaseSharesMixedTest):
             "fake-inexistent-snapshot-id",
         )
 
+    @decorators.idempotent_id('c2aa3770-c061-4b49-83ac-ab29773c2e0c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_export_locations_by_nonexistent_snapshot_instance(self):
         self.assertRaises(
@@ -149,6 +157,7 @@ class SnapshotExportLocationsAPIOnlyNegativeTest(base.BaseSharesMixedTest):
             "fake-inexistent-snapshot-instance-id",
         )
 
+    @decorators.idempotent_id('74d5d46d-8161-4e17-acbc-812248d6d694')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_inexistent_snapshot_instance_export_locations_by_member(
             self):

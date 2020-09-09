@@ -13,6 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -46,6 +47,7 @@ class SecurityServiceAdminTest(
             'kerberos',
             **ss_kerberos_data)
 
+    @decorators.idempotent_id('6f843a0a-21da-4a83-ae3b-3831f99b3678')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_all_tenants(self):
         listed = self.shares_client.list_security_services(
@@ -57,6 +59,7 @@ class SecurityServiceAdminTest(
         keys = ["name", "id", "status", "type", ]
         [self.assertIn(key, s_s.keys()) for s_s in listed for key in keys]
 
+    @decorators.idempotent_id('fe515fa7-0275-4190-adc7-5321e1047dad')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_security_services_invalid_filters(self):
         listed = self.shares_client.list_security_services(

@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -53,6 +54,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
             cleanup_in_class=True,
             extra_specs=cls.extra_specs)
 
+    @decorators.idempotent_id('2bbe564d-d314-474b-8060-ada30581d0cd')
     @testtools.skipIf(CONF.share.share_network_id != "",
                       "This test is not suitable for pre-existing "
                       "share_network.")

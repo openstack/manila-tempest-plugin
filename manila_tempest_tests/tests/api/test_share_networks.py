@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
@@ -25,6 +26,7 @@ CONF = config.CONF
 
 class ShareNetworkListMixin(object):
 
+    @decorators.idempotent_id('41c635b1-d9ef-4c05-9100-5e4b0034b523')
     @tc.attr("gate", "smoke", )
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks(self):
@@ -35,6 +37,7 @@ class ShareNetworkListMixin(object):
         keys = ["name", "id"]
         [self.assertIn(key, sn.keys()) for sn in listed for key in keys]
 
+    @decorators.idempotent_id('18fe9031-cefc-4df3-bbb0-6541f5fda12b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_share_networks_all_tenants(self):
         listed = self.shares_client.list_share_networks_with_detail(
@@ -45,6 +48,7 @@ class ShareNetworkListMixin(object):
         keys = ["name", "id"]
         [self.assertIn(key, sn.keys()) for sn in listed for key in keys]
 
+    @decorators.idempotent_id('caf6635a-ecb8-4981-9776-11dcfdf3cdbc')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_share_networks_project_id(self):
         listed = self.shares_client.list_share_networks_with_detail(
@@ -55,6 +59,7 @@ class ShareNetworkListMixin(object):
         keys = ["name", "id"]
         [self.assertIn(key, sn.keys()) for sn in listed for key in keys]
 
+    @decorators.idempotent_id('285c7a91-1703-42a5-86c8-2463edde60e2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_with_detail(self):
         listed = self.shares_v2_client.list_share_networks_with_detail()
@@ -91,6 +96,7 @@ class ShareNetworkListMixin(object):
 
         [self.assertIn(key, sn.keys()) for sn in listed for key in keys]
 
+    @decorators.idempotent_id('6d13a090-0855-40c0-85b1-424f6878c6ce')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_filter_by_ss(self):
         listed = self.shares_client.list_share_networks_with_detail(
@@ -103,6 +109,7 @@ class ShareNetworkListMixin(object):
             self.assertTrue(any(ss['id'] == self.ss_ldap['id']
                                 for ss in ss_list))
 
+    @decorators.idempotent_id('bff1356e-70aa-4bbe-b398-cb4dadd8fcb1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @base.skip_if_microversion_lt("2.36")
     def test_list_share_networks_like_filter(self):
@@ -119,6 +126,7 @@ class ShareNetworkListMixin(object):
             self.assertTrue(all(value in sn[key] for key, value in
                                 valid_filter_opts.items()))
 
+    @decorators.idempotent_id('27490442-60f8-4514-a10a-194a400b48bb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_all_filter_opts(self):
         valid_filter_opts = {
@@ -204,6 +212,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
             cls.sn_with_kerberos_ss["id"],
             cls.ss_kerberos["id"])
 
+    @decorators.idempotent_id('b998a594-f630-475d-b46f-e4143caf61fb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_delete_share_network(self):
         # generate data for share network
@@ -216,6 +225,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         # Delete share_network
         self.shares_client.delete_share_network(created["id"])
 
+    @decorators.idempotent_id('55990ec2-37f0-483f-9c67-76fd6f377cc1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_get_share_network(self):
         get = self.shares_client.get_share_network(self.sn_with_ldap_ss["id"])
@@ -224,6 +234,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         del data['created_at']
         self.assertDictContainsSubset(data, get)
 
+    @decorators.idempotent_id('1837fdd3-8068-4e88-bc50-9224498f84c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_share_network(self):
         update_data = self.generate_share_network_data()
@@ -232,6 +243,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
             **update_data)
         self.assertDictContainsSubset(update_data, updated)
 
+    @decorators.idempotent_id('198a5c08-3aaf-4623-9720-95d33ebe3376')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -246,6 +258,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
             self.shares_client.share_network_id, **update_dict)
         self.assertDictContainsSubset(update_dict, updated)
 
+    @decorators.idempotent_id('7595a844-a28e-476c-89f1-4d3193ce9d5b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_recreate_share_network(self):
         # generate data for share network
@@ -265,6 +278,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         # Delete second share network
         self.shares_client.delete_share_network(sn2["id"])
 
+    @decorators.idempotent_id('be5f4f60-493e-47ea-a5bd-f16dfaa98c5c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_two_share_networks_with_same_net_and_subnet(self):
         # generate data for share network
@@ -278,6 +292,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         sn2 = self.create_share_network(**data)
         self.assertDictContainsSubset(data, sn2)
 
+    @decorators.idempotent_id('50bac743-7ca9-409b-827f-f277da67e32e')
     @testtools.skipUnless(CONF.share.create_networks_when_multitenancy_enabled,
                           "Only for setups with network creation.")
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
@@ -301,6 +316,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         self.assertEqual(subnet_details['subnet']['gateway_ip'],
                          share_net_info['gateway'])
 
+    @decorators.idempotent_id('2dbf91da-04ae-4f9f-a7b9-0299c6b2e02c')
     @testtools.skipUnless(CONF.share.create_networks_when_multitenancy_enabled,
                           "Only for setups with network creation.")
     @testtools.skipUnless(CONF.share.multitenancy_enabled,

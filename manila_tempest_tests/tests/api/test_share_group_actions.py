@@ -17,6 +17,7 @@
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -103,6 +104,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             description=cls.sg_snap_desc,
         )
 
+    @decorators.idempotent_id('1e359389-09a7-4235-84c9-7b5c83632fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -128,6 +130,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         self.assertEqual(self.share_group_name, share_group["name"])
         self.assertEqual(self.share_group_desc, share_group["description"])
 
+    @decorators.idempotent_id('45b77673-b1bb-43a1-b4b7-41351930adbd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_min_supported_sg_microversion(self):
 
@@ -155,6 +158,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         self.assertEqual(self.share_size, int(share["size"]))
         self.assertEqual(self.share_group["id"], share["share_group_id"])
 
+    @decorators.idempotent_id('04fcd695-c5f8-4de7-ab09-131424e6bdfb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -185,6 +189,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             msg = ("Expected id %s exactly once in share group list" % sg_id)
             self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('16986c21-ecbc-429e-ab3d-8d1596a3eac4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION, '2.36',
@@ -220,6 +225,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                    group_id)
             self.assertEqual(1, len(gen), msg)
 
+    @decorators.idempotent_id('e72be2f9-56db-467f-89d7-0dddbf7e37e9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_filter_shares_by_share_group_id_min(self):
         shares = self.shares_v2_client.list_shares(
@@ -243,6 +249,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             'Share %s expected in returned list, but got %s' % (
                 self.shares[0]['id'], share_ids))
 
+    @decorators.idempotent_id('5d2ca4f5-04da-4528-af47-ec980b95e884')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -273,6 +280,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         self.assertEqual(self.sg_snap_name, sg_snapshot["name"])
         self.assertEqual(self.sg_snap_desc, sg_snapshot["description"])
 
+    @decorators.idempotent_id('67e8c099-f1c1-4972-9c51-bb7bfe1d7994')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_group_snapshot_members_min(self):
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
@@ -297,6 +305,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                 if share['id'] == member['share_id']:
                     self.assertEqual(share['size'], member['size'])
 
+    @decorators.idempotent_id('650c5fa7-11f2-48bd-b012-fc2e32b6f446')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -401,6 +410,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             version=version,
         )
 
+    @decorators.idempotent_id('7f0a07ce-afdd-4c51-a29c-d8fe6cb5f6a5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,
@@ -440,6 +450,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
         # going to be reused
         self._rollback_share_group_update(version)
 
+    @decorators.idempotent_id('611b1555-df09-499b-8aef-e8261e3f6863')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
         *set([constants.MIN_SHARE_GROUP_MICROVERSION,

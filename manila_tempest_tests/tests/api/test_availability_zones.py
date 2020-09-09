@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -28,6 +29,7 @@ class AvailabilityZonesTest(base.BaseSharesTest):
             for key in keys:
                 self.assertIn(key, az)
 
+    @decorators.idempotent_id('202f20d3-1afa-40ea-a5e6-8b7bda40e6cf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_availability_zones_legacy_url_api_v1(self):
         # NOTE(vponomaryov): remove this test with removal of availability zone
@@ -35,6 +37,7 @@ class AvailabilityZonesTest(base.BaseSharesTest):
         azs = self.shares_client.list_availability_zones()
         self._list_availability_zones_assertions(azs)
 
+    @decorators.idempotent_id('7054f2f4-bc77-4d60-82a6-2f23b93d281e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @base.skip_if_microversion_not_supported("2.6")
     def test_list_availability_zones_legacy_url_api_v2(self):
@@ -44,6 +47,7 @@ class AvailabilityZonesTest(base.BaseSharesTest):
             url='os-availability-zone', version='2.6')
         self._list_availability_zones_assertions(azs)
 
+    @decorators.idempotent_id('4caadb86-2988-4adb-b705-aece99235c1e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @base.skip_if_microversion_not_supported("2.7")
     def test_list_availability_zones(self):

@@ -16,6 +16,7 @@
 from oslo_log import log
 import six
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -42,6 +43,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
 
+    @decorators.idempotent_id('e3d17444-8ed4-445e-bc65-c748dbc5d21f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_sec_service_twice_to_share_network(self):
         self.cl.add_sec_service_to_share_network(self.sn["id"], self.ss["id"])
@@ -49,54 +51,63 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
                           self.cl.add_sec_service_to_share_network,
                           self.sn["id"], self.ss["id"])
 
+    @decorators.idempotent_id('3f7af51f-3afa-495c-94b7-e9d29f06cf1d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_nonexistant_sec_service_to_share_network(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.add_sec_service_to_share_network,
                           self.sn["id"], "wrong_ss_id")
 
+    @decorators.idempotent_id('85dd5693-a89c-4d05-9416-0e11fbba23f5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_empty_sec_service_id_to_share_network(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.add_sec_service_to_share_network,
                           self.sn["id"], "")
 
+    @decorators.idempotent_id('d9af5086-ace9-4be3-8119-e765699c0c91')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_sec_service_to_nonexistant_share_network(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.add_sec_service_to_share_network,
                           "wrong_sn_id", self.ss["id"])
 
+    @decorators.idempotent_id('7272426d-ab58-4efb-a490-0c78c07fa7fe')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_sec_service_to_share_network_with_empty_id(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.add_sec_service_to_share_network,
                           "", self.ss["id"])
 
+    @decorators.idempotent_id('f87aefa6-9681-477d-a118-603883849f4f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_sec_services_for_nonexistant_share_network(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.list_sec_services_for_share_network,
                           "wrong_id")
 
+    @decorators.idempotent_id('7f8d7527-2d62-478a-ab19-213156777612')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_nonexistant_sec_service_from_share_network(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.remove_sec_service_from_share_network,
                           self.sn["id"], "wrong_id")
 
+    @decorators.idempotent_id('be1c9c79-efa1-471e-920b-da4733ad383e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_sec_service_from_nonexistant_share_network(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.remove_sec_service_from_share_network,
                           "wrong_id", self.ss["id"])
 
+    @decorators.idempotent_id('c7c2f66f-81f8-4984-b807-2b9520105a33')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_nonexistant_ss_from_nonexistant_sn(self):
         self.assertRaises(lib_exc.NotFound,
                           self.cl.remove_sec_service_from_share_network,
                           "wrong_id", "wrong_id")
 
+    @decorators.idempotent_id('eb66a8f7-b549-4cf1-8719-30844fb151b6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
@@ -130,6 +141,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
                           fresh_sn["id"],
                           self.ss["id"])
 
+    @decorators.idempotent_id('6a15c8ff-eba3-40e5-8fa1-6eab52338672')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_map_two_ss_with_same_type_to_sn(self):
         # create share network
@@ -155,6 +167,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
                           self.cl.add_sec_service_to_share_network,
                           sn["id"], security_services[1]["id"])
 
+    @decorators.idempotent_id('d422a15a-1f4c-4531-a092-9216b90c4179')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_ss_that_assigned_to_sn(self):
         # create share network

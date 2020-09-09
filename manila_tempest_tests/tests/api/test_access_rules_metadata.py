@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -76,6 +77,7 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             cls.share["id"], cls.access_type,
             cls.access_to[cls.access_type].pop(), 'rw', metadata=cls.md1)
 
+    @decorators.idempotent_id('4c8e0236-2e7b-4337-be3c-17b51a738644')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_get_delete_access_metadata(self):
         data = {"key1": "v" * 255, "k" * 255: "value2"}
@@ -102,6 +104,7 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         self.shares_v2_client.wait_for_resource_deletion(
             rule_id=access["id"], share_id=self.share["id"])
 
+    @decorators.idempotent_id('8c294d7d-0702-49ce-b964-0945ec323370')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_update_metadata_by_key(self):
         md2 = {"key7": "value7", "key2": "value6_new"}
@@ -116,6 +119,7 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         self.md1.update(md2)
         self.assertEqual(self.md1, get_access['metadata'])
 
+    @decorators.idempotent_id('c97cc976-2c2f-4db3-ba07-cd04af29c9f4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_access_filter_by_metadata(self):
         data = {"key3": "v3", "key4": "value4"}

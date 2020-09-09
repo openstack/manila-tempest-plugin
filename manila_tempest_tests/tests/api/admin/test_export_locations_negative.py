@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -49,6 +50,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
         cls.share_instances = cls.admin_client.get_instances_of_share(
             cls.share['id'])
 
+    @decorators.idempotent_id('8eac1355-f272-4913-8a49-1a8a9cb086bd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_inexistent_share_export_location(self):
         self.assertRaises(
@@ -58,6 +60,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
             "fake-inexistent-share-instance-id",
         )
 
+    @decorators.idempotent_id('064a18dd-1a00-42f1-84c0-5a3e3b46fb39')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_inexistent_share_instance_export_location(self):
         for share_instance in self.share_instances:
@@ -68,6 +71,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 "fake-inexistent-share-instance-id",
             )
 
+    @decorators.idempotent_id('6d0b9d1b-fc87-4b7f-add5-919b0ddcda90')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_instance_export_locations_as_member(self):
         for share_instance in self.share_instances:
@@ -76,6 +80,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
                 self.admin_member_client.list_share_instance_export_locations,
                 share_instance['id'])
 
+    @decorators.idempotent_id('abde4357-a26c-4adb-88a6-ece6b0e15b5e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_instance_export_locations_as_member(self):
         for share_instance in self.share_instances:
@@ -88,6 +93,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
                                    get_share_instance_export_location),
                                   share_instance['id'], el['id'])
 
+    @decorators.idempotent_id('a3c3d16b-5f62-4089-8f86-efc660592986')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_export_locations_by_different_project_user(self):
         self.assertRaises(
@@ -95,6 +101,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
             self.different_project_client.list_share_export_locations,
             self.share['id'])
 
+    @decorators.idempotent_id('0f6823a5-3929-4025-9cd4-b5198b4384dd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_export_location_by_different_project_user(self):
         export_locations = self.admin_client.list_share_export_locations(
@@ -115,6 +122,7 @@ class ExportLocationsAPIOnlyNegativeTest(base.BaseSharesAdminTest):
         super(ExportLocationsAPIOnlyNegativeTest, cls).skip_checks()
         utils.check_skip_if_microversion_lt("2.9")
 
+    @decorators.idempotent_id('4b5b4e89-0c80-4383-b272-62d5e0419d9a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_export_locations_by_nonexistent_share(self):
         self.assertRaises(
@@ -123,6 +131,7 @@ class ExportLocationsAPIOnlyNegativeTest(base.BaseSharesAdminTest):
             "fake-inexistent-share-id",
         )
 
+    @decorators.idempotent_id('21ba5111-91a8-4ec3-86dc-689fc2fa90e6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_export_locations_by_nonexistent_share_instance(self):
         self.assertRaises(

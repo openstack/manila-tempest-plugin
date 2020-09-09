@@ -15,6 +15,7 @@
 
 import ddt
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -67,6 +68,7 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
             cls.share["id"], cls.access_type, cls.access_to,
             'rw', metadata={u"key1": u"value1"})
 
+    @decorators.idempotent_id('d2d41db8-ae00-4641-a5ec-499cee1877f1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data({'data': {"": "value"}}, {'data': {"k" * 256: "value"}},
               {'data': {"key": "x" * 1024}})
@@ -76,6 +78,7 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
                           self.shares_v2_client.update_access_metadata,
                           self.access["id"], data)
 
+    @decorators.idempotent_id('53dc2752-687d-4895-bc9e-518c3bed29d0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_try_delete_unexisting_access_metadata(self):
         self.assertRaises(lib_exc.NotFound,

@@ -15,6 +15,7 @@
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -90,6 +91,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
 
         return valid_params
 
+    @decorators.idempotent_id('8267161e-4f55-44eb-9af5-30d1a3fb2606')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_invalid_param_raises_exception(self):
         # Try to manage share with invalid parameters, it should not succeed
@@ -140,6 +142,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self._delete_share_server_and_wait(
                 managed_share['share_server_id'])
 
+    @decorators.idempotent_id('01b36343-c503-4c14-bb74-71f131ae96b6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_invalid_param_manage_error(self):
         # Try to manage share with invalid parameters, it should not succeed.
@@ -184,6 +187,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self._delete_share_server_and_wait(
                 managed_share['share_server_id'])
 
+    @decorators.idempotent_id('832b1c4d-e6f2-4a75-9ea5-d99f780db743')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_share_duplicate(self):
         share = self._create_share_for_manage()
@@ -216,6 +220,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self._delete_share_server_and_wait(
                 managed_share['share_server_id'])
 
+    @decorators.idempotent_id('c2f28981-5758-46e8-9d90-5c3269461d94')
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           'Multitenancy tests are disabled.')
     @utils.skip_if_microversion_not_supported("2.49")
@@ -244,6 +249,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self._delete_share_server_and_wait(
                 managed_share['share_server_id'])
 
+    @decorators.idempotent_id('162b6b96-e801-40f4-b111-7e533cf8b943')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_share_in_manage_error(self):
         share = self._create_share_for_manage()
@@ -280,6 +286,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self._delete_share_server_and_wait(
                 managed_share['share_server_id'])
 
+    @decorators.idempotent_id('7cad4763-8f78-46a5-aeeb-6ca174284d3d')
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           'Snapshot tests are disabled.')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -300,6 +307,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         self._delete_snapshot_and_wait(snap)
         self._delete_share_and_wait(share)
 
+    @decorators.idempotent_id('f71bcb3c-836e-4e9e-972a-50debeb8c285')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_unmanage_share_transitional_state(self):
         # A share in transitional state cannot be unmanaged
@@ -319,6 +327,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         # cleanup
         self._reset_state_and_delete_share(share)
 
+    @decorators.idempotent_id('916ca8e2-5635-4cc9-8ab6-36b7b53ecd0a')
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           'Multitenancy tests are disabled.')
     @utils.skip_if_microversion_not_supported("2.48")

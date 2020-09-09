@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
@@ -42,12 +43,14 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
             metadata={'key': 'value'}
         )
 
+    @decorators.idempotent_id('255011c0-4ed9-4174-bb13-8bbd06a62529')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_share_with_wrong_public_value(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_client.update_share, self.share["id"],
                           is_public="truebar")
 
+    @decorators.idempotent_id('b9bb8dee-0c7c-4e51-909c-028335b1a6a0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -64,6 +67,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_client.delete_share, share["id"])
 
+    @decorators.idempotent_id('3df8e2d8-9b79-428d-9d8b-30bc66b5b40e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -96,6 +100,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                           snapshot_id=snap["id"],
                           cleanup_in_class=False)
 
+    @decorators.idempotent_id('3047fb1c-5acc-4ef2-8796-b2d2d49829b5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(not CONF.share.multitenancy_enabled,
                       "Only for multitenancy.")
@@ -105,6 +110,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           share_network_id="wrong_sn_id")
 
+    @decorators.idempotent_id('e84ce567-a090-47c7-87c4-6ee427bdee7a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(not CONF.share.multitenancy_enabled,
                       "Only for multitenancy.")
@@ -148,6 +154,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
             snapshot_id=snap["id"],
         )
 
+    @decorators.idempotent_id('3443493b-f56a-4faa-9968-e7cbb0d2802f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_other_tenants_public_share(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -155,12 +162,14 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                           self.share["id"],
                           name="new_name")
 
+    @decorators.idempotent_id('68d1f1bc-16e4-4086-8982-7e44ca6bdc4d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_other_tenants_public_share(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.alt_shares_v2_client.delete_share,
                           self.share['id'])
 
+    @decorators.idempotent_id('1f9e5d84-0885-4a4b-9196-9031a1c01508')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_of_other_tenants_public_share(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -168,6 +177,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           {'key': 'value'})
 
+    @decorators.idempotent_id('fed7a935-9699-43a1-854e-67b61ba6233e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_metadata_of_other_tenants_public_share(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -175,6 +185,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                           self.share['id'],
                           {'key': 'value'})
 
+    @decorators.idempotent_id('bd62adeb-73c2-4b04-8812-80b479cd5c3b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_metadata_of_other_tenants_public_share(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -192,12 +203,14 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
 
+    @decorators.idempotent_id('75837f93-8c2c-40a4-bb9e-d76c53db07c7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_unmanage_share_by_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_client.unmanage_share,
                           'fake-id')
 
+    @decorators.idempotent_id('97a4dd2f-7c90-4eb7-bf74-d698c3060833')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_manage_share_by_user(self):
         self.assertRaises(lib_exc.Forbidden,
@@ -205,18 +218,21 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           'fake-host', 'nfs', '/export/path',
                           'fake-type')
 
+    @decorators.idempotent_id('1a438374-8a91-4566-9cef-0386f6609445')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_by_user_with_host_filter(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_v2_client.list_shares,
                           params={'host': 'fake_host'})
 
+    @decorators.idempotent_id('73f37f33-946d-4213-9d27-25cd4e9a0208')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_by_share_server_by_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_client.list_shares,
                           params={'share_server_id': 12345})
 
+    @decorators.idempotent_id('2f0df934-b2fb-4ebd-96f7-183cb699dcdd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_non_existent_az(self):
         self.assertRaises(lib_exc.NotFound,
@@ -224,6 +240,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           availability_zone='fake_az')
 
+    @decorators.idempotent_id('5ae2ecd7-a694-4ba9-ae23-cca75580b9d8')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_zero_size(self):
         self.assertRaises(lib_exc.BadRequest,
@@ -231,6 +248,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           size=0)
 
+    @decorators.idempotent_id('3620a380-f9f9-4521-a468-473581637344')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_invalid_size(self):
         self.assertRaises(lib_exc.BadRequest,
@@ -238,6 +256,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           size="#$%")
 
+    @decorators.idempotent_id('26ed523d-a215-4661-a038-633b74c9cad7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_out_passing_size(self):
         self.assertRaises(lib_exc.BadRequest,
@@ -245,6 +264,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           size="")
 
+    @decorators.idempotent_id('bf303b29-bbcb-4a96-96e9-270e12df58d1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -253,6 +273,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           self.shares_client.delete_snapshot,
                           "wrong_share_id")
 
+    @decorators.idempotent_id('08e5a9c7-45cb-414c-b375-28c335f20ff1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
@@ -261,6 +282,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           self.shares_client.create_snapshot,
                           "wrong_share_id")
 
+    @decorators.idempotent_id('78e5e327-c68e-4910-82b2-27f5f4d150ac')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_invalid_protocol(self):
         self.assertRaises(lib_exc.BadRequest,
@@ -268,6 +290,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           share_protocol="nonexistent_protocol")
 
+    @decorators.idempotent_id('2b7c7ea8-c0e9-446c-a8e3-add765452c04')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_wrong_public_value(self):
         self.assertRaises(lib_exc.BadRequest,
@@ -275,17 +298,20 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=self.share_type_id,
                           is_public='truebar')
 
+    @decorators.idempotent_id('f82d1667-ae39-43bb-b5aa-bfc9b2ec7292')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_share_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound, self.shares_client.get_share,
                           "wrong_share_id")
 
+    @decorators.idempotent_id('d03cf44e-6e69-415f-be36-25defb86df56')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_share_without_passing_share_id(self):
         # Should not be able to get share when empty ID is passed
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.get_share, '')
 
+    @decorators.idempotent_id('a9487254-606b-444f-ba6a-2f461bcaf474')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_shares_nonadmin_with_nonexistent_share_server_filter(self):
         # filtering by share server allowed only for admins by default
@@ -293,11 +319,13 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           self.shares_client.list_shares_with_detail,
                           {'share_server_id': 'fake_share_server_id'})
 
+    @decorators.idempotent_id('9698d1a3-8ee8-46fa-a46b-1084d98e7149')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_share_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound, self.shares_client.delete_share,
                           "wrong_share_id")
 
+    @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fd24')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_share_without_passing_share_id(self):
         # Should not be able to delete share when empty ID is passed

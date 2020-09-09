@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -20,6 +21,7 @@ from manila_tempest_tests.tests.api import base
 
 class ShareLimitsTest(base.BaseSharesTest):
 
+    @decorators.idempotent_id('239903d2-f1cb-4bec-b456-d57456308244')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_limits_keys(self):
 
@@ -44,6 +46,7 @@ class ShareLimitsTest(base.BaseSharesTest):
         ]
         [self.assertIn(key, limits["absolute"].keys()) for key in abs_keys]
 
+    @decorators.idempotent_id('fea1a10e-6bcb-46eb-bbba-f6f0a8d4f377')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_limits_values(self):
 

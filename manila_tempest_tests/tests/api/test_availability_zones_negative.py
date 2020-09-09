@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
@@ -27,6 +28,7 @@ class AvailabilityZonesNegativeTest(base.BaseSharesTest):
         super(AvailabilityZonesNegativeTest, cls).skip_checks()
         utils.check_skip_if_microversion_not_supported('2.7')
 
+    @decorators.idempotent_id('050fa9fb-4cc8-4064-9e91-bb169fca03db')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_availability_zones_api_not_found_with_legacy_url(self):
         # NOTE(vponomaryov): remove this test with removal of availability zone
@@ -38,6 +40,7 @@ class AvailabilityZonesNegativeTest(base.BaseSharesTest):
             version='2.7',
         )
 
+    @decorators.idempotent_id('133ffc40-bff1-491a-a230-189cddd66e29')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_availability_zones_api_not_found(self):
         self.assertRaises(
