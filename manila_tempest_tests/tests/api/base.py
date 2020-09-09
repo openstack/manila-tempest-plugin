@@ -678,10 +678,11 @@ class BaseSharesTest(test.BaseTestCase):
 
     @classmethod
     def create_share_replica(cls, share_id, availability_zone, client=None,
-                             cleanup_in_class=False, cleanup=True):
+                             cleanup_in_class=False, cleanup=True,
+                             version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         replica = client.create_share_replica(
-            share_id, availability_zone=availability_zone)
+            share_id, availability_zone=availability_zone, version=version)
         resource = {
             "type": "share_replica",
             "id": replica["id"],
@@ -699,18 +700,20 @@ class BaseSharesTest(test.BaseTestCase):
         return replica
 
     @classmethod
-    def delete_share_replica(cls, replica_id, client=None):
+    def delete_share_replica(cls, replica_id, client=None,
+                             version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         try:
-            client.delete_share_replica(replica_id)
+            client.delete_share_replica(replica_id, version=version)
             client.wait_for_resource_deletion(replica_id=replica_id)
         except exceptions.NotFound:
             pass
 
     @classmethod
-    def promote_share_replica(cls, replica_id, client=None):
+    def promote_share_replica(cls, replica_id, client=None,
+                              version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
-        replica = client.promote_share_replica(replica_id)
+        replica = client.promote_share_replica(replica_id, version=version)
         client.wait_for_share_replica_status(
             replica["id"],
             constants.REPLICATION_STATE_ACTIVE,

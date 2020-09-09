@@ -1654,20 +1654,23 @@ class SharesV2Client(shares_client.SharesClient):
             'share_id': share_id,
             'availability_zone': availability_zone,
         }
-
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         body = json.dumps({'share_replica': post_body})
         resp, body = self.post(uri, body,
-                               headers=EXPERIMENTAL,
-                               extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
 
     def get_share_replica(self, replica_id, version=LATEST_MICROVERSION):
         """Get the details of share_replica."""
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.get("share-replicas/%s" % replica_id,
-                              headers=EXPERIMENTAL,
-                              extra_headers=True,
+                              headers=headers,
+                              extra_headers=extra_headers,
                               version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
@@ -1676,8 +1679,10 @@ class SharesV2Client(shares_client.SharesClient):
         """Get list of replicas."""
         uri = "share-replicas/detail"
         uri += ("?share_id=%s" % share_id) if share_id is not None else ''
-        resp, body = self.get(uri, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -1686,17 +1691,21 @@ class SharesV2Client(shares_client.SharesClient):
         """Get summary list of replicas."""
         uri = "share-replicas"
         uri += ("?share_id=%s" % share_id) if share_id is not None else ''
-        resp, body = self.get(uri, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def delete_share_replica(self, replica_id, version=LATEST_MICROVERSION):
         """Delete share_replica."""
         uri = "share-replicas/%s" % replica_id
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.delete(uri,
-                                 headers=EXPERIMENTAL,
-                                 extra_headers=True,
+                                 headers=headers,
+                                 extra_headers=extra_headers,
                                  version=version)
         self.expected_success(202, resp.status)
         return body
@@ -1709,9 +1718,11 @@ class SharesV2Client(shares_client.SharesClient):
             'promote': None,
         }
         body = json.dumps(post_body)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.post(uri, body,
-                               headers=EXPERIMENTAL,
-                               extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         self.expected_success(expected_status, resp.status)
         return self._parse_resp(body)
@@ -1720,8 +1731,10 @@ class SharesV2Client(shares_client.SharesClient):
                                             expected_status=200,
                                             version=LATEST_MICROVERSION):
         uri = "share-replicas/%s/export-locations" % replica_id
-        resp, body = self.get(uri, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(expected_status, resp.status)
         return self._parse_resp(body)
 
@@ -1731,8 +1744,10 @@ class SharesV2Client(shares_client.SharesClient):
                                           version=LATEST_MICROVERSION):
         uri = "share-replicas/%s/export-locations/%s" % (replica_id,
                                                          export_location_id)
-        resp, body = self.get(uri, headers=EXPERIMENTAL,
-                              extra_headers=True, version=version)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
+        resp, body = self.get(uri, headers=headers,
+                              extra_headers=extra_headers, version=version)
         self.expected_success(expected_status, resp.status)
         return self._parse_resp(body)
 
@@ -1779,9 +1794,11 @@ class SharesV2Client(shares_client.SharesClient):
             }
         }
         body = json.dumps(post_body)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.post(uri, body,
-                               headers=EXPERIMENTAL,
-                               extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
@@ -1797,9 +1814,11 @@ class SharesV2Client(shares_client.SharesClient):
             }
         }
         body = json.dumps(post_body)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.post(uri, body,
-                               headers=EXPERIMENTAL,
-                               extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
@@ -1812,9 +1831,11 @@ class SharesV2Client(shares_client.SharesClient):
             'resync': None
         }
         body = json.dumps(post_body)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.post(uri, body,
-                               headers=EXPERIMENTAL,
-                               extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         self.expected_success(expected_result, resp.status)
         return self._parse_resp(body)
@@ -1827,9 +1848,11 @@ class SharesV2Client(shares_client.SharesClient):
             'force_delete': None
         }
         body = json.dumps(post_body)
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         resp, body = self.post(uri, body,
-                               headers=EXPERIMENTAL,
-                               extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
