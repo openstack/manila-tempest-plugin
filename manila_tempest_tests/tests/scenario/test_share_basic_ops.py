@@ -45,13 +45,6 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
-    def _ping_host_from_export_location(self, export, remote_client):
-        ip, version = self.get_ip_and_version_from_export_location(export)
-        if version == 6:
-            remote_client.exec_command("ping6 -c 5 %s" % ip)
-        else:
-            remote_client.exec_command("ping -c 5 %s" % ip)
-
     @decorators.idempotent_id('825be71c-cf14-4884-a0ad-cf47d511df9a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
