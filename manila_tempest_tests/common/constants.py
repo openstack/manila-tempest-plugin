@@ -97,6 +97,7 @@ MIN_SHARE_ACCESS_METADATA_MICROVERSION = '2.45'
 
 # Share servers
 SERVER_STATE_ACTIVE = 'active'
+SERVER_STATE_INACTIVE = 'inactive'
 SERVER_STATE_CREATING = 'creating'
 SERVER_STATE_DELETING = 'deleting'
 SERVER_STATE_ERROR = 'error'
@@ -104,3 +105,5 @@ SERVER_STATE_MANAGE_ERROR = 'manage_error'
 SERVER_STATE_MANAGE_STARTING = 'manage_starting'
 SERVER_STATE_UNMANAGE_ERROR = 'unmanage_error'
 SERVER_STATE_UNMANAGE_STARTING = 'unmanage_starting'
+STATUS_SERVER_MIGRATING = 'server_migrating'
+STATUS_SERVER_MIGRATING_TO = 'server_migrating_to'

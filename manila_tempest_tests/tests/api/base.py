@@ -677,8 +677,9 @@ class BaseSharesTest(test.BaseTestCase):
         return rep_domain, pools_in_rep_domain
 
     @classmethod
-    def create_share_replica(cls, share_id, availability_zone, client=None,
-                             cleanup_in_class=False, cleanup=True,
+    def create_share_replica(cls, share_id, availability_zone=None,
+                             client=None, cleanup_in_class=False,
+                             cleanup=True,
                              version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         replica = client.create_share_replica(
