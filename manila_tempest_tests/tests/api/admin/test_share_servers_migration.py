@@ -36,9 +36,9 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
             raise cls.skipException('%s tests are disabled.' % cls.protocol)
         if not CONF.share.multitenancy_enabled:
             raise cls.skipException('Multitenancy tests are disabled.')
-        if not CONF.share.run_share_servers_migration_tests:
+        if not CONF.share.run_share_server_migration_tests:
             raise cls.skipException(
-                'Share servers migration tests are disabled.')
+                'Share server migration tests are disabled.')
         utils.check_skip_if_microversion_lt('2.57')
 
     @classmethod
@@ -58,6 +58,10 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         # create share type (generic)
         cls.share_type = cls._create_share_type()
 
+        # create two non routable IPs to be used in NFS access rulesi
+        cls.access_rules_ip_rw = utils.rand_ip()
+        cls.access_rules_ip_ro = utils.rand_ip()
+
     def _setup_migration(self, share):
         """Initial share server migration setup."""
 
@@ -66,11 +70,12 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
 
         # (andrer) Verify if have at least one backend compatible with
         # the specified share server.
-        dest_host, compatible = self._choose_matching_backend_for_share_server(
-            server_id)
+        dest_host, compatible = (
+            self._choose_compatible_backend_for_share_server(server_id))
 
         snapshot = False
-        if compatible['supported_capabilities']['preserve_snapshots']:
+        if (compatible['supported_capabilities']['preserve_snapshots'] and
+                share['snapshot_support']):
             snapshot = self.create_snapshot_wait_for_active(
                 share['id'], cleanup_in_class=False)['id']
 
@@ -85,35 +90,26 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         # (andrer) Create the access rules, considering NFS and CIFS
         # protocols.
         access_rules = self._get_access_rule_data_for_protocols()
-        self.shares_v2_client.create_access_rule(
-            share['id'], access_type=access_rules[0].get('access_type'),
-            access_to=access_rules[0].get('access_to'),
-            access_level=access_rules[0].get('access_level'))
-
+        for rule in access_rules:
+            self.shares_v2_client.create_access_rule(
+                share['id'], access_type=rule.get('access_type'),
+                access_to=rule.get('access_to'),
+                access_level=rule.get('access_level')
+            )
         self.shares_v2_client.wait_for_share_status(
             share['id'], constants.RULE_STATE_ACTIVE,
             status_attr='access_rules_status')
-
-        if self.protocol == 'nfs':
-            self.shares_v2_client.create_access_rule(
-                share['id'], access_type=access_rules[1].get('access_type'),
-                access_to=access_rules[1].get('access_to'),
-                access_level=access_rules[1].get('access_level'))
-
-            self.shares_v2_client.wait_for_share_status(
-                share['id'], constants.RULE_STATE_ACTIVE,
-                status_attr='access_rules_status')
 
         share = self.shares_v2_client.get_share(share['id'])
 
         return share, server_id, dest_host, snapshot
 
-    def _validate_instances_states(self, share, instance_status,
-                                   snapshot_id):
+    def _validate_state_of_resources(self, share, expected_status,
+                                     snapshot_id):
         """Validates the share and snapshot status."""
-        statuses = ((instance_status,)
-                    if not isinstance(instance_status, (tuple, list, set))
-                    else instance_status)
+        statuses = ((expected_status,)
+                    if not isinstance(expected_status, (tuple, list, set))
+                    else expected_status)
 
         share = self.shares_v2_client.get_share(share['id'])
         self.assertIn(share['status'], statuses)
@@ -123,9 +119,8 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
             self.assertIn(snapshot['status'], statuses)
 
     def _validate_share_server_migration_complete(
-        self, share, dest_host, src_server_id, dest_server_id,
-        snapshot_id=None, share_network_id=None,
-        version=CONF.share.max_api_microversion):
+        self, share, dest_host, dest_server_id, snapshot_id=None,
+        share_network_id=None, version=CONF.share.max_api_microversion):
         """Validates the share server migration complete. """
 
         # Check the export locations
@@ -165,12 +160,12 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         elif self.protocol == 'nfs':
             expected_rules = [{
                 'state': constants.RULE_STATE_ACTIVE,
-                'access_to': '50.50.50.50',
+                'access_to': self.access_rules_ip_rw,
                 'access_type': 'ip',
                 'access_level': 'rw',
             }, {
                 'state': constants.RULE_STATE_ACTIVE,
-                'access_to': '51.51.51.51',
+                'access_to': self.access_rules_ip_ro,
                 'access_type': 'ip',
                 'access_level': 'ro',
             }]
@@ -186,7 +181,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         self.assertEqual(len(expected_rules), len(filtered_rules))
 
     @classmethod
-    def _choose_matching_backend_for_share_server(self, server_id):
+    def _choose_compatible_backend_for_share_server(self, server_id):
         """Choose a compatible host for the share server migration."""
         for backend in self.backends:
             # This try is necessary since if you try migrate the share server
@@ -218,10 +213,11 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
                 return backend, compatibility
 
         raise self.skipException(
-            "Not found incompatible host for the share server migration.")
+            "None of the hosts available are incompatible to perform a"
+            " negative share server migration test.")
 
     def _get_share_server_destination_for_migration(self, src_server_id):
-        """Find the destination share server choosed for the migration."""
+        """Find the destination share server chosen for the migration."""
         params = {'source_share_server_id': src_server_id,
                   'status': constants.STATUS_SERVER_MIGRATING_TO}
         dest_server = self.admin_shares_v2_client.list_share_servers(
@@ -235,11 +231,11 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         if self.protocol == 'nfs':
             return [{
                 'access_type': 'ip',
-                'access_to': '50.50.50.50',
+                'access_to': self.access_rules_ip_rw,
                 'access_level': 'rw',
             }, {
                 'access_type': 'ip',
-                'access_to': '51.51.51.51',
+                'access_to': self.access_rules_ip_ro,
                 'access_level': 'ro',
             }]
         elif self.protocol == 'cifs':
@@ -279,9 +275,9 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         self.shares_v2_client.share_server_migration_start(
             src_server_id, dest_host, preserve_snapshots=preserve_snapshots)
 
-        task_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
+        expected_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
         self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, task_state, status_attr='task_state')
+            src_server_id, expected_state, status_attr='task_state')
         # Get for the destination share server.
         dest_server_id = self._get_share_server_destination_for_migration(
             src_server_id)
@@ -292,19 +288,19 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
 
         # Validate the share instances status.
         share_status = constants.STATUS_SERVER_MIGRATING
-        self._validate_instances_states(share, share_status, snapshot_id)
+        self._validate_state_of_resources(share, share_status, snapshot_id)
 
         # Cancel the share server migration.
         self.shares_v2_client.share_server_migration_cancel(src_server_id)
 
         # Wait for the migration cancelled status.
-        task_state = constants.TASK_STATE_MIGRATION_CANCELLED
+        expected_state = constants.TASK_STATE_MIGRATION_CANCELLED
         self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, task_state, status_attr='task_state')
+            src_server_id, expected_state, status_attr='task_state')
 
         # After the cancel operation, we need to validate again the resources.
-        share_status = constants.STATUS_AVAILABLE
-        self._validate_instances_states(share, share_status, snapshot_id)
+        expected_status = constants.STATUS_AVAILABLE
+        self._validate_state_of_resources(share, expected_status, snapshot_id)
 
     @decorators.idempotent_id('99e439a8-a716-4205-bf5b-af50128cb908')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -342,9 +338,9 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             new_share_network_id=dest_share_network_id,
             preserve_snapshots=preserve_snapshots)
 
-        task_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
+        expected_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
         self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, task_state, status_attr='task_state')
+            src_server_id, expected_state, status_attr='task_state')
         # Get for the destination share server.
         dest_server_id = self._get_share_server_destination_for_migration(
             src_server_id)
@@ -354,24 +350,32 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         self.assertEqual(dest_share_network_id,
                          dest_server['share_network_id'])
 
-        share_status = constants.STATUS_SERVER_MIGRATING
-        self._validate_instances_states(share, share_status, snapshot_id)
+        expected_status = constants.STATUS_SERVER_MIGRATING
+        self._validate_state_of_resources(share, expected_status, snapshot_id)
 
         # Share server migration complete.
         self.shares_v2_client.share_server_migration_complete(src_server_id)
 
-        # It's necessary wait for the migration success state and
-        # active status.
-        task_state = [constants.TASK_STATE_MIGRATION_SUCCESS,
-                      constants.SERVER_STATE_INACTIVE]
+        # It's necessary wait for the destination server went to active status.
+        expected_status = constants.SERVER_STATE_ACTIVE
         self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, task_state, status_attr='task_state')
+            dest_server_id, expected_status)
+
+        # Check if the source server went to inactive status if it exists.
+        try:
+            src_server = self.shares_v2_client.show_share_server(src_server_id)
+        except exceptions.NotFound:
+            src_server = None
+
+        if src_server:
+            self.assertEqual(
+                src_server['status'], constants.SERVER_STATE_INACTIVE)
 
         # Validate the share server migration complete.
         share = self.shares_v2_client.get_share(share['id'])
         self._validate_share_server_migration_complete(
-            share, dest_host, src_server_id, dest_server_id,
-            snapshot_id=snapshot_id, share_network_id=dest_share_network_id)
+            share, dest_host, dest_server_id, snapshot_id=snapshot_id,
+            share_network_id=dest_share_network_id)
 
     @decorators.idempotent_id('52e154eb-2d39-45af-b5c1-49ea569ab804')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -385,8 +389,9 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         # Find a backend compatible or not for the share server
         # check compatibility operation.
         if compatible:
-            dest_host, result = self._choose_matching_backend_for_share_server(
-                server_id=share['share_server_id'])
+            dest_host, result = (
+                self._choose_compatible_backend_for_share_server(
+                    server_id=share['share_server_id']))
             self.assertTrue(result['compatible'])
             self.assertEqual(result['requested_capabilities']['host'],
                              dest_host)
@@ -394,10 +399,6 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             dest_host, result = (
                 self._choose_incompatible_backend_for_share_server(
                     server_id=share['share_server_id']))
-            if dest_host is None:
-                raise self.skipException(
-                    "Not found any compatible destination host for the share "
-                    "server %s." % share['share_server_id'])
             self.assertFalse(result['compatible'])
             self.assertEqual(result['requested_capabilities'].get('host'),
                              dest_host)

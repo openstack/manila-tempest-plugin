@@ -29,26 +29,26 @@ CONF = config.CONF
 
 class MigrationShareServerNegative(
         test_share_servers_migration.MigrationShareServerBase):
-    protocool = None
+    protocol = None
 
     @classmethod
-    def _setup_migration(self, cleanup_in_class=True):
+    def _setup_migration(cls, cleanup_in_class=True):
         """Setup migration for negative tests."""
         extra_specs = {
             'driver_handles_share_servers': CONF.share.multitenancy_enabled}
         if CONF.share.capability_snapshot_support:
             extra_specs['snapshot_support'] = True
-        share_type = self.create_share_type(
+        share_type = cls.create_share_type(
             name=data_utils.rand_name("tempest-share-type"),
             extra_specs=extra_specs,
             cleanup_in_class=cleanup_in_class)
-        share = self.create_share(share_protocol=self.protocol,
-                                  share_type_id=share_type['share_type']['id'],
-                                  cleanup_in_class=cleanup_in_class)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = cls.create_share(share_protocol=cls.protocol,
+                                 share_type_id=share_type['share_type']['id'],
+                                 cleanup_in_class=cleanup_in_class)
+        share = cls.shares_v2_client.get_share(share['id'])
         share_server_id = share['share_server_id']
-        dest_host, compatible = self._choose_matching_backend_for_share_server(
-            share_server_id)
+        dest_host, compatible = (
+            cls._choose_compatible_backend_for_share_server(share_server_id))
 
         return share, share_server_id, dest_host
 
@@ -60,16 +60,11 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
     @classmethod
     def resource_setup(cls):
         super(ShareServerMigrationInvalidParametersNFS, cls).resource_setup()
-        cls.share = cls.create_share(
-            share_protocol=cls.protocol,
-            share_type_id=cls.share_type['id'])
-        cls.share = cls.shares_v2_client.get_share(cls.share['id'])
-        cls.share_server_id = cls.share['share_server_id']
         cls.fake_server_id = 'fake_server_id'
         cls.fake_host = 'fake_host@fake_backend'
 
     @decorators.idempotent_id('1be6ec2a-3118-4033-9cdb-ea6d199d97f4')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_server_invalid_server_migration_check(self):
         """Not found share server in migration check."""
         self.assertRaises(lib_exc.NotFound,
@@ -78,7 +73,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
                           self.fake_host)
 
     @decorators.idempotent_id('2aeffcfa-4e68-40e4-8a75-03b017503501')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_server_invalid_server_migration_cancel(self):
         """Not found share server in migration cancel."""
         self.assertRaises(lib_exc.NotFound,
@@ -86,7 +81,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
                           self.fake_server_id)
 
     @decorators.idempotent_id('52d23980-80e7-40de-8dba-1bb1382ef995')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_server_invalid_server_migration_start(self):
         """Not found share server in migration start."""
         self.assertRaises(lib_exc.NotFound,
@@ -95,7 +90,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
                           self.fake_host)
 
     @decorators.idempotent_id('47795631-eb50-424b-9fac-d2ee832cd01c')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_server_invalid_server_migration_get_progress(self):
         """Not found share server in migration get progress."""
         self.assertRaises(
@@ -104,9 +99,9 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
             self.fake_server_id)
 
     @decorators.idempotent_id('3b464298-a4e4-417b-92d6-acfbd30ac45b')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_share_server_invalid_server_migration_complete(self):
-        """Not found share server in migration """
+        """Not found share server in migration complete."""
         self.assertRaises(
             lib_exc.NotFound,
             self.shares_v2_client.share_server_migration_complete,
@@ -115,20 +110,64 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
     @decorators.idempotent_id('2d25cf84-0b5c-4a9f-ae20-9bec09bb6914')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_share_server_invalid_host_migration_start(self):
-        """Not found share server in migration start."""
+        """Invalid host in migration start."""
+        share = self.create_share(
+            share_protocol=self.protocol,
+            share_type_id=self.share_type['id'])
+        share = self.shares_v2_client.get_share(share['id'])
+        share_server_id = share['share_server_id']
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.share_server_migration_start,
-                          self.share_server_id,
+                          share_server_id,
                           self.fake_host)
 
     @decorators.idempotent_id('e7e2c19c-a0ed-41ab-b666-b2beae4a690c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_share_server_invalid_host_migration_check(self):
-        """Not found share server in migration check."""
+        """Invalid host in migration check."""
+        share = self.create_share(
+            share_protocol=self.protocol,
+            share_type_id=self.share_type['id'])
+        share = self.shares_v2_client.get_share(share['id'])
+        share_server_id = share['share_server_id']
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.share_server_migration_check,
-                          self.share_server_id,
+                          share_server_id,
                           self.fake_host)
+
+    @decorators.idempotent_id('f0d7a055-3b46-4d2b-9b96-1d719bd323e8')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_share_server_invalid_share_network_migration_start(self):
+        """Invalid host in migration start."""
+        share = self.create_share(
+            share_protocol=self.protocol,
+            share_type_id=self.share_type['id'])
+        share = self.shares_v2_client.get_share(share['id'])
+        share_server_id = share['share_server_id']
+        dest_host, _ = self._choose_compatible_backend_for_share_server(
+            share_server_id)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.share_server_migration_start,
+                          share_server_id,
+                          dest_host,
+                          new_share_network_id='fake_share_net_id')
+
+    @decorators.idempotent_id('2617e714-7a8e-49a4-8109-beab3ea6527f')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_share_server_invalid_share_network_migration_check(self):
+        """Invalid host in migration check."""
+        share = self.create_share(
+            share_protocol=self.protocol,
+            share_type_id=self.share_type['id'])
+        share = self.shares_v2_client.get_share(share['id'])
+        share_server_id = share['share_server_id']
+        dest_host, _ = self._choose_compatible_backend_for_share_server(
+            share_server_id)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.share_server_migration_check,
+                          share_server_id,
+                          self.fake_host,
+                          new_share_network_id='fake_share_net_id')
 
 
 class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
@@ -142,9 +181,10 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
             share_type_id=cls.share_type['id'])
         cls.share = cls.shares_v2_client.get_share(cls.share['id'])
         cls.share_server_id = cls.share['share_server_id']
+        cls.dest_host, _ = cls._choose_compatible_backend_for_share_server(
+            cls.share_server_id)
         cls.shares_v2_client.share_server_reset_state(
             cls.share_server_id, status=constants.STATUS_ERROR)
-        cls.fake_host = 'fake_host@fake_backend'
 
     @decorators.idempotent_id('1f8d75c1-aa3c-465a-b2dd-9ad33933944f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -153,7 +193,7 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
         self.assertRaises(lib_exc.Conflict,
                           self.shares_v2_client.share_server_migration_check,
                           self.share_server_id,
-                          self.fake_host)
+                          self.dest_host)
 
     @decorators.idempotent_id('c256c5f5-b4d1-47b7-a1f4-af21f19ce600')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -162,7 +202,7 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
         self.assertRaises(lib_exc.Conflict,
                           self.shares_v2_client.share_server_migration_start,
                           self.share_server_id,
-                          self.fake_host)
+                          self.dest_host)
 
     @decorators.idempotent_id('d2830fe4-8d13-40d2-b987-18d414bb6196')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -171,8 +211,7 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
         self.assertRaises(
             lib_exc.BadRequest,
             self.shares_v2_client.share_server_migration_get_progress,
-            self.share_server_id,
-            self.fake_host)
+            self.share_server_id)
 
     @decorators.idempotent_id('245f39d7-bcbc-4711-afd7-651a5535a880')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -180,8 +219,7 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
         """Share server migration cancel invalid operation."""
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.share_server_migration_cancel,
-                          self.share_server_id,
-                          self.fake_host)
+                          self.share_server_id)
 
     @decorators.idempotent_id('3db45440-2c70-4fa4-b5eb-75e3cb0204f8')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -190,8 +228,7 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
         self.assertRaises(
             lib_exc.BadRequest,
             self.shares_v2_client.share_server_migration_complete,
-            self.share_server_id,
-            self.fake_host)
+            self.share_server_id)
 
 
 class ShareServerMigrationStartNegativesNFS(MigrationShareServerNegative):
@@ -258,14 +295,34 @@ class ShareServerMigrationStartInvalidStatesNFS(MigrationShareServerNegative):
         """Try server migration start with invalid network."""
         share, share_server_id, dest_host = self._setup_migration(
             cleanup_in_class=False)
-        share_network = self.create_share_network(cleanup_in_class=False)
+        azs = self.get_availability_zones()
+        if len(azs) < 2:
+            raise self.skipException(
+                "Could not find the necessary azs. At least two azs are "
+                "needed to run this test.")
 
+        # In this test we'll attempt to start a migration to a share
+        # network that isn't available in the destination back ends's
+        # availability zone.
+        dest_host_az = self.get_availability_zones(backends=[dest_host])
+
+        if dest_host_az[0] != share['availability_zone']:
+            share_network_az = share['availability_zone']
+        else:
+            for az in azs:
+                if az != dest_host_az:
+                    share_network_az = az
+                    break
+
+        share_network = self.create_share_network(
+            client=self.shares_v2_client, cleanup_in_class=False,
+            availability_zone=share_network_az)
         self.assertRaises(
-            lib_exc.ServerFault,
+            lib_exc.Conflict,
             self.shares_v2_client.share_server_migration_start,
             share_server_id,
             dest_host,
-            new_share_network_id=share_network)
+            new_share_network_id=share_network['id'])
 
     @decorators.idempotent_id('11374277-efcf-4992-ad94-c8f4a393d41b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -273,7 +330,7 @@ class ShareServerMigrationStartInvalidStatesNFS(MigrationShareServerNegative):
         """Try server migration start with invalid share state."""
         share, share_server_id, dest_host = self._setup_migration(
             cleanup_in_class=False)
-        self.shares_v2_client.reset_state(share['id'])
+        self.shares_v2_client.reset_state(share['id'], status='error')
 
         self.assertRaises(
             lib_exc.Conflict,
@@ -303,7 +360,7 @@ class ShareServerMigrationStartInvalidStatesNFS(MigrationShareServerNegative):
                                   cleanup_in_class=False)
         share = self.shares_v2_client.get_share(share['id'])
         share_server_id = share['share_server_id']
-        dest_host, _ = self._choose_matching_backend_for_share_server(
+        dest_host, _ = self._choose_compatible_backend_for_share_server(
             share_server_id)
         self.create_share_replica(
             share['id'],

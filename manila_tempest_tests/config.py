@@ -262,7 +262,7 @@ ShareGroup = [
                 help="Defines whether to run tests that create share from "
                      "snapshots in another pool or az. Enable this "
                      "option if the used driver supports it."),
-    cfg.BoolOpt("run_share_servers_migration_tests",
+    cfg.BoolOpt("run_share_server_migration_tests",
                 default=False,
                 help="Defines whether to run share servers migration tests. "
                      "Enable this option if the used driver supports it."),
