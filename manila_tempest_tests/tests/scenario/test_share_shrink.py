@@ -67,7 +67,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         LOG.debug('Step 4 - grant access')
-        location = self.get_share_export_location_for_mount(share)
+        location = self.get_user_export_locations(share)[0]
         self.allow_access(instance=instance, remote_client=remote_client,
                           locations=location)
 

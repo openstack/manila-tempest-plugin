@@ -220,8 +220,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         self.share = self.migration_complete(self.share['id'], dest_pool)
 
-        new_exports = self.get_user_export_locations(
-            self.share, error_on_invalid_ip_version=True)
+        new_exports = self.get_user_export_locations(self.share)
 
         self.assertEqual(dest_pool, self.share['host'])
         self.assertEqual(constants.TASK_STATE_MIGRATION_SUCCESS,
