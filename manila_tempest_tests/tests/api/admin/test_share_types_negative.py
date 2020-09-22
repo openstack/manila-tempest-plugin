@@ -128,3 +128,35 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
             self.admin_shares_v2_client.remove_access_from_share_type,
             data_utils.rand_name("fake"),
             self.admin_shares_v2_client.tenant_id)
+
+    @decorators.idempotent_id('0fd53c51-e1ba-4392-9f4c-5d3bdd157163')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
+    def test_create_share_with_non_allowed_share_type(self):
+        # Create a private share type
+        name = data_utils.rand_name('share-type')
+        share_type = self.create_share_type(
+            client=self.admin_shares_v2_client,
+            name=name, is_public=False,
+            extra_specs=self.add_extra_specs_to_dict())['share_type']
+
+        # The share type should not be listed without access
+        share_type_list = (
+            self.admin_shares_v2_client.list_share_types()['share_types'])
+        self.assertFalse(
+            any(share_type['id'] in st['id'] for st in share_type_list))
+
+        # List projects that have access for share type - none expected
+        access = self.admin_shares_v2_client.list_access_to_share_type(
+            share_type['id'])
+        self.assertEmpty(access)
+
+        # Although the share type should not be found on alt project,
+        # try to create a share with it by using the share type name
+        self.assertRaises(lib_exc.NotFound,
+                          self.alt_shares_v2_client.create_share,
+                          share_type_id=share_type['name'])
+
+        # The share should not be listed
+        share_list = self.alt_shares_v2_client.list_shares(detailed=True)
+        self.assertFalse(
+            any(share_type['id'] in s['share_type'] for s in share_list))
