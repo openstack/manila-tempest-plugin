@@ -659,14 +659,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         LOG.info('Creating Glance image using the downloaded image file')
         return self._image_create('centos', 'bare', imagepath, 'qcow2')
 
-    def get_share_export_location_for_mount(self, share):
-        exports = self.get_user_export_locations(
-            share=share,
-            error_on_invalid_ip_version=True)
-        return exports[0]
-
-    def get_user_export_locations(self, share=None, snapshot=None,
-                                  error_on_invalid_ip_version=False):
+    def get_user_export_locations(self, share=None, snapshot=None):
         locations = None
         if share:
             locations = self.get_share_export_locations(share)
@@ -676,19 +669,18 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         self.assertNotEmpty(locations)
         if self.protocol != 'cephfs':
             locations = self._get_export_locations_according_to_ip_version(
-                locations, error_on_invalid_ip_version)
+                locations)
             self.assertNotEmpty(locations)
 
         return locations
 
-    def _get_export_locations_according_to_ip_version(
-            self, all_locations, error_on_invalid_ip_version):
+    def _get_export_locations_according_to_ip_version(self, all_locations):
         locations = [
             x for x in all_locations
             if self.get_ip_and_version_from_export_location(
                 x)[1] == self.ip_version]
 
-        if len(locations) == 0 and not error_on_invalid_ip_version:
+        if len(locations) == 0:
             message = ("Configured backend does not support "
                        "ip_version %s" % self.ip_version)
             raise self.skipException(message)
