@@ -85,10 +85,14 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             share_ids = [si['share_id'] for si in share_instance_list]
             self.assertNotIn(share['id'], share_ids)
 
+        export_path = share['export_locations'][0]
+        if utils.is_microversion_ge(version, "2.8"):
+            export_path = share['export_locations'][0]['path']
+
         # Manage share
         manage_params = {
             'service_host': share['host'],
-            'export_path': share['export_locations'][0],
+            'export_path': export_path,
             'protocol': share['share_proto'],
             'share_type_id': self.st['share_type']['id'],
             'name': name,
