@@ -13,7 +13,6 @@
 import time
 
 from oslo_log import log as logging
-import six
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
@@ -146,7 +145,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
                                                        new_size=new_size)
                 except exceptions.BadRequest as e:
                     if ('New size for shrink must be less than current size'
-                            in six.text_type(e)):
+                            in str(e)):
                         break
 
             time.sleep(check_interval)

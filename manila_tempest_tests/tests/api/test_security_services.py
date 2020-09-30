@@ -15,7 +15,6 @@
 
 import ddt
 from oslo_log import log
-import six
 from tempest import config
 from tempest.lib import decorators
 import testtools
@@ -252,7 +251,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             LOG.warning("Caught exception. It is expected in case backend "
                         "fails having security-service with improper data "
                         "that leads to share-server creation error. "
-                        "%s", six.text_type(e))
+                        "%s", str(e))
 
         update_data = {
             "name": "name",

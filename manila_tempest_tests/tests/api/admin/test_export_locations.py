@@ -16,7 +16,6 @@
 import ddt
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-import six
 from tempest import config
 from tempest.lib import decorators
 from testtools import testcase as tc
@@ -91,7 +90,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
             # Check the format of ever-present summary keys
             self.assertTrue(uuidutils.is_uuid_like(export_location['id']))
             self.assertIsInstance(export_location['path'],
-                                  six.string_types)
+                                  str)
 
             if utils.is_microversion_ge(version, '2.14'):
                 self.assertIn(export_location['preferred'], (True, False))

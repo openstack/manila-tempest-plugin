@@ -13,7 +13,6 @@
 import sys
 
 from oslo_log import log
-import six
 from tempest import config
 from tempest.lib.common import ssh
 from tempest.lib.common.utils import test_utils
@@ -47,7 +46,7 @@ def debug_ssh(function):
                             msg = 'Could not get console_log for server %s'
                             LOG.debug(msg, self.server['id'])
                 # re-raise the original ssh timeout exception
-                six.reraise(*original_exception)
+                raise original_exception
             finally:
                 # Delete the traceback to avoid circular references
                 _, _, trace = original_exception

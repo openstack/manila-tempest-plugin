@@ -14,7 +14,6 @@
 #    under the License.
 
 import ddt
-import six
 from tempest import config
 from tempest.lib import decorators
 from testtools import testcase as tc
@@ -54,7 +53,7 @@ class BaseShareSnapshotRulesTest(base.BaseSharesMixedTest):
             access_to)['snapshot_access']
 
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
-            self.assertNotIn(key, list(six.iterkeys(rule)))
+            self.assertNotIn(key, list(rule.keys()))
 
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.snapshot['id'], 'active',

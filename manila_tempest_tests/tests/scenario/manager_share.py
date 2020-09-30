@@ -14,10 +14,9 @@
 #    under the License.
 
 from tempfile import mkstemp
+from urllib.request import urlopen
 
 from oslo_log import log
-import six
-from six.moves.urllib.request import urlopen
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -288,7 +287,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         # original implementation depends on CONF.compute.ssh_auth_method
         # option.
         server_or_ip = kwargs['server_or_ip']
-        if isinstance(server_or_ip, six.string_types):
+        if isinstance(server_or_ip, str):
             ip = server_or_ip
         else:
             addr = server_or_ip['addresses'][

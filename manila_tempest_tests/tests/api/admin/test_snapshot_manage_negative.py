@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -51,7 +51,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
         cls.extra_specs = {
             'storage_protocol': CONF.share.capability_storage_protocol,
             'driver_handles_share_servers': CONF.share.multitenancy_enabled,
-            'snapshot_support': six.text_type(
+            'snapshot_support': str(
                 CONF.share.capability_snapshot_support),
         }
 

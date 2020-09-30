@@ -16,8 +16,8 @@
 import json
 import re
 import time
+from urllib import parse
 
-from six.moves.urllib import parse
 from tempest import config
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
@@ -1522,8 +1522,6 @@ class SharesV2Client(shares_client.SharesClient):
                                headers=EXPERIMENTAL, extra_headers=True,
                                version=version)
         return rest_client.ResponseBody(resp, body)
-
-################
 
     def create_share_replica(self, share_id, availability_zone=None,
                              version=LATEST_MICROVERSION):
