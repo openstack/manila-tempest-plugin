@@ -216,7 +216,8 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
     @testtools.skipIf(
         "nfs" not in CONF.share.enable_ro_access_level_for_protocols,
         "RO access rule tests are disabled for NFS protocol.")
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_ro_access_rule(self, client_name):
         _create_delete_ro_access_rule(self, client_name)
 
@@ -230,7 +231,8 @@ class ShareIpRulesForCIFSTest(ShareIpRulesForNFSTest):
     @testtools.skipIf(
         "cifs" not in CONF.share.enable_ro_access_level_for_protocols,
         "RO access rule tests are disabled for CIFS protocol.")
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_ro_access_rule(self, version):
         _create_delete_ro_access_rule(self, version)
 
@@ -265,7 +267,8 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('1f87565f-c3d9-448d-b89a-387d6c2fdae6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_user_rule(self, version):
 
         # create rule
@@ -314,7 +317,8 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
     @testtools.skipIf(
         "nfs" not in CONF.share.enable_ro_access_level_for_protocols,
         "RO access rule tests are disabled for NFS protocol.")
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_ro_access_rule(self, version):
         _create_delete_ro_access_rule(self, version)
 
@@ -328,7 +332,8 @@ class ShareUserRulesForCIFSTest(ShareUserRulesForNFSTest):
     @testtools.skipIf(
         "cifs" not in CONF.share.enable_ro_access_level_for_protocols,
         "RO access rule tests are disabled for CIFS protocol.")
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_ro_access_rule(self, version):
         _create_delete_ro_access_rule(self, version)
 
@@ -364,7 +369,8 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('775ebc55-4a4d-4012-a030-2eeb7b6d2ce8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_cert_rule(self, version):
 
         # create rule
@@ -413,7 +419,8 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
     @testtools.skipIf(
         "glusterfs" not in CONF.share.enable_ro_access_level_for_protocols,
         "RO access rule tests are disabled for GLUSTERFS protocol.")
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_create_delete_cert_ro_access_rule(self, version):
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
@@ -570,7 +577,7 @@ class ShareRulesTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('c52e95cc-d6ea-4d02-9b52-cd7c1913dfff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(*set(
+    @ddt.data(*utils.deduplicate(
         ['1.0', '2.9', '2.27', '2.28', '2.45', LATEST_MICROVERSION]))
     def test_list_access_rules(self, version):
         self.skip_if_microversion_not_supported(version)
@@ -664,7 +671,8 @@ class ShareRulesTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('b77bcbda-9754-48f0-9be6-79341ad1af64')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(*set(['1.0', '2.9', '2.27', '2.28', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
+                                 LATEST_MICROVERSION]))
     def test_access_rules_deleted_if_share_deleted(self, version):
         if (utils.is_microversion_lt(version, '2.13') and
                 CONF.share.enable_cephx_rules_for_protocols):

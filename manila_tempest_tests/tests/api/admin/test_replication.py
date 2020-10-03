@@ -84,9 +84,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('0213cdfd-6a0f-4f24-a154-69796888a64a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_REPLICATION_VERSION,
-              constants.SHARE_REPLICA_GRADUATION_VERSION,
-              LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_REPLICATION_VERSION,
+                            constants.SHARE_REPLICA_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_promote_out_of_sync_share_replica(self, version):
         """Test promote 'out_of_sync' share replica to active state."""
         self.skip_if_microversion_not_supported(version)
@@ -145,9 +145,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('22a199b7-f4f6-4ede-b09f-8047a9d01cad')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_REPLICATION_VERSION,
-              constants.SHARE_REPLICA_GRADUATION_VERSION,
-              LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_REPLICATION_VERSION,
+                            constants.SHARE_REPLICA_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_force_delete_share_replica(self, version):
         """Test force deleting a replica that is in 'error_deleting' status."""
         self.skip_if_microversion_not_supported(version)
@@ -167,9 +167,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('16bd90f0-c478-4a99-8633-b18703ff56fa')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_REPLICATION_VERSION,
-              constants.SHARE_REPLICA_GRADUATION_VERSION,
-              LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_REPLICATION_VERSION,
+                            constants.SHARE_REPLICA_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_reset_share_replica_status(self, version):
         """Test resetting a replica's 'status' attribute."""
         self.skip_if_microversion_not_supported(version)
@@ -187,9 +187,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('258844da-a853-42b6-87db-b16e616018c6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_REPLICATION_VERSION,
-              constants.SHARE_REPLICA_GRADUATION_VERSION,
-              LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_REPLICATION_VERSION,
+                            constants.SHARE_REPLICA_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_reset_share_replica_state(self, version):
         """Test resetting a replica's 'replica_state' attribute."""
         self.skip_if_microversion_not_supported(version)
@@ -207,9 +207,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('2969565a-85e8-4c61-9dfb-cc7f7ca9f6dd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_REPLICATION_VERSION,
-              constants.SHARE_REPLICA_GRADUATION_VERSION,
-              LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_REPLICATION_VERSION,
+                            constants.SHARE_REPLICA_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_resync_share_replica(self, version):
         """Test resyncing a replica."""
         self.skip_if_microversion_not_supported(version)

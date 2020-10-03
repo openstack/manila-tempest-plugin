@@ -296,7 +296,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('90dca5c5-f28e-4f16-90ed-78f5d725664e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*set(('2.45', '2.46', LATEST_MICROVERSION)))
+    @ddt.data(*utils.deduplicate(('2.45', '2.46', LATEST_MICROVERSION)))
     def test_share_type_create_show_list_with_is_default_key(self, version):
         self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")

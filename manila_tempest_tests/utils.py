@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from collections import OrderedDict
 import random
 import re
 
@@ -25,6 +26,15 @@ CONF = config.CONF
 SHARE_NETWORK_SUBNETS_MICROVERSION = '2.51'
 SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
 EXPERIMENTAL = {'X-OpenStack-Manila-API-Experimental': 'True'}
+
+
+def deduplicate(items):
+    """De-duplicate a list of items while preserving the order.
+
+    It is useful when passing a list of items to ddt.data, in order
+    to remove duplicated elements which may be specified as constants.
+    """
+    return list(OrderedDict.fromkeys(items))
 
 
 def get_microversion_as_tuple(microversion_str):

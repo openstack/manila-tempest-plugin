@@ -147,8 +147,9 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('15b44580-a34d-4e0d-a77b-0e76b45d6199')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_update_single_share_group_type_spec(self, version):
         self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
@@ -202,8 +203,9 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('efddee69-ca23-4681-8247-94ded81c4c3a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_delete_single_share_group_type_spec_min(self, version):
         self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
@@ -231,8 +233,9 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('c2d34b42-e3ec-404e-8b7a-0fe9b1560507')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_private_share_group_type_access(self, version):
         self.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
@@ -291,7 +294,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('b8b20a96-cecc-4677-8a77-aae3b93e5b96')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*set(('2.45', '2.46', LATEST_MICROVERSION)))
+    @ddt.data(*utils.deduplicate(('2.45', '2.46', LATEST_MICROVERSION)))
     def test_share_group_type_create_show_list_with_is_default_key(self,
                                                                    version):
         self.skip_if_microversion_not_supported(version)

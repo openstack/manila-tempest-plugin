@@ -121,7 +121,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('da22cfb8-7dd8-4bf1-87fc-a1f7b51ebf8e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(*set(['2.46', '2.47', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['2.46', '2.47', LATEST_MICROVERSION]))
     def test_replicated_share_export_locations(self, version):
         """Test behavior changes in the share export locations API at 2.47"""
         self.skip_if_microversion_not_supported(version)
@@ -139,7 +139,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('58430f57-c6eb-44e2-9583-eecb1dd10594')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(*set(['2.46', '2.47', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['2.46', '2.47', LATEST_MICROVERSION]))
     @testtools.skipUnless(
         CONF.share.backend_replication_type in
         (constants.REPLICATION_STYLE_READABLE, constants.REPLICATION_STYLE_DR),

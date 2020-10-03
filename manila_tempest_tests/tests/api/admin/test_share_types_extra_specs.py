@@ -22,6 +22,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 CONF = config.CONF
@@ -125,7 +126,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('1b9f501d-8f34-46d0-b318-83bdfed571ec')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*set(['2.24', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['2.24', LATEST_MICROVERSION]))
     def test_delete_snapshot_support_extra_spec(self, version):
         self.skip_if_microversion_not_supported(version)
         # Delete one extra spec for share type

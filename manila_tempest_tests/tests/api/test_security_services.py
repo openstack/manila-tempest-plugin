@@ -46,7 +46,7 @@ class SecurityServiceListMixin(object):
 
     @decorators.idempotent_id('22b22937-7436-458c-ac22-8ff19feab253')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*set(['1.0', '2.42', '2.44', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.42', '2.44', LATEST_MICROVERSION]))
     def test_list_security_services_with_detail(self, version):
         self.skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
@@ -169,7 +169,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
 
     @decorators.idempotent_id('bb052be4-0176-4613-b7d5-e12bef391ddb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*set(['1.0', '2.43', '2.44', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['1.0', '2.43', '2.44', LATEST_MICROVERSION]))
     def test_get_security_service(self, version):
         self.skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False

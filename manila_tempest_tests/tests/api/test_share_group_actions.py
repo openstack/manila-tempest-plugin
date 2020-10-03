@@ -107,8 +107,9 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('1e359389-09a7-4235-84c9-7b5c83632fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_get_share_group(self, version):
         self.skip_if_microversion_not_supported(version)
 
@@ -161,8 +162,9 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('04fcd695-c5f8-4de7-ab09-131424e6bdfb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_list_share_groups(self, version):
         self.skip_if_microversion_not_supported(version)
 
@@ -192,8 +194,9 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('16986c21-ecbc-429e-ab3d-8d1596a3eac4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION, '2.36',
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION, '2.36',
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_list_share_groups_with_detail_min(self, version):
         self.skip_if_microversion_not_supported(version)
         params = None
@@ -252,8 +255,9 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('5d2ca4f5-04da-4528-af47-ec980b95e884')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_get_share_group_snapshot(self, version):
         self.skip_if_microversion_not_supported(version)
 
@@ -308,8 +312,9 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('650c5fa7-11f2-48bd-b012-fc2e32b6f446')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_create_share_group_from_populated_share_group_snapshot(self,
                                                                     version):
         self.skip_if_microversion_not_supported(version)
@@ -413,8 +418,9 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('7f0a07ce-afdd-4c51-a29c-d8fe6cb5f6a5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_update_share_group(self, version):
         self.skip_if_microversion_not_supported(version)
 
@@ -453,8 +459,9 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('611b1555-df09-499b-8aef-e8261e3f6863')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_create_update_read_share_group_with_unicode(self, version):
         self.skip_if_microversion_not_supported(version)
 

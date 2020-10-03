@@ -63,8 +63,9 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('79eaa86f-4c8f-49fd-acb2-ec051aa6bf93')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_create_share_group_with_single_share_type_min(self, version):
         self.skip_if_microversion_not_supported(version)
         share_group = self.create_share_group(
@@ -137,8 +138,9 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
         CONF.share.default_share_type_name, "Only if defaults are defined.")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *set([constants.MIN_SHARE_GROUP_MICROVERSION,
-              constants.SHARE_GROUPS_GRADUATION_VERSION, LATEST_MICROVERSION]))
+        *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
+                            constants.SHARE_GROUPS_GRADUATION_VERSION,
+                            LATEST_MICROVERSION]))
     def test_default_share_group_type_applied(self, version):
         self.skip_if_microversion_not_supported(version)
         try:
