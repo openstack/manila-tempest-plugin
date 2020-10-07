@@ -376,6 +376,9 @@
         MANILA_SETUP_IPV6: true
         NEUTRON_CREATE_INITIAL_NETWORKS: false
         MANILA_RESTORE_IPV6_DEFAULT_ROUTE: false
+      zuul_copy_output:
+        '/var/log/ganesha': logs
+        '/etc/ganesha': logs
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
