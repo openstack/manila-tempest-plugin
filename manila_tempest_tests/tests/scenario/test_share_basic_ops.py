@@ -108,9 +108,9 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # Write data to first VM
         remote_client_inst1 = self.init_remote_client(instance1)
-        self.allow_access(instance=instance1,
-                          remote_client=remote_client_inst1,
-                          locations=location)
+        access = self.allow_access(instance=instance1,
+                                   remote_client=remote_client_inst1,
+                                   locations=location)
 
         self.mount_share(location, remote_client_inst1)
         self.addCleanup(self.unmount_share,
@@ -122,7 +122,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         if not CONF.share.override_ip_for_nfs_access or self.ipv6_enabled:
             self.allow_access(instance=instance2,
                               remote_client=remote_client_inst2,
-                              locations=location)
+                              locations=location,
+                              access_rule=access)
 
         self.mount_share(location, remote_client_inst2)
         self.addCleanup(self.unmount_share,

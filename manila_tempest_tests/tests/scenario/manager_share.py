@@ -376,41 +376,62 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 snapshot=snapshot, access_level=access_level, client=client)
 
     def provide_access_to_client_identified_by_cephx(self, share=None,
+                                                     access_rule=None,
                                                      access_level='rw',
                                                      access_to=None,
                                                      remote_client=None,
                                                      locations=None,
                                                      client=None,
                                                      oc_size=20971520):
-        share = share or self.share
-        client = client or self.shares_v2_client
-        access_to = access_to or data_utils.rand_name(
-            self.__class__.__name__ + '-cephx-id')
-        # Check if access is already granted to the client
-        access = self.shares_v2_client.list_access_rules(
-            share['id'], metadata={'metadata': {'access_to': access_to}})
-        access = access[0] if access else None
+        """Provide an access to a client identified by cephx authentication
 
-        if not access:
-            access = self._allow_access(
-                share['id'], access_level=access_level, access_to=access_to,
-                access_type="cephx", cleanup=False, client=client)
-            # Set metadata to access rule to be filtered if necessary.
-            # This is necessary to prevent granting access to a client who
-            # already has.
-            self.shares_v2_client.update_access_metadata(
-                metadata={"access_to": "{}".format(access_to)},
-                access_id=access['id'])
-        get_access = self.shares_v2_client.get_access(access['id'])
+        :param: share: An existing share.
+        :param: access_rule: An existing access rule. In case we want to create
+                        the configuration files in the instance according to an
+                        existing access rule.
+        :param: access_level: Share access level; this is not required if
+                        "access_rule" is set.
+        :param: access_to: Client to provide access to; this is not required if
+                        "access_rule" is set.
+        :param: remote_client: An SSH client connection to the Nova instance.
+        :param: locations: Export locations of shares.
+        :param: client: Client object.
+        :param: oc_size: Set how many bytes of data will the client cache.
+        :return: Share access.
+
+        """
+        client = client or self.shares_v2_client
+        if not access_rule:
+            share = share or self.share
+            access_to = access_to or data_utils.rand_name(
+                self.__class__.__name__ + '-cephx-id')
+            # Check if access is already granted to the client
+            access_rules_matching_client = client.list_access_rules(
+                share['id'], metadata={'metadata': {'access_to': access_to}})
+            access_rule = (access_rules_matching_client[0] if
+                           access_rules_matching_client else None)
+
+            if not access_rule:
+                access_rule = self._allow_access(
+                    share['id'], access_level=access_level,
+                    access_to=access_to, access_type="cephx", cleanup=False,
+                    client=client)
+                # Set metadata to access rule to be filtered if necessary.
+                # This is necessary to prevent granting access to a client who
+                # already has.
+                client.update_access_metadata(
+                    metadata={"access_to": "{}".format(access_to)},
+                    access_id=access_rule['id'])
+        get_access = client.get_access(access_rule['id'])
         # Set 'access_key' and 'access_to' attributes for being use in mount
         # operation.
         setattr(self, 'access_key', get_access['access_key'])
-        setattr(self, 'access_to', access_to)
+        setattr(self, 'access_to', get_access['access_to'])
 
         remote_client.exec_command(
             "sudo crudini --set {access_to}.keyring client.{access_to} key "
             "{access_key}"
-            .format(access_to=access_to, access_key=self.access_key))
+            .format(access_to=self.access_to, access_key=self.access_key))
         remote_client.exec_command(
             "sudo crudini --set ceph.conf client \"client quota\" true")
         remote_client.exec_command(
@@ -421,7 +442,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         remote_client.exec_command(
             "sudo crudini --set ceph.conf client \"mon host\" {}"
             .format(locations[0].split(':/')[0]))
-        return access
+        return access_rule
 
     def wait_for_active_instance(self, instance_id):
         waiters.wait_for_server_status(
@@ -703,10 +724,11 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
 class BaseShareCEPHFSTest(ShareScenarioTest):
 
-    def allow_access(self, access_level='rw', **kwargs):
+    def allow_access(self, access_level='rw', access_rule=None, **kwargs):
         return self.provide_access_to_client_identified_by_cephx(
             remote_client=kwargs['remote_client'],
-            locations=kwargs['locations'], access_level=access_level)
+            locations=kwargs['locations'], access_level=access_level,
+            access_rule=access_rule)
 
     def _fuse_client(self, mountpoint, remote_client, target_dir, access_to):
         remote_client.exec_command(
