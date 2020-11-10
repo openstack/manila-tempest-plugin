@@ -262,12 +262,6 @@
     description: |
       Test the generic driver multibackend (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-base
-    # TODO(gmann): Remove the below nodeset setting to Bionic once
-    # https://bugs.launchpad.net/manila/+bug/1896672 is fixed
-    # Once nodeset is removed form here then devstack base job
-    # will automatically run this job on Ubuntu Focal nodeset from
-    # Victoria gate onwards.
-    nodeset: openstack-single-node-bionic
     vars:
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
       # The generic driver uses nova VMs as share servers; running with a
