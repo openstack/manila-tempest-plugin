@@ -551,12 +551,6 @@
     description: |
       Test the GlusterFS driver (DHSS=False) with the native NFS protocol
     parent: manila-tempest-plugin-standalone-base
-    # TODO(gmann): Remove the below nodeset setting to Bionic once
-    # https://bugs.launchpad.net/manila/+bug/1896672 is fixed
-    # Once nodeset is removed form here then devstack base job
-    # will automatically run this job on Ubuntu Focal nodeset from
-    # Victoria gate onwards.
-    nodeset: openstack-single-node-bionic
     required-projects:
       - x/devstack-plugin-glusterfs
     vars:
