@@ -329,12 +329,6 @@
     name: manila-tempest-plugin-cephfs-nfs
     description: Test CephFS NFS (DHSS=False)
     parent: manila-tempest-plugin-base
-    # TODO(gmann): Remove the below nodeset setting to Bionic once
-    # https://bugs.launchpad.net/manila/+bug/1896672 is fixed
-    # Once nodeset is removed form here then devstack base job
-    # will automatically run this job on Ubuntu Focal nodeset from
-    # Victoria gate onwards.
-    nodeset: openstack-single-node-bionic
     required-projects:
       - openstack/devstack-plugin-ceph
       - openstack/neutron-dynamic-routing
