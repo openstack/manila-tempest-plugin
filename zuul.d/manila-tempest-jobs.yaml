@@ -165,12 +165,6 @@
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
     parent: manila-tempest-plugin-ipv6-base
-    # TODO(gmann): Remove the below nodeset setting to Bionic once
-    # https://bugs.launchpad.net/manila/+bug/1896672 is fixed
-    # Once nodeset is removed form here then devstack base job
-    # will automatically run this job on Ubuntu Focal nodeset from
-    # Victoria gate onwards.
-    nodeset: openstack-single-node-bionic
     required-projects:
       - openstack/neutron-dynamic-routing
     vars:
