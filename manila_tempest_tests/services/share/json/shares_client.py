@@ -637,6 +637,11 @@ class SharesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
+    def get_default_share_type(self):
+        resp, body = self.get("types/default")
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
     def add_access_to_share_type(self, share_type_id, project_id):
         uri = 'types/%s/action' % share_type_id
         post_body = {'project': project_id}

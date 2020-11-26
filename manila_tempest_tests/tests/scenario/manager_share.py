@@ -452,8 +452,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
     def get_share_type(self):
         if CONF.share.default_share_type_name:
-            return self.shares_client.get_share_type(
-                CONF.share.default_share_type_name)['share_type']
+            return self.shares_client.get_default_share_type()['share_type']
         return self._create_share_type(
             data_utils.rand_name("share_type"),
             extra_specs={
