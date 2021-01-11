@@ -339,6 +339,7 @@
       - openstack/devstack-plugin-ceph
       - openstack/neutron-dynamic-routing
     vars:
+      tempest_concurrency: 2
       devstack_plugins:
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
         neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
