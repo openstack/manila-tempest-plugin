@@ -88,7 +88,7 @@ class SharesQuotasTest(base.BaseSharesTest):
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 
     @ddt.data(
-        *itertools.product(set(
+        *itertools.product(utils.deduplicate(
             ["2.25", "2.53", CONF.share.max_api_microversion]), (True, False))
     )
     @ddt.unpack
