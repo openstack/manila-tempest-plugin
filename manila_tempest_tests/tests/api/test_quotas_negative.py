@@ -28,11 +28,11 @@ CONF = config.CONF
 class SharesQuotasNegativeTest(base.BaseSharesTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(SharesQuotasNegativeTest, cls).skip_checks()
         if not CONF.share.run_quota_tests:
             msg = "Quota tests are disabled."
             raise cls.skipException(msg)
-        super(SharesQuotasNegativeTest, cls).resource_setup()
 
     @decorators.idempotent_id('d0dfe81d-8e8c-4847-a55f-95ba8a3d922c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)

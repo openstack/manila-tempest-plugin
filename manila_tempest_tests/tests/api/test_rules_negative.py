@@ -467,8 +467,8 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
     # Tests independent from rule type and share protocol
 
     @classmethod
-    def resource_setup(cls):
-        super(ShareRulesNegativeTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(ShareRulesNegativeTest, cls).skip_checks()
         if not (any(p in CONF.share.enable_ip_rules_for_protocols
                     for p in cls.protocols) or
                 any(p in CONF.share.enable_user_rules_for_protocols
@@ -479,6 +479,10 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
                     for p in cls.protocols)):
             cls.message = "Rule tests are disabled"
             raise cls.skipException(cls.message)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ShareRulesNegativeTest, cls).resource_setup()
         # create share type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
