@@ -30,11 +30,15 @@ class SharesNFSTest(base.BaseSharesMixedTest):
     protocol = "nfs"
 
     @classmethod
-    def resource_setup(cls):
-        super(SharesNFSTest, cls).resource_setup()
+    def skip_checks(cls):
+        super(SharesNFSTest, cls).skip_checks()
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
+
+    @classmethod
+    def resource_setup(cls):
+        super(SharesNFSTest, cls).resource_setup()
         # create share_type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']

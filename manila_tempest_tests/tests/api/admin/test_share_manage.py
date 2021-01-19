@@ -40,17 +40,14 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
         super(ManageNFSShareTest, cls).skip_checks()
         if not CONF.share.run_manage_unmanage_tests:
             raise cls.skipException('Manage/unmanage tests are disabled.')
-
-    @classmethod
-    def resource_setup(cls):
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
-
         utils.skip_if_manage_not_supported_for_version()
 
+    @classmethod
+    def resource_setup(cls):
         super(ManageNFSShareTest, cls).resource_setup()
-
         # Create share type
         cls.st_name = data_utils.rand_name("manage-st-name")
         cls.extra_specs = {
