@@ -24,6 +24,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -328,9 +329,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
                 share_server['id'],
                 status=state,
             )
-            self.shares_v2_client.wait_for_share_server_status(
-                share_server['id'],
-                status=state
+            waiters.wait_for_share_server_status(
+                self.shares_v2_client, share_server['id'], status=state
             )
 
         # bring the share server back in the active state
@@ -338,8 +338,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             share_server['id'],
             status=constants.SERVER_STATE_ACTIVE,
         )
-        self.shares_v2_client.wait_for_share_server_status(
-            share_server['id'],
+        waiters.wait_for_share_server_status(
+            self.shares_v2_client, share_server['id'],
             status=constants.SERVER_STATE_ACTIVE
         )
 

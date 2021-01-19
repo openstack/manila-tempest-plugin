@@ -18,6 +18,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
@@ -151,9 +152,9 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         )
         primary_replica = self.shares_v2_client.get_share_replica(
             primary_replica_exports[0]['share_instance_id'])
-        self.shares_v2_client.wait_for_share_replica_status(
-            replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         # Share export locations list API
         share_exports = self.shares_v2_client.list_share_export_locations(

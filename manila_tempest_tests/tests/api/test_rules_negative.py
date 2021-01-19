@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -103,15 +104,15 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                 self.share["id"], access_type, access_to, version=version)
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # try create duplicate of rule
         if utils.is_microversion_eq(version, '1.0'):
@@ -153,8 +154,9 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
             self.share["id"], "ip", access_to)
         self.addCleanup(self.shares_v2_client.delete_access_rule,
                         self.share["id"], rule['id'])
-        self.shares_v2_client.wait_for_share_status(
-            self.share["id"], "active", status_attr='access_rules_status')
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share["id"], "active",
+            status_attr='access_rules_status')
 
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.create_access_rule,
@@ -184,8 +186,8 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         share = self.create_share(share_type_id=share_type['id'],
                                   cleanup_in_class=False,
                                   wait_for_status=False)
-        self.shares_v2_client.wait_for_share_status(
-            share['id'], constants.STATUS_ERROR)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], constants.STATUS_ERROR)
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_client.create_access_rule,
                           share["id"], access_type, access_to)
@@ -458,8 +460,9 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
         # Check share's access_rules_status has transitioned to "active" status
         self.alt_shares_v2_client.delete_access_rule(
             share_alt['id'], rule1['id'])
-        self.alt_shares_v2_client.wait_for_share_status(
-            share_alt['id'], 'active', status_attr='access_rules_status')
+        waiters.wait_for_share_status(
+            self.alt_shares_v2_client, share_alt['id'], 'active',
+            status_attr='access_rules_status')
 
 
 @ddt.ddt

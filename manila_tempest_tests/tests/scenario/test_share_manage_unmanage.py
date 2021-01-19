@@ -18,6 +18,7 @@ from tempest.lib import exceptions
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager_share as manager
 from manila_tempest_tests import utils
@@ -131,8 +132,8 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['share_proto'],
             locations[0],
             share_type['id'])
-        self.shares_admin_v2_client.wait_for_share_status(
-            managed_share['id'], 'available')
+        waiters.wait_for_share_status(
+            self.shares_admin_v2_client, managed_share['id'], 'available')
 
         LOG.debug('Step 11 - grant access again')
         self.provide_access_to_auxiliary_instance(
@@ -165,8 +166,8 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['share_proto'],
             locations[0],
             share_type['id'])
-        self.shares_admin_v2_client.wait_for_share_status(
-            remanaged_share['id'], 'manage_error')
+        waiters.wait_for_share_status(
+            self.shares_admin_v2_client, remanaged_share['id'], 'manage_error')
 
         self.shares_admin_v2_client.reset_state(remanaged_share['id'])
 

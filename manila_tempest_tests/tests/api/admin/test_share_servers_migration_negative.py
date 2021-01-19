@@ -21,6 +21,7 @@ from testtools import testcase as tc
 
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api.admin import test_share_servers_migration
 from manila_tempest_tests.tests.api import base
 
@@ -245,11 +246,12 @@ class ShareServerMigrationStartNegativesNFS(MigrationShareServerNegative):
     def resource_cleanup(cls):
         states = [constants.TASK_STATE_MIGRATION_DRIVER_IN_PROGRESS,
                   constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE]
-        cls.shares_v2_client.wait_for_share_server_status(
-            cls.server_id, status=states, status_attr="task_state")
+        waiters.wait_for_share_server_status(
+            cls.shares_v2_client, cls.server_id, status=states,
+            status_attr="task_state")
         cls.shares_v2_client.share_server_migration_cancel(cls.server_id)
-        cls.shares_v2_client.wait_for_share_status(cls.share['id'],
-                                                   status="available")
+        waiters.wait_for_share_status(
+            cls.shares_v2_client, cls.share['id'], status="available")
         super(ShareServerMigrationStartNegativesNFS, cls).resource_cleanup()
 
     @decorators.idempotent_id('5b904db3-fc36-4c35-a8ef-cf6b80315388')

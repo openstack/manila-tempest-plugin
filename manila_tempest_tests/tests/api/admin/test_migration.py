@@ -22,6 +22,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -113,15 +114,16 @@ class MigrationBase(base.BaseSharesAdminTest):
         self.shares_v2_client.create_access_rule(
             share['id'], access_to="50.50.50.50", access_level="rw")
 
-        self.shares_v2_client.wait_for_share_status(
+        waiters.wait_for_share_status(
+            self.shares_v2_client,
             share['id'], constants.RULE_STATE_ACTIVE,
             status_attr='access_rules_status')
 
         self.shares_v2_client.create_access_rule(
             share['id'], access_to="51.51.51.51", access_level="ro")
 
-        self.shares_v2_client.wait_for_share_status(
-            share['id'], constants.RULE_STATE_ACTIVE,
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], constants.RULE_STATE_ACTIVE,
             status_attr='access_rules_status')
 
         dest_pool = dest_pool['name']
@@ -235,15 +237,15 @@ class MigrationBase(base.BaseSharesAdminTest):
         if resize == 'extend':
             new_size = CONF.share.share_size + 2
             self.shares_v2_client.extend_share(share['id'], new_size)
-            self.shares_v2_client.wait_for_share_status(
-                share['id'], constants.STATUS_AVAILABLE)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
             share = self.shares_v2_client.get_share(share["id"])
             self.assertEqual(new_size, int(share["size"]))
         else:
             new_size = CONF.share.share_size
             self.shares_v2_client.shrink_share(share['id'], new_size)
-            self.shares_v2_client.wait_for_share_status(
-                share['id'], constants.STATUS_AVAILABLE)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
             share = self.shares_v2_client.get_share(share["id"])
             self.assertEqual(new_size, int(share["size"]))
 

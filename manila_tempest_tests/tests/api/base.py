@@ -27,6 +27,7 @@ from tempest import test
 
 from manila_tempest_tests import clients
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests import utils
 
@@ -399,24 +400,24 @@ class BaseSharesTest(test.BaseTestCase):
             nondisruptive=nondisruptive, preserve_snapshots=preserve_snapshots,
             new_share_network_id=new_share_network_id,
             new_share_type_id=new_share_type_id, **kwargs)
-        share = client.wait_for_migration_status(
-            share_id, dest_host, wait_for_status, **kwargs)
+        share = waiters.wait_for_migration_status(
+            client, share_id, dest_host, wait_for_status, **kwargs)
         return share
 
     @classmethod
     def migration_complete(cls, share_id, dest_host, client=None, **kwargs):
         client = client or cls.shares_v2_client
         client.migration_complete(share_id, **kwargs)
-        share = client.wait_for_migration_status(
-            share_id, dest_host, 'migration_success', **kwargs)
+        share = waiters.wait_for_migration_status(
+            client, share_id, dest_host, 'migration_success', **kwargs)
         return share
 
     @classmethod
     def migration_cancel(cls, share_id, dest_host, client=None, **kwargs):
         client = client or cls.shares_v2_client
         client.migration_cancel(share_id, **kwargs)
-        share = client.wait_for_migration_status(
-            share_id, dest_host, 'migration_cancelled', **kwargs)
+        share = waiters.wait_for_migration_status(
+            client, share_id, dest_host, 'migration_cancelled', **kwargs)
         return share
 
     @classmethod
@@ -480,7 +481,8 @@ class BaseSharesTest(test.BaseTestCase):
                 client = d["kwargs"]["client"]
                 share_id = d["share"]["id"]
                 try:
-                    client.wait_for_share_status(share_id, "available")
+                    waiters.wait_for_share_status(
+                        client, share_id, "available")
                     d["available"] = True
                 except (share_exceptions.ShareBuildErrorException,
                         exceptions.TimeoutException) as e:
@@ -539,7 +541,8 @@ class BaseSharesTest(test.BaseTestCase):
                 else:
                     cls.method_resources.insert(0, resource)
 
-        client.wait_for_share_group_status(share_group['id'], 'available')
+        waiters.wait_for_share_group_status(
+            client, share_group['id'], 'available')
         return share_group
 
     @classmethod
@@ -588,7 +591,7 @@ class BaseSharesTest(test.BaseTestCase):
             cls.class_resources.insert(0, resource)
         else:
             cls.method_resources.insert(0, resource)
-        client.wait_for_snapshot_status(snapshot["id"], "available")
+        waiters.wait_for_snapshot_status(client, snapshot["id"], "available")
         return snapshot
 
     @classmethod
@@ -609,8 +612,8 @@ class BaseSharesTest(test.BaseTestCase):
             cls.class_resources.insert(0, resource)
         else:
             cls.method_resources.insert(0, resource)
-        client.wait_for_share_group_snapshot_status(
-            sg_snapshot["id"], "available")
+        waiters.wait_for_share_group_snapshot_status(
+            client, sg_snapshot["id"], "available")
         return sg_snapshot
 
     @classmethod
@@ -696,8 +699,8 @@ class BaseSharesTest(test.BaseTestCase):
                 cls.class_resources.insert(0, resource)
             else:
                 cls.method_resources.insert(0, resource)
-        client.wait_for_share_replica_status(
-            replica["id"], constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_replica_status(
+            client, replica["id"], constants.STATUS_AVAILABLE)
         return replica
 
     @classmethod
@@ -715,9 +718,8 @@ class BaseSharesTest(test.BaseTestCase):
                               version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         replica = client.promote_share_replica(replica_id, version=version)
-        client.wait_for_share_replica_status(
-            replica["id"],
-            constants.REPLICATION_STATE_ACTIVE,
+        waiters.wait_for_share_replica_status(
+            client, replica["id"], constants.REPLICATION_STATE_ACTIVE,
             status_attr="replica_state")
         return replica
 
@@ -1084,8 +1086,9 @@ class BaseSharesTest(test.BaseTestCase):
                   'share_network_id': self.shares_v2_client.share_network_id}
         share = self.shares_v2_client.create_share(**params)
         self.addCleanup(self.shares_v2_client.delete_share, share['id'])
-        self.shares_v2_client.wait_for_share_status(share['id'], "error")
-        return self.shares_v2_client.wait_for_message(share['id'])
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], "error")
+        return waiters.wait_for_message(self.shares_v2_client, share['id'])
 
     def allow_access(self, share_id, client=None, access_type=None,
                      access_level='rw', access_to=None, status='active',
@@ -1098,8 +1101,8 @@ class BaseSharesTest(test.BaseTestCase):
 
         rule = client.create_access_rule(share_id, access_type, access_to,
                                          access_level)
-        client.wait_for_access_rule_status(share_id, rule['id'], status,
-                                           raise_rule_in_error_state)
+        waiters.wait_for_access_rule_status(client, share_id, rule['id'],
+                                            status, raise_rule_in_error_state)
         if cleanup:
             self.addCleanup(client.wait_for_resource_deletion,
                             rule_id=rule['id'], share_id=share_id)
@@ -1186,8 +1189,9 @@ class BaseSharesAdminTest(BaseSharesTest):
             description=description,
             share_server_id=share_server_id
         )
-        self.shares_v2_client.wait_for_share_status(
-            managed_share['id'], constants.STATUS_AVAILABLE
+        waiters.wait_for_share_status(
+            self.shares_v2_client, managed_share['id'],
+            constants.STATUS_AVAILABLE
         )
 
         return managed_share
@@ -1207,8 +1211,8 @@ class BaseSharesAdminTest(BaseSharesTest):
             params.get('identifier', share_server['identifier']),
             share_network_subnet_id=subnet_id,
         )
-        self.shares_v2_client.wait_for_share_server_status(
-            managed_share_server['id'],
+        waiters.wait_for_share_server_status(
+            self.shares_v2_client, managed_share_server['id'],
             constants.SERVER_STATE_ACTIVE,
         )
 

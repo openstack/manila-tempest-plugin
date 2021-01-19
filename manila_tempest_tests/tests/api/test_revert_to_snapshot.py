@@ -20,6 +20,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
@@ -115,8 +116,9 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             self.share['id'],
             snapshot['id'],
             version=version)
-        self.shares_v2_client.wait_for_share_status(self.share['id'],
-                                                    constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share['id'],
+            constants.STATUS_AVAILABLE)
 
     @decorators.idempotent_id('09bd9942-7ef9-4d24-b2dd-f83bdda27b50')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -137,8 +139,9 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         self.shares_v2_client.revert_to_snapshot(self.share['id'],
                                                  snapshot1['id'],
                                                  version=version)
-        self.shares_v2_client.wait_for_share_status(self.share['id'],
-                                                    constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share['id'],
+            constants.STATUS_AVAILABLE)
 
     @decorators.idempotent_id('146de138-d351-49dc-a13a-5cdbed40b9ac')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -158,9 +161,9 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
 
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone)
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         snapshot = self.create_snapshot_wait_for_active(share["id"])
 
@@ -168,8 +171,8 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             share['id'],
             snapshot['id'],
             version=version)
-        self.shares_v2_client.wait_for_share_status(share['id'],
-                                                    constants.STATUS_AVAILABLE)
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')

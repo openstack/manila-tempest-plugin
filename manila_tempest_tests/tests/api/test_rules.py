@@ -22,6 +22,7 @@ from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -55,12 +56,12 @@ def _create_delete_ro_access_rule(self, version):
         self.assertEqual("queued_to_apply", rule['state'])
 
     if utils.is_microversion_le(version, '2.9'):
-        self.shares_client.wait_for_access_rule_status(
-            self.share["id"], rule["id"], "active")
+        waiters.wait_for_access_rule_status(
+            self.shares_client, self.share["id"], rule["id"], "active")
     else:
-        self.shares_v2_client.wait_for_share_status(
-            self.share["id"], "active", status_attr='access_rules_status',
-            version=version)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share["id"], "active",
+            status_attr='access_rules_status', version=version)
         # If the 'access_rules_status' transitions to 'active',
         # rule state must too
         rules = self.shares_v2_client.list_access_rules(self.share['id'])
@@ -137,15 +138,15 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # delete rule and wait for deletion
         if utils.is_microversion_eq(version, '1.0'):
@@ -190,15 +191,15 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # delete rule and wait for deletion
         if utils.is_microversion_eq(version, '1.0'):
@@ -291,15 +292,15 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # delete rule and wait for deletion
         if utils.is_microversion_eq(version, '1.0'):
@@ -393,15 +394,15 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # delete rule
         if utils.is_microversion_eq(version, '1.0'):
@@ -441,15 +442,15 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         if utils.is_microversion_eq(version, '1.0'):
             self.shares_client.delete_access_rule(self.share["id"], rule["id"])
@@ -506,8 +507,8 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         self.assertEqual(access_level, rule['access_level'])
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
             self.assertNotIn(key, rule.keys())
-        self.shares_v2_client.wait_for_access_rule_status(
-            self.share["id"], rule["id"], "active")
+        waiters.wait_for_access_rule_status(
+            self.shares_v2_client, self.share["id"], rule["id"], "active")
 
         self.shares_v2_client.delete_access_rule(
             self.share["id"], rule["id"], version=version)
@@ -520,8 +521,8 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         # Grant access to the share
         access1 = self.shares_v2_client.create_access_rule(
             self.share['id'], self.access_type, self.access_to, 'rw')
-        self.shares_v2_client.wait_for_access_rule_status(
-            self.share['id'], access1['id'], 'active')
+        waiters.wait_for_access_rule_status(
+            self.shares_v2_client, self.share['id'], access1['id'], 'active')
 
         # Create a new user in the current project
         project = self.os_admin.projects_client.show_project(
@@ -537,8 +538,9 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         # used in access1
         access2 = user_client.shares_v2_client.create_access_rule(
             share2['id'], self.access_type, self.access_to, 'rw')
-        user_client.shares_v2_client.wait_for_access_rule_status(
-            share2['id'], access2['id'], 'active')
+        waiters.wait_for_access_rule_status(
+            user_client.shares_v2_client, share2['id'], access2['id'],
+            'active')
 
 
 @ddt.ddt
@@ -614,15 +616,15 @@ class ShareRulesTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, self.share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                self.share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, self.share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                self.share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # list rules
         if utils.is_microversion_eq(version, '1.0'):
@@ -699,15 +701,15 @@ class ShareRulesTest(base.BaseSharesMixedTest):
             self.assertEqual("queued_to_apply", rule['state'])
 
         if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.wait_for_access_rule_status(
-                share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_client, share["id"], rule["id"], "active")
         elif utils.is_microversion_eq(version, '2.9'):
-            self.shares_v2_client.wait_for_access_rule_status(
-                share["id"], rule["id"], "active")
+            waiters.wait_for_access_rule_status(
+                self.shares_v2_client, share["id"], rule["id"], "active")
         else:
-            self.shares_v2_client.wait_for_share_status(
-                share["id"], "active", status_attr='access_rules_status',
-                version=version)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, share["id"], "active",
+                status_attr='access_rules_status', version=version)
 
         # delete share
         if utils.is_microversion_eq(version, '1.0'):

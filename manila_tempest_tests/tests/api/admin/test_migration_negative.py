@@ -23,6 +23,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
@@ -93,8 +94,8 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
     @base.skip_if_microversion_lt("2.22")
     def test_migration_get_progress_None(self):
         self.shares_v2_client.reset_task_state(self.share["id"], None)
-        self.shares_v2_client.wait_for_share_status(
-            self.share["id"], None, 'task_state')
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share["id"], None, 'task_state')
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migration_get_progress,
             self.share['id'])
@@ -209,8 +210,8 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
             self.share['id'], self.dest_pool,
             new_share_type_id=self.new_type_invalid['share_type']['id'],
             new_share_network_id=new_share_network_id)
-        self.shares_v2_client.wait_for_migration_status(
-            self.share['id'], self.dest_pool,
+        waiters.wait_for_migration_status(
+            self.shares_v2_client, self.share['id'], self.dest_pool,
             constants.TASK_STATE_MIGRATION_ERROR)
 
     @decorators.idempotent_id('e2bd0cca-c091-4785-a9dc-7f42d2bb95a5')
@@ -227,15 +228,16 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
     def test_migrate_share_not_available(self):
         self.shares_client.reset_state(self.share['id'],
                                        constants.STATUS_ERROR)
-        self.shares_client.wait_for_share_status(self.share['id'],
-                                                 constants.STATUS_ERROR)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share['id'], constants.STATUS_ERROR)
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
             self.share['id'], self.dest_pool)
         self.shares_client.reset_state(self.share['id'],
                                        constants.STATUS_AVAILABLE)
-        self.shares_client.wait_for_share_status(self.share['id'],
-                                                 constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, self.share['id'],
+            constants.STATUS_AVAILABLE)
 
     @decorators.idempotent_id('e8f1e491-697a-4941-bf51-4d37f0a93fa5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)

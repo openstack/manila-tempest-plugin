@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager_share as manager
 
@@ -86,8 +87,9 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         LOG.debug('Step 8 - try update size, shrink and wait')
         self.shares_v2_client.shrink_share(share['id'],
                                            new_size=default_share_size)
-        self.shares_v2_client.wait_for_share_status(
-            share['id'], ['shrinking_possible_data_loss_error', 'available'])
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'],
+            ['shrinking_possible_data_loss_error', 'available'])
 
         share = self.shares_v2_client.get_share(share["id"])
 

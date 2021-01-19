@@ -21,6 +21,7 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -99,9 +100,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
                 'client': self.shares_v2_client})
 
         # Wait for success
-        self.shares_v2_client.wait_for_snapshot_status(
-            snapshot['id'],
-            constants.STATUS_AVAILABLE
+        waiters.wait_for_snapshot_status(
+            self.shares_v2_client, snapshot['id'], constants.STATUS_AVAILABLE
         )
 
         # Verify manage snapshot API response

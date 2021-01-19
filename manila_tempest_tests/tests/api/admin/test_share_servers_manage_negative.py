@@ -22,6 +22,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
@@ -164,8 +165,8 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
                 share['share_server_id'],
                 status=constants.SERVER_STATE_ACTIVE,
             )
-            self.shares_v2_client.wait_for_share_server_status(
-                share['share_server_id'],
+            waiters.wait_for_share_server_status(
+                self.shares_v2_client, share['share_server_id'],
                 constants.SERVER_STATE_ACTIVE,
             )
 
@@ -206,8 +207,8 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
                 share['share_server_id'],
                 status=constants.SERVER_STATE_ACTIVE,
             )
-            self.shares_v2_client.wait_for_share_server_status(
-                share['share_server_id'],
+            waiters.wait_for_share_server_status(
+                self.shares_v2_client, share['share_server_id'],
                 constants.SERVER_STATE_ACTIVE,
             )
 

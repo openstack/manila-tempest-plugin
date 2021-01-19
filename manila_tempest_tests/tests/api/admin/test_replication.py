@@ -19,6 +19,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
@@ -107,9 +108,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             share["id"], self.replica_zone, cleanup=False,
             client=self.admin_client, version=version)
         # Wait for replica state to update after creation
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         # List replicas
         replica_list = self.admin_client.list_share_replicas(
@@ -124,8 +125,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         self.admin_client.reset_share_replica_state(
             replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
             version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'],
+            constants.REPLICATION_STATE_OUT_OF_SYNC,
             status_attr='replica_state')
 
         # Promote 'out_of_sync' replica to 'active' state.
@@ -158,8 +160,8 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                                             version=version)
         self.admin_client.reset_share_replica_status(
             replica['id'], constants.STATUS_ERROR_DELETING, version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.STATUS_ERROR_DELETING)
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'], constants.STATUS_ERROR_DELETING)
         self.admin_client.force_delete_share_replica(replica['id'],
                                                      version=version)
         self.admin_client.wait_for_resource_deletion(replica_id=replica['id'])
@@ -181,8 +183,8 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         self.admin_client.reset_share_replica_status(replica['id'],
                                                      constants.STATUS_ERROR,
                                                      version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.STATUS_ERROR)
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'], constants.STATUS_ERROR)
 
     @decorators.idempotent_id('258844da-a853-42b6-87db-b16e616018c6')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -201,8 +203,9 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         self.admin_client.reset_share_replica_state(replica['id'],
                                                     constants.STATUS_ERROR,
                                                     version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.STATUS_ERROR, status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'], constants.STATUS_ERROR,
+            status_attr='replica_state')
 
     @decorators.idempotent_id('2969565a-85e8-4c61-9dfb-cc7f7ca9f6dd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -218,20 +221,21 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                                             cleanup_in_class=False,
                                             client=self.admin_client,
                                             version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         # Set replica_state to 'out_of_sync'.
         self.admin_client.reset_share_replica_state(
             replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
             version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC,
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'],
+            constants.REPLICATION_STATE_OUT_OF_SYNC,
             status_attr='replica_state')
 
         # Attempt resync
         self.admin_client.resync_share_replica(replica['id'], version=version)
-        self.admin_client.wait_for_share_replica_status(
-            replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.admin_client, replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')

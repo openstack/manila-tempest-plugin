@@ -20,6 +20,7 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -233,7 +234,8 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         share = self.create_share(
             name=share_name, share_type_id=st_create["share_type"]["id"])
         self.assertEqual(share["name"], share_name)
-        self.shares_client.wait_for_share_status(share["id"], "available")
+        waiters.wait_for_share_status(
+            self.shares_client, share["id"], "available")
 
         # Verify share info
         get = self.shares_v2_client.get_share(share["id"], version="2.5")

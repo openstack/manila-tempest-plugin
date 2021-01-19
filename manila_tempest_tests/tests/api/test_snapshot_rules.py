@@ -19,6 +19,7 @@ from tempest import config
 from tempest.lib import decorators
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -51,14 +52,14 @@ class BaseShareSnapshotRulesTest(base.BaseSharesMixedTest):
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
             self.assertNotIn(key, list(six.iterkeys(rule)))
 
-        self.shares_v2_client.wait_for_snapshot_access_rule_status(
-            self.snapshot['id'], rule['id'])
+        waiters.wait_for_snapshot_access_rule_status(
+            self.shares_v2_client, self.snapshot['id'], rule['id'])
 
         # delete rule and wait for deletion
         self.shares_v2_client.delete_snapshot_access_rule(self.snapshot['id'],
                                                           rule['id'])
-        self.shares_v2_client.wait_for_snapshot_access_rule_deletion(
-            self.snapshot['id'], rule['id'])
+        waiters.wait_for_snapshot_access_rule_deletion(
+            self.shares_v2_client, self.snapshot['id'], rule['id'])
 
 
 @ddt.ddt

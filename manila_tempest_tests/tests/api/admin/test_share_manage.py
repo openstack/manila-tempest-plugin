@@ -20,6 +20,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -107,8 +108,9 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
                 'client': self.shares_client})
 
         # Wait for success
-        self.shares_v2_client.wait_for_share_status(managed_share['id'],
-                                                    constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(self.shares_v2_client,
+                                      managed_share['id'],
+                                      constants.STATUS_AVAILABLE)
 
         # Verify data of managed share
         self.assertEqual(name, managed_share['name'])

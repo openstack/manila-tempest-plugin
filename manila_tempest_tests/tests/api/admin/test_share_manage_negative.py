@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -66,8 +67,8 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         # Manage the share and wait for the expected state.
         # Return the managed share object.
         managed_share = self.shares_v2_client.manage_share(**params)
-        self.shares_v2_client.wait_for_share_status(
-            managed_share['id'], state)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, managed_share['id'], state)
 
         return managed_share
 
@@ -167,8 +168,9 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             invalid_share = self.shares_v2_client.manage_share(
                 **invalid_params
             )
-            self.shares_v2_client.wait_for_share_status(
-                invalid_share['id'], constants.STATUS_MANAGE_ERROR)
+            waiters.wait_for_share_status(
+                self.shares_v2_client, invalid_share['id'],
+                constants.STATUS_MANAGE_ERROR)
 
             # cleanup
             self._unmanage_share_and_wait(invalid_share)
@@ -259,8 +261,9 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         invalid_params.update({'export_path': 'invalid'})
         invalid_share = self.shares_v2_client.manage_share(**invalid_params)
 
-        self.shares_v2_client.wait_for_share_status(
-            invalid_share['id'], constants.STATUS_MANAGE_ERROR)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, invalid_share['id'],
+            constants.STATUS_MANAGE_ERROR)
         self._unmanage_share_and_wait(share)
 
         # the attempt to delete a share in manage_error should raise an

@@ -20,6 +20,7 @@ from tempest.lib import exceptions
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -96,8 +97,8 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
                 access_to=rule.get('access_to'),
                 access_level=rule.get('access_level')
             )
-        self.shares_v2_client.wait_for_share_status(
-            share['id'], constants.RULE_STATE_ACTIVE,
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], constants.RULE_STATE_ACTIVE,
             status_attr='access_rules_status')
 
         share = self.shares_v2_client.get_share(share['id'])
@@ -140,8 +141,8 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
 
         # Check the snapshot status if possible.
         if snapshot_id:
-            self.shares_v2_client.wait_for_snapshot_status(
-                snapshot_id, constants.STATUS_AVAILABLE)
+            waiters.wait_for_snapshot_status(
+                self.shares_v2_client, snapshot_id, constants.STATUS_AVAILABLE)
 
         # Check the share server destination status.
         dest_server = self.shares_v2_client.show_share_server(dest_server_id)
@@ -276,8 +277,9 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             src_server_id, dest_host, preserve_snapshots=preserve_snapshots)
 
         expected_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
-        self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, expected_state, status_attr='task_state')
+        waiters.wait_for_share_server_status(
+            self.shares_v2_client, src_server_id, expected_state,
+            status_attr='task_state')
         # Get for the destination share server.
         dest_server_id = self._get_share_server_destination_for_migration(
             src_server_id)
@@ -295,8 +297,9 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
 
         # Wait for the migration cancelled status.
         expected_state = constants.TASK_STATE_MIGRATION_CANCELLED
-        self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, expected_state, status_attr='task_state')
+        waiters.wait_for_share_server_status(
+            self.shares_v2_client, src_server_id, expected_state,
+            status_attr='task_state')
 
         # After the cancel operation, we need to validate again the resources.
         expected_status = constants.STATUS_AVAILABLE
@@ -339,8 +342,9 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             preserve_snapshots=preserve_snapshots)
 
         expected_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
-        self.shares_v2_client.wait_for_share_server_status(
-            src_server_id, expected_state, status_attr='task_state')
+        waiters.wait_for_share_server_status(
+            self.shares_v2_client, src_server_id, expected_state,
+            status_attr='task_state')
         # Get for the destination share server.
         dest_server_id = self._get_share_server_destination_for_migration(
             src_server_id)
@@ -358,8 +362,8 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
 
         # It's necessary wait for the destination server went to active status.
         expected_status = constants.SERVER_STATE_ACTIVE
-        self.shares_v2_client.wait_for_share_server_status(
-            dest_server_id, expected_status)
+        waiters.wait_for_share_server_status(
+            self.shares_v2_client, dest_server_id, expected_status)
 
         # Check if the source server went to inactive status if it exists.
         try:

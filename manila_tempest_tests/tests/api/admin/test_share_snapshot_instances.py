@@ -18,6 +18,7 @@ from tempest import config
 from tempest.lib import decorators
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -128,8 +129,8 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
         for status in ("error", "available"):
             self.shares_v2_client.reset_snapshot_instance_status(
                 sii, status=status)
-            self.shares_v2_client.wait_for_snapshot_instance_status(
-                sii, expected_status=status)
+            waiters.wait_for_snapshot_instance_status(
+                self.shares_v2_client, sii, expected_status=status)
         self.shares_v2_client.delete_snapshot(snapshot['id'])
         self.shares_v2_client.wait_for_resource_deletion(
             snapshot_id=snapshot['id'])

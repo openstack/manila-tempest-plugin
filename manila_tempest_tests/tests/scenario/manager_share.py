@@ -26,6 +26,7 @@ from tempest.lib import exceptions
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import remote_client
+from manila_tempest_tests.common import waiters as share_waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager
 from manila_tempest_tests import utils
@@ -347,8 +348,9 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
         client = client or self.shares_client
         client.delete_access_rule(share_id, access_rule_id)
-        self.shares_v2_client.wait_for_share_status(
-            share_id, "active", status_attr='access_rules_status')
+        share_waiters.wait_for_share_status(
+            self.shares_v2_client, share_id, "active",
+            status_attr='access_rules_status')
 
     def provide_access_to_auxiliary_instance(self, instance, share=None,
                                              snapshot=None, access_level='rw',
@@ -531,7 +533,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             self.addCleanup(client.delete_share,
                             share['id'])
 
-        client.wait_for_share_status(share['id'], 'available')
+        share_waiters.wait_for_share_status(client, share['id'], 'available')
         return share
 
     def _create_snapshot(self, share_id, client=None, **kwargs):
@@ -540,7 +542,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         self.addCleanup(
             client.wait_for_resource_deletion, snapshot_id=snapshot['id'])
         self.addCleanup(client.delete_snapshot, snapshot['id'])
-        client.wait_for_snapshot_status(snapshot["id"], "available")
+        share_waiters.wait_for_snapshot_status(
+            client, snapshot["id"], "available")
         return snapshot
 
     def _wait_for_share_server_deletion(self, sn_id, client=None):
@@ -590,8 +593,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         access = client.create_access_rule(share_id, access_type, access_to,
                                            access_level)
 
-        client.wait_for_share_status(
-            share_id, "active", status_attr='access_rules_status')
+        share_waiters.wait_for_share_status(
+            client, share_id, "active", status_attr='access_rules_status')
 
         if cleanup:
             self.addCleanup(client.delete_access_rule, share_id, access['id'])
@@ -616,8 +619,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             self.addCleanup(client.delete_snapshot_access_rule,
                             snapshot_id, access['id'])
 
-        client.wait_for_snapshot_access_rule_status(
-            snapshot_id, access['id'])
+        share_waiters.wait_for_snapshot_access_rule_status(
+            client, snapshot_id, access['id'])
 
         return access
 
@@ -642,15 +645,16 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             share_id, dest_host, writable=False, preserve_metadata=False,
             nondisruptive=False, preserve_snapshots=False,
             force_host_assisted_migration=force_host_assisted)
-        share = client.wait_for_migration_status(share_id, dest_host, status)
+        share = share_waiters.wait_for_migration_status(
+            client, share_id, dest_host, status)
         return share
 
     def _migration_complete(self, share_id, dest_host, client=None, **kwargs):
         client = client or self.shares_admin_v2_client
         client.migration_complete(share_id, **kwargs)
-        share = client.wait_for_migration_status(
-            share_id, dest_host, constants.TASK_STATE_MIGRATION_SUCCESS,
-            **kwargs)
+        share = share_waiters.wait_for_migration_status(
+            client, share_id, dest_host,
+            constants.TASK_STATE_MIGRATION_SUCCESS, **kwargs)
         return share
 
     def _create_share_type(self, name, is_public=True, **kwargs):

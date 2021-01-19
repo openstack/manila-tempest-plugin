@@ -22,6 +22,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -120,8 +121,8 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
             'invalid_provider_location',
             driver_options={}
         )
-        self.shares_v2_client.wait_for_snapshot_status(
-            invalid_snap['id'],
+        waiters.wait_for_snapshot_status(
+            self.shares_v2_client, invalid_snap['id'],
             constants.STATUS_MANAGE_ERROR
         )
         self.shares_v2_client.unmanage_snapshot(invalid_snap['id'])
@@ -131,8 +132,8 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
             self.share['id'],
             snap['provider_location']
         )
-        self.shares_v2_client.wait_for_snapshot_status(
-            managed_snap['id'],
+        waiters.wait_for_snapshot_status(
+            self.shares_v2_client, managed_snap['id'],
             constants.STATUS_AVAILABLE
         )
         self._delete_snapshot_and_wait(managed_snap)

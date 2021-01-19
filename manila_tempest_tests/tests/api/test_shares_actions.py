@@ -22,6 +22,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -664,7 +665,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # extend share and wait for active status
         self.shares_v2_client.extend_share(share['id'], new_size)
-        self.shares_client.wait_for_share_status(share['id'], 'available')
+        waiters.wait_for_share_status(
+            self.shares_client, share['id'], 'available')
 
         # check state and new size
         share_get = self.shares_v2_client.get_share(share['id'])
@@ -691,7 +693,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # shrink share and wait for active status
         self.shares_v2_client.shrink_share(share['id'], new_size)
-        self.shares_client.wait_for_share_status(share['id'], 'available')
+        waiters.wait_for_share_status(
+            self.shares_client, share['id'], 'available')
 
         # check state and new size
         share_get = self.shares_v2_client.get_share(share['id'])

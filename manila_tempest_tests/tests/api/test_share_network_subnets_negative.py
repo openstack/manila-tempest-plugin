@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -171,8 +172,8 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
         # Create a share into the share network
         share = self.shares_v2_client.create_share(**args)
-        self.shares_v2_client.wait_for_share_status(
-            share['id'], constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
         share = self.shares_v2_client.get_share(share['id'])
 
         # Gets the export locations to be used in the future
@@ -202,8 +203,9 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         )
 
         # Do some necessary cleanup
-        self.shares_v2_client.wait_for_share_status(
-            managed_share['id'], constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, managed_share['id'],
+            constants.STATUS_AVAILABLE)
         self.shares_client.delete_share(managed_share['id'])
         self.shares_v2_client.wait_for_resource_deletion(
             share_id=managed_share["id"])
@@ -254,8 +256,8 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
         # Create a share into the share network
         share = self.shares_v2_client.create_share(**args)
-        self.shares_v2_client.wait_for_share_status(
-            share['id'], constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
         share = self.admin_shares_v2_client.get_share(share['id'])
         share_server = self.admin_shares_v2_client.show_share_server(
             share['share_server_id']

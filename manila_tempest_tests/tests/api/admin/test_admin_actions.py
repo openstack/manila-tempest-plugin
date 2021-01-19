@@ -19,6 +19,7 @@ from tempest.lib import decorators
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 
 CONF = config.CONF
@@ -41,8 +42,9 @@ class AdminActionsTest(base.BaseSharesAdminTest):
 
     def _wait_for_resource_status(self, resource_id, resource_type):
         wait_for_resource_status = getattr(
-            self.shares_v2_client, "wait_for_{}_status".format(resource_type))
-        wait_for_resource_status(resource_id, "available")
+            waiters, "wait_for_{}_status".format(resource_type))
+        wait_for_resource_status(
+            self.shares_v2_client, resource_id, "available")
 
     def _reset_resource_available(self, resource_id, resource_type="shares"):
         self.shares_v2_client.reset_state(
@@ -54,7 +56,8 @@ class AdminActionsTest(base.BaseSharesAdminTest):
     @ddt.data("error", "available", "error_deleting", "deleting", "creating")
     def test_reset_share_state(self, status):
         self.shares_v2_client.reset_state(self.sh["id"], status=status)
-        self.shares_v2_client.wait_for_share_status(self.sh["id"], status)
+        waiters.wait_for_share_status(self.shares_v2_client,
+                                      self.sh["id"], status)
         self.addCleanup(self._reset_resource_available, self.sh["id"])
 
     @decorators.idempotent_id('13075b2d-fe83-41bf-b6ef-99cfcc00257d')
@@ -66,8 +69,8 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         share_instance_id = sh_instance["id"]
         self.shares_v2_client.reset_state(
             share_instance_id, s_type="share_instances", status=status)
-        self.shares_v2_client.wait_for_share_instance_status(
-            share_instance_id, status)
+        waiters.wait_for_share_instance_status(
+            self.shares_v2_client, share_instance_id, status)
         self.addCleanup(self._reset_resource_available,
                         share_instance_id, "share_instances")
 
@@ -80,8 +83,8 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         snapshot = self.create_snapshot_wait_for_active(self.sh["id"])
         self.shares_v2_client.reset_state(
             snapshot["id"], s_type="snapshots", status=status)
-        self.shares_v2_client.wait_for_snapshot_status(
-            snapshot["id"], status)
+        waiters.wait_for_snapshot_status(
+            self.shares_v2_client, snapshot["id"], status)
         self.addCleanup(self._reset_resource_available,
                         snapshot["id"], "snapshots")
 
@@ -151,5 +154,5 @@ class AdminActionsTest(base.BaseSharesAdminTest):
     def test_reset_share_task_state(self):
         for task_state in self.task_states:
             self.shares_v2_client.reset_task_state(self.sh["id"], task_state)
-            self.shares_v2_client.wait_for_share_status(
-                self.sh["id"], task_state, 'task_state')
+            waiters.wait_for_share_status(
+                self.shares_v2_client, self.sh["id"], task_state, 'task_state')

@@ -19,6 +19,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
@@ -86,9 +87,9 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                                   self.replica_zone,
                                                   cleanup=False)
         self.addCleanup(self.delete_share_replica, original_replica['id'])
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         snapshot = self.create_snapshot_wait_for_active(share["id"])
         self.promote_share_replica(share_replica['id'])
@@ -122,13 +123,13 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                                   self.replica_zone,
                                                   cleanup=False)
         self.addCleanup(self.delete_share_replica, original_replica['id'])
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         # Wait for snapshot1 to become available
-        self.shares_v2_client.wait_for_snapshot_status(
-            snapshot['id'], "available")
+        waiters.wait_for_snapshot_status(
+            self.shares_v2_client, snapshot['id'], "available")
 
         self.promote_share_replica(share_replica['id'])
         self.delete_share_replica(original_replica['id'])
@@ -162,15 +163,15 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                                   self.replica_zone,
                                                   cleanup=False)
         self.addCleanup(self.delete_share_replica, original_replica['id'])
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
 
         snapshot2 = self.create_snapshot_wait_for_active(share["id"])
 
         # Wait for snapshot1 to become available
-        self.shares_v2_client.wait_for_snapshot_status(
-            snapshot1['id'], "available")
+        waiters.wait_for_snapshot_status(
+            self.shares_v2_client, snapshot1['id'], "available")
 
         self.promote_share_replica(share_replica['id'])
         # Remove the original active replica to ensure that snapshot is
@@ -205,9 +206,9 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                   share_network_id=self.sn_id)
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone)
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
         snapshot = self.create_snapshot_wait_for_active(share["id"])
         self.shares_v2_client.delete_snapshot(snapshot['id'])
         self.shares_v2_client.wait_for_resource_deletion(
@@ -234,9 +235,9 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                                   self.replica_zone,
                                                   cleanup=False)
         self.addCleanup(self.delete_share_replica, original_replica['id'])
-        self.shares_v2_client.wait_for_share_replica_status(
-            share_replica['id'], constants.REPLICATION_STATE_IN_SYNC,
-            status_attr='replica_state')
+        waiters.wait_for_share_replica_status(
+            self.shares_v2_client, share_replica['id'],
+            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
         self.promote_share_replica(share_replica['id'])
         # Delete the demoted replica so promoted replica can be cleaned
         # during the cleanup

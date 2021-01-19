@@ -20,6 +20,7 @@ from tempest.lib import exceptions
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.scenario import manager_share as manager
 
@@ -95,8 +96,8 @@ class ShareExtendBase(manager.ShareScenarioTest):
         extended_share_size = default_share_size + 1
         self.shares_v2_client.extend_share(share["id"],
                                            new_size=extended_share_size)
-        self.shares_v2_client.wait_for_share_status(share["id"],
-                                                    constants.STATUS_AVAILABLE)
+        waiters.wait_for_share_status(
+            self.shares_v2_client, share["id"], constants.STATUS_AVAILABLE)
         share = self.shares_v2_client.get_share(share["id"])
         self.assertEqual(extended_share_size, int(share["size"]))
 

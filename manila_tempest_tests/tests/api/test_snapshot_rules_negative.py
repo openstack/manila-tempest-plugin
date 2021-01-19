@@ -19,6 +19,7 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.api import test_snapshot_rules
 from manila_tempest_tests import utils
@@ -92,8 +93,8 @@ class SnapshotIpRulesForNFSNegativeTest(
         rule = self.shares_v2_client.create_snapshot_access_rule(
             self.snap['id'], access_type, access_to)
 
-        self.shares_v2_client.wait_for_snapshot_access_rule_status(
-            self.snap['id'], rule['id'])
+        waiters.wait_for_snapshot_access_rule_status(
+            self.shares_v2_client, self.snap['id'], rule['id'])
 
         # try create duplicate of rule
         self.assertRaises(lib_exc.BadRequest,
@@ -113,8 +114,8 @@ class SnapshotIpRulesForNFSNegativeTest(
         # delete rule and wait for deletion
         self.shares_v2_client.delete_snapshot_access_rule(self.snap['id'],
                                                           rule['id'])
-        self.shares_v2_client.wait_for_snapshot_access_rule_deletion(
-            self.snap['id'], rule['id'])
+        waiters.wait_for_snapshot_access_rule_deletion(
+            self.shares_v2_client, self.snap['id'], rule['id'])
 
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.delete_snapshot_access_rule,

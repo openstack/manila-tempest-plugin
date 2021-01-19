@@ -17,11 +17,9 @@ import json
 import re
 import time
 
-import six
 from six.moves.urllib import parse
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest.lib import exceptions
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.services.share.json import shares_client
@@ -373,54 +371,6 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
-    def wait_for_share_instance_status(self, instance_id, status,
-                                       version=LATEST_MICROVERSION):
-        """Waits for a share to reach a given status."""
-        body = self.get_share_instance(instance_id, version=version)
-        instance_status = body['status']
-        start = int(time.time())
-
-        while instance_status != status:
-            time.sleep(self.build_interval)
-            body = self.get_share(instance_id)
-            instance_status = body['status']
-            if instance_status == status:
-                return
-            elif 'error' in instance_status.lower():
-                raise share_exceptions.ShareInstanceBuildErrorException(
-                    id=instance_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Share instance %s failed to reach %s status within'
-                           ' the required time (%s s).' %
-                           (instance_id, status, self.build_timeout))
-                raise exceptions.TimeoutException(message)
-
-    def wait_for_share_status(self, share_id, status, status_attr='status',
-                              version=LATEST_MICROVERSION):
-        """Waits for a share to reach a given status."""
-        body = self.get_share(share_id, version=version)
-        share_status = body[status_attr]
-        start = int(time.time())
-
-        exp_status = status if isinstance(status, list) else [status]
-        while share_status not in exp_status:
-            time.sleep(self.build_interval)
-            body = self.get_share(share_id, version=version)
-            share_status = body[status_attr]
-            if share_status in exp_status:
-                return
-            elif 'error' in share_status.lower():
-                raise share_exceptions.ShareBuildErrorException(
-                    share_id=share_id)
-            if int(time.time()) - start >= self.build_timeout:
-                message = ("Share's %(status_attr)s failed to transition to "
-                           "%(status)s within the required "
-                           "time %(seconds)s." %
-                           {"status_attr": status_attr, "status": exp_status,
-                            "seconds": self.build_timeout})
-                raise exceptions.TimeoutException(message)
-
 ###############
 
     def extend_share(self, share_id, new_size, version=LATEST_MICROVERSION,
@@ -566,30 +516,6 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(202, resp.status)
         return body
 
-    def wait_for_snapshot_status(self, snapshot_id, status,
-                                 version=LATEST_MICROVERSION):
-        """Waits for a snapshot to reach a given status."""
-        body = self.get_snapshot(snapshot_id, version=version)
-        snapshot_name = body['name']
-        snapshot_status = body['status']
-        start = int(time.time())
-
-        while snapshot_status != status:
-            time.sleep(self.build_interval)
-            body = self.get_snapshot(snapshot_id, version=version)
-            snapshot_status = body['status']
-            if snapshot_status in status:
-                return
-            if 'error' in snapshot_status:
-                raise (share_exceptions.
-                       SnapshotBuildErrorException(snapshot_id=snapshot_id))
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Share Snapshot %s failed to reach %s status '
-                           'within the required time (%s s).' %
-                           (snapshot_name, status, self.build_timeout))
-                raise exceptions.TimeoutException(message)
-
     def manage_snapshot(self, share_id, provider_location,
                         name=None, description=None,
                         version=LATEST_MICROVERSION,
@@ -727,35 +653,6 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(uri, body, extra_headers=True, version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
-
-    def wait_for_snapshot_instance_status(self, instance_id, expected_status):
-        """Waits for a snapshot instance status to reach a given status."""
-        body = self.get_snapshot_instance(instance_id)
-        instance_status = body['status']
-        start = int(time.time())
-
-        while instance_status != expected_status:
-            time.sleep(self.build_interval)
-            body = self.get_snapshot_instance(instance_id)
-            instance_status = body['status']
-            if instance_status == expected_status:
-                return
-            if 'error' in instance_status:
-                raise share_exceptions.SnapshotInstanceBuildErrorException(
-                    id=instance_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('The status of snapshot instance %(id)s failed to '
-                           'reach %(expected_status)s status within the '
-                           'required time (%(time)ss). Current '
-                           'status: %(current_status)s.' %
-                           {
-                               'expected_status': expected_status,
-                               'time': self.build_timeout,
-                               'id': instance_id,
-                               'current_status': instance_status,
-                           })
-                raise exceptions.TimeoutException(message)
 
     def get_snapshot_instance_export_location(
             self, instance_id, export_location_uuid,
@@ -1171,29 +1068,6 @@ class SharesV2Client(shares_client.SharesClient):
         self.force_delete(share_group_id, s_type='share-groups',
                           headers=headers, version=version)
 
-    def wait_for_share_group_status(self, share_group_id, status):
-        """Waits for a share group to reach a given status."""
-        body = self.get_share_group(share_group_id)
-        sg_name = body['name']
-        sg_status = body['status']
-        start = int(time.time())
-
-        while sg_status != status:
-            time.sleep(self.build_interval)
-            body = self.get_share_group(share_group_id)
-            sg_status = body['status']
-            if 'error' in sg_status and status != 'error':
-                raise share_exceptions.ShareGroupBuildErrorException(
-                    share_group_id=share_group_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                sg_name = sg_name or share_group_id
-                message = ('Share Group %s failed to reach %s status '
-                           'within the required time (%s s). '
-                           'Current status: %s' %
-                           (sg_name, status, self.build_timeout, sg_status))
-                raise exceptions.TimeoutException(message)
-
 ###############
 
     def create_share_group_type(self, name=None, share_types=(),
@@ -1458,28 +1332,6 @@ class SharesV2Client(shares_client.SharesClient):
             share_group_snapshot_id, s_type='share-group-snapshots',
             headers=headers, version=version)
 
-    def wait_for_share_group_snapshot_status(self, share_group_snapshot_id,
-                                             status):
-        """Waits for a share group snapshot to reach a given status."""
-        body = self.get_share_group_snapshot(share_group_snapshot_id)
-        sg_snapshot_name = body['name']
-        sg_snapshot_status = body['status']
-        start = int(time.time())
-
-        while sg_snapshot_status != status:
-            time.sleep(self.build_interval)
-            body = self.get_share_group_snapshot(share_group_snapshot_id)
-            sg_snapshot_status = body['status']
-            if 'error' in sg_snapshot_status and status != 'error':
-                raise share_exceptions.ShareGroupSnapshotBuildErrorException(
-                    share_group_snapshot_id=share_group_snapshot_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('Share Group Snapshot %s failed to reach %s status '
-                           'within the required time (%s s).' %
-                           (sg_snapshot_name, status, self.build_timeout))
-                raise exceptions.TimeoutException(message)
-
 ###############
 
     def manage_share_server(self, host, share_network_id, identifier,
@@ -1510,31 +1362,6 @@ class SharesV2Client(shares_client.SharesClient):
                                body, extra_headers=True, version=version)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
-
-    def wait_for_share_server_status(self, server_id, status,
-                                     status_attr='status'):
-        """Waits for a share to reach a given status."""
-        body = self.show_share_server(server_id)
-        server_status = body[status_attr]
-        start = int(time.time())
-
-        while server_status != status:
-            time.sleep(self.build_interval)
-            body = self.show_share_server(server_id)
-            server_status = body[status_attr]
-            if server_status in status:
-                return
-            elif constants.STATUS_ERROR in server_status.lower():
-                raise share_exceptions.ShareServerBuildErrorException(
-                    server_id=server_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ("Share server's %(status_attr)s failed to "
-                           "transition to %(status)s within the required "
-                           "time %(seconds)s." %
-                           {"status_attr": status_attr, "status": status,
-                            "seconds": self.build_timeout})
-                raise exceptions.TimeoutException(message)
 
     def share_server_reset_state(self, share_server_id,
                                  status=constants.SERVER_STATE_ACTIVE,
@@ -1612,37 +1439,6 @@ class SharesV2Client(shares_client.SharesClient):
         return self.post('shares/%s/action' % share_id, body,
                          headers=EXPERIMENTAL, extra_headers=True,
                          version=version)
-
-    def wait_for_migration_status(self, share_id, dest_host, status_to_wait,
-                                  version=LATEST_MICROVERSION):
-        """Waits for a share to migrate to a certain host."""
-        statuses = ((status_to_wait,)
-                    if not isinstance(status_to_wait, (tuple, list, set))
-                    else status_to_wait)
-        share = self.get_share(share_id, version=version)
-        migration_timeout = CONF.share.migration_timeout
-        start = int(time.time())
-        while share['task_state'] not in statuses:
-            time.sleep(self.build_interval)
-            share = self.get_share(share_id, version=version)
-            if share['task_state'] in statuses:
-                break
-            elif share['task_state'] == 'migration_error':
-                raise share_exceptions.ShareMigrationException(
-                    share_id=share['id'], src=share['host'], dest=dest_host)
-            elif int(time.time()) - start >= migration_timeout:
-                message = ('Share %(share_id)s failed to reach a status in'
-                           '%(status)s when migrating from host %(src)s to '
-                           'host %(dest)s within the required time '
-                           '%(timeout)s.' % {
-                               'src': share['host'],
-                               'dest': dest_host,
-                               'share_id': share['id'],
-                               'timeout': self.build_timeout,
-                               'status': six.text_type(statuses),
-                           })
-                raise exceptions.TimeoutException(message)
-        return share
 
 ################
 
@@ -1750,38 +1546,6 @@ class SharesV2Client(shares_client.SharesClient):
                               extra_headers=extra_headers, version=version)
         self.expected_success(expected_status, resp.status)
         return self._parse_resp(body)
-
-    def wait_for_share_replica_status(self, replica_id, expected_status,
-                                      status_attr='status'):
-        """Waits for a replica's status_attr to reach a given status."""
-        body = self.get_share_replica(replica_id)
-        replica_status = body[status_attr]
-        start = int(time.time())
-
-        while replica_status != expected_status:
-            time.sleep(self.build_interval)
-            body = self.get_share_replica(replica_id)
-            replica_status = body[status_attr]
-            if replica_status == expected_status:
-                return
-            if ('error' in replica_status
-                    and expected_status != constants.STATUS_ERROR):
-                raise share_exceptions.ShareInstanceBuildErrorException(
-                    id=replica_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('The %(status_attr)s of Replica %(id)s failed to '
-                           'reach %(expected_status)s status within the '
-                           'required time (%(time)ss). Current '
-                           '%(status_attr)s: %(current_status)s.' %
-                           {
-                               'status_attr': status_attr,
-                               'expected_status': expected_status,
-                               'time': self.build_timeout,
-                               'id': replica_id,
-                               'current_status': replica_status,
-                           })
-                raise exceptions.TimeoutException(message)
 
     def reset_share_replica_status(self, replica_id,
                                    status=constants.STATUS_AVAILABLE,
@@ -1901,35 +1665,6 @@ class SharesV2Client(shares_client.SharesClient):
 
         return found_rules[0] if len(found_rules) > 0 else None
 
-    def wait_for_snapshot_access_rule_status(self, snapshot_id, rule_id,
-                                             expected_state='active'):
-        rule = self.get_snapshot_access_rule(snapshot_id, rule_id)
-        state = rule['state']
-        start = int(time.time())
-
-        while state != expected_state:
-            time.sleep(self.build_interval)
-            rule = self.get_snapshot_access_rule(snapshot_id, rule_id)
-            state = rule['state']
-            if state == expected_state:
-                return
-            if 'error' in state:
-                raise share_exceptions.AccessRuleBuildErrorException(
-                    snapshot_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('The status of snapshot access rule %(id)s failed '
-                           'to reach %(expected_state)s state within the '
-                           'required time (%(time)ss). Current '
-                           'state: %(current_state)s.' %
-                           {
-                               'expected_state': expected_state,
-                               'time': self.build_timeout,
-                               'id': rule_id,
-                               'current_state': state,
-                           })
-                raise exceptions.TimeoutException(message)
-
     def delete_snapshot_access_rule(self, snapshot_id, rule_id):
         body = {
             "deny_access": {
@@ -1940,26 +1675,6 @@ class SharesV2Client(shares_client.SharesClient):
                                json.dumps(body), version=LATEST_MICROVERSION)
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
-
-    def wait_for_snapshot_access_rule_deletion(self, snapshot_id, rule_id):
-        rule = self.get_snapshot_access_rule(snapshot_id, rule_id)
-        start = int(time.time())
-
-        while rule is not None:
-            time.sleep(self.build_interval)
-
-            rule = self.get_snapshot_access_rule(snapshot_id, rule_id)
-
-            if rule is None:
-                return
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('The snapshot access rule %(id)s failed to delete '
-                           'within the required time (%(time)ss).' %
-                           {
-                               'time': self.build_timeout,
-                               'id': rule_id,
-                           })
-                raise exceptions.TimeoutException(message)
 
     def get_snapshot_export_location(self, snapshot_id, export_location_uuid,
                                      version=LATEST_MICROVERSION):
@@ -2000,23 +1715,6 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.delete(url, version=version)
         self.expected_success(204, resp.status)
         return self._parse_resp(body)
-
-    def wait_for_message(self, resource_id):
-        """Waits until a message for a resource with given id exists"""
-        start = int(time.time())
-        message = None
-
-        while not message:
-            time.sleep(self.build_interval)
-            for msg in self.list_messages():
-                if msg['resource_id'] == resource_id:
-                    return msg
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = ('No message for resource with id %s was created in'
-                           ' the required time (%s s).' %
-                           (resource_id, self.build_timeout))
-                raise exceptions.TimeoutException(message)
 
 ###############
 
