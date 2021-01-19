@@ -429,7 +429,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
         self.assertEqual('error', share_alt_updated['access_rules_status'])
 
     @decorators.idempotent_id('1a9f46f0-d4e1-40ac-8726-aedd0320d583')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_can_apply_new_cephx_rules_when_one_is_in_error_state(self):
         # Create share on "primary" tenant
         share_primary = self.create_share()
