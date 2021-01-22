@@ -22,6 +22,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import waiters
+from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -401,6 +402,17 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.create_access_rule,
                           self.share["id"], self.access_type, access_to)
+
+    @decorators.idempotent_id('16b7d848-2f7c-4709-85a3-2dfb4576cc59')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_create_access_rule_cephx_admin_user(self):
+        """CVE-2020-27781 - using admin in cephx rule must be disallowed"""
+
+        self.assertRaises(share_exceptions.AccessRuleBuildErrorException,
+                          self.allow_access,
+                          self.share["id"],
+                          access_type=self.access_type,
+                          access_to='admin')
 
     @decorators.idempotent_id('dd8be44c-c7e8-42fe-b81c-095a1c66730c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
