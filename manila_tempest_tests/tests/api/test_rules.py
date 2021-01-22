@@ -495,7 +495,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('4e636fd2-26ef-4b63-96eb-77860a8b6cdf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*itertools.product(
-        set(['2.13', '2.27', '2.28', LATEST_MICROVERSION]),
+        utils.deduplicate(['2.13', '2.27', '2.28', LATEST_MICROVERSION]),
         ("alice", "alice_bob", "alice bob"),
         ('rw', 'ro')))
     @ddt.unpack

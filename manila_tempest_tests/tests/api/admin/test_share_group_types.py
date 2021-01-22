@@ -60,7 +60,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('e2ba1754-cecc-4178-ad39-eefbb59e4d6d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
-        *itertools.product(('id', 'name'), set(
+        *itertools.product(('id', 'name'), utils.deduplicate(
             [LATEST_MICROVERSION, constants.MIN_SHARE_GROUP_MICROVERSION,
              constants.SHARE_GROUPS_GRADUATION_VERSION])))
     @ddt.unpack
