@@ -26,6 +26,15 @@ CONF = config.CONF
 
 class ShareMultiBackendTest(base.BaseSharesAdminTest):
 
+    @staticmethod
+    def _share_protocol(protocol):
+        protocols_list = protocol.lower().split('_')
+        allowed_protocols = [
+            i for i in CONF.share.enable_protocols
+            if i.lower() in protocols_list
+        ]
+        return allowed_protocols
+
     @classmethod
     def resource_setup(cls):
         super(ShareMultiBackendTest, cls).resource_setup()
@@ -41,18 +50,33 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
         cls.shares = []
         share_data_list = []
 
+        pools = cls.shares_v2_client.list_pools(detail=True)['pools']
+        backends_protocols = {
+            pool['capabilities']['share_backend_name']: pool[
+                'capabilities']['storage_protocol'] for pool in pools
+        }
         # Create share types
-        for i in [0, 1]:
-            st_name = data_utils.rand_name("share-type-%s" % str(i))
+        for backend in CONF.share.backend_names:
+            share_protocol = cls._share_protocol(backends_protocols[backend])
+            if not share_protocol:
+                continue
+            st_name = data_utils.rand_name(
+                cls.__name__ + "-share-type-%s" % backend)
             extra_specs = {
-                "share_backend_name": CONF.share.backend_names[i],
+                "share_backend_name": backend,
             }
             st = cls.create_share_type(
                 name=st_name,
                 extra_specs=cls.add_extra_specs_to_dict(extra_specs))
             cls.sts.append(st["share_type"])
             st_id = st["share_type"]["id"]
-            share_data_list.append({"kwargs": {"share_type_id": st_id}})
+            share_data_list.append({"kwargs": {
+                "share_type_id": st_id,
+                "share_protocol": share_protocol[0]}})
+
+        if not share_data_list:
+            raise cls.skipException("Enabled protocols not supported by any "
+                                    "of the enabled backends.")
 
         # Create shares using precreated share types
         cls.shares = cls.create_shares(share_data_list)
@@ -69,20 +93,21 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_share_type(self):
         # Share type should be the same as provided with share creation
-        for i in [0, 1]:
-            get = self.shares_v2_client.get_share(self.shares[i]['id'],
-                                                  version="2.5")
-            self.assertEqual(self.sts[i]["name"], get["share_type"])
+        for share, share_type in zip(self.shares, self.sts):
+            share_details = self.shares_v2_client.get_share(
+                share['id'], version="2.5")
+            self.assertEqual(share_type["name"], share_details["share_type"])
 
     @decorators.idempotent_id('f25e0cb0-d656-4f16-a761-ec23992cd9e7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_share_type_v_2_6(self):
         # Share type should be the same as provided with share creation
-        for i in [0, 1]:
-            get = self.shares_v2_client.get_share(self.shares[i]['id'],
-                                                  version="2.6")
-            self.assertEqual(self.sts[i]["id"], get["share_type"])
-            self.assertEqual(self.sts[i]["name"], get["share_type_name"])
+        for share, share_type in zip(self.shares, self.sts):
+            share_details = self.shares_v2_client.get_share(
+                share['id'], version="2.6")
+            self.assertEqual(share_type["id"], share_details["share_type"])
+            self.assertEqual(
+                share_type["name"], share_details["share_type_name"])
 
     @decorators.idempotent_id('bfa0c056-0a15-40e1-bdff-f1e10b95736c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
