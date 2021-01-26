@@ -87,7 +87,7 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             self.access_to[self.access_type].pop(), 'rw', metadata=data)
 
         # read metadata
-        get_access = self.shares_v2_client.get_access(access["id"])
+        get_access = self.shares_v2_client.get_access_rule(access["id"])
 
         # verify metadata
         self.assertEqual(data, get_access['metadata'])
@@ -97,7 +97,7 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             self.shares_v2_client.delete_access_metadata(access["id"], key)
 
         # verify deletion of metadata
-        access_without_md = self.shares_v2_client.get_access(access["id"])
+        access_without_md = self.shares_v2_client.get_access_rule(access["id"])
         self.assertEqual({}, access_without_md['metadata'])
         self.shares_v2_client.delete_access_rule(self.share["id"],
                                                  access["id"])
@@ -113,7 +113,7 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         self.shares_v2_client.update_access_metadata(
             access_id=self.access['id'], metadata=md2)
         # get metadata
-        get_access = self.shares_v2_client.get_access(self.access['id'])
+        get_access = self.shares_v2_client.get_access_rule(self.access['id'])
 
         # verify metadata
         self.md1.update(md2)

@@ -116,7 +116,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             self.share['id'],
             snapshot['id'],
             version=version)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'],
             constants.STATUS_AVAILABLE)
 
@@ -139,7 +139,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         self.shares_v2_client.revert_to_snapshot(self.share['id'],
                                                  snapshot1['id'],
                                                  version=version)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'],
             constants.STATUS_AVAILABLE)
 
@@ -161,9 +161,10 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
 
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone)
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share_replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')
 
         snapshot = self.create_snapshot_wait_for_active(share["id"])
 
@@ -171,8 +172,9 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             share['id'],
             snapshot['id'],
             version=version)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share_replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')

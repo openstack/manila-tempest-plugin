@@ -329,8 +329,9 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
                 share_server['id'],
                 status=state,
             )
-            waiters.wait_for_share_server_status(
-                self.shares_v2_client, share_server['id'], status=state
+            waiters.wait_for_resource_status(
+                self.shares_v2_client, share_server['id'], state,
+                resource_name="share_server"
             )
 
         # bring the share server back in the active state
@@ -338,9 +339,9 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             share_server['id'],
             status=constants.SERVER_STATE_ACTIVE,
         )
-        waiters.wait_for_share_server_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share_server['id'],
-            status=constants.SERVER_STATE_ACTIVE
+            constants.SERVER_STATE_ACTIVE, resource_name="share_server"
         )
 
         # delete share

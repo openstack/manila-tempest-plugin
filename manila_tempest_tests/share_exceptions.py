@@ -17,33 +17,34 @@ from tempest.lib import exceptions
 
 
 class ShareBuildErrorException(exceptions.TempestException):
-    message = "Share %(share_id)s failed to build and is in ERROR status"
+    message = "Share %(resource_id)s failed to build and is in ERROR status"
 
 
 class ShareInstanceBuildErrorException(exceptions.TempestException):
-    message = "Share instance %(id)s failed to build and is in ERROR status"
+    message = ("Share instance %(resource_id)s failed to build and is in "
+               "ERROR status")
 
 
 class ShareGroupBuildErrorException(exceptions.TempestException):
-    message = ("Share group %(share_group_id)s failed to build and "
+    message = ("Share group %(resource_id)s failed to build and "
                "is in ERROR status")
 
 
 class AccessRuleBuildErrorException(exceptions.TempestException):
-    message = "Share's rule with id %(rule_id)s is in ERROR status"
+    message = "Share's rule with id %(resource_id)s is in ERROR status"
 
 
 class SnapshotBuildErrorException(exceptions.TempestException):
-    message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
+    message = "Snapshot %(resource_id)s failed to build and is in ERROR status"
 
 
 class SnapshotInstanceBuildErrorException(exceptions.TempestException):
-    message = ("Snapshot instance %(id)s failed to build and is in "
+    message = ("Snapshot instance %(resource_id)s failed to build and is in "
                "ERROR status.")
 
 
 class ShareGroupSnapshotBuildErrorException(exceptions.TempestException):
-    message = ("Share Group Snapshot %(share_group_snapshot_id)s failed "
+    message = ("Share Group Snapshot %(resource_id)s failed "
                "to build and is in ERROR status")
 
 

@@ -132,7 +132,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['share_proto'],
             locations[0],
             share_type['id'])
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_admin_v2_client, managed_share['id'], 'available')
 
         LOG.debug('Step 11 - grant access again')
@@ -166,7 +166,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['share_proto'],
             locations[0],
             share_type['id'])
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_admin_v2_client, remanaged_share['id'], 'manage_error')
 
         self.shares_admin_v2_client.reset_state(remanaged_share['id'])

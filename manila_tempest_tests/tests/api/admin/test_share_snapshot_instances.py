@@ -129,8 +129,9 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
         for status in ("error", "available"):
             self.shares_v2_client.reset_snapshot_instance_status(
                 sii, status=status)
-            waiters.wait_for_snapshot_instance_status(
-                self.shares_v2_client, sii, expected_status=status)
+            waiters.wait_for_resource_status(
+                self.shares_v2_client, sii, status,
+                resource_name='snapshot_instance')
         self.shares_v2_client.delete_snapshot(snapshot['id'])
         self.shares_v2_client.wait_for_resource_deletion(
             snapshot_id=snapshot['id'])

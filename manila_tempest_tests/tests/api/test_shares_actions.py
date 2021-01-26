@@ -665,7 +665,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # extend share and wait for active status
         self.shares_v2_client.extend_share(share['id'], new_size)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_client, share['id'], 'available')
 
         # check state and new size
@@ -693,7 +693,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # shrink share and wait for active status
         self.shares_v2_client.shrink_share(share['id'], new_size)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_client, share['id'], 'available')
 
         # check state and new size

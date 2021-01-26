@@ -93,8 +93,10 @@ class SnapshotIpRulesForNFSNegativeTest(
         rule = self.shares_v2_client.create_snapshot_access_rule(
             self.snap['id'], access_type, access_to)
 
-        waiters.wait_for_snapshot_access_rule_status(
-            self.shares_v2_client, self.snap['id'], rule['id'])
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.snap['id'], 'active',
+            resource_name='snapshot_access_rule', rule_id=rule['id'],
+            status_attr='state')
 
         # try create duplicate of rule
         self.assertRaises(lib_exc.BadRequest,

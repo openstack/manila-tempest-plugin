@@ -234,7 +234,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         share = self.create_share(
             name=share_name, share_type_id=st_create["share_type"]["id"])
         self.assertEqual(share["name"], share_name)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_client, share["id"], "available")
 
         # Verify share info

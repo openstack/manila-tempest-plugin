@@ -67,7 +67,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         # Manage the share and wait for the expected state.
         # Return the managed share object.
         managed_share = self.shares_v2_client.manage_share(**params)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, managed_share['id'], state)
 
         return managed_share
@@ -168,7 +168,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             invalid_share = self.shares_v2_client.manage_share(
                 **invalid_params
             )
-            waiters.wait_for_share_status(
+            waiters.wait_for_resource_status(
                 self.shares_v2_client, invalid_share['id'],
                 constants.STATUS_MANAGE_ERROR)
 
@@ -263,7 +263,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         )
         invalid_share = self.shares_v2_client.manage_share(**invalid_params)
 
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, invalid_share['id'],
             constants.STATUS_MANAGE_ERROR)
         self._unmanage_share_and_wait(share)

@@ -348,7 +348,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
         client = client or self.shares_client
         client.delete_access_rule(share_id, access_rule_id)
-        share_waiters.wait_for_share_status(
+        share_waiters.wait_for_resource_status(
             self.shares_v2_client, share_id, "active",
             status_attr='access_rules_status')
 
@@ -424,7 +424,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 client.update_access_metadata(
                     metadata={"access_to": "{}".format(access_to)},
                     access_id=access_rule['id'])
-        get_access = client.get_access(access_rule['id'])
+        get_access = client.get_access_rule(access_rule['id'])
         # Set 'access_key' and 'access_to' attributes for being use in mount
         # operation.
         setattr(self, 'access_key', get_access['access_key'])
@@ -533,7 +533,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             self.addCleanup(client.delete_share,
                             share['id'])
 
-        share_waiters.wait_for_share_status(client, share['id'], 'available')
+        share_waiters.wait_for_resource_status(client, share['id'],
+                                               'available')
         return share
 
     def _create_snapshot(self, share_id, client=None, **kwargs):
@@ -542,8 +543,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         self.addCleanup(
             client.wait_for_resource_deletion, snapshot_id=snapshot['id'])
         self.addCleanup(client.delete_snapshot, snapshot['id'])
-        share_waiters.wait_for_snapshot_status(
-            client, snapshot["id"], "available")
+        share_waiters.wait_for_resource_status(
+            client, snapshot["id"], "available", resource_name='snapshot')
         return snapshot
 
     def _wait_for_share_server_deletion(self, sn_id, client=None):
@@ -593,7 +594,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         access = client.create_access_rule(share_id, access_type, access_to,
                                            access_level)
 
-        share_waiters.wait_for_share_status(
+        share_waiters.wait_for_resource_status(
             client, share_id, "active", status_attr='access_rules_status')
 
         if cleanup:
@@ -619,8 +620,10 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             self.addCleanup(client.delete_snapshot_access_rule,
                             snapshot_id, access['id'])
 
-        share_waiters.wait_for_snapshot_access_rule_status(
-            client, snapshot_id, access['id'])
+        share_waiters.wait_for_resource_status(
+            client, snapshot_id, 'active',
+            resource_name='snapshot_access_rule', rule_id=access['id'],
+            status_attr='state')
 
         return access
 

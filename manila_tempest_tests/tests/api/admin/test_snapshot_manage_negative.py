@@ -121,9 +121,9 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
             'invalid_provider_location',
             driver_options={}
         )
-        waiters.wait_for_snapshot_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, invalid_snap['id'],
-            constants.STATUS_MANAGE_ERROR
+            constants.STATUS_MANAGE_ERROR, resource_name='snapshot'
         )
         self.shares_v2_client.unmanage_snapshot(invalid_snap['id'])
 
@@ -132,9 +132,9 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
             self.share['id'],
             snap['provider_location']
         )
-        waiters.wait_for_snapshot_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, managed_snap['id'],
-            constants.STATUS_AVAILABLE
+            constants.STATUS_AVAILABLE, resource_name='snapshot'
         )
         self._delete_snapshot_and_wait(managed_snap)
 

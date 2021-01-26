@@ -87,7 +87,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         LOG.debug('Step 8 - try update size, shrink and wait')
         self.shares_v2_client.shrink_share(share['id'],
                                            new_size=default_share_size)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'],
             ['shrinking_possible_data_loss_error', 'available'])
 

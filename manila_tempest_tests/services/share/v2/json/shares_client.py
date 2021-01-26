@@ -623,6 +623,15 @@ class SharesV2Client(shares_client.SharesClient):
 
 ###############
 
+    def show_share_server(self, share_server_id, version=LATEST_MICROVERSION):
+        """Get share server info."""
+        uri = "share-servers/%s" % share_server_id
+        resp, body = self.get(uri, version=version)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+###############
+
     def get_snapshot_instance(self, instance_id, version=LATEST_MICROVERSION):
         resp, body = self.get("snapshot-instances/%s" % instance_id,
                               version=version)
@@ -746,7 +755,7 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(202, resp.status)
         return body
 
-    def get_access(self, access_id, version=LATEST_MICROVERSION):
+    def get_access_rule(self, access_id, version=LATEST_MICROVERSION):
         resp, body = self.get("share-access-rules/%s" % access_id,
                               version=version)
         self.expected_success(200, resp.status)
@@ -1657,9 +1666,10 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(202, resp.status)
         return self._parse_resp(body)
 
-    def get_snapshot_access_rule(self, snapshot_id, rule_id):
+    def get_snapshot_access_rule(self, snapshot_id, rule_id,
+                                 version=LATEST_MICROVERSION):
         resp, body = self.get("snapshots/%s/access-list" % snapshot_id,
-                              version=LATEST_MICROVERSION)
+                              version=version)
         body = self._parse_resp(body)
         found_rules = [r for r in body if r['id'] == rule_id]
 

@@ -130,9 +130,10 @@ class ReplicationTest(base.BaseSharesMixedTest):
         replica = self.create_share_replica(share["id"], self.replica_zone,
                                             cleanup=False)
         # Wait for replica state to update after creation
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')
         # Promote the first in_sync replica to active state
         promoted_replica = self.promote_share_replica(replica['id'])
         # Delete the demoted replica so promoted replica can be cleaned
@@ -192,15 +193,16 @@ class ReplicationTest(base.BaseSharesMixedTest):
         access_type, access_to = self._get_access_rule_data_from_config()
         rule = self.shares_v2_client.create_access_rule(
             self.shares[0]["id"], access_type, access_to, 'ro')
-        waiters.wait_for_access_rule_status(
-            self.shares_v2_client, self.shares[0]["id"], rule["id"],
-            constants.RULE_STATE_ACTIVE)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.shares[0]["id"],
+            constants.RULE_STATE_ACTIVE, resource_name='access_rule',
+            rule_id=rule["id"])
 
         # Create the replica
         self._verify_create_replica()
 
         # Verify access_rules_status transitions to 'active' state.
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.shares[0]["id"],
             constants.RULE_STATE_ACTIVE, status_attr='access_rules_status')
 
@@ -221,7 +223,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.shares_v2_client.create_access_rule(
             self.shares[0]["id"], access_type, access_to, 'ro')
 
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.shares[0]["id"],
             constants.RULE_STATE_ACTIVE, status_attr='access_rules_status')
 
@@ -281,9 +283,9 @@ class ReplicationTest(base.BaseSharesMixedTest):
         access_type, access_to = self._get_access_rule_data_from_config()
         rule = self.shares_v2_client.create_access_rule(
             share["id"], access_type, access_to, 'ro')
-        waiters.wait_for_access_rule_status(
-            self.shares_v2_client, share["id"], rule["id"],
-            constants.RULE_STATE_ACTIVE)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, share["id"], constants.RULE_STATE_ACTIVE,
+            resource_name='access_rule', rule_id=rule["id"])
 
         original_replica = self.shares_v2_client.list_share_replicas(
             share["id"])[0]
@@ -340,23 +342,26 @@ class ReplicationTest(base.BaseSharesMixedTest):
         new_replica = self.create_share_replica(share["id"],
                                                 self.replica_zone,
                                                 cleanup_in_class=False)
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, new_replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')
 
         # Promote the new replica to active and verify the replica states
         self.promote_share_replica(new_replica['id'])
         self._verify_active_replica_count(share["id"])
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, original_replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')
 
         # Promote the original replica back to active
         self.promote_share_replica(original_replica['id'])
         self._verify_active_replica_count(share["id"])
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, new_replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')
 
     @decorators.idempotent_id('1452156b-75a5-4f3c-a921-834732a03b0a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
