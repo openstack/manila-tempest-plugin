@@ -181,6 +181,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         }
         cls.sn_with_ldap_ss = cls.create_share_network(
             cleanup_in_class=True,
+            add_security_services=False,
             **cls.data_sn_with_ldap_ss)
 
         cls.shares_client.add_sec_service_to_share_network(
@@ -206,6 +207,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
 
         cls.sn_with_kerberos_ss = cls.create_share_network(
             cleanup_in_class=True,
+            add_security_services=False,
             **cls.data_sn_with_kerberos_ss)
 
         cls.shares_client.add_sec_service_to_share_network(

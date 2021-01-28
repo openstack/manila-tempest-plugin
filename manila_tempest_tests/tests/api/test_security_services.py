@@ -225,6 +225,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         sn = self.shares_client.get_share_network(
             self.shares_client.share_network_id)
         fresh_sn = self.create_share_network(
+            add_security_services=False,
             neutron_net_id=sn["neutron_net_id"],
             neutron_subnet_id=sn["neutron_subnet_id"])
 

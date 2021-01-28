@@ -33,7 +33,8 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(SecServicesMappingNegativeTest, cls).resource_setup()
-        cls.sn = cls.create_share_network(cleanup_in_class=True)
+        cls.sn = cls.create_share_network(cleanup_in_class=True,
+                                          add_security_services=False)
         cls.share_net_info = (
             utils.share_network_get_default_subnet(cls.sn)
             if utils.share_network_subnets_are_supported() else cls.sn)
@@ -115,6 +116,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         sn = self.shares_client.get_share_network(
             self.shares_client.share_network_id)
         fresh_sn = self.create_share_network(
+            add_security_services=False,
             neutron_net_id=sn["neutron_net_id"],
             neutron_subnet_id=sn["neutron_subnet_id"])
 
@@ -147,7 +149,8 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         # create share network
         data = self.generate_share_network_data()
 
-        sn = self.create_share_network(client=self.cl, **data)
+        sn = self.create_share_network(client=self.cl,
+                                       add_security_services=False, **data)
         self.assertDictContainsSubset(data, sn)
 
         # create security services with same type
@@ -173,7 +176,8 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         # create share network
         data = self.generate_share_network_data()
 
-        sn = self.create_share_network(client=self.cl, **data)
+        sn = self.create_share_network(client=self.cl,
+                                       add_security_services=False, **data)
         self.assertDictContainsSubset(data, sn)
 
         # create security service
