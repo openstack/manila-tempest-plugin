@@ -268,3 +268,11 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             params=filters)
 
         self.assertEqual(0, len(shares))
+
+    @decorators.skip_because(bug='1914363')
+    @decorators.idempotent_id('e8f857f1-ec32-4f81-9e09-26065891dc93')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_get_share_from_other_project(self):
+        self.assertRaises(lib_exc.NotFound,
+                          self.alt_shares_v2_client.get_share,
+                          self.share['id'])
