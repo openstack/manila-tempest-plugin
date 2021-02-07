@@ -1110,11 +1110,6 @@ class BaseSharesTest(test.BaseTestCase):
         return rule
 
 
-class BaseSharesAltTest(BaseSharesTest):
-    """Base test case class for all Shares Alt API tests."""
-    credentials = ('alt', )
-
-
 class BaseSharesAdminTest(BaseSharesTest):
     """Base test case class for all Shares Admin API tests."""
     credentials = ('admin', )
