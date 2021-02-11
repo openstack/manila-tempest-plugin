@@ -155,3 +155,16 @@ class AdminActionsTest(base.BaseSharesAdminTest):
             waiters.wait_for_resource_status(
                 self.shares_v2_client, self.sh["id"], task_state,
                 status_attr='task_state')
+
+    @decorators.idempotent_id('4233b941-a909-4f35-9ec9-753736949dd2')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_ensure_share_server_creation_when_dhss_enabled(self):
+        # This check will ensure that when a share creation request is handled,
+        # if the driver has the "driver handles share servers" option enabled,
+        # that a share server will be created, otherwise, not.
+        share_get = self.admin_shares_v2_client.get_share(self.sh['id'])
+        share_server = share_get['share_server_id']
+        if CONF.share.multitenancy_enabled:
+            self.assertNotEmpty(share_server)
+        else:
+            self.assertEmpty(share_server)
