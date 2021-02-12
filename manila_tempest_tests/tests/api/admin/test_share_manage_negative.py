@@ -258,7 +258,9 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
 
         # forge bad param to have a share in manage_error state
         invalid_params = valid_params.copy()
-        invalid_params.update({'export_path': 'invalid'})
+        invalid_params.update(
+            {'export_path': 'invalid-%s-share' % self.protocol}
+        )
         invalid_share = self.shares_v2_client.manage_share(**invalid_params)
 
         waiters.wait_for_share_status(
