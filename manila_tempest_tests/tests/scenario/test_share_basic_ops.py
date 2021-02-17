@@ -49,12 +49,12 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm(self):
         instance = self.boot_instance(wait_until="BUILD")
-        self.create_share()
-        locations = self.get_user_export_locations(self.share)
+        share = self.create_share()
+        locations = self.get_user_export_locations(share)
         instance = self.wait_for_active_instance(instance["id"])
         remote_client = self.init_remote_client(instance)
-        self.allow_access(instance=instance, remote_client=remote_client,
-                          locations=locations)
+        self.allow_access(share=share, instance=instance,
+                          remote_client=remote_client, locations=locations)
 
         for location in locations:
             self.mount_share(location, remote_client)
@@ -67,23 +67,24 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         test_data = "Some test data to write"
 
         instance = self.boot_instance(wait_until="BUILD")
-        self.create_share()
-        location = self.get_user_export_locations(self.share)[0]
+        share = self.create_share()
+        location = self.get_user_export_locations(share)[0]
         instance = self.wait_for_active_instance(instance["id"])
 
         remote_client_inst = self.init_remote_client(instance)
 
         # First, check if write works RW access.
         acc_rule_id = self.allow_access(
-            instance=instance, remote_client=remote_client_inst,
+            share=share, instance=instance, remote_client=remote_client_inst,
             locations=location)['id']
 
         self.mount_share(location, remote_client_inst)
         self.write_data_to_mounted_share(test_data, remote_client_inst)
-        self.deny_access(self.share['id'], acc_rule_id)
+        self.deny_access(share['id'], acc_rule_id)
 
-        self.allow_access(instance=instance, remote_client=remote_client_inst,
-                          locations=location, access_level='ro')
+        self.allow_access(share=share, instance=instance,
+                          remote_client=remote_client_inst, locations=location,
+                          access_level='ro')
 
         self.addCleanup(self.unmount_share, remote_client_inst)
 
@@ -101,14 +102,14 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         # Boot two VMs and create share
         instance1 = self.boot_instance(wait_until="BUILD")
         instance2 = self.boot_instance(wait_until="BUILD")
-        self.create_share()
-        location = self.get_user_export_locations(self.share)[0]
+        share = self.create_share()
+        location = self.get_user_export_locations(share)[0]
         instance1 = self.wait_for_active_instance(instance1["id"])
         instance2 = self.wait_for_active_instance(instance2["id"])
 
         # Write data to first VM
         remote_client_inst1 = self.init_remote_client(instance1)
-        access = self.allow_access(instance=instance1,
+        access = self.allow_access(share=share, instance=instance1,
                                    remote_client=remote_client_inst1,
                                    locations=location)
 
@@ -120,7 +121,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         # Read from second VM
         remote_client_inst2 = self.init_remote_client(instance2)
         if not CONF.share.override_ip_for_nfs_access or self.ipv6_enabled:
-            self.allow_access(instance=instance2,
+            self.allow_access(share=share, instance=instance2,
                               remote_client=remote_client_inst2,
                               locations=location,
                               access_rule=access)
@@ -164,17 +165,15 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                                      "needed to run share migration tests.")
 
         instance = self.boot_instance(wait_until="BUILD")
-        self.create_share()
-        export_location = self.get_user_export_locations(self.share)[0]
+        share = self.create_share()
+        export_location = self.get_user_export_locations(share)[0]
         instance = self.wait_for_active_instance(instance["id"])
-        self.share = self.shares_admin_v2_client.get_share(
-            self.share['id'])['share']
+        share = self.shares_admin_v2_client.get_share(share['id'])['share']
 
         default_type = self.shares_v2_client.list_share_types(
             default=True)['share_type']
 
-        dest_pool = utils.choose_matching_backend(
-            self.share, pools, default_type)
+        dest_pool = utils.choose_matching_backend(share, pools, default_type)
 
         self.assertIsNotNone(dest_pool)
         self.assertIsNotNone(dest_pool.get('name'))
@@ -183,7 +182,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         remote_client = self.init_remote_client(instance)
 
-        self.allow_access(instance=instance,
+        self.allow_access(share=share,
+                          instance=instance,
                           remote_client=remote_client,
                           locations=export_location)
 
@@ -212,8 +212,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
                       if force_host_assisted
                       else constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE)
 
-        self.share = self.migrate_share(
-            self.share['id'], dest_pool, task_state, force_host_assisted)
+        share = self.migrate_share(
+            share['id'], dest_pool, task_state, force_host_assisted)
 
         if force_host_assisted:
             self.assertRaises(
@@ -223,13 +223,13 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         self.unmount_share(remote_client)
 
-        self.share = self.migration_complete(self.share['id'], dest_pool)
+        share = self.migration_complete(share['id'], dest_pool)
 
-        new_exports = self.get_user_export_locations(self.share)
+        new_exports = self.get_user_export_locations(share)
 
-        self.assertEqual(dest_pool, self.share['host'])
+        self.assertEqual(dest_pool, share['host'])
         self.assertEqual(constants.TASK_STATE_MIGRATION_SUCCESS,
-                         self.share['task_state'])
+                         share['task_state'])
 
         self.mount_share(new_exports[0], remote_client)
 
@@ -266,7 +266,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         # 4 - Provide RW access to S1, ok, provided
-        self.allow_access(instance=instance,
+        self.allow_access(share=parent_share,
+                          instance=instance,
                           remote_client=remote_client,
                           locations=parent_share_export_location)
 
@@ -307,7 +308,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         )
 
         # 11 - Provide RW access to S2, ok, provided
-        self.allow_access(instance=instance,
+        self.allow_access(share=child_share,
+                          instance=instance,
                           remote_client=remote_client,
                           locations=child_share_export_location)
 
@@ -364,7 +366,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         # 4 - Provide RW access to S1, ok, provided
-        self.allow_access(instance=instance,
+        self.allow_access(share=parent_share,
+                          instance=instance,
                           remote_client=remote_client,
                           locations=user_export_location)
 
@@ -390,7 +393,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client.exec_command("sudo touch %s/file2" % parent_share_dir)
 
         # 9 - Allow access to SS1
-        self.allow_access(instance=instance,
+        self.allow_access(share=parent_share,
+                          instance=instance,
                           snapshot=snapshot,
                           remote_client=remote_client,
                           locations=snapshot_export_location)

@@ -198,7 +198,6 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         # NOTE(u_glide): Workaround for bug #1465682
         remote_client = remote_client.ssh_client
 
-        self.share = self.shares_client.get_share(self.share['id'])['share']
         return remote_client
 
     def validate_ping_to_export_location(self, export, remote_client,
@@ -278,8 +277,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             kwargs.update({'share_type_id': default_share_type_id})
         if CONF.share.multitenancy_enabled:
             kwargs.update({'share_network_id': self.share_network['id']})
-        self.share = self._create_share(**kwargs)
-        return self.share
+        share = self._create_share(**kwargs)
+        return share
 
     def get_remote_client(self, *args, **kwargs):
         if not CONF.share.image_with_share_tools:
@@ -357,7 +356,6 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                                                    snapshot=None,
                                                    access_level='rw',
                                                    client=None):
-        share = share or self.share
         client = client or self.shares_v2_client
         if not CONF.share.multitenancy_enabled:
             if self.ipv6_enabled and not self.storage_network:
@@ -406,7 +404,6 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
         client = client or self.shares_v2_client
         if not access_rule:
-            share = share or self.share
             access_to = access_to or data_utils.rand_name(
                 self.__class__.__name__ + '-cephx-id')
             # Check if access is already granted to the client
@@ -746,9 +743,10 @@ class BaseShareScenarioNFSTest(ShareScenarioTest):
 
     def allow_access(self, access_level='rw', **kwargs):
         snapshot = kwargs.get('snapshot')
+        share = kwargs.get('share')
         return self._provide_access_to_client_identified_by_ip(
-            instance=kwargs['instance'], access_level=access_level,
-            snapshot=snapshot)
+            share=share, instance=kwargs['instance'],
+            access_level=access_level, snapshot=snapshot)
 
     def mount_share(self, location, ssh_client, target_dir=None):
 
@@ -772,9 +770,11 @@ class BaseShareScenarioCIFSTest(ShareScenarioTest):
             raise cls.skipException(message)
 
     def allow_access(self, access_level='rw', **kwargs):
+        share = kwargs.get('share')
         snapshot = kwargs.get('snapshot')
         return self._provide_access_to_client_identified_by_ip(
             instance=kwargs['instance'],
+            share=share,
             snapshot=snapshot,
             access_level=access_level)
 
@@ -794,7 +794,7 @@ class BaseShareScenarioCEPHFSTest(ShareScenarioTest):
 
     def allow_access(self, access_level='rw', access_rule=None, **kwargs):
         return self._provide_access_to_client_identified_by_cephx(
-            remote_client=kwargs['remote_client'],
+            share=kwargs['share'], remote_client=kwargs['remote_client'],
             locations=kwargs['locations'], access_level=access_level,
             access_rule=access_rule)
 

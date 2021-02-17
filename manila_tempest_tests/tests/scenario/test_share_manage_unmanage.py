@@ -123,7 +123,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
         self.assertRaises(
             exceptions.NotFound,
             self.shares_admin_v2_client.get_share,
-            self.share['id'])
+            share['id'])
 
         LOG.debug('Step 10 - manage share')
         share_type = self.get_share_type()
