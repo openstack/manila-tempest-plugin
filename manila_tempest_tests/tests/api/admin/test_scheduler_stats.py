@@ -19,6 +19,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -170,7 +171,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('f027fb62-1ec3-4f52-a782-e9dd9db34fda')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.23")
+    @utils.skip_if_microversion_not_supported("2.23")
     @ddt.data((True, "name"), (True, "id"), (False, "name"), (False, "id"))
     @ddt.unpack
     def test_pool_list_with_share_type_filter_with_detail(
@@ -196,7 +197,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('31cb2c99-3abf-4dce-8e66-7fd30b168300')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.23")
+    @utils.skip_if_microversion_not_supported("2.23")
     @ddt.data((True, "name"), (True, "id"), (False, "name"), (False, "id"))
     @ddt.unpack
     def test_pool_list_with_share_type_filter_with_detail_negative(

@@ -290,7 +290,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             share_type_ids=[self.share_type_id],
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
-    @base.skip_if_microversion_lt("2.34")
+    @utils.skip_if_microversion_lt("2.34")
     @decorators.idempotent_id('64527564-9cd6-42db-8897-910f4fc1a151')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_and_share_with_different_azs(self):

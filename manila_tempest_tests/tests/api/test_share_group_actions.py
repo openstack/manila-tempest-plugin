@@ -111,7 +111,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_get_share_group(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         # Get share group
         share_group = self.shares_v2_client.get_share_group(
@@ -166,7 +166,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_list_share_groups(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         # List share groups
         share_groups = self.shares_v2_client.list_share_groups(
@@ -198,7 +198,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_list_share_groups_with_detail_min(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
         params = None
         if utils.is_microversion_ge(version, '2.36'):
             params = {'name~': 'tempest', 'description~': 'tempest'}
@@ -259,7 +259,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_get_share_group_snapshot(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         # Get share group snapshot
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
@@ -317,7 +317,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
                             LATEST_MICROVERSION]))
     def test_create_share_group_from_populated_share_group_snapshot(self,
                                                                     version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
@@ -422,7 +422,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_update_share_group(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         # Get share_group
         share_group = self.shares_v2_client.get_share_group(
@@ -463,7 +463,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_create_update_read_share_group_with_unicode(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         value1 = u'ಠ_ಠ'
         value2 = u'ಠ_ರೃ'

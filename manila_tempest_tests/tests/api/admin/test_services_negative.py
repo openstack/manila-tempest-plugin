@@ -19,6 +19,7 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 @ddt.ddt
@@ -100,7 +101,7 @@ class ServicesAdminNegativeTest(base.BaseSharesMixedTest):
         ('services', '2.0'),
     )
     @ddt.unpack
-    @base.skip_if_microversion_not_supported("2.7")
+    @utils.skip_if_microversion_not_supported("2.7")
     def test_list_services_with_wrong_versions(self, url, version):
         self.assertRaises(
             lib_exc.NotFound,

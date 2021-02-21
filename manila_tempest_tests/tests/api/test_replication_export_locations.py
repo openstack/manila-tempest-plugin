@@ -125,7 +125,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
     @ddt.data(*utils.deduplicate(['2.46', '2.47', LATEST_MICROVERSION]))
     def test_replicated_share_export_locations(self, version):
         """Test behavior changes in the share export locations API at 2.47"""
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
         share, replica, primary_replica_exports, replica_exports = (
             self._create_share_and_replica_get_exports()
         )
@@ -146,7 +146,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         (constants.REPLICATION_STYLE_READABLE, constants.REPLICATION_STYLE_DR),
         'Promotion of secondary not supported in writable replication style.')
     def test_replicated_share_export_locations_with_promotion(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
         share, replica, primary_replica_exports, replica_exports = (
             self._create_share_and_replica_get_exports(cleanup_replica=False)
         )

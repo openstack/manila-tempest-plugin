@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -242,7 +243,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         for share in shares:
             self.assertEqual(filters['host'], share['host'])
 
-    @base.skip_if_microversion_lt("2.35")
+    @utils.skip_if_microversion_lt("2.35")
     @ddt.data(('path', True), ('id', True), ('path', False), ('id', False))
     @ddt.unpack
     @decorators.idempotent_id('a27e5e3f-451f-4200-af38-99a562ccbe86')

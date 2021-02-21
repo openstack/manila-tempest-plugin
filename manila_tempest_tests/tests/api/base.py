@@ -115,18 +115,6 @@ class BaseSharesTest(test.BaseTestCase):
     # a stable class is used, which includes plugin registered services as well
     client_manager = clients.Clients
 
-    def skip_if_microversion_not_supported(self, microversion):
-        if not utils.is_microversion_supported(microversion):
-            raise self.skipException(
-                "Microversion '%s' is not supported." % microversion)
-
-    def skip_if_microversion_lt(self, microversion):
-        if utils.is_microversion_lt(CONF.share.max_api_microversion,
-                                    microversion):
-            raise self.skipException(
-                "Microversion must be greater than or equal to '%s'." %
-                microversion)
-
     @classmethod
     def skip_checks(cls):
         super(BaseSharesTest, cls).skip_checks()

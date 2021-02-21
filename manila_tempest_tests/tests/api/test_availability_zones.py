@@ -17,6 +17,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 class AvailabilityZonesTest(base.BaseSharesTest):
@@ -39,7 +40,7 @@ class AvailabilityZonesTest(base.BaseSharesTest):
 
     @decorators.idempotent_id('7054f2f4-bc77-4d60-82a6-2f23b93d281e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported("2.6")
+    @utils.skip_if_microversion_not_supported("2.6")
     def test_list_availability_zones_legacy_url_api_v2(self):
         # NOTE(vponomaryov): remove this test with removal of availability zone
         # extension url support.
@@ -49,7 +50,7 @@ class AvailabilityZonesTest(base.BaseSharesTest):
 
     @decorators.idempotent_id('4caadb86-2988-4adb-b705-aece99235c1e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported("2.7")
+    @utils.skip_if_microversion_not_supported("2.7")
     def test_list_availability_zones(self):
         azs = self.shares_v2_client.list_availability_zones(version='2.7')
         self._list_availability_zones_assertions(azs)

@@ -73,7 +73,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('2.0', '2.6', '2.7', '2.40', '2.41')
     def test_share_type_create_get(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         name = data_utils.rand_name("tempest-manila")
         description = None
@@ -102,7 +102,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         # Check that backwards compatibility didn't break
         self.assertDictMatch(get["volume_type"], get["share_type"])
 
-    @base.skip_if_microversion_lt("2.50")
+    @utils.skip_if_microversion_lt("2.50")
     @decorators.idempotent_id('a9af19e1-e789-4c4f-a39b-dd8df6ed00b1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
@@ -151,7 +151,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
                 st_is_public,
                 updated_st["share_type"]["share_type_access:is_public"])
 
-    @base.skip_if_microversion_lt("2.50")
+    @utils.skip_if_microversion_lt("2.50")
     @decorators.idempotent_id('9019dc61-b2b1-472d-9b15-a3986439d4c3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(
@@ -186,7 +186,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('2.0', '2.6', '2.7', '2.40', '2.41')
     def test_share_type_create_list(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         name = data_utils.rand_name("tempest-manila")
         description = None
@@ -300,7 +300,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*utils.deduplicate(('2.45', '2.46', LATEST_MICROVERSION)))
     def test_share_type_create_show_list_with_is_default_key(self, version):
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         extra_specs = self.add_extra_specs_to_dict()
 

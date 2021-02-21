@@ -22,6 +22,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -168,7 +169,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('ff307c91-3bb9-48b5-926c-5a2747320151')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.34")
+    @utils.skip_if_microversion_not_supported("2.34")
     @ddt.data('path', 'id')
     def test_list_shares_with_export_location_and_invalid_version(
             self, export_location_type):
@@ -185,7 +186,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('ffc3dc76-2f92-4308-a125-1d3905ed72ba')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.35")
+    @utils.skip_if_microversion_lt("2.35")
     @ddt.data('path', 'id')
     def test_list_shares_with_export_location_not_exist(
             self, export_location_type):
@@ -199,7 +200,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('3dbcf17b-cc63-43ea-b45f-eae12300729e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.36")
+    @utils.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_like_filter_and_invalid_version(self):
         # In API versions < v2.36, querying the share API by inexact
         # filter (name or description) should have no effect. Those
@@ -215,7 +216,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('f41c6cd2-62cf-4bba-a26e-21a6e86eae15')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.36")
+    @utils.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_like_filter_not_exist(self):
         filters = {
             'name~': 'fake_not_exist',
@@ -237,7 +238,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('5b0ceae1-357f-4b51-81a6-88973ea20c16')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.36")
+    @utils.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_description_not_exist(self):
         filters = {
             'description': "tempest-share",
@@ -248,7 +249,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('061ee37a-96b2-4b4f-9cfe-2c8c80ed4370')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.36")
+    @utils.skip_if_microversion_not_supported("2.36")
     def test_list_snapshots_with_description_not_exist(self):
         filters = {
             'description': "tempest-snapshot",
