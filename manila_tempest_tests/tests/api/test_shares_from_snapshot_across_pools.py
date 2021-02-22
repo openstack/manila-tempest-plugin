@@ -147,7 +147,6 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
             raise self.skipException(msg)
         azs = list(azs)
         share_a = self.create_share(share_type_id=self.share_type_id,
-                                    is_public=True,
                                     availability_zone=azs[0])
 
         # Create snapshot
