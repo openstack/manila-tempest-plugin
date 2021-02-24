@@ -435,40 +435,6 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         shares = self.shares_v2_client.list_shares_with_detail(params)
         self.assertGreater(shares["count"], 0)
 
-    @decorators.idempotent_id('557a0474-9e30-47b4-a766-19e2afb13e66')
-    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    def test_list_shares_public_with_detail(self):
-        public_share = self.create_share(
-            name='public_share',
-            description='public_share_desc',
-            share_type_id=self.share_type_id,
-            is_public=True,
-            cleanup_in_class=False
-        )
-        private_share = self.create_share(
-            name='private_share',
-            description='private_share_desc',
-            share_type_id=self.share_type_id,
-            is_public=False,
-            cleanup_in_class=False
-        )
-
-        params = {"is_public": True}
-        shares = self.alt_shares_client.list_shares_with_detail(params)
-
-        keys = [
-            "status", "description", "links", "availability_zone",
-            "created_at", "export_location", "share_proto",
-            "name", "snapshot_id", "id", "size", "project_id", "is_public",
-        ]
-        [self.assertIn(key, sh.keys()) for sh in shares for key in keys]
-
-        gen = [sid["id"] for sid in shares if sid["id"] == public_share["id"]]
-        msg = "expected id lists %s times in share list" % (len(gen))
-        self.assertEqual(1, len(gen), msg)
-
-        self.assertFalse(any([s["id"] == private_share["id"] for s in shares]))
-
     @decorators.idempotent_id('174829eb-fd3e-46ef-880b-f05c3d44d1fe')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
@@ -748,16 +714,15 @@ class SharesRenameTest(base.BaseSharesMixedTest):
         new_name = data_utils.rand_name("tempest-new-name")
         new_desc = data_utils.rand_name("tempest-new-description")
         updated = self.shares_client.update_share(
-            share["id"], new_name, new_desc, is_public=True)
+            share["id"], name=new_name, desc=new_desc)
         self.assertEqual(new_name, updated["name"])
         self.assertEqual(new_desc, updated["description"])
-        self.assertTrue(updated["is_public"])
 
         # get share
         share = self.shares_client.get_share(self.share['id'])
         self.assertEqual(new_name, share["name"])
         self.assertEqual(new_desc, share["description"])
-        self.assertTrue(share["is_public"])
+        self.assertFalse(share["is_public"])
 
     @decorators.idempotent_id('20f299f6-2441-4629-b44e-d791d57f413c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
