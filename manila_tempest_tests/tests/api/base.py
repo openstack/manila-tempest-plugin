@@ -1262,7 +1262,8 @@ class BaseSharesMixedTest(BaseSharesTest):
         cls.os_admin.domains_client = (
             cls.os_admin.identity_v3.DomainsClient() if
             CONF.identity.auth_version == 'v3' else None)
-        cls.admin_project_member_client = cls.create_user_and_get_client()
+        cls.admin_project_member_client = cls.create_user_and_get_client(
+            project=cls.admin_project, add_member_role=True)
 
         if CONF.share.multitenancy_enabled:
             admin_share_network_id = cls.provide_share_network(
@@ -1277,7 +1278,7 @@ class BaseSharesMixedTest(BaseSharesTest):
             cls.alt_shares_v2_client.share_network_id = alt_share_network_id
 
     @classmethod
-    def create_user_and_get_client(cls, project=None):
+    def create_user_and_get_client(cls, project=None, add_member_role=True):
         """Create a user in specified project & set share clients for user
 
         The user will have all roles specified in tempest.conf
@@ -1302,9 +1303,12 @@ class BaseSharesMixedTest(BaseSharesTest):
             username, password, project, email)
         cls.class_project_users_created.append(user)
 
-        for conf_role in CONF.auth.tempest_roles:
-            cls.os_admin.creds_client.assign_user_role(
-                user, project, conf_role)
+        tempest_roles_to_assign = CONF.auth.tempest_roles or []
+        if "member" not in tempest_roles_to_assign and add_member_role:
+            tempest_roles_to_assign.append("member")
+
+        for role in tempest_roles_to_assign:
+            cls.os_admin.creds_client.assign_user_role(user, project, role)
 
         user_creds = cls.os_admin.creds_client.get_credentials(
             user, project, password)
