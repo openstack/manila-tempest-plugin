@@ -165,9 +165,9 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
                 share['share_server_id'],
                 status=constants.SERVER_STATE_ACTIVE,
             )
-            waiters.wait_for_share_server_status(
+            waiters.wait_for_resource_status(
                 self.shares_v2_client, share['share_server_id'],
-                constants.SERVER_STATE_ACTIVE,
+                constants.SERVER_STATE_ACTIVE, resource_name='share_server'
             )
 
         # delete share
@@ -207,9 +207,9 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
                 share['share_server_id'],
                 status=constants.SERVER_STATE_ACTIVE,
             )
-            waiters.wait_for_share_server_status(
+            waiters.wait_for_resource_status(
                 self.shares_v2_client, share['share_server_id'],
-                constants.SERVER_STATE_ACTIVE,
+                constants.SERVER_STATE_ACTIVE, resource_name='share_server'
             )
 
         # delete share

@@ -104,13 +104,15 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                 self.share["id"], access_type, access_to, version=version)
 
         if utils.is_microversion_eq(version, '1.0'):
-            waiters.wait_for_access_rule_status(
-                self.shares_client, self.share["id"], rule["id"], "active")
+            waiters.wait_for_resource_status(
+                self.shares_client, self.share["id"], "active",
+                resource_name='access_rule', rule_id=rule["id"])
         elif utils.is_microversion_eq(version, '2.9'):
-            waiters.wait_for_access_rule_status(
-                self.shares_v2_client, self.share["id"], rule["id"], "active")
+            waiters.wait_for_resource_status(
+                self.shares_v2_client, self.share["id"], "active",
+                resource_name="access_rule", rule_id=rule["id"])
         else:
-            waiters.wait_for_share_status(
+            waiters.wait_for_resource_status(
                 self.shares_v2_client, self.share["id"], "active",
                 status_attr='access_rules_status', version=version)
 
@@ -154,7 +156,7 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
             self.share["id"], "ip", access_to)
         self.addCleanup(self.shares_v2_client.delete_access_rule,
                         self.share["id"], rule['id'])
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.share["id"], "active",
             status_attr='access_rules_status')
 
@@ -186,7 +188,7 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         share = self.create_share(share_type_id=share_type['id'],
                                   cleanup_in_class=False,
                                   wait_for_status=False)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], constants.STATUS_ERROR)
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_client.create_access_rule,
@@ -460,7 +462,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
         # Check share's access_rules_status has transitioned to "active" status
         self.alt_shares_v2_client.delete_access_rule(
             share_alt['id'], rule1['id'])
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.alt_shares_v2_client, share_alt['id'], 'active',
             status_attr='access_rules_status')
 

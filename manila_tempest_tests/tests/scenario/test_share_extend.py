@@ -96,7 +96,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
         extended_share_size = default_share_size + 1
         self.shares_v2_client.extend_share(share["id"],
                                            new_size=extended_share_size)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share["id"], constants.STATUS_AVAILABLE)
         share = self.shares_v2_client.get_share(share["id"])
         self.assertEqual(extended_share_size, int(share["size"]))

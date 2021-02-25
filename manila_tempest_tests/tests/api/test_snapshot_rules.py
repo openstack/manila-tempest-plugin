@@ -52,8 +52,10 @@ class BaseShareSnapshotRulesTest(base.BaseSharesMixedTest):
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
             self.assertNotIn(key, list(six.iterkeys(rule)))
 
-        waiters.wait_for_snapshot_access_rule_status(
-            self.shares_v2_client, self.snapshot['id'], rule['id'])
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.snapshot['id'], 'active',
+            resource_name='snapshot_access_rule', rule_id=rule['id'],
+            status_attr='state')
 
         # delete rule and wait for deletion
         self.shares_v2_client.delete_snapshot_access_rule(self.snapshot['id'],

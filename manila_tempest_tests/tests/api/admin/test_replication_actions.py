@@ -86,7 +86,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         # Test extend share
         new_size = self.share["size"] + 1
         self.admin_client.extend_share(self.share["id"], new_size)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.admin_client, self.share["id"], "available")
         share = self.admin_client.get_share(self.share["id"])
         self.assertEqual(new_size, int(share["size"]))
@@ -99,7 +99,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         share = self.admin_client.get_share(self.share["id"])
         new_size = self.share["size"] - 1
         self.admin_client.shrink_share(self.share["id"], new_size)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.admin_client, share["id"], "available")
         shrink_share = self.admin_client.get_share(self.share["id"])
         self.assertEqual(new_size, int(shrink_share["size"]))
@@ -129,7 +129,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         managed_share = self.admin_client.manage_share(
             share['host'], share['share_proto'],
             export_path, self.share_type_id)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.admin_client, managed_share['id'], 'available')
 
         # Add managed share to cleanup queue

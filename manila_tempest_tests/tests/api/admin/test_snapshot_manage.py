@@ -100,8 +100,9 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
                 'client': self.shares_v2_client})
 
         # Wait for success
-        waiters.wait_for_snapshot_status(
-            self.shares_v2_client, snapshot['id'], constants.STATUS_AVAILABLE
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, snapshot['id'], constants.STATUS_AVAILABLE,
+            resource_name='snapshot'
         )
 
         # Verify manage snapshot API response

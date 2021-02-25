@@ -108,9 +108,9 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
                 'client': self.shares_client})
 
         # Wait for success
-        waiters.wait_for_share_status(self.shares_v2_client,
-                                      managed_share['id'],
-                                      constants.STATUS_AVAILABLE)
+        waiters.wait_for_resource_status(self.shares_v2_client,
+                                         managed_share['id'],
+                                         constants.STATUS_AVAILABLE)
 
         # Verify data of managed share
         self.assertEqual(name, managed_share['name'])

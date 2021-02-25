@@ -152,9 +152,10 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         )
         primary_replica = self.shares_v2_client.get_share_replica(
             primary_replica_exports[0]['share_instance_id'])
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, replica['id'],
-            constants.REPLICATION_STATE_IN_SYNC, status_attr='replica_state')
+            constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
+            status_attr='replica_state')
 
         # Share export locations list API
         share_exports = self.shares_v2_client.list_share_export_locations(

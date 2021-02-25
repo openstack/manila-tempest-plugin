@@ -147,10 +147,10 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         # Set replica state to out of sync
         self.admin_client.reset_share_replica_state(
             replica['id'], constants.REPLICATION_STATE_OUT_OF_SYNC)
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, replica['id'],
             constants.REPLICATION_STATE_OUT_OF_SYNC,
-            status_attr='replica_state')
+            resource_name='share_replica', status_attr='replica_state')
         # Try promoting the first out_of_sync replica to active state
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_v2_client.promote_share_replica,
@@ -177,9 +177,10 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         replica = self.create_share_replica(share["id"], self.replica_zone,
                                             cleanup_in_class=False)
         # By default, 'writable' replica is expected to be in active state
-        waiters.wait_for_share_replica_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, replica["id"],
-            constants.REPLICATION_STATE_ACTIVE, status_attr='replica_state')
+            constants.REPLICATION_STATE_ACTIVE, resource_name='share_replica',
+            status_attr='replica_state')
 
         # Try promoting the replica
         self.shares_v2_client.promote_share_replica(replica['id'])

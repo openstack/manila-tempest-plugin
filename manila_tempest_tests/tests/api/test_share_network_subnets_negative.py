@@ -172,7 +172,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
         # Create a share into the share network
         share = self.shares_v2_client.create_share(**args)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
         share = self.shares_v2_client.get_share(share['id'])
 
@@ -203,7 +203,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         )
 
         # Do some necessary cleanup
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, managed_share['id'],
             constants.STATUS_AVAILABLE)
         self.shares_client.delete_share(managed_share['id'])
@@ -256,7 +256,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
         # Create a share into the share network
         share = self.shares_v2_client.create_share(**args)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
         share = self.admin_shares_v2_client.get_share(share['id'])
         share_server = self.admin_shares_v2_client.show_share_server(

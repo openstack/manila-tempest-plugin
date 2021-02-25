@@ -94,8 +94,9 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
     @base.skip_if_microversion_lt("2.22")
     def test_migration_get_progress_None(self):
         self.shares_v2_client.reset_task_state(self.share["id"], None)
-        waiters.wait_for_share_status(
-            self.shares_v2_client, self.share["id"], None, 'task_state')
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.share["id"], None,
+            status_attr='task_state')
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migration_get_progress,
             self.share['id'])
@@ -228,14 +229,14 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
     def test_migrate_share_not_available(self):
         self.shares_client.reset_state(self.share['id'],
                                        constants.STATUS_ERROR)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'], constants.STATUS_ERROR)
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
             self.share['id'], self.dest_pool)
         self.shares_client.reset_state(self.share['id'],
                                        constants.STATUS_AVAILABLE)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'],
             constants.STATUS_AVAILABLE)
 

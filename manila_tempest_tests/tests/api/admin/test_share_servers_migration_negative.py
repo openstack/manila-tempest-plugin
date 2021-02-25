@@ -246,11 +246,12 @@ class ShareServerMigrationStartNegativesNFS(MigrationShareServerNegative):
     def resource_cleanup(cls):
         states = [constants.TASK_STATE_MIGRATION_DRIVER_IN_PROGRESS,
                   constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE]
-        waiters.wait_for_share_server_status(
-            cls.shares_v2_client, cls.server_id, status=states,
+        waiters.wait_for_resource_status(
+            cls.shares_v2_client, cls.server_id, states,
+            resource_name="share_server",
             status_attr="task_state")
         cls.shares_v2_client.share_server_migration_cancel(cls.server_id)
-        waiters.wait_for_share_status(
+        waiters.wait_for_resource_status(
             cls.shares_v2_client, cls.share['id'], status="available")
         super(ShareServerMigrationStartNegativesNFS, cls).resource_cleanup()
 
