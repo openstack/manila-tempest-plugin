@@ -317,7 +317,6 @@
               enable_cephx_rules_for_protocols: cephfs
               run_share_group_tests: false
               multitenancy_enabled: false
-              capability_create_share_from_snapshot_support: false
               suppress_errors_in_cleanup: true
               backend_names: CEPHFSNATIVE
               capability_storage_protocol: CEPHFS
@@ -368,7 +367,6 @@
               backend_names: CEPHFSNFS
               enable_protocols: nfs
               capability_storage_protocol: NFS
-              capability_create_share_from_snapshot_support: false
               image_password: manila
 
 - job:
