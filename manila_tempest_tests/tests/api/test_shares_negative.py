@@ -146,7 +146,13 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
         super(SharesAPIOnlyNegativeTest, cls).resource_setup()
         # create share_type
         cls.share_type = cls._create_share_type()
+        cls.share_type_min_2_max_5 = cls._create_share_type(
+            specs={
+                'provisioning:max_share_size': int(CONF.share.share_size) + 4,
+                'provisioning:min_share_size': int(CONF.share.share_size) + 1
+            })
         cls.share_type_id = cls.share_type['id']
+        cls.share_type_min_2_max_5_id = cls.share_type_min_2_max_5['id']
 
     @decorators.idempotent_id('75837f93-8c2c-40a4-bb9e-d76c53db07c7')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
@@ -276,3 +282,23 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
         # Should not be able to delete share when empty ID is passed
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.delete_share, '')
+
+    @base.skip_if_microversion_lt("2.61")
+    @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fe86')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_create_share_size_greater_than_specified_in_share_type(self):
+        # Should not be able to create share if size too large
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_share,
+                          size=int(CONF.share.share_size) + 5,
+                          share_type_id=self.share_type_min_2_max_5_id)
+
+    @base.skip_if_microversion_lt("2.61")
+    @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fe87')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_create_share_size_less_than_specified_in_share_type(self):
+        # Should not be able to create share if size too small
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_share,
+                          size=int(CONF.share.share_size),
+                          share_type_id=self.share_type_min_2_max_5_id)
