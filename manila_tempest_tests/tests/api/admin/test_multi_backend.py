@@ -64,10 +64,10 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
                 cls.__name__ + "-share-type-%s" % backend)
             extra_specs = {
                 "share_backend_name": backend,
+                "driver_handles_share_servers":
+                    CONF.share.multitenancy_enabled,
             }
-            st = cls.create_share_type(
-                name=st_name,
-                extra_specs=cls.add_extra_specs_to_dict(extra_specs))
+            st = cls.create_share_type(name=st_name, extra_specs=extra_specs)
             cls.sts.append(st["share_type"])
             st_id = st["share_type"]["id"]
             share_data_list.append({"kwargs": {
