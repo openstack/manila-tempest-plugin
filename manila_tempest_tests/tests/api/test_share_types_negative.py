@@ -23,6 +23,7 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 CONF = config.CONF
@@ -79,7 +80,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           self.st['id'],
                           self.shares_client.tenant_id)
 
-    @base.skip_if_microversion_lt("2.50")
+    @utils.skip_if_microversion_lt("2.50")
     @decorators.idempotent_id('4a22945c-8988-43a1-88c9-eb86e6abcd8e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(
@@ -100,7 +101,7 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
                           st_id, st_name, st_is_public, st_description,
                           version)
 
-    @base.skip_if_microversion_lt("2.50")
+    @utils.skip_if_microversion_lt("2.50")
     @decorators.idempotent_id('7193465a-ed8e-44d5-9ca9-4e8a3c5958e0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data('2.50', LATEST_MICROVERSION)

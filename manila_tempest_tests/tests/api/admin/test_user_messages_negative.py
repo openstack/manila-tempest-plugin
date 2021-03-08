@@ -64,7 +64,7 @@ class UserMessageNegativeTest(base.BaseSharesMixedTest):
                           six.text_type(uuidutils.generate_uuid()))
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
-    @base.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
     @decorators.idempotent_id('03e80563-1a36-408e-baa8-0e3ed46f7a0a')
     def test_list_messages_with_invalid_time_format(self):
         params_key = ['created_since', 'created_before']

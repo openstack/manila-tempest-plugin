@@ -133,7 +133,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
     @decorators.idempotent_id('15d42949-545e-4ad8-b06e-bb2556c54375')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(CONF.share.run_host_assisted_migration_tests or
                           CONF.share.run_driver_assisted_migration_tests,
                           "Share migration tests are disabled.")
@@ -324,7 +324,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
     @decorators.idempotent_id('c98e6876-3a4f-40e8-8b4f-023c94c242c3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @base.skip_if_microversion_lt("2.32")
+    @utils.skip_if_microversion_lt("2.32")
     @testtools.skipUnless(CONF.share.run_mount_snapshot_tests,
                           'Mountable snapshots tests are disabled.')
     @testtools.skipUnless(CONF.share.run_snapshot_tests,

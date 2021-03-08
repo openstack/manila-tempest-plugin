@@ -121,7 +121,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
             message_id=self.message['id'])
 
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
-    @base.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)
     @decorators.idempotent_id('2ed0c40e-cdaa-471b-97d4-5ebe3fb040e9')
     def test_list_messages_with_since_and_before_filters(self):
         new_message = self.create_user_message()

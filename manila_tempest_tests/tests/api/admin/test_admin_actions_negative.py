@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -143,7 +144,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('d662457c-2b84-4f13-aee7-5ffafe2552f1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_reset_task_state_invalid_state(self):
         self.assertRaises(
             lib_exc.BadRequest, self.admin_client.reset_task_state,
@@ -168,7 +169,7 @@ class AdminActionsAPIOnlyNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('aba8638c-bfed-4c3e-994b-5309fcd912b2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_reset_task_state_share_not_found(self):
         self.assertRaises(
             lib_exc.NotFound, self.admin_client.reset_task_state,

@@ -262,7 +262,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.unpack
     @decorators.idempotent_id('ed38ab0a-694c-48ea-bce5-5c264f485d5b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported("2.7")
+    @utils.skip_if_microversion_not_supported("2.7")
     def test_show_quotas_with_wrong_versions(self, url, version, method_name):
         self.assertRaises(lib_exc.NotFound,
                           getattr(self.client, method_name),
@@ -285,7 +285,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data('show', 'reset', 'update')
     @decorators.idempotent_id('cf45eb7d-7330-4b2d-8214-e4149eb4a398')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_lt("2.39")
     def test_share_type_quotas_using_nonexistent_share_type(self, op):
 
         kwargs = {"share_type": "fake_nonexistent_share_type"}
@@ -301,7 +301,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data('id', 'name')
     @decorators.idempotent_id('2ba641a1-100b-417e-80e2-d3f717fd3c7c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_lt("2.39")
     def test_try_update_share_type_quota_for_share_networks(self, key):
         share_type = self._create_share_type()
         tenant_quotas = self.client.show_quotas(self.tenant_id)
@@ -316,7 +316,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data('share_groups', 'share_group_snapshots')
     @decorators.idempotent_id('5eb6ce15-1172-4bcb-9c7b-91543bf714e8')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt(SHARE_GROUPS_MICROVERSION)
+    @utils.skip_if_microversion_lt(SHARE_GROUPS_MICROVERSION)
     def test_try_update_share_type_quota_for_share_groups(self, quota_name):
         share_type = self._create_share_type()
         tenant_quotas = self.client.show_quotas(self.tenant_id)
@@ -330,8 +330,8 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data('share_groups', 'share_group_snapshots')
     @decorators.idempotent_id('1b504c74-2ce9-40f6-87fb-9e643b1b5906')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported(PRE_SHARE_GROUPS_MICROVERSION)
-    @base.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(PRE_SHARE_GROUPS_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_share_group_quotas_using_too_old_microversion(self, quota_key):
         tenant_quotas = self.client.show_quotas(
             self.tenant_id, version=SHARE_GROUPS_MICROVERSION)
@@ -348,7 +348,8 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data("share_replicas", "replica_gigabytes")
     @decorators.idempotent_id('66f22d42-37bc-4f9b-8e0b-a679341e1e88')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported(SHARE_REPLICA_QUOTAS_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(
+        SHARE_REPLICA_QUOTAS_MICROVERSION)
     def test_share_replica_quotas_using_too_old_microversion(self, quota_key):
         tenant_quotas = self.client.show_quotas(
             self.tenant_id, version=SHARE_REPLICA_QUOTAS_MICROVERSION)
@@ -365,7 +366,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data('show', 'reset', 'update')
     @decorators.idempotent_id('acc609c2-f314-4540-984c-33e93d048f6c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.38")
+    @utils.skip_if_microversion_lt("2.38")
     def test_share_type_quotas_using_too_old_microversion(self, op):
         share_type = self._create_share_type()
         kwargs = {"version": "2.38", "share_type": share_type["name"]}
@@ -381,7 +382,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data('show', 'reset', 'update')
     @decorators.idempotent_id('719768d1-d313-40e9-9127-c5777840ecbd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_lt("2.39")
     def test_quotas_providing_share_type_and_user_id(self, op):
         share_type = self._create_share_type()
         kwargs = {"share_type": share_type["name"], "user_id": self.user_id}
@@ -397,7 +398,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @ddt.data(11, -1)
     @decorators.idempotent_id('82256511-aa46-4b99-a6e5-8b400534e96d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_lt("2.39")
     def test_update_share_type_quotas_bigger_than_project_quota(self, st_q):
         share_type = self._create_share_type()
         self.update_quotas(self.tenant_id, shares=10)

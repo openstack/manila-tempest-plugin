@@ -167,7 +167,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
-    @base.skip_if_microversion_not_supported("2.51")
+    @utils.skip_if_microversion_not_supported("2.51")
     def test_add_delete_share_replica_different_subnet(self):
         # Create new subnet in replica az
         subnet = utils.share_network_get_default_subnet(self.share_network)
@@ -300,7 +300,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('7904e3c7-e6d0-472d-b9c9-c0772b4f9f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.48")
+    @utils.skip_if_microversion_not_supported("2.48")
     def test_share_type_azs_share_replicas(self):
         az_spec = ', '.join(self.zones)
         self.admin_shares_v2_client.update_share_type_extra_spec(

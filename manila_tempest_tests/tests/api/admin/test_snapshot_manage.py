@@ -145,7 +145,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         utils.skip_if_manage_not_supported_for_version(version)
 
         # Skip in case specified version is not supported
-        self.skip_if_microversion_not_supported(version)
+        utils.skip_if_microversion_not_supported(version)
 
         snap_name = data_utils.rand_name("tempest-snapshot-name")
         snap_desc = data_utils.rand_name("tempest-snapshot-description")

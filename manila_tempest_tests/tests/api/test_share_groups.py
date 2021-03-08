@@ -196,7 +196,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             new_share_group['share_network_id'],
             msg)
 
-    @base.skip_if_microversion_lt("2.34")
+    @utils.skip_if_microversion_lt("2.34")
     @decorators.idempotent_id('14fd6d88-87ff-4af2-ad17-f95dbd8dcd61')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(

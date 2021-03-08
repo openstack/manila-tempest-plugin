@@ -21,6 +21,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -148,7 +149,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('49a576eb-733a-4299-aa6f-918fe7c67a6a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_reset_share_task_state(self):
         for task_state in self.task_states:
             self.shares_v2_client.reset_task_state(self.sh["id"], task_state)

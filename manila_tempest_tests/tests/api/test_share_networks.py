@@ -111,7 +111,7 @@ class ShareNetworkListMixin(object):
 
     @decorators.idempotent_id('bff1356e-70aa-4bbe-b398-cb4dadd8fcb1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @base.skip_if_microversion_lt("2.36")
+    @utils.skip_if_microversion_lt("2.36")
     def test_list_share_networks_like_filter(self):
         valid_filter_opts = {
             'name': 'sn_with_ldap_ss',
@@ -300,7 +300,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           "Only for multitenancy.")
     @testtools.skipUnless(CONF.service_available.neutron, "Only with neutron.")
-    @base.skip_if_microversion_lt("2.18")
+    @utils.skip_if_microversion_lt("2.18")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_gateway_with_neutron(self):
         subnet_client = self.subnets_client
@@ -324,7 +324,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @testtools.skipUnless(CONF.share.multitenancy_enabled,
                           "Only for multitenancy.")
     @testtools.skipUnless(CONF.service_available.neutron, "Only with neutron.")
-    @base.skip_if_microversion_lt("2.20")
+    @utils.skip_if_microversion_lt("2.20")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_mtu_with_neutron(self):
         network_client = self.networks_client

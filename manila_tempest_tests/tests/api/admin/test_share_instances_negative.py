@@ -15,6 +15,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 @ddt.ddt
@@ -31,7 +32,7 @@ class ShareInstancesNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('babe885e-a8ab-439d-8b95-e5422983a942')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_not_supported("2.34")
+    @utils.skip_if_microversion_not_supported("2.34")
     @ddt.data('path', 'id')
     def test_list_share_instances_with_export_location_and_invalid_version(
             self, export_location_type):
@@ -48,7 +49,7 @@ class ShareInstancesNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('ce0d045c-e418-42fa-86e4-ead493fc0663')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.35")
+    @utils.skip_if_microversion_lt("2.35")
     @ddt.data('path', 'id')
     def test_list_share_instances_with_export_location_not_exist(
             self, export_location_type):

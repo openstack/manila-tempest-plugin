@@ -207,7 +207,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           CONF.share.run_driver_assisted_migration_tests,
                           "Share migration tests are disabled.")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migration_of_replicated_share(self):
         pools = self.admin_client.list_pools(detail=True)['pools']
         hosts = [p['name'] for p in pools]
@@ -226,7 +226,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
 
     @decorators.idempotent_id('bf01bcfc-57cb-4e56-957f-8aa9f1b9be1b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.48")
+    @utils.skip_if_microversion_lt("2.48")
     def test_try_add_replica_share_type_azs_unsupported_az(self):
         self.admin_shares_v2_client.update_share_type_extra_spec(
             self.share_type['id'], 'availability_zones', 'non-existent az')
@@ -242,7 +242,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
-    @base.skip_if_microversion_lt("2.51")
+    @utils.skip_if_microversion_lt("2.51")
     def test_try_add_replica_nonexistent_subnet(self):
         # Create a new share network only for a specific az
         data = self.generate_share_network_data()

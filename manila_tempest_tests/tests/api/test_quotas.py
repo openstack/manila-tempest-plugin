@@ -99,7 +99,7 @@ class SharesQuotasTest(base.BaseSharesTest):
     @decorators.idempotent_id('795614f6-4a18-47d5-b817-0b294e9d4c48')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_quotas_detail(self, microversion, with_user):
-        self.skip_if_microversion_not_supported(microversion)
+        utils.skip_if_microversion_not_supported(microversion)
         quota_args = {"tenant_id": self.tenant_id, "version": microversion, }
         keys = ['gigabytes', 'snapshot_gigabytes', 'shares',
                 'snapshots', 'share_networks']
@@ -119,7 +119,7 @@ class SharesQuotasTest(base.BaseSharesTest):
 
     @decorators.idempotent_id('7bd5ac42-9fcb-477f-a253-02cde2bde661')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @base.skip_if_microversion_not_supported(PRE_SHARE_REPLICAS_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(PRE_SHARE_REPLICAS_MICROVERSION)
     def test_quota_detail_2_52_no_share_replica_quotas(self):
         quota_args = {"tenant_id": self.tenant_id,
                       "version": PRE_SHARE_REPLICAS_MICROVERSION}

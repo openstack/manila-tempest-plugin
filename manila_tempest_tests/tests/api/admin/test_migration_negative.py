@@ -83,7 +83,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('8aa1f2a0-bc44-4df5-a556-161590e594a3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_migration_cancel_invalid(self):
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migration_cancel,
@@ -91,7 +91,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('6d0dfb2e-51a0-4cb7-8c69-6135a49c6057')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_migration_get_progress_None(self):
         self.shares_v2_client.reset_task_state(self.share["id"], None)
         waiters.wait_for_resource_status(
@@ -103,7 +103,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('2ab1fc82-bc13-4c99-8324-c6b23530e8a4')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_migration_complete_invalid(self):
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migration_complete,
@@ -111,7 +111,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('8ef562b4-7704-4a78-973f-9bf8d2b6f6a6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_migration_cancel_not_found(self):
         self.assertRaises(
             lib_exc.NotFound, self.shares_v2_client.migration_cancel,
@@ -119,7 +119,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('044c792b-63e0-42c3-9f44-dc2280e2af08')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_migration_get_progress_not_found(self):
         self.assertRaises(
             lib_exc.NotFound, self.shares_v2_client.migration_get_progress,
@@ -127,7 +127,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('a509871a-3f3a-4618-bb60-9661732dd371')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.22")
+    @utils.skip_if_microversion_lt("2.22")
     def test_migration_complete_not_found(self):
         self.assertRaises(
             lib_exc.NotFound, self.shares_v2_client.migration_complete,
@@ -135,7 +135,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('6276bea6-6939-4569-930f-218d99c0fa56')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
     def test_migrate_share_with_snapshot(self):
@@ -150,7 +150,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('78670c24-c4ee-45b5-b166-2d053c333144')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     @ddt.data(True, False)
     def test_migrate_share_same_host(self, specified):
         new_share_type_id = None
@@ -168,7 +168,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('af17204f-ffab-4ba8-8cb6-032e49216f67')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_host_invalid(self):
         self.assertRaises(
             lib_exc.NotFound, self.shares_v2_client.migrate_share,
@@ -176,7 +176,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('0558e9c4-0416-41d2-b28a-803d4b81521a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     @ddt.data({'writable': False, 'preserve_metadata': False,
                'preserve_snapshots': False, 'nondisruptive': True},
               {'writable': False, 'preserve_metadata': False,
@@ -198,7 +198,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('ee57024c-d00e-4def-8eec-cbc62bae327f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_change_type_no_valid_host(self):
         if not CONF.share.multitenancy_enabled:
             new_share_network_id = self.create_share_network(
@@ -217,7 +217,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('e2bd0cca-c091-4785-a9dc-7f42d2bb95a5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_not_found(self):
         self.assertRaises(
             lib_exc.NotFound, self.shares_v2_client.migrate_share,
@@ -225,7 +225,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('86b427a7-27c0-4cd5-8f52-9688b339980b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_not_available(self):
         self.shares_client.reset_state(self.share['id'],
                                        constants.STATUS_ERROR)
@@ -242,7 +242,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('e8f1e491-697a-4941-bf51-4d37f0a93fa5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_invalid_share_network(self):
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
@@ -251,7 +251,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('be262d44-2ca2-4b9c-be3a-5a6a98ed871b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_invalid_share_type(self):
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
@@ -260,7 +260,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('16c72693-6f9e-4cb4-a166-c60accd3479b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_migrate_share_opposite_type_share_network_invalid(self):
 
         extra_specs = utils.get_configured_extra_specs(
@@ -286,7 +286,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('1f529b09-e404-4f0e-9423-bb4b117b5522')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.48")
+    @utils.skip_if_microversion_lt("2.48")
     def test_share_type_azs_share_migrate_unsupported_az(self):
         extra_specs = self.add_extra_specs_to_dict({
             'availability_zones': 'non-existent az'})
@@ -302,13 +302,13 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
     @testtools.skipUnless(CONF.share.run_driver_assisted_migration_tests,
                           "Driver-assisted migration tests are disabled.")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_create_snapshot_during_share_migration(self):
         self._test_share_actions_during_share_migration('create_snapshot', [])
 
     @decorators.idempotent_id('20121039-bb11-45d8-9972-d2daff7a779c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     @ddt.data(('extend_share', [CONF.share.share_size + 2]),
               ('shrink_share', [CONF.share.share_size]))
     @ddt.unpack
@@ -326,7 +326,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('6e83fc25-4e3e-49a7-93e8-db4e6b355a91')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @base.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_lt("2.29")
     def test_add_access_rule_during_migration(self):
         access_type = "ip"
         access_to = "50.50.50.50"
