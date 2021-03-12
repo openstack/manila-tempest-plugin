@@ -50,7 +50,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
     def resource_setup(cls):
         super(ManageNFSShareNegativeTest, cls).resource_setup()
         # Create share type
-        cls.st_name = data_utils.rand_name("manage-st-name")
+        cls.st_name = data_utils.rand_name(name="manage-st-name")
         cls.extra_specs = {
             'storage_protocol': CONF.share.capability_storage_protocol,
             'driver_handles_share_servers': CONF.share.multitenancy_enabled,
@@ -155,7 +155,8 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         self._unmanage_share_and_wait(share)
 
         for invalid_key, invalid_value in (
-            ('export_path', 'invalid_export'),
+            ('export_path',
+             data_utils.rand_name(name='invalid-share-export')),
             ('protocol', 'invalid_protocol'),
         ):
 
@@ -259,7 +260,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         # forge bad param to have a share in manage_error state
         invalid_params = valid_params.copy()
         invalid_params.update(
-            {'export_path': 'invalid-%s-share' % self.protocol}
+            {'export_path': data_utils.rand_name(name='invalid-share-export')}
         )
         invalid_share = self.shares_v2_client.manage_share(**invalid_params)
 
