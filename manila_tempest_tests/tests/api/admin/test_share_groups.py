@@ -45,10 +45,12 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
     def resource_setup(cls):
         super(ShareGroupsTest, cls).resource_setup()
         # Create 2 share_types
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
-
-        cls.share_type2 = cls._create_share_type()
+        cls.share_type2 = cls._create_share_type(specs=extra_specs)
         cls.share_type_id2 = cls.share_type2['id']
 
         # Create a share group type
@@ -176,6 +178,8 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('8ca1f0a0-2a36-4adb-af6b-6741b00307c5')
     @testtools.skipUnless(
         CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @testtools.skipUnless(
+        CONF.share.run_snapshot_tests, "Snapshot tests are disabled.")
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_from_snapshot_verify_share_server_information_min(self):
         # Create a share group

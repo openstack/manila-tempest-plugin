@@ -17,6 +17,7 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -42,7 +43,10 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ShareGroupsNegativeTest, cls).resource_setup()
         # Create a share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         # Create a share group type
@@ -69,15 +73,16 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             share_type_id=cls.share_type_id,
             share_group_id=cls.share_group['id'],
         )
-        # Create a share group snapshot of the share group
-        cls.sg_snap_name = data_utils.rand_name("tempest-sg-snap-name")
-        cls.sg_snap_desc = data_utils.rand_name(
-            "tempest-group-snap-description")
-        cls.sg_snapshot = cls.create_share_group_snapshot_wait_for_active(
-            cls.share_group['id'],
-            name=cls.sg_snap_name,
-            description=cls.sg_snap_desc
-        )
+        if CONF.share.run_snapshot_tests:
+            # Create a share group snapshot of the share group
+            cls.sg_snap_name = data_utils.rand_name("tempest-sg-snap-name")
+            cls.sg_snap_desc = data_utils.rand_name(
+                "tempest-group-snap-description")
+            cls.sg_snapshot = cls.create_share_group_snapshot_wait_for_active(
+                cls.share_group['id'],
+                name=cls.sg_snap_name,
+                description=cls.sg_snap_desc
+            )
 
     @decorators.idempotent_id('7ce3fb52-1bec-42b1-9b4f-671c8465764b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -206,6 +211,8 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('18fe2dee-4a07-484e-8f0f-bbc238500dc3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
     def test_delete_sg_in_use_by_sg_snapshot_min(self):
         self.assertRaises(
             lib_exc.Conflict,
@@ -215,6 +222,8 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('d2a58f10-cc86-498d-a5e0-1468d4345852')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
     def test_delete_share_in_use_by_sg_snapshot_min(self):
         params = {'share_group_id': self.share['share_group_id']}
         self.assertRaises(

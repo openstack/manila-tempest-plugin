@@ -41,16 +41,13 @@ class ShareGroupsNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_group_with_wrong_consistent_snapshot_spec(self):
         # Create valid share type for share group type
-        name = data_utils.rand_name("tempest-manila")
-        extra_specs = self.add_extra_specs_to_dict()
-        st = self.create_share_type(name, extra_specs=extra_specs)
-        share_type = st['share_type'] if 'share_type' in st else st
+        share_type = self._create_share_type(cleanup_in_class=False)
 
         # Create share group type with wrong value for
         # 'consistent_snapshot_support' capability, we always expect
         # NoValidHostFound using this SG type.
         sg_type = self.create_share_group_type(
-            name=name,
+            name=data_utils.rand_name("tempest-manila"),
             share_types=[share_type['id']],
             group_specs={"consistent_snapshot_support": "fake"},
             cleanup_in_class=False)

@@ -18,6 +18,7 @@ import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -46,7 +47,12 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         super(ShareGroupActionsTest, cls).resource_setup()
 
         # Create a share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        if CONF.share.capability_create_share_from_snapshot_support:
+            extra_specs.update({'create_share_from_snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         cls.share_group_type = cls._create_share_group_type()
@@ -89,20 +95,21 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         ])
 
         # Create share group snapshots
-        cls.sg_snap_name = data_utils.rand_name("tempest-sg-snap-name")
-        cls.sg_snap_desc = data_utils.rand_name("tempest-sg-snap-desc")
+        if CONF.share.capability_snapshot_support:
+            cls.sg_snap_name = data_utils.rand_name("tempest-sg-snap-name")
+            cls.sg_snap_desc = data_utils.rand_name("tempest-sg-snap-desc")
 
-        cls.sg_snapshot = cls.create_share_group_snapshot_wait_for_active(
-            cls.share_group["id"],
-            name=cls.sg_snap_name,
-            description=cls.sg_snap_desc,
-        )
+            cls.sg_snapshot = cls.create_share_group_snapshot_wait_for_active(
+                cls.share_group["id"],
+                name=cls.sg_snap_name,
+                description=cls.sg_snap_desc,
+            )
 
-        cls.sg_snapshot2 = cls.create_share_group_snapshot_wait_for_active(
-            cls.share_group2['id'],
-            name=cls.sg_snap_name,
-            description=cls.sg_snap_desc,
-        )
+            cls.sg_snapshot2 = cls.create_share_group_snapshot_wait_for_active(
+                cls.share_group2['id'],
+                name=cls.sg_snap_name,
+                description=cls.sg_snap_desc,
+            )
 
     @decorators.idempotent_id('1e359389-09a7-4235-84c9-7b5c83632fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -258,6 +265,8 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
     def test_get_share_group_snapshot(self, version):
         utils.check_skip_if_microversion_not_supported(version)
 
@@ -286,6 +295,8 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('67e8c099-f1c1-4972-9c51-bb7bfe1d7994')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
     def test_get_share_group_snapshot_members_min(self):
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
@@ -315,6 +326,11 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         *utils.deduplicate([constants.MIN_SHARE_GROUP_MICROVERSION,
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
+    @testtools.skipUnless(
+        CONF.share.capability_create_share_from_snapshot_support,
+        "Tests creating shares from snapshots are disabled.")
     def test_create_share_group_from_populated_share_group_snapshot(self,
                                                                     version):
         utils.check_skip_if_microversion_not_supported(version)

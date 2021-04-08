@@ -40,7 +40,8 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
         cls.admin_client = cls.admin_shares_v2_client
         cls.member_client = cls.shares_v2_client
         # create share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {'snapshot_support': True}
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id,

@@ -196,7 +196,12 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def resource_setup(cls):
         super(SharesAdminQuotasUpdateTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        if CONF.share.capability_create_share_from_snapshot_support:
+            extra_specs.update({'create_share_from_snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share group type
         cls.share_group_type = cls._create_share_group_type()
@@ -901,6 +906,11 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @testtools.skipUnless(
         CONF.share.run_share_group_tests, 'Share Group tests disabled.')
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
+    @testtools.skipUnless(
+        CONF.share.capability_create_share_from_snapshot_support,
+        "Tests for shares from snapshots are disabled.")
     def test_share_group_quotas_usages(self):
         # Set quotas for project (3 SG, 1 SGS) and user (2 SG, 1 SGS)
         self.update_quotas(self.tenant_id,

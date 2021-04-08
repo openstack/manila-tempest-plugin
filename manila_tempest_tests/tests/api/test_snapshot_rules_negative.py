@@ -50,7 +50,10 @@ class SnapshotIpRulesForNFSNegativeTest(
     def resource_setup(cls):
         super(SnapshotIpRulesForNFSNegativeTest, cls).resource_setup()
         # create share type
-        extra_specs = {'mount_snapshot_support': 'True'}
+        extra_specs = {
+            'snapshot_support': True,
+            'mount_snapshot_support': True,
+        }
         cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share

@@ -93,9 +93,17 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
 
         # Get share type
         get = self.shares_v2_client.get_share_type(st_id, version=version)
+
         self.assertEqual(name, get["share_type"]["name"])
         self.assertEqual(st_id, get["share_type"]["id"])
         self._verify_description(description, get['share_type'], version)
+
+        if utils.is_microversion_lt(version, "2.24"):
+            # snapshot_support is an implied/required extra-spec until
+            # version 2.24, and the service assumes it to be True since we
+            # don't provide it during share type creation.
+            extra_specs.update({"snapshot_support": 'True'})
+
         self.assertEqual(extra_specs, get["share_type"]["extra_specs"])
         self._verify_is_public_key_name(get['share_type'], version)
 

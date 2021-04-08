@@ -252,7 +252,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         instance = self.boot_instance(wait_until="BUILD")
 
         # 2 - Create share S1, ok, created
-        parent_share = self.create_share()
+        extra_specs = {'snapshot_support': True}
+        parent_share = self.create_share(extra_specs=extra_specs)
         parent_share_export_location = self.get_user_export_locations(
             parent_share)[0]
 
@@ -350,7 +351,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         instance = self.boot_instance(wait_until="BUILD")
 
         # 2 - Create share S1, ok, created
-        parent_share = self.create_share()
+        extra_specs = {'snapshot_support': True}
+        parent_share = self.create_share(extra_specs=extra_specs)
         user_export_location = self.get_user_export_locations(parent_share)[0]
 
         # Create client User Virtual Machine

@@ -56,6 +56,8 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
 
         # create share type
         extra_specs = {"replication_type": cls.replication_type}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({"snapshot_support": True})
         cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 

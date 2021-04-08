@@ -55,7 +55,14 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
             )
 
         # create share type
-        extra_specs = {"replication_type": cls.replication_type}
+        extra_specs = {
+            "replication_type": cls.replication_type,
+            "snapshot_support": True,
+        }
+        if CONF.share.capability_create_share_from_snapshot_support:
+            extra_specs.update({
+                "create_share_from_snapshot_support": True,
+            })
         cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         cls.sn_id = None

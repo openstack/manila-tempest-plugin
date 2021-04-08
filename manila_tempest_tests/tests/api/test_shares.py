@@ -42,9 +42,6 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         # create share_type
         cls.share_type = cls._create_share_type()
         cls.share_type_id = cls.share_type['id']
-        # create share
-        cls.share = cls.create_share(cls.protocol,
-                                     share_type_id=cls.share_type_id)
 
     @decorators.idempotent_id('21ad41fb-04cf-493c-bc2f-66c80220898b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -128,9 +125,15 @@ class SharesNFSTest(base.BaseSharesMixedTest):
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
     def test_create_delete_snapshot(self):
+        extra_specs = {'snapshot_support': True}
+        share_type = self._create_share_type(specs=extra_specs,
+                                             cleanup_in_class=False)
+        share = self.create_share(self.protocol,
+                                  share_type_id=share_type['id'],
+                                  cleanup_in_class=False)
 
         # create snapshot
-        snap = self.create_snapshot_wait_for_active(self.share["id"])
+        snap = self.create_snapshot_wait_for_active(share["id"])
 
         detailed_elements = {'name', 'id', 'description',
                              'created_at', 'share_proto', 'size', 'share_size',
@@ -167,14 +170,23 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         "Create share from snapshot tests are disabled.")
     def test_create_share_from_snapshot(self):
         # If multitenant driver used, share_network will be provided by default
+        extra_specs = {
+            'snapshot_support': True,
+            'create_share_from_snapshot_support': True,
+        }
+        share_type = self._create_share_type(specs=extra_specs,
+                                             cleanup_in_class=False)
+        share = self.create_share(self.protocol,
+                                  share_type_id=share_type['id'],
+                                  cleanup_in_class=False)
 
         # create snapshot
-        snap = self.create_snapshot_wait_for_active(
-            self.share["id"], cleanup_in_class=False)
+        snap = self.create_snapshot_wait_for_active(share["id"],
+                                                    cleanup_in_class=False)
 
         # create share from snapshot
         s2 = self.create_share(self.protocol,
-                               share_type_id=self.share_type_id,
+                               share_type_id=share_type['id'],
                                snapshot_id=snap["id"],
                                cleanup_in_class=False)
 
@@ -204,16 +216,25 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         # when creating share from snapshot using a driver that supports
         # multi-tenancy.
 
+        extra_specs = {
+            'snapshot_support': True,
+            'create_share_from_snapshot_support': True,
+        }
+        share_type = self._create_share_type(specs=extra_specs,
+                                             cleanup_in_class=False)
+        share = self.create_share(self.protocol,
+                                  share_type_id=share_type['id'],
+                                  cleanup_in_class=False)
+
         # get parent share
-        parent = self.shares_client.get_share(self.share["id"])
+        parent = self.shares_client.get_share(share["id"])
 
         # create snapshot
-        snap = self.create_snapshot_wait_for_active(
-            self.share["id"], cleanup_in_class=False)
+        snap = self.create_snapshot_wait_for_active(share["id"],
+                                                    cleanup_in_class=False)
 
         # create share from snapshot
         child = self.create_share(self.protocol,
-                                  share_type_id=self.share_type_id,
                                   snapshot_id=snap["id"],
                                   cleanup_in_class=False)
 
@@ -226,7 +247,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         # verify share, created from snapshot
         get = self.shares_client.get_share(child["id"])
         keys = {
-            "share": self.share["id"],
+            "share": share["id"],
             "actual_sn": get["share_network_id"],
             "expected_sn": parent["share_network_id"],
         }

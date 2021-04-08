@@ -34,24 +34,27 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         cls.admin_client = cls.admin_shares_v2_client
         cls.member_client = cls.shares_v2_client
         # create share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
-        cls.sh = cls.create_share(share_type_id=cls.share_type_id,
-                                  client=cls.admin_client)
+        cls.share = cls.create_share(share_type_id=cls.share_type_id,
+                                     client=cls.admin_client)
         cls.sh_instance = (
-            cls.admin_client.get_instances_of_share(cls.sh["id"])[0]
+            cls.admin_client.get_instances_of_share(cls.share["id"])[0]
         )
         if CONF.share.run_snapshot_tests:
-            cls.sn = cls.create_snapshot_wait_for_active(
-                cls.sh["id"], client=cls.admin_client)
+            cls.snapshot = cls.create_snapshot_wait_for_active(
+                cls.share["id"], client=cls.admin_client)
 
     @decorators.idempotent_id('f730c395-a501-44cf-90d9-a3273771b895')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_reset_share_state_to_unacceptable_state(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_client.reset_state,
-                          self.sh["id"], status="fake")
+                          self.share["id"], status="fake")
 
     @decorators.idempotent_id('3bfa9555-9c7e-45a2-b5bd-384329cb6fda')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -71,7 +74,9 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
     def test_reset_snapshot_state_to_unacceptable_state(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_client.reset_state,
-                          self.sn["id"], s_type="snapshots", status="fake")
+                          self.snapshot["id"],
+                          s_type="snapshots",
+                          status="fake")
 
     @decorators.idempotent_id('3b525c29-b657-493f-aa41-b17676a95fd2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -79,7 +84,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         # Even if member from another tenant, it should be unauthorized
         self.assertRaises(lib_exc.Forbidden,
                           self.member_client.reset_state,
-                          self.sh["id"])
+                          self.share["id"])
 
     @decorators.idempotent_id('d4abddba-1c20-49e1-85b1-5452f0faceb0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -97,7 +102,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         # Even if member from another tenant, it should be unauthorized
         self.assertRaises(lib_exc.Forbidden,
                           self.member_client.reset_state,
-                          self.sn["id"], s_type="snapshots")
+                          self.snapshot["id"], s_type="snapshots")
 
     @decorators.idempotent_id('7cd0b48e-2815-4f8c-8718-3c071ff9701f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -105,7 +110,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         # If a non-admin tries to do force_delete, it should be unauthorized
         self.assertRaises(lib_exc.Forbidden,
                           self.member_client.force_delete,
-                          self.sh["id"])
+                          self.share["id"])
 
     @decorators.idempotent_id('257da3e0-9460-4d97-8a56-c86c0427cc64')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -123,7 +128,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         # If a non-admin tries to do force_delete, it should be unauthorized
         self.assertRaises(lib_exc.Forbidden,
                           self.member_client.force_delete,
-                          self.sn["id"], s_type="snapshots")
+                          self.snapshot["id"], s_type="snapshots")
 
     @decorators.idempotent_id('821da7c8-3501-44ba-9ffe-45f485a6e573')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -140,7 +145,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         # unauthorized
         self.assertRaises(lib_exc.Forbidden,
                           self.member_client.get_instances_of_share,
-                          self.sh['id'])
+                          self.share['id'])
 
     @decorators.idempotent_id('d662457c-2b84-4f13-aee7-5ffafe2552f1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -148,7 +153,7 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
     def test_reset_task_state_invalid_state(self):
         self.assertRaises(
             lib_exc.BadRequest, self.admin_client.reset_task_state,
-            self.sh['id'], 'fake_state')
+            self.share['id'], 'fake_state')
 
 
 @ddt.ddt

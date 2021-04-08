@@ -72,8 +72,11 @@ class MigrationBase(base.BaseSharesAdminTest):
                                     "needed to run share migration tests.")
 
         # create share type (generic)
-        cls.share_type = cls._create_share_type()
-        cls.share_type_id = cls.share_type['id']
+        cls.share_type = cls.create_share_type(
+            name=data_utils.rand_name('original_share_type_for_migration'),
+            cleanup_in_class=True,
+            extra_specs=utils.get_configured_extra_specs())
+        cls.share_type_id = cls.share_type['share_type']['id']
 
         cls.new_type = cls.create_share_type(
             name=data_utils.rand_name('new_share_type_for_migration'),
@@ -338,7 +341,10 @@ class MigrationBase(base.BaseSharesAdminTest):
         # Share type with snapshot support
         st_name = data_utils.rand_name(
             'snapshot_capable_share_type_for_migration')
-        extra_specs = self.add_extra_specs_to_dict({"snapshot_support": True})
+        extra_specs = self.add_extra_specs_to_dict({
+            "snapshot_support": True,
+            "create_share_from_snapshot_support": True,
+        })
         ss_type = self.create_share_type(st_name, extra_specs=extra_specs)
 
         # New share type with no snapshot support capability

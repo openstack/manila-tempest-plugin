@@ -63,7 +63,10 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             raise cls.skipException(msg)
 
         cls.share_type_name = data_utils.rand_name("share-type")
-        extra_specs = {constants.REVERT_TO_SNAPSHOT_SUPPORT: True}
+        extra_specs = {
+            "snapshot_support": True,
+            constants.REVERT_TO_SNAPSHOT_SUPPORT: True,
+        }
         cls.revert_enabled_extra_specs = cls.add_extra_specs_to_dict(
             extra_specs=extra_specs)
 
@@ -86,6 +89,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
                 )
             extra_specs = cls.add_extra_specs_to_dict({
                 "replication_type": cls.replication_type,
+                "snapshot_support": True,
                 constants.REVERT_TO_SNAPSHOT_SUPPORT: True,
             })
             share_type = cls.create_share_type(

@@ -40,7 +40,8 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
     def resource_setup(cls):
         super(ShareSnapshotInstancesTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {'snapshot_support': True}
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id)

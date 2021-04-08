@@ -268,12 +268,13 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def migration_complete(self, share_id, dest_host):
         return self._migration_complete(share_id, dest_host)
 
-    def create_share(self, **kwargs):
+    def create_share(self, extra_specs=None, **kwargs):
         kwargs.update({
             'share_protocol': self.protocol,
         })
         if not ('share_type_id' in kwargs or 'snapshot_id' in kwargs):
-            default_share_type_id = self.get_share_type()['id']
+            default_share_type_id = self.get_share_type(
+                extra_specs=extra_specs)['id']
             kwargs.update({'share_type_id': default_share_type_id})
         if CONF.share.multitenancy_enabled:
             kwargs.update({'share_network_id': self.share_network['id']})
@@ -453,15 +454,17 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return self.os_primary.servers_client.show_server(
             instance_id)["server"]
 
-    def get_share_type(self):
+    def get_share_type(self, extra_specs=None):
         if CONF.share.default_share_type_name:
             return self.shares_client.get_default_share_type()['share_type']
+        extra_specs_dict = {
+            'driver_handles_share_servers': CONF.share.multitenancy_enabled
+        }
+        if extra_specs:
+            extra_specs_dict.update(extra_specs)
         return self._create_share_type(
             data_utils.rand_name("share_type"),
-            extra_specs={
-                'snapshot_support': CONF.share.capability_snapshot_support,
-                'driver_handles_share_servers': CONF.share.multitenancy_enabled
-            },)['share_type']
+            extra_specs=extra_specs_dict)['share_type']
 
     def get_share_export_locations(self, share):
         if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):

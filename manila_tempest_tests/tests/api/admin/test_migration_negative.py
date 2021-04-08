@@ -57,7 +57,11 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
                                     "are needed to run share migration tests.")
 
         # create share type (generic)
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         # create share
