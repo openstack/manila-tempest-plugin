@@ -83,7 +83,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         LOG.debug('Step 4 - provide access to instance')
-        self.provide_access_to_auxiliary_instance(instance, share=share)
+        self._provide_access_to_client_identified_by_ip(instance, share=share)
 
         if utils.is_microversion_lt(CONF.share.max_api_microversion, "2.9"):
             locations = share['export_locations']
@@ -136,7 +136,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             self.shares_admin_v2_client, managed_share['id'], 'available')
 
         LOG.debug('Step 11 - grant access again')
-        self.provide_access_to_auxiliary_instance(
+        self._provide_access_to_client_identified_by_ip(
             instance,
             share=managed_share,
             client=self.shares_admin_v2_client)
@@ -177,31 +177,14 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share_id=remanaged_share['id'])
 
 
-class ShareManageUnmanageNFS(ShareManageUnmanageBase):
-    protocol = "nfs"
-
-    def mount_share(self, location, remote_client, target_dir=None):
-
-        self.validate_ping_to_export_location(location, remote_client)
-
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command(
-            "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
-        )
+class ShareManageUnmanageNFS(manager.BaseShareScenarioNFSTest,
+                             ShareManageUnmanageBase):
+    ip_version = 4
 
 
-class ShareManageUnmanageCIFS(ShareManageUnmanageBase):
-    protocol = "cifs"
-
-    def mount_share(self, location, remote_client, target_dir=None):
-
-        self.validate_ping_to_export_location(location, remote_client)
-
-        location = location.replace("\\", "/")
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command(
-            "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
-        )
+class ShareManageUnmanageCIFS(manager.BaseShareScenarioCIFSTest,
+                              ShareManageUnmanageBase):
+    pass
 
 
 class ShareManageUnmanageNFSIPv6(ShareManageUnmanageNFS):

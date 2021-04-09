@@ -165,7 +165,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         instance = self.boot_instance(wait_until="BUILD")
         self.create_share()
-        exports = self.get_user_export_locations(self.share)
+        export_location = self.get_user_export_locations(self.share)[0]
         instance = self.wait_for_active_instance(instance["id"])
         self.share = self.shares_admin_v2_client.get_share(self.share['id'])
 
@@ -181,9 +181,12 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         dest_pool = dest_pool['name']
 
         remote_client = self.init_remote_client(instance)
-        self.provide_access_to_auxiliary_instance(instance)
 
-        self.mount_share(exports[0], remote_client)
+        self.allow_access(instance=instance,
+                          remote_client=remote_client,
+                          locations=export_location)
+
+        self.mount_share(export_location, remote_client)
 
         remote_client.exec_command("sudo mkdir -p /mnt/f1")
         remote_client.exec_command("sudo mkdir -p /mnt/f2")
@@ -250,6 +253,10 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 2 - Create share S1, ok, created
         parent_share = self.create_share()
+        parent_share_export_location = self.get_user_export_locations(
+            parent_share)[0]
+
+        # Create a client User Virtual Machine
         instance = self.wait_for_active_instance(instance["id"])
         self.addCleanup(self.servers_client.delete_server, instance['id'])
 
@@ -257,14 +264,18 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         # 4 - Provide RW access to S1, ok, provided
-        self.provide_access_to_auxiliary_instance(instance, parent_share)
+        self.allow_access(instance=instance,
+                          remote_client=remote_client,
+                          locations=parent_share_export_location)
 
         # 5 - Try mount S1 to UVM, ok, mounted
-        user_export_location = self.get_user_export_locations(parent_share)[0]
+
         parent_share_dir = "/mnt/parent"
         remote_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
 
-        self.mount_share(user_export_location, remote_client, parent_share_dir)
+        self.mount_share(parent_share_export_location,
+                         remote_client,
+                         parent_share_dir)
         self.addCleanup(self.unmount_share, remote_client, parent_share_dir)
 
         # 6 - Create "file1", ok, created
@@ -282,21 +293,26 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 10 - Try mount S2 - fail, access denied. We test that child share
         #      did not get access rules from parent share.
-        user_export_location = self.get_user_export_locations(child_share)[0]
+        child_share_export_location = self.get_user_export_locations(
+            child_share)[0]
         child_share_dir = "/mnt/child"
         remote_client.exec_command("sudo mkdir -p %s" % child_share_dir)
 
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
             self.mount_share,
-            user_export_location, remote_client, child_share_dir,
+            child_share_export_location, remote_client, child_share_dir,
         )
 
         # 11 - Provide RW access to S2, ok, provided
-        self.provide_access_to_auxiliary_instance(instance, child_share)
+        self.allow_access(instance=instance,
+                          remote_client=remote_client,
+                          locations=child_share_export_location)
 
         # 12 - Try mount S2, ok, mounted
-        self.mount_share(user_export_location, remote_client, child_share_dir)
+        self.mount_share(child_share_export_location,
+                         remote_client,
+                         child_share_dir)
         self.addCleanup(self.unmount_share, remote_client, child_share_dir)
 
         # 13 - List files on S2, only "file1" exists
@@ -335,6 +351,9 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 2 - Create share S1, ok, created
         parent_share = self.create_share()
+        user_export_location = self.get_user_export_locations(parent_share)[0]
+
+        # Create client User Virtual Machine
         instance = self.wait_for_active_instance(instance["id"])
         self.addCleanup(self.servers_client.delete_server, instance['id'])
 
@@ -342,10 +361,11 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
         remote_client = self.init_remote_client(instance)
 
         # 4 - Provide RW access to S1, ok, provided
-        self.provide_access_to_auxiliary_instance(instance, parent_share)
+        self.allow_access(instance=instance,
+                          remote_client=remote_client,
+                          locations=user_export_location)
 
         # 5 - Try mount S1 to UVM, ok, mounted
-        user_export_location = self.get_user_export_locations(parent_share)[0]
         parent_share_dir = "/mnt/parent"
         snapshot_dir = "/mnt/snapshot_dir"
         remote_client.exec_command("sudo mkdir -p %s" % parent_share_dir)
@@ -359,18 +379,21 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         # 7 - Create snapshot SS1 from S1, ok, created
         snapshot = self._create_snapshot(parent_share['id'])
+        snapshot_export_location = self.get_user_export_locations(
+            snapshot=snapshot)[0]
 
         # 8 - Create "file2" in share S1 - ok, created. We expect that
         # snapshot will not contain any data created after snapshot creation.
         remote_client.exec_command("sudo touch %s/file2" % parent_share_dir)
 
         # 9 - Allow access to SS1
-        self.provide_access_to_auxiliary_instance(instance, snapshot=snapshot)
+        self.allow_access(instance=instance,
+                          snapshot=snapshot,
+                          remote_client=remote_client,
+                          locations=snapshot_export_location)
 
         # 10 - Mount SS1
-        user_export_location = self.get_user_export_locations(
-            snapshot=snapshot)[0]
-        self.mount_share(user_export_location, remote_client, snapshot_dir)
+        self.mount_share(snapshot_export_location, remote_client, snapshot_dir)
         self.addCleanup(self.unmount_share, remote_client, snapshot_dir)
 
         # 11 - List files on SS1, only "file1" exists
@@ -387,54 +410,13 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             "sudo touch %s/file3" % snapshot_dir)
 
 
-class TestShareBasicOpsNFS(ShareBasicOpsBase):
-    protocol = "nfs"
-
-    @classmethod
-    def skip_checks(cls):
-        super(TestShareBasicOpsNFS, cls).skip_checks()
-        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       cls.protocol)
-            raise cls.skipException(message)
-
-    def allow_access(self, access_level='rw', **kwargs):
-        return self.provide_access_to_auxiliary_instance(
-            instance=kwargs['instance'], access_level=access_level)
-
-    def mount_share(self, location, remote_client, target_dir=None):
-
-        self.validate_ping_to_export_location(location, remote_client)
-
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command(
-            "sudo mount -vt nfs \"%s\" %s" % (location, target_dir))
+class TestShareBasicOpsNFS(manager.BaseShareScenarioNFSTest,
+                           ShareBasicOpsBase):
+    ip_version = 4
 
 
-class TestShareBasicOpsCIFS(ShareBasicOpsBase):
-    protocol = "cifs"
-
-    @classmethod
-    def skip_checks(cls):
-        super(TestShareBasicOpsCIFS, cls).skip_checks()
-        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       cls.protocol)
-            raise cls.skipException(message)
-
-    def allow_access(self, access_level='rw', **kwargs):
-        return self.provide_access_to_auxiliary_instance(
-            instance=kwargs['instance'], access_level=access_level)
-
-    def mount_share(self, location, remote_client, target_dir=None):
-
-        self.validate_ping_to_export_location(location, remote_client)
-
-        location = location.replace("\\", "/")
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command(
-            "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
-        )
+class TestShareBasicOpsCIFS(manager.BaseShareScenarioCIFSTest,
+                            ShareBasicOpsBase):
 
     @decorators.idempotent_id('4344a47a-d316-496b-97a4-12a59297950a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
@@ -456,26 +438,28 @@ class TestShareBasicOpsCIFS(ShareBasicOpsBase):
         raise self.skipException(msg)
 
 
-class TestShareBasicOpsCEPHFS(ShareBasicOpsBase, manager.BaseShareCEPHFSTest):
-    protocol = "cephfs"
-
+class TestBaseShareBasicOpsScenarioCEPHFS(manager.BaseShareScenarioCEPHFSTest,
+                                          ShareBasicOpsBase):
     @decorators.idempotent_id('9fb12879-45b3-4042-acac-82be338dbde1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
-        super(TestShareBasicOpsCEPHFS, self).test_mount_share_one_vm()
+        super(TestBaseShareBasicOpsScenarioCEPHFS,
+              self).test_mount_share_one_vm()
 
     @decorators.idempotent_id('a2a70b94-f5fc-438a-9dfa-53aa60ee3949')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_write_with_ro_access_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
-        super(TestShareBasicOpsCEPHFS, self).test_write_with_ro_access()
+        super(TestBaseShareBasicOpsScenarioCEPHFS,
+              self).test_write_with_ro_access()
 
     @decorators.idempotent_id('c247f51f-0ffc-4a4f-894c-781647619faf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_read_write_two_vms_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
-        super(TestShareBasicOpsCEPHFS, self).test_read_write_two_vms()
+        super(TestBaseShareBasicOpsScenarioCEPHFS,
+              self).test_read_write_two_vms()
 
 
 class TestShareBasicOpsNFSIPv6(TestShareBasicOpsNFS):

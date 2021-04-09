@@ -146,65 +146,23 @@ class ShareExtendBase(manager.ShareScenarioTest):
                 raise
 
 
-class TestShareExtendNFS(ShareExtendBase):
-    protocol = "nfs"
-
-    @classmethod
-    def skip_checks(cls):
-        super(ShareExtendBase, cls).skip_checks()
-        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       cls.protocol)
-            raise cls.skipException(message)
-
-    def allow_access(self, access_level='rw', **kwargs):
-        return self.provide_access_to_auxiliary_instance(
-            instance=kwargs['instance'], access_level=access_level)
-
-    def mount_share(self, location, remote_client, target_dir=None):
-
-        self.validate_ping_to_export_location(location, remote_client)
-
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command(
-            "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
-        )
+class TestShareExtendNFS(manager.BaseShareScenarioNFSTest, ShareExtendBase):
+    ip_version = 4
 
 
-class TestShareExtendCIFS(ShareExtendBase):
-    protocol = "cifs"
-
-    @classmethod
-    def skip_checks(cls):
-        super(ShareExtendBase, cls).skip_checks()
-        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
-            message = ("%s tests for access rules other than IP are disabled" %
-                       cls.protocol)
-            raise cls.skipException(message)
-
-    def allow_access(self, access_level='rw', **kwargs):
-        return self.provide_access_to_auxiliary_instance(
-            instance=kwargs['instance'], access_level=access_level)
-
-    def mount_share(self, location, remote_client, target_dir=None):
-
-        self.validate_ping_to_export_location(location, remote_client)
-
-        location = location.replace("\\", "/")
-        target_dir = target_dir or "/mnt"
-        remote_client.exec_command(
-            "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
-        )
+class TestShareExtendCIFS(manager.BaseShareScenarioCIFSTest, ShareExtendBase):
+    pass
 
 
-class TestShareExtendCEPHFS(ShareExtendBase, manager.BaseShareCEPHFSTest):
-    protocol = "cephfs"
+class TestBaseShareExtendScenarioCEPHFS(manager.BaseShareScenarioCEPHFSTest,
+                                        ShareExtendBase):
 
     @decorators.idempotent_id('9ca1e4a9-23e3-4da6-a63e-46e7919335e0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_extend_and_write_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
-        super(TestShareExtendCEPHFS, self).test_create_extend_and_write()
+        super(TestBaseShareExtendScenarioCEPHFS,
+              self).test_create_extend_and_write()
 
 
 class TestShareExtendNFSIPv6(TestShareExtendNFS):

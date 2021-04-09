@@ -352,9 +352,10 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             self.shares_v2_client, share_id, "active",
             status_attr='access_rules_status')
 
-    def provide_access_to_auxiliary_instance(self, instance, share=None,
-                                             snapshot=None, access_level='rw',
-                                             client=None):
+    def _provide_access_to_client_identified_by_ip(self, instance, share=None,
+                                                   snapshot=None,
+                                                   access_level='rw',
+                                                   client=None):
         share = share or self.share
         client = client or self.shares_v2_client
         if not CONF.share.multitenancy_enabled:
@@ -377,14 +378,14 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 share['id'], instance=instance, cleanup=False,
                 snapshot=snapshot, access_level=access_level, client=client)
 
-    def provide_access_to_client_identified_by_cephx(self, share=None,
-                                                     access_rule=None,
-                                                     access_level='rw',
-                                                     access_to=None,
-                                                     remote_client=None,
-                                                     locations=None,
-                                                     client=None,
-                                                     oc_size=20971520):
+    def _provide_access_to_client_identified_by_cephx(self, share=None,
+                                                      access_rule=None,
+                                                      access_level='rw',
+                                                      access_to=None,
+                                                      remote_client=None,
+                                                      locations=None,
+                                                      client=None,
+                                                      oc_size=20971520):
         """Provide an access to a client identified by cephx authentication
 
         :param: share: An existing share.
@@ -728,10 +729,67 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         return ip, version
 
 
-class BaseShareCEPHFSTest(ShareScenarioTest):
+class BaseShareScenarioNFSTest(ShareScenarioTest):
+    protocol = "nfs"
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseShareScenarioNFSTest, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
+    def allow_access(self, access_level='rw', **kwargs):
+        snapshot = kwargs.get('snapshot')
+        return self._provide_access_to_client_identified_by_ip(
+            instance=kwargs['instance'], access_level=access_level,
+            snapshot=snapshot)
+
+    def mount_share(self, location, ssh_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, ssh_client)
+
+        target_dir = target_dir or "/mnt"
+        ssh_client.exec_command(
+            "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
+        )
+
+
+class BaseShareScenarioCIFSTest(ShareScenarioTest):
+    protocol = 'cifs'
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseShareScenarioCIFSTest, cls).skip_checks()
+        if cls.protocol not in CONF.share.enable_ip_rules_for_protocols:
+            message = ("%s tests for access rules other than IP are disabled" %
+                       cls.protocol)
+            raise cls.skipException(message)
+
+    def allow_access(self, access_level='rw', **kwargs):
+        snapshot = kwargs.get('snapshot')
+        return self._provide_access_to_client_identified_by_ip(
+            instance=kwargs['instance'],
+            snapshot=snapshot,
+            access_level=access_level)
+
+    def mount_share(self, location, ssh_client, target_dir=None):
+
+        self.validate_ping_to_export_location(location, ssh_client)
+
+        location = location.replace("\\", "/")
+        target_dir = target_dir or "/mnt"
+        ssh_client.exec_command(
+            "sudo mount.cifs \"%s\" %s -o guest" % (location, target_dir)
+        )
+
+
+class BaseShareScenarioCEPHFSTest(ShareScenarioTest):
+    protocol = 'cephfs'
 
     def allow_access(self, access_level='rw', access_rule=None, **kwargs):
-        return self.provide_access_to_client_identified_by_cephx(
+        return self._provide_access_to_client_identified_by_cephx(
             remote_client=kwargs['remote_client'],
             locations=kwargs['locations'], access_level=access_level,
             access_rule=access_rule)
@@ -762,4 +820,4 @@ class BaseShareCEPHFSTest(ShareScenarioTest):
         if getattr(self, 'mount_client', None):
             return remote_client.exec_command(
                 "sudo fusermount -uz %s" % target_dir)
-        super(BaseShareCEPHFSTest, self).unmount_share(remote_client)
+        super(BaseShareScenarioCEPHFSTest, self).unmount_share(remote_client)
