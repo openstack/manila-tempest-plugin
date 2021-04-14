@@ -639,6 +639,22 @@
               enable_ro_access_level_for_protocols: ""
 
 - job:
+    name: manila-tempest-plugin-dummy-no-dhss-rbac
+    parent: manila-tempest-plugin-dummy-no-dhss
+    description: |
+      This job runs the devstack with scope checks enabled,
+      on the Dummy driver with DHSS=False.
+    vars:
+      tempest_test_regex: 'manila_tempest_tests.tests.rbac'
+      devstack_localrc:
+        MANILA_ENFORCE_SCOPE: true
+      devstack_local_conf:
+        test-config:
+          "$TEMPEST_CONFIG":
+            share:
+              default_share_type_name: default
+
+- job:
     name: manila-tempest-plugin-lvm-fips-base
     parent: manila-tempest-plugin-lvm-base
     nodeset: devstack-single-node-centos-9-stream
