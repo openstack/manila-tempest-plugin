@@ -820,4 +820,5 @@ class BaseShareScenarioCEPHFSTest(ShareScenarioTest):
         if getattr(self, 'mount_client', None):
             return remote_client.exec_command(
                 "sudo fusermount -uz %s" % target_dir)
-        super(BaseShareScenarioCEPHFSTest, self).unmount_share(remote_client)
+        super(BaseShareScenarioCEPHFSTest, self).unmount_share(
+            remote_client, target_dir=target_dir)

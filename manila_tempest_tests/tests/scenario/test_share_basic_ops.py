@@ -412,7 +412,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
 class TestShareBasicOpsNFS(manager.BaseShareScenarioNFSTest,
                            ShareBasicOpsBase):
-    ip_version = 4
+    pass
 
 
 class TestShareBasicOpsCIFS(manager.BaseShareScenarioCIFSTest,
@@ -460,6 +460,14 @@ class TestBaseShareBasicOpsScenarioCEPHFS(manager.BaseShareScenarioCEPHFSTest,
         self.mount_client = 'fuse'
         super(TestBaseShareBasicOpsScenarioCEPHFS,
               self).test_read_write_two_vms()
+
+    @decorators.idempotent_id('5bd64c46-05f4-4891-a08f-e146d1a76437')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_write_data_to_share_created_from_snapshot_with_ceph_fuse_client(
+            self):
+        self.mount_client = 'fuse'
+        super(TestBaseShareBasicOpsScenarioCEPHFS,
+              self).test_write_data_to_share_created_from_snapshot()
 
 
 class TestShareBasicOpsNFSIPv6(TestShareBasicOpsNFS):

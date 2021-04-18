@@ -179,7 +179,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
 
 class ShareManageUnmanageNFS(manager.BaseShareScenarioNFSTest,
                              ShareManageUnmanageBase):
-    ip_version = 4
+    pass
 
 
 class ShareManageUnmanageCIFS(manager.BaseShareScenarioCIFSTest,

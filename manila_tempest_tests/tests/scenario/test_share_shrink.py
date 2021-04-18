@@ -163,7 +163,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
 
 
 class TestShareShrinkNFS(manager.BaseShareScenarioNFSTest, ShareShrinkBase):
-    ip_version = 4
+    pass
 
 
 class TestShareShrinkCIFS(manager.BaseShareScenarioCIFSTest, ShareShrinkBase):

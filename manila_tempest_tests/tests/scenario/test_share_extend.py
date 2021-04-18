@@ -147,7 +147,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
 
 
 class TestShareExtendNFS(manager.BaseShareScenarioNFSTest, ShareExtendBase):
-    ip_version = 4
+    pass
 
 
 class TestShareExtendCIFS(manager.BaseShareScenarioCIFSTest, ShareExtendBase):
