@@ -51,7 +51,7 @@ class SecurityServiceAdminTest(
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_all_tenants(self):
         listed = self.shares_client.list_security_services(
-            params={'all_tenants': 1})
+            params={'all_tenants': 1})['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
                             for ss in listed))
@@ -63,5 +63,5 @@ class SecurityServiceAdminTest(
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_security_services_invalid_filters(self):
         listed = self.shares_client.list_security_services(
-            params={'fake_opt': 'some_value'})
+            params={'fake_opt': 'some_value'})['security_services']
         self.assertEqual(0, len(listed))

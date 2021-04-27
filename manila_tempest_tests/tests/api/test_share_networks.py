@@ -30,7 +30,7 @@ class ShareNetworkListMixin(object):
     @tc.attr("gate", "smoke", )
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks(self):
-        listed = self.shares_client.list_share_networks()
+        listed = self.shares_client.list_share_networks()['share_networks']
         any(self.sn_with_ldap_ss["id"] in sn["id"] for sn in listed)
 
         # verify keys
@@ -41,7 +41,7 @@ class ShareNetworkListMixin(object):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_share_networks_all_tenants(self):
         listed = self.shares_client.list_share_networks_with_detail(
-            params={'all_tenants': 1})
+            params={'all_tenants': 1})['share_networks']
         any(self.sn_with_ldap_ss["id"] in sn["id"] for sn in listed)
 
         # verify keys
@@ -52,7 +52,7 @@ class ShareNetworkListMixin(object):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_share_networks_project_id(self):
         listed = self.shares_client.list_share_networks_with_detail(
-            params={'project_id': 'some_project'})
+            params={'project_id': 'some_project'})['share_networks']
         any(self.sn_with_ldap_ss["id"] in sn["id"] for sn in listed)
 
         # verify keys
@@ -62,7 +62,8 @@ class ShareNetworkListMixin(object):
     @decorators.idempotent_id('285c7a91-1703-42a5-86c8-2463edde60e2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_with_detail(self):
-        listed = self.shares_v2_client.list_share_networks_with_detail()
+        listed = self.shares_v2_client.list_share_networks_with_detail(
+            )['share_networks']
         any(self.sn_with_ldap_ss["id"] in sn["id"] for sn in listed)
 
         # verify keys
@@ -100,12 +101,12 @@ class ShareNetworkListMixin(object):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_filter_by_ss(self):
         listed = self.shares_client.list_share_networks_with_detail(
-            {'security_service_id': self.ss_ldap['id']})
+            {'security_service_id': self.ss_ldap['id']})['share_networks']
         self.assertTrue(any(self.sn_with_ldap_ss['id'] == sn['id']
                             for sn in listed))
         for sn in listed:
             ss_list = self.shares_client.list_sec_services_for_share_network(
-                sn['id'])
+                sn['id'])['security_services']
             self.assertTrue(any(ss['id'] == self.ss_ldap['id']
                                 for ss in ss_list))
 
@@ -119,7 +120,7 @@ class ShareNetworkListMixin(object):
         }
 
         listed = self.shares_v2_client.list_share_networks_with_detail(
-            {'name~': 'ldap_ss', 'description~': 'fa'})
+            {'name~': 'ldap_ss', 'description~': 'fa'})['share_networks']
         self.assertTrue(any(self.sn_with_ldap_ss['id'] == sn['id']
                             for sn in listed))
         for sn in listed:
@@ -142,7 +143,7 @@ class ShareNetworkListMixin(object):
         }
 
         listed = self.shares_client.list_share_networks_with_detail(
-            valid_filter_opts)
+            valid_filter_opts)['share_networks']
         self.assertTrue(any(self.sn_with_ldap_ss['id'] == sn['id']
                             for sn in listed))
         created_before = valid_filter_opts.pop('created_before')
@@ -221,7 +222,8 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         data = self.generate_share_network_data()
 
         # create share network
-        created = self.shares_client.create_share_network(**data)
+        created = self.shares_client.create_share_network(
+            **data)['share_network']
         self.assertDictContainsSubset(data, created)
 
         # Delete share_network
@@ -230,7 +232,8 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @decorators.idempotent_id('55990ec2-37f0-483f-9c67-76fd6f377cc1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_get_share_network(self):
-        get = self.shares_client.get_share_network(self.sn_with_ldap_ss["id"])
+        get = self.shares_client.get_share_network(
+            self.sn_with_ldap_ss["id"])['share_network']
         self.assertEqual('2002-02-02T00:00:00.000000', get['created_at'])
         data = self.data_sn_with_ldap_ss.copy()
         del data['created_at']
@@ -242,7 +245,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         update_data = self.generate_share_network_data()
         updated = self.shares_client.update_share_network(
             self.sn_with_ldap_ss["id"],
-            **update_data)
+            **update_data)['share_network']
         self.assertDictContainsSubset(update_data, updated)
 
     @decorators.idempotent_id('198a5c08-3aaf-4623-9720-95d33ebe3376')
@@ -257,7 +260,8 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
             "description": "new_description",
         }
         updated = self.shares_client.update_share_network(
-            self.shares_client.share_network_id, **update_dict)
+            self.shares_client.share_network_id,
+            **update_dict)['share_network']
         self.assertDictContainsSubset(update_dict, updated)
 
     @decorators.idempotent_id('7595a844-a28e-476c-89f1-4d3193ce9d5b')
@@ -267,14 +271,14 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         data = self.generate_share_network_data()
 
         # create share network
-        sn1 = self.shares_client.create_share_network(**data)
+        sn1 = self.shares_client.create_share_network(**data)['share_network']
         self.assertDictContainsSubset(data, sn1)
 
         # Delete first share network
         self.shares_client.delete_share_network(sn1["id"])
 
         # create second share network with same data
-        sn2 = self.shares_client.create_share_network(**data)
+        sn2 = self.shares_client.create_share_network(**data)['share_network']
         self.assertDictContainsSubset(data, sn2)
 
         # Delete second share network
@@ -308,7 +312,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         self.create_share(share_type_id=self.share_type_id,
                           cleanup_in_class=False)
         share_net_details = self.shares_v2_client.get_share_network(
-            self.shares_v2_client.share_network_id)
+            self.shares_v2_client.share_network_id)['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(share_net_details)
             if utils.share_network_subnets_are_supported()
@@ -332,7 +336,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         self.create_share(share_type_id=self.share_type_id,
                           cleanup_in_class=False)
         share_net_details = self.shares_v2_client.get_share_network(
-            self.shares_v2_client.share_network_id)
+            self.shares_v2_client.share_network_id)['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(share_net_details)
             if utils.share_network_subnets_are_supported()

@@ -51,7 +51,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         cls.share = cls.create_share(
             share_type_id=cls.share_type_id)
         cls.share_network = cls.shares_v2_client.get_share_network(
-            cls.shares_v2_client.share_network_id)
+            cls.shares_v2_client.share_network_id)['share_network']
 
         if not cls.share_network["name"]:
             sn_id = cls.share_network["id"]
@@ -74,7 +74,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('3f821248-2c05-4323-a95f-a0216a537b0a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_without_filters(self):
-        servers = self.shares_v2_client.list_share_servers()
+        servers = self.shares_v2_client.list_share_servers()['share_servers']
         self.assertGreater(len(servers), 0)
         keys = [
             "id",
@@ -106,7 +106,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_host_filter(self):
         # Get list of share servers and remember 'host' name
-        servers = self.shares_v2_client.list_share_servers()
+        servers = self.shares_v2_client.list_share_servers()['share_servers']
         # Remember name of server that was used by this test suite
         # to be sure it will be still existing.
         for server in servers:
@@ -123,7 +123,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
                                                         six.text_type(servers))
             raise lib_exc.NotFound(message=msg)
         search_opts = {"host": host}
-        servers = self.shares_v2_client.list_share_servers(search_opts)
+        servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
         self.assertGreater(len(servers), 0)
         for server in servers:
             self.assertEqual(server["host"], host)
@@ -132,7 +133,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_status_filter(self):
         search_opts = {"status": "active"}
-        servers = self.shares_v2_client.list_share_servers(search_opts)
+        servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
 
         # At least 1 share server should exist always - the one created
         # for this class.
@@ -144,7 +146,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_project_id_filter(self):
         search_opts = {"project_id": self.share_network["project_id"]}
-        servers = self.shares_v2_client.list_share_servers(search_opts)
+        servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
         # Should exist, at least, one share server, used by this test suite.
         self.assertGreater(len(servers), 0)
         for server in servers:
@@ -155,7 +158,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_share_network_name_filter(self):
         search_opts = {"share_network": self.share_network["name"]}
-        servers = self.shares_v2_client.list_share_servers(search_opts)
+        servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
         # Should exist, at least, one share server, used by this test suite.
         self.assertGreater(len(servers), 0)
         for server in servers:
@@ -166,7 +170,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_servers_with_share_network_id_filter(self):
         search_opts = {"share_network": self.share_network["id"]}
-        servers = self.shares_v2_client.list_share_servers(search_opts)
+        servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
         # Should exist, at least, one share server, used by this test suite.
         self.assertGreater(len(servers), 0)
         for server in servers:
@@ -176,9 +181,9 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('e1af24f4-bf63-467d-a857-3a402fa9b65b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_server(self):
-        share = self.shares_v2_client.get_share(self.share["id"])
+        share = self.shares_v2_client.get_share(self.share["id"])['share']
         server = self.shares_v2_client.show_share_server(
-            share["share_server_id"])
+            share["share_server_id"])['share_server']
         keys = [
             "id",
             "host",
@@ -215,9 +220,9 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('782d8f5f-2c02-44dd-8d43-e06b651a71be')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_server_details(self):
-        share = self.shares_v2_client.get_share(self.share['id'])
+        share = self.shares_v2_client.get_share(self.share['id'])['share']
         details = self.shares_v2_client.show_share_server_details(
-            share['share_server_id'])
+            share['share_server_id'])['details']
 
         # If details are present they and their values should be only strings
         for k, v in details.items():
@@ -246,7 +251,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
 
         # List share servers, filtered by share_network_id
         servers = self.shares_v2_client.list_share_servers(
-            {"share_network": new_sn["id"]})
+            {"share_network": new_sn["id"]})['share_servers']
 
         # There can be more than one share server for share network when retry
         # was used and share was created successfully not from first time.
@@ -258,7 +263,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
 
             # List shares by share server id
             shares = self.shares_v2_client.list_shares_with_detail(
-                {"share_server_id": serv["id"]})
+                {"share_server_id": serv["id"]})['shares']
             for s in shares:
                 self.assertEqual(new_sn["id"], s["share_network_id"])
 
@@ -273,7 +278,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
 
             # List shares by share server id, we expect empty list
             empty = self.shares_v2_client.list_shares_with_detail(
-                {"share_server_id": serv["id"]})
+                {"share_server_id": serv["id"]})['shares']
             self.assertEqual(0, len(empty))
 
             if delete_share_network:
@@ -308,12 +313,12 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             share_type_id=self.share_type_id,
             share_network_id=new_sn['id']
         )
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         # obtain share server
         share_server = self.shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
 
         for state in (constants.SERVER_STATE_ACTIVE,
                       constants.SERVER_STATE_CREATING,

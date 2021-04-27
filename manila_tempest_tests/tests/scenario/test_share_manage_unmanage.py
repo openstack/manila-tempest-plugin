@@ -89,14 +89,14 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             locations = share['export_locations']
         else:
             exports = self.shares_v2_client.list_share_export_locations(
-                share['id'])
+                share['id'])['export_locations']
             locations = [x['path'] for x in exports]
 
         LOG.debug('Step 5 - mount')
         self.mount_share(locations[0], remote_client)
 
         # Update share info, needed later
-        share = self.shares_admin_v2_client.get_share(share['id'])
+        share = self.shares_admin_v2_client.get_share(share['id'])['share']
 
         LOG.debug('Step 6a - create file')
         remote_client.exec_command("sudo touch /mnt/t1")
@@ -131,7 +131,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['host'],
             share['share_proto'],
             locations[0],
-            share_type['id'])
+            share_type['id'])['share']
         waiters.wait_for_resource_status(
             self.shares_admin_v2_client, managed_share['id'], 'available')
 
@@ -142,7 +142,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             client=self.shares_admin_v2_client)
 
         exports = self.shares_admin_v2_client.list_share_export_locations(
-            managed_share['id'])
+            managed_share['id'])['export_locations']
         locations = [x['path'] for x in exports]
 
         LOG.debug('Step 12 - mount')
@@ -165,7 +165,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['host'],
             share['share_proto'],
             locations[0],
-            share_type['id'])
+            share_type['id'])['share']
         waiters.wait_for_resource_status(
             self.shares_admin_v2_client, remanaged_share['id'], 'manage_error')
 

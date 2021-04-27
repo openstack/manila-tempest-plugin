@@ -65,7 +65,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
         "Quota tests are disabled.")
     def test_share_extend_over_quota(self):
         tenant_quotas = self.shares_client.show_quotas(
-            self.shares_client.tenant_id)
+            self.shares_client.tenant_id)['quota_set']
         new_size = int(tenant_quotas["gigabytes"]) + 1
 
         # extend share with over quota and check result
@@ -183,7 +183,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             'export_location_' + export_location_type: 'fake',
         }
         shares = self.shares_v2_client.list_shares(
-            params=filters, version="2.34")
+            params=filters, version="2.34")['shares']
 
         self.assertGreater(len(shares), 0)
 
@@ -197,7 +197,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             'export_location_' + export_location_type: 'fake_not_exist',
         }
         shares = self.shares_v2_client.list_shares(
-            params=filters)
+            params=filters)['shares']
 
         self.assertEqual(0, len(shares))
 
@@ -213,7 +213,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             'description~': 'fake',
         }
         shares = self.shares_v2_client.list_shares(
-            params=filters, version="2.35")
+            params=filters, version="2.35")['shares']
 
         self.assertGreater(len(shares), 0)
 
@@ -225,7 +225,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             'name~': 'fake_not_exist',
             'description~': 'fake_not_exist',
         }
-        shares = self.shares_v2_client.list_shares(params=filters)
+        shares = self.shares_v2_client.list_shares(params=filters)['shares']
 
         self.assertEqual(0, len(shares))
 
@@ -235,7 +235,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
         filters = {
             'name': "tempest-share",
         }
-        shares = self.shares_v2_client.list_shares(params=filters)
+        shares = self.shares_v2_client.list_shares(params=filters)['shares']
 
         self.assertEqual(0, len(shares))
 
@@ -246,7 +246,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
         filters = {
             'description': "tempest-share",
         }
-        shares = self.shares_v2_client.list_shares(params=filters)
+        shares = self.shares_v2_client.list_shares(params=filters)['shares']
 
         self.assertEqual(0, len(shares))
 
@@ -258,7 +258,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             'description': "tempest-snapshot",
         }
         shares = self.shares_v2_client.list_snapshots_with_detail(
-            params=filters)
+            params=filters)['snapshots']
 
         self.assertEqual(0, len(shares))
 
@@ -269,7 +269,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
             'name': "tempest-snapshot",
         }
         shares = self.shares_v2_client.list_snapshots_with_detail(
-            params=filters)
+            params=filters)['snapshots']
 
         self.assertEqual(0, len(shares))
 

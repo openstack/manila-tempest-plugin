@@ -35,7 +35,8 @@ class SecurityServiceListMixin(object):
     @decorators.idempotent_id('f6f5657c-a93c-49ed-86e3-b351a92734d5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services(self):
-        listed = self.shares_client.list_security_services()
+        listed = self.shares_client.list_security_services(
+            )['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
                             for ss in listed))
@@ -52,9 +53,10 @@ class SecurityServiceListMixin(object):
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
         if utils.is_microversion_ge(version, '2.0'):
             listed = self.shares_v2_client.list_security_services(
-                detailed=True, version=version)
+                detailed=True, version=version)['security_services']
         else:
-            listed = self.shares_client.list_security_services(detailed=True)
+            listed = self.shares_client.list_security_services(
+                detailed=True)['security_services']
 
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
@@ -77,7 +79,7 @@ class SecurityServiceListMixin(object):
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_list_security_services_filter_by_share_network(self):
         sn = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)
+            self.shares_client.share_network_id)['share_network']
         fresh_sn = []
         for i in range(2):
             sn = self.create_share_network(
@@ -92,7 +94,9 @@ class SecurityServiceListMixin(object):
             fresh_sn[1]["id"], self.ss_kerberos["id"])
 
         listed = self.shares_client.list_security_services(
-            params={'share_network_id': fresh_sn[0]['id']})
+            params={
+                'share_network_id': fresh_sn[0]['id']
+            })['security_services']
         self.assertEqual(1, len(listed))
         self.assertEqual(self.ss_ldap['id'], listed[0]['id'])
 
@@ -112,7 +116,7 @@ class SecurityServiceListMixin(object):
         }
         listed = self.shares_client.list_security_services(
             detailed=True,
-            params=search_opts)
+            params=search_opts)['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         for ss in listed:
             self.assertTrue(all(ss[key] == value for key, value
@@ -179,10 +183,11 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             ss = self.create_security_service(
                 client=self.shares_v2_client, version=version, **data)
             get = self.shares_v2_client.get_security_service(
-                ss["id"], version=version)
+                ss["id"], version=version)['security_service']
         else:
             ss = self.create_security_service(**data)
-            get = self.shares_client.get_security_service(ss["id"])
+            get = self.shares_client.get_security_service(
+                ss["id"])['security_service']
 
         self.assertDictContainsSubset(data, ss)
         self.assertEqual(with_ou, 'ou' in ss)
@@ -198,9 +203,10 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
 
         upd_data = self.generate_security_service_data()
         updated = self.shares_client.update_security_service(
-            ss["id"], **upd_data)
+            ss["id"], **upd_data)['security_service']
 
-        get = self.shares_client.get_security_service(ss["id"])
+        get = self.shares_client.get_security_service(
+            ss["id"])['security_service']
         self.assertDictContainsSubset(upd_data, updated)
         self.assertDictContainsSubset(upd_data, get)
 
@@ -208,9 +214,10 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             # update again with ou
             upd_data_ou = self.generate_security_service_data(set_ou=True)
             updated_ou = self.shares_v2_client.update_security_service(
-                ss["id"], **upd_data_ou)
+                ss["id"], **upd_data_ou)['security_service']
 
-            get_ou = self.shares_v2_client.get_security_service(ss["id"])
+            get_ou = self.shares_v2_client.get_security_service(
+                ss["id"])['security_service']
             self.assertDictContainsSubset(upd_data_ou, updated_ou)
             self.assertDictContainsSubset(upd_data_ou, get_ou)
 
@@ -223,7 +230,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         ss = self.create_security_service(**ss_data)
 
         sn = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)
+            self.shares_client.share_network_id)['share_network']
         fresh_sn = self.create_share_network(
             add_security_services=False,
             neutron_net_id=sn["neutron_net_id"],
@@ -252,14 +259,14 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             "description": "new_description",
         }
         updated = self.shares_client.update_security_service(
-            ss["id"], **update_data)
+            ss["id"], **update_data)['security_service']
         self.assertDictContainsSubset(update_data, updated)
 
     @decorators.idempotent_id('8d9af272-df89-470d-9ff8-92ba774c9fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_filter_by_invalid_opt(self):
         listed = self.shares_client.list_security_services(
-            params={'fake_opt': 'some_value'})
+            params={'fake_opt': 'some_value'})['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
                             for ss in listed))
@@ -268,7 +275,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_security_services_all_tenants(self):
         listed = self.shares_client.list_security_services(
-            params={'all_tenants': 1})
+            params={'all_tenants': 1})['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
                             for ss in listed))

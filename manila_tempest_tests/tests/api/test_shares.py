@@ -72,12 +72,14 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         self.assertIn(share['status'], ('creating', 'available'))
 
         # Get share using v 2.1 - we expect key 'snapshot_support' to be absent
-        share_get = self.shares_v2_client.get_share(share['id'], version='2.1')
+        share_get = self.shares_v2_client.get_share(
+            share['id'], version='2.1')['share']
         detailed_elements.add('export_location')
         self.assertTrue(detailed_elements.issubset(share_get.keys()), msg)
 
         # Get share using v 2.2 - we expect key 'snapshot_support' to exist
-        share_get = self.shares_v2_client.get_share(share['id'], version='2.2')
+        share_get = self.shares_v2_client.get_share(
+            share['id'], version='2.2')['share']
         detailed_elements.add('snapshot_support')
         self.assertTrue(detailed_elements.issubset(share_get.keys()), msg)
 
@@ -85,7 +87,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             # Get share using v 2.9 - key 'export_location' is expected
             # to be absent
             share_get = self.shares_v2_client.get_share(
-                share['id'], version='2.9')
+                share['id'], version='2.9')['share']
             detailed_elements.remove('export_location')
             self.assertTrue(detailed_elements.issubset(share_get.keys()), msg)
 
@@ -197,7 +199,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         self.assertIn(s2['status'], ('creating', 'available'))
 
         # verify share, created from snapshot
-        get = self.shares_client.get_share(s2["id"])
+        get = self.shares_client.get_share(s2["id"])['share']
         msg = ("Expected snapshot_id %s as "
                "source of share %s" % (snap["id"], get["snapshot_id"]))
         self.assertEqual(get["snapshot_id"], snap["id"], msg)
@@ -227,7 +229,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # get parent share
-        parent = self.shares_client.get_share(share["id"])
+        parent = self.shares_client.get_share(share["id"])['share']
 
         # create snapshot
         snap = self.create_snapshot_wait_for_active(share["id"],
@@ -245,7 +247,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         self.assertIn(child['status'], ('creating', 'available'))
 
         # verify share, created from snapshot
-        get = self.shares_client.get_share(child["id"])
+        get = self.shares_client.get_share(child["id"])['share']
         keys = {
             "share": share["id"],
             "actual_sn": get["share_network_id"],

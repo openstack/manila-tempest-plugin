@@ -93,7 +93,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # get share
         share = self.shares_v2_client.get_share(
-            self.shares[0]['id'], version=six.text_type(version))
+            self.shares[0]['id'], version=six.text_type(version))['share']
 
         # verify keys
         expected_keys = [
@@ -195,7 +195,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares(self):
 
         # list shares
-        shares = self.shares_v2_client.list_shares()
+        shares = self.shares_v2_client.list_shares()['shares']
 
         # verify keys
         keys = ["name", "id", "links"]
@@ -211,7 +211,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # list shares
         shares = self.shares_v2_client.list_shares_with_detail(
-            version=six.text_type(version))
+            version=six.text_type(version))['shares']
 
         # verify keys
         keys = [
@@ -305,7 +305,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         filters = {'metadata': self.metadata}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(params=filters)
+        shares = self.shares_client.list_shares_with_detail(
+            params=filters)['shares']
 
         # verify response
         self.assertGreater(len(shares), 0)
@@ -320,11 +321,13 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_list_shares_with_detail_filter_by_share_network_id(self):
-        base_share = self.shares_client.get_share(self.shares[0]['id'])
+        base_share = self.shares_client.get_share(
+            self.shares[0]['id'])['share']
         filters = {'share_network_id': base_share['share_network_id']}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(params=filters)
+        shares = self.shares_client.list_shares_with_detail(
+            params=filters)['shares']
 
         # verify response
         self.assertGreater(len(shares), 0)
@@ -343,7 +346,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         filters = {'snapshot_id': self.snap['id']}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(params=filters)
+        shares = self.shares_client.list_shares_with_detail(
+            params=filters)['shares']
 
         # verify response
         self.assertGreater(len(shares), 0)
@@ -357,7 +361,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         filters = {'sort_key': 'created_at', 'sort_dir': 'asc'}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(params=filters)
+        shares = self.shares_client.list_shares_with_detail(
+            params=filters)['shares']
 
         # verify response
         self.assertGreater(len(shares), 0)
@@ -369,7 +374,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_existed_name(self):
         # list shares by name, at least one share is expected
         params = {"name": self.share_name}
-        shares = self.shares_client.list_shares_with_detail(params)
+        shares = self.shares_client.list_shares_with_detail(
+            params)['shares']
         self.assertEqual(self.share_name, shares[0]["name"])
 
     @decorators.idempotent_id('f446e8cb-5bef-45ac-8b87-f4136f44ca69')
@@ -378,7 +384,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_existed_description(self):
         # list shares by description, at least one share is expected
         params = {"description": self.share_desc}
-        shares = self.shares_v2_client.list_shares_with_detail(params)
+        shares = self.shares_v2_client.list_shares_with_detail(
+            params)['shares']
         self.assertEqual(self.share_name, shares[0]["name"])
 
     @decorators.idempotent_id('1276b97b-cf46-4953-973f-f995985a1ce4')
@@ -387,7 +394,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_inexact_name(self):
         # list shares by name, at least one share is expected
         params = {"name~": 'tempest-share'}
-        shares = self.shares_v2_client.list_shares_with_detail(params)
+        shares = self.shares_v2_client.list_shares_with_detail(
+            params)['shares']
         for share in shares:
             self.assertIn('tempest-share', share["name"])
 
@@ -396,7 +404,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_fake_name(self):
         # list shares by fake name, no shares are expected
         params = {"name": data_utils.rand_name("fake-nonexistent-name")}
-        shares = self.shares_client.list_shares_with_detail(params)
+        shares = self.shares_client.list_shares_with_detail(params)['shares']
         self.assertEqual(0, len(shares))
 
     @decorators.idempotent_id('708e3e2e-8761-4d16-b18d-a834ee7ca69e')
@@ -404,7 +412,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_active_status(self):
         # list shares by active status, at least one share is expected
         params = {"status": "available"}
-        shares = self.shares_client.list_shares_with_detail(params)
+        shares = self.shares_client.list_shares_with_detail(params)['shares']
         self.assertGreater(len(shares), 0)
         for share in shares:
             self.assertEqual(params["status"], share["status"])
@@ -414,7 +422,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_fake_status(self):
         # list shares by fake status, no shares are expected
         params = {"status": 'fake'}
-        shares = self.shares_client.list_shares_with_detail(params)
+        shares = self.shares_client.list_shares_with_detail(params)['shares']
         self.assertEqual(0, len(shares))
 
     @decorators.idempotent_id('7609b7bb-613e-474d-a9b3-e41584842503')
@@ -422,11 +430,11 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_shares_with_detail_filter_by_all_tenants(self):
         # non-admin user can get shares only from his project
         params = {"all_tenants": 1}
-        shares = self.shares_client.list_shares_with_detail(params)
+        shares = self.shares_client.list_shares_with_detail(params)['shares']
         self.assertGreater(len(shares), 0)
 
         # get share with detailed info, we need its 'project_id'
-        share = self.shares_client.get_share(self.shares[0]["id"])
+        share = self.shares_client.get_share(self.shares[0]["id"])['share']
         project_id = share["project_id"]
         for share in shares:
             self.assertEqual(project_id, share["project_id"])
@@ -449,11 +457,12 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # get snapshot
         if version is None:
-            snapshot = self.shares_client.get_snapshot(self.snap["id"])
+            snapshot = self.shares_client.get_snapshot(
+                self.snap["id"])['snapshot']
         else:
             utils.check_skip_if_microversion_not_supported(version)
             snapshot = self.shares_v2_client.get_snapshot(
-                self.snap["id"], version=version)
+                self.snap["id"], version=version)['snapshot']
 
         # verify keys
         expected_keys = ["status", "links", "share_id", "name",
@@ -504,7 +513,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
     def test_list_snapshots(self):
 
         # list share snapshots
-        snaps = self.shares_client.list_snapshots()
+        snaps = self.shares_client.list_snapshots()['snapshots']
 
         # verify keys
         keys = ["id", "name", "links"]
@@ -526,11 +535,12 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             params = {'name~': 'tempest', 'description~': 'tempest'}
         # list share snapshots
         if version is None:
-            snaps = self.shares_client.list_snapshots_with_detail()
+            snaps = self.shares_client.list_snapshots_with_detail(
+                )['snapshots']
         else:
             utils.check_skip_if_microversion_not_supported(version)
             snaps = self.shares_v2_client.list_snapshots_with_detail(
-                version=version, params=params)
+                version=version, params=params)['snapshots']
 
         # verify keys
         expected_keys = ["status", "links", "share_id", "name",
@@ -561,7 +571,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
             # list snapshots
             snaps = self.shares_client.list_snapshots_with_detail(
-                params=filters)
+                params=filters)['snapshots']
 
             # Our snapshot should not be listed
             self.assertEqual(0, len(snaps))
@@ -569,10 +579,10 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         # Only our one snapshot should be listed
         snaps = self.shares_client.list_snapshots_with_detail(
             params={'limit': '1', 'offset': '0',
-                    'share_id': self.shares[0]['id']})
+                    'share_id': self.shares[0]['id']})['snapshots']
 
-        self.assertEqual(1, len(snaps['snapshots']))
-        self.assertEqual(self.snap['id'], snaps['snapshots'][0]['id'])
+        self.assertEqual(1, len(snaps))
+        self.assertEqual(self.snap['id'], snaps[0]['id'])
 
     @decorators.idempotent_id('0a94e996-c4db-4fef-b486-4004ea65c11a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -583,7 +593,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # list snapshots
         snaps = self.shares_client.list_snapshots_with_detail(
-            params=filters)
+            params=filters)['snapshots']
 
         # verify response
         self.assertGreater(len(snaps), 0)
@@ -601,7 +611,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # list snapshots
         snaps = self.shares_client.list_snapshots_with_detail(
-            params=filters)
+            params=filters)['snapshots']
 
         # verify response
         self.assertGreater(len(snaps), 0)
@@ -617,7 +627,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # list snapshots
         snaps = self.shares_client.list_snapshots_with_detail(
-            params=filters)
+            params=filters)['snapshots']
 
         # verify response
         self.assertGreater(len(snaps), 0)
@@ -640,7 +650,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             self.shares_client, share['id'], 'available')
 
         # check state and new size
-        share_get = self.shares_v2_client.get_share(share['id'])
+        share_get = self.shares_v2_client.get_share(share['id'])['share']
         msg = (
             "Share could not be extended. "
             "Expected %(expected)s, got %(actual)s." % {
@@ -668,7 +678,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             self.shares_client, share['id'], 'available')
 
         # check state and new size
-        share_get = self.shares_v2_client.get_share(share['id'])
+        share_get = self.shares_v2_client.get_share(share['id'])['share']
         msg = (
             "Share could not be shrunk. "
             "Expected %(expected)s, got %(actual)s." % {
@@ -713,7 +723,7 @@ class SharesRenameTest(base.BaseSharesMixedTest):
     def test_update_share(self):
 
         # get share
-        share = self.shares_client.get_share(self.share['id'])
+        share = self.shares_client.get_share(self.share['id'])['share']
         self.assertEqual(self.share_name, share["name"])
         self.assertEqual(self.share_desc, share["description"])
         self.assertFalse(share["is_public"])
@@ -722,12 +732,12 @@ class SharesRenameTest(base.BaseSharesMixedTest):
         new_name = data_utils.rand_name("tempest-new-name")
         new_desc = data_utils.rand_name("tempest-new-description")
         updated = self.shares_client.update_share(
-            share["id"], name=new_name, desc=new_desc)
+            share["id"], name=new_name, desc=new_desc)['share']
         self.assertEqual(new_name, updated["name"])
         self.assertEqual(new_desc, updated["description"])
 
         # get share
-        share = self.shares_client.get_share(self.share['id'])
+        share = self.shares_client.get_share(self.share['id'])['share']
         self.assertEqual(new_name, share["name"])
         self.assertEqual(new_desc, share["description"])
         self.assertFalse(share["is_public"])
@@ -739,7 +749,7 @@ class SharesRenameTest(base.BaseSharesMixedTest):
     def test_rename_snapshot(self):
 
         # get snapshot
-        get = self.shares_client.get_snapshot(self.snap["id"])
+        get = self.shares_client.get_snapshot(self.snap["id"])['snapshot']
         self.assertEqual(self.snap_name, get["name"])
         self.assertEqual(self.snap_desc, get["description"])
 
@@ -747,11 +757,11 @@ class SharesRenameTest(base.BaseSharesMixedTest):
         new_name = data_utils.rand_name("tempest-new-name-for-snapshot")
         new_desc = data_utils.rand_name("tempest-new-description-for-snapshot")
         renamed = self.shares_client.rename_snapshot(
-            self.snap["id"], new_name, new_desc)
+            self.snap["id"], new_name, new_desc)['snapshot']
         self.assertEqual(new_name, renamed["name"])
         self.assertEqual(new_desc, renamed["description"])
 
         # get snapshot
-        get = self.shares_client.get_snapshot(self.snap["id"])
+        get = self.shares_client.get_snapshot(self.snap["id"])['snapshot']
         self.assertEqual(new_name, get["name"])
         self.assertEqual(new_desc, get["description"])

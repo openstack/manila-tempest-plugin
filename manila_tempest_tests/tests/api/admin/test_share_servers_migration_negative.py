@@ -46,7 +46,7 @@ class MigrationShareServerNegative(
         share = cls.create_share(share_protocol=cls.protocol,
                                  share_type_id=share_type['id'],
                                  cleanup_in_class=cleanup_in_class)
-        share = cls.shares_v2_client.get_share(share['id'])
+        share = cls.shares_v2_client.get_share(share['id'])['share']
         share_server_id = share['share_server_id']
         dest_host, compatible = (
             cls._choose_compatible_backend_for_share_server(share_server_id))
@@ -115,7 +115,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
         share = self.create_share(
             share_protocol=self.protocol,
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share_server_id = share['share_server_id']
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.share_server_migration_start,
@@ -129,7 +129,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
         share = self.create_share(
             share_protocol=self.protocol,
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share_server_id = share['share_server_id']
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.share_server_migration_check,
@@ -143,7 +143,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
         share = self.create_share(
             share_protocol=self.protocol,
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share_server_id = share['share_server_id']
         dest_host, _ = self._choose_compatible_backend_for_share_server(
             share_server_id)
@@ -160,7 +160,7 @@ class ShareServerMigrationInvalidParametersNFS(MigrationShareServerNegative):
         share = self.create_share(
             share_protocol=self.protocol,
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share_server_id = share['share_server_id']
         dest_host, _ = self._choose_compatible_backend_for_share_server(
             share_server_id)
@@ -180,7 +180,7 @@ class ShareServerErrorStatusOperationNFS(MigrationShareServerNegative):
         cls.share = cls.create_share(
             share_protocol=cls.protocol,
             share_type_id=cls.share_type['id'])
-        cls.share = cls.shares_v2_client.get_share(cls.share['id'])
+        cls.share = cls.shares_v2_client.get_share(cls.share['id'])['share']
         cls.share_server_id = cls.share['share_server_id']
         cls.dest_host, _ = cls._choose_compatible_backend_for_share_server(
             cls.share_server_id)
@@ -361,7 +361,7 @@ class ShareServerMigrationStartInvalidStatesNFS(MigrationShareServerNegative):
         share = self.create_share(share_type_id=share_type['share_type']['id'],
                                   share_protocol=self.protocol,
                                   cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share_server_id = share['share_server_id']
         dest_host, _ = self._choose_compatible_backend_for_share_server(
             share_server_id)

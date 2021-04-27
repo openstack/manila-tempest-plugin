@@ -43,7 +43,8 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
         cls.share = cls.create_share(share_type_id=cls.share_type_id,
                                      client=cls.admin_client)
         cls.sh_instance = (
-            cls.admin_client.get_instances_of_share(cls.share["id"])[0]
+            cls.admin_client.get_instances_of_share(
+                cls.share["id"])['share_instances'][0]
         )
         if CONF.share.run_snapshot_tests:
             cls.snapshot = cls.create_snapshot_wait_for_active(

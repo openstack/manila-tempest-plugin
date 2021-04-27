@@ -60,9 +60,10 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
                                      client=cls.admin_client)
         cls.snapshot = cls.create_snapshot_wait_for_active(
             cls.share['id'], client=cls.admin_client)
-        cls.snapshot = cls.admin_client.get_snapshot(cls.snapshot['id'])
+        cls.snapshot = cls.admin_client.get_snapshot(
+            cls.snapshot['id'])['snapshot']
         cls.snapshot_instances = cls.admin_client.list_snapshot_instances(
-            snapshot_id=cls.snapshot['id'])
+            snapshot_id=cls.snapshot['id'])['snapshot_instances']
 
     def _verify_export_location_structure(
             self, export_locations, role='admin', detail=False):
@@ -105,7 +106,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
     def test_list_snapshot_export_location(self):
         export_locations = (
             self.admin_client.list_snapshot_export_locations(
-                self.snapshot['id']))
+                self.snapshot['id']))['share_snapshot_export_locations']
 
         for el in export_locations:
             self._verify_export_location_structure(el)
@@ -115,11 +116,12 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
     def test_get_snapshot_export_location(self):
         export_locations = (
             self.admin_client.list_snapshot_export_locations(
-                self.snapshot['id']))
+                self.snapshot['id']))['share_snapshot_export_locations']
 
         for export_location in export_locations:
             el = self.admin_client.get_snapshot_export_location(
-                self.snapshot['id'], export_location['id'])
+                self.snapshot['id'],
+                export_location['id'])['share_snapshot_export_location']
             self._verify_export_location_structure(el, detail=True)
 
     @decorators.idempotent_id('03be6418-5ba3-4919-a798-89d7e5ffb925')
@@ -128,10 +130,14 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
         for snapshot_instance in self.snapshot_instances:
             export_locations = (
                 self.admin_client.list_snapshot_instance_export_locations(
-                    snapshot_instance['id']))
+                    snapshot_instance['id'])['share_snapshot_export_locations']
+            )
             for el in export_locations:
-                el = self.admin_client.get_snapshot_instance_export_location(
-                    snapshot_instance['id'], el['id'])
+                el = (
+                    self.admin_client.get_snapshot_instance_export_location(
+                        snapshot_instance['id'],
+                        el['id'])['share_snapshot_export_location']
+                )
                 self._verify_export_location_structure(el, detail=True)
 
     @decorators.idempotent_id('cdf444ea-95a3-4f7b-ae48-6b027a6b9529')
@@ -140,12 +146,13 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
             self):
         snapshot_export_locations = (
             self.admin_client.list_snapshot_export_locations(
-                self.snapshot['id']))
+                self.snapshot['id']))['share_snapshot_export_locations']
         snapshot_instances_export_locations = []
         for snapshot_instance in self.snapshot_instances:
             snapshot_instance_export_locations = (
                 self.admin_client.list_snapshot_instance_export_locations(
-                    snapshot_instance['id']))
+                    snapshot_instance['id'])['share_snapshot_export_locations']
+            )
             snapshot_instances_export_locations.extend(
                 snapshot_instance_export_locations)
 

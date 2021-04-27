@@ -19,6 +19,7 @@ import time
 
 from six.moves.urllib import parse
 from tempest import config
+from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
 
 from manila_tempest_tests.common import constants
@@ -137,7 +138,7 @@ class SharesV2Client(shares_client.SharesClient):
                                headers=headers, extra_headers=True,
                                version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def force_delete(self, s_id, s_type="shares", headers=None,
                      version=LATEST_MICROVERSION, action_name=None):
@@ -156,7 +157,7 @@ class SharesV2Client(shares_client.SharesClient):
                                headers=headers, extra_headers=True,
                                version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     @staticmethod
     def _get_base_url(endpoint):
@@ -278,7 +279,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post("shares", body, headers=headers,
                                extra_headers=experimental, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_shares(self, detailed=False, params=None,
                     version=LATEST_MICROVERSION, experimental=False):
@@ -289,7 +291,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers, extra_headers=experimental,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_shares_with_detail(self, params=None,
                                 version=LATEST_MICROVERSION,
@@ -304,7 +307,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get("shares/%s" % share_id, headers=headers,
                               extra_headers=experimental, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_export_location(
             self, share_id, export_location_uuid, version=LATEST_MICROVERSION):
@@ -313,7 +317,8 @@ class SharesV2Client(shares_client.SharesClient):
                 "share_id": share_id, "el_uuid": export_location_uuid},
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_export_locations(
             self, share_id, version=LATEST_MICROVERSION):
@@ -321,7 +326,8 @@ class SharesV2Client(shares_client.SharesClient):
             "shares/%(share_id)s/export_locations" % {"share_id": share_id},
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share(self, share_id, params=None,
                      version=LATEST_MICROVERSION):
@@ -329,7 +335,7 @@ class SharesV2Client(shares_client.SharesClient):
         uri += '?%s' % (parse.urlencode(params) if params else '')
         resp, body = self.delete(uri, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -337,7 +343,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get("shares/%s/instances" % share_id,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_instances(self, version=LATEST_MICROVERSION,
                              params=None):
@@ -345,13 +352,15 @@ class SharesV2Client(shares_client.SharesClient):
         uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_instance(self, instance_id, version=LATEST_MICROVERSION):
         resp, body = self.get("share_instances/%s" % instance_id,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_instance_export_location(
             self, instance_id, export_location_uuid,
@@ -361,7 +370,8 @@ class SharesV2Client(shares_client.SharesClient):
                 "instance_id": instance_id, "el_uuid": export_location_uuid},
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_instance_export_locations(
             self, instance_id, version=LATEST_MICROVERSION):
@@ -369,7 +379,8 @@ class SharesV2Client(shares_client.SharesClient):
             "share_instances/%s/export_locations" % instance_id,
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -389,7 +400,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def shrink_share(self, share_id, new_size, version=LATEST_MICROVERSION,
                      action_name=None):
@@ -407,7 +418,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -436,7 +447,8 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.dumps(post_body)
         resp, body = self.post(url, body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def unmanage_share(self, share_id, version=LATEST_MICROVERSION, url=None,
                        action_name=None, body=None):
@@ -458,7 +470,7 @@ class SharesV2Client(shares_client.SharesClient):
             body,
             version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -480,12 +492,14 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.dumps(post_body)
         resp, body = self.post("snapshots", body, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_snapshot(self, snapshot_id, version=LATEST_MICROVERSION):
         resp, body = self.get("snapshots/%s" % snapshot_id, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshots(self, detailed=False, params=None,
                        version=LATEST_MICROVERSION):
@@ -494,7 +508,8 @@ class SharesV2Client(shares_client.SharesClient):
         uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshots_for_share(self, share_id, detailed=False,
                                  version=LATEST_MICROVERSION):
@@ -503,7 +518,8 @@ class SharesV2Client(shares_client.SharesClient):
                if detailed else 'snapshots?share_id=%s' % share_id)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshots_with_detail(self, params=None,
                                    version=LATEST_MICROVERSION):
@@ -514,7 +530,7 @@ class SharesV2Client(shares_client.SharesClient):
     def delete_snapshot(self, snap_id, version=LATEST_MICROVERSION):
         resp, body = self.delete("snapshots/%s" % snap_id, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def manage_snapshot(self, share_id, provider_location,
                         name=None, description=None,
@@ -537,7 +553,8 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.dumps(post_body)
         resp, body = self.post(url, body, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def unmanage_snapshot(self, snapshot_id, version=LATEST_MICROVERSION,
                           body=None):
@@ -552,13 +569,13 @@ class SharesV2Client(shares_client.SharesClient):
             body,
             version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def snapshot_reset_state(self, snapshot_id,
                              status=constants.STATUS_AVAILABLE,
                              version=LATEST_MICROVERSION):
-        self.reset_state(snapshot_id, status=status, s_type='snapshots',
-                         version=version)
+        return self.reset_state(
+            snapshot_id, status=status, s_type='snapshots', version=version)
 
 ###############
 
@@ -568,7 +585,7 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.dumps({'revert': {'snapshot_id': snapshot_id}})
         resp, body = self.post(url, body, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -578,14 +595,16 @@ class SharesV2Client(shares_client.SharesClient):
         post_body = json.dumps({'extra_specs': extra_specs})
         resp, body = self.post(url, post_body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_type_extra_spec(self, share_type_id, extra_spec_name,
                                   version=LATEST_MICROVERSION):
         uri = "types/%s/extra_specs/%s" % (share_type_id, extra_spec_name)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_type_extra_specs(self, share_type_id, params=None,
                                    version=LATEST_MICROVERSION):
@@ -594,7 +613,8 @@ class SharesV2Client(shares_client.SharesClient):
             uri += '?%s' % parse.urlencode(params)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_type_extra_spec(self, share_type_id, spec_name,
                                      spec_value, version=LATEST_MICROVERSION):
@@ -603,7 +623,8 @@ class SharesV2Client(shares_client.SharesClient):
         post_body = json.dumps(extra_spec)
         resp, body = self.put(uri, post_body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_type_extra_specs(self, share_type_id, extra_specs,
                                       version=LATEST_MICROVERSION):
@@ -612,14 +633,15 @@ class SharesV2Client(shares_client.SharesClient):
         post_body = json.dumps(extra_specs)
         resp, body = self.post(uri, post_body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_type_extra_spec(self, share_type_id, extra_spec_name,
                                      version=LATEST_MICROVERSION):
         uri = "types/%s/extra_specs/%s" % (share_type_id, extra_spec_name)
         resp, body = self.delete(uri, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -628,7 +650,8 @@ class SharesV2Client(shares_client.SharesClient):
         uri = "share-servers/%s" % share_server_id
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -636,7 +659,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get("snapshot-instances/%s" % instance_id,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshot_instances(self, detail=False, snapshot_id=None,
                                 version=LATEST_MICROVERSION):
@@ -646,7 +670,8 @@ class SharesV2Client(shares_client.SharesClient):
             uri += '?snapshot_id=%s' % snapshot_id
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_snapshot_instance_status(self, instance_id,
                                        status=constants.STATUS_AVAILABLE,
@@ -661,7 +686,7 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.dumps(post_body)
         resp, body = self.post(uri, body, extra_headers=True, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_snapshot_instance_export_location(
             self, instance_id, export_location_uuid,
@@ -673,7 +698,8 @@ class SharesV2Client(shares_client.SharesClient):
                 "el_uuid": export_location_uuid},
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshot_instance_export_locations(
             self, instance_id, version=LATEST_MICROVERSION):
@@ -681,7 +707,8 @@ class SharesV2Client(shares_client.SharesClient):
             "snapshot-instances/%s/export-locations" % instance_id,
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -708,7 +735,8 @@ class SharesV2Client(shares_client.SharesClient):
             "shares/%s/action" % share_id, body, version=version,
             extra_headers=True)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_access_rules(self, share_id, version=LATEST_MICROVERSION,
                           metadata=None, action_name=None):
@@ -724,7 +752,8 @@ class SharesV2Client(shares_client.SharesClient):
             return self.list_access_rules_with_new_API(
                 share_id, metadata=metadata, version=version,
                 action_name=action_name)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_access_rules_with_new_API(self, share_id, metadata=None,
                                        version=LATEST_MICROVERSION,
@@ -740,7 +769,8 @@ class SharesV2Client(shares_client.SharesClient):
         url = 'share-access-rules?share_id=%s' % share_id + query_string
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_access_rule(self, share_id, rule_id,
                            version=LATEST_MICROVERSION, action_name=None):
@@ -753,13 +783,14 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def get_access_rule(self, access_id, version=LATEST_MICROVERSION):
         resp, body = self.get("share-access-rules/%s" % access_id,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_access_metadata(self, access_id, metadata,
                                version=LATEST_MICROVERSION):
@@ -767,14 +798,15 @@ class SharesV2Client(shares_client.SharesClient):
         body = {"metadata": metadata}
         resp, body = self.put(url, json.dumps(body), version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_access_metadata(self, access_id, key,
                                version=LATEST_MICROVERSION):
         url = "share-access-rules/%s/metadata/%s" % (access_id, key)
         resp, body = self.delete(url, version=version)
         self.expected_success(200, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -788,7 +820,8 @@ class SharesV2Client(shares_client.SharesClient):
                 url = 'os-availability-zone'
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -804,7 +837,8 @@ class SharesV2Client(shares_client.SharesClient):
             url += '?%s' % parse.urlencode(params)
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -817,7 +851,8 @@ class SharesV2Client(shares_client.SharesClient):
             uri += '?%s' % parse.urlencode(params)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_share_type(self, name, is_public=True,
                           version=LATEST_MICROVERSION, **kwargs):
@@ -835,7 +870,8 @@ class SharesV2Client(shares_client.SharesClient):
         post_body = json.dumps({'share_type': post_body})
         resp, body = self.post('types', post_body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_type(self, share_type_id, name=None,
                           is_public=None, description=None,
@@ -851,17 +887,19 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.put("types/%s" % share_type_id, post_body,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_type(self, share_type_id, version=LATEST_MICROVERSION):
         resp, body = self.delete("types/%s" % share_type_id, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_type(self, share_type_id, version=LATEST_MICROVERSION):
         resp, body = self.get("types/%s" % share_type_id, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_access_to_share_type(self, share_type_id,
                                   version=LATEST_MICROVERSION,
@@ -876,7 +914,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(url, version=version)
         # [{"share_type_id": "%st_id%", "project_id": "%project_id%"}, ]
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -903,7 +942,8 @@ class SharesV2Client(shares_client.SharesClient):
         url += '/%s' % tenant_id
         resp, body = self.get("%s/defaults" % url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_quotas(self, tenant_id, user_id=None, share_type=None, url=None,
                     version=LATEST_MICROVERSION):
@@ -913,7 +953,8 @@ class SharesV2Client(shares_client.SharesClient):
         url += self._get_quotas_url_arguments_as_str(user_id, share_type)
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_quotas(self, tenant_id, user_id=None, share_type=None, url=None,
                      version=LATEST_MICROVERSION):
@@ -923,7 +964,7 @@ class SharesV2Client(shares_client.SharesClient):
         url += self._get_quotas_url_arguments_as_str(user_id, share_type)
         resp, body = self.delete(url, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def detail_quotas(self, tenant_id, user_id=None, share_type=None, url=None,
                       version=LATEST_MICROVERSION):
@@ -933,7 +974,8 @@ class SharesV2Client(shares_client.SharesClient):
         url += self._get_quotas_url_arguments_as_str(user_id, share_type)
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_quotas(self, tenant_id, user_id=None, shares=None,
                       snapshots=None, gigabytes=None, snapshot_gigabytes=None,
@@ -972,7 +1014,8 @@ class SharesV2Client(shares_client.SharesClient):
 
         resp, body = self.put(url, put_body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1008,7 +1051,8 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers, version=version)
 
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_group(self, share_group_id, version=LATEST_MICROVERSION):
         """Delete a share group."""
@@ -1018,7 +1062,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.delete(uri, headers=headers,
                                  extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_groups(self, detailed=False, params=None,
                           version=LATEST_MICROVERSION):
@@ -1030,7 +1074,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_group(self, share_group_id, version=LATEST_MICROVERSION):
         """Get share group info."""
@@ -1040,7 +1085,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_group(self, share_group_id, name=None, description=None,
                            version=LATEST_MICROVERSION, **kwargs):
@@ -1061,21 +1107,24 @@ class SharesV2Client(shares_client.SharesClient):
                               extra_headers=extra_headers, version=version)
 
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def share_group_reset_state(self, share_group_id, status='error',
                                 version=LATEST_MICROVERSION):
         headers, _junk = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
-        self.reset_state(share_group_id, status=status, s_type='groups',
-                         headers=headers, version=version)
+        return self.reset_state(
+            share_group_id, status=status, s_type='groups', headers=headers,
+            version=version)
 
     def share_group_force_delete(self, share_group_id,
                                  version=LATEST_MICROVERSION):
         headers, _junk = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
-        self.force_delete(share_group_id, s_type='share-groups',
-                          headers=headers, version=version)
+        return self.force_delete(
+            share_group_id, s_type='share-groups', headers=headers,
+            version=version)
 
 ###############
 
@@ -1103,7 +1152,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(uri, body, headers=headers,
                                extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_group_types(self, detailed=False, params=None,
                                version=LATEST_MICROVERSION):
@@ -1115,7 +1165,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_group_type(self, share_group_type_id,
                              version=LATEST_MICROVERSION):
@@ -1126,7 +1177,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_default_share_group_type(self, version=LATEST_MICROVERSION):
         """Get default share group type info."""
@@ -1136,7 +1188,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_group_type(self, share_group_type_id,
                                 version=LATEST_MICROVERSION):
@@ -1147,7 +1200,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.delete(uri, headers=headers,
                                  extra_headers=extra_headers, version=version)
         self.expected_success(204, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def add_access_to_share_group_type(self, share_group_type_id, project_id,
                                        version=LATEST_MICROVERSION):
@@ -1159,7 +1212,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(uri, post_body, headers=headers,
                                extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def remove_access_from_share_group_type(self, share_group_type_id,
                                             project_id,
@@ -1172,7 +1225,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(uri, post_body, headers=headers,
                                extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_access_to_share_group_type(self, share_group_type_id,
                                         version=LATEST_MICROVERSION):
@@ -1182,7 +1235,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1196,7 +1250,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(url, post_body, headers=headers,
                                extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_group_type_spec(self, share_group_type_id, group_spec_key,
                                   version=LATEST_MICROVERSION):
@@ -1207,7 +1262,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_group_type_specs(self, share_group_type_id, params=None,
                                     version=LATEST_MICROVERSION):
@@ -1219,7 +1275,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_group_type_spec(self, share_group_type_id, group_spec_key,
                                      group_spec_value,
@@ -1233,7 +1290,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.put(uri, post_body, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_group_type_specs(self, share_group_type_id,
                                       group_specs_dict,
@@ -1250,7 +1308,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.delete(uri, headers=headers,
                                  extra_headers=extra_headers, version=version)
         self.expected_success(204, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1270,7 +1328,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post(uri, body, headers=headers,
                                extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_group_snapshot(self, share_group_snapshot_id,
                                     version=LATEST_MICROVERSION):
@@ -1281,7 +1340,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.delete(uri, headers=headers,
                                  extra_headers=extra_headers, version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_group_snapshots(self, detailed=False, params=None,
                                    version=LATEST_MICROVERSION):
@@ -1293,7 +1352,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_group_snapshot(self, share_group_snapshot_id,
                                  version=LATEST_MICROVERSION):
@@ -1304,7 +1364,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_group_snapshot(self, share_group_snapshot_id, name=None,
                                     description=None,
@@ -1322,22 +1383,23 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.put(uri, body, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def share_group_snapshot_reset_state(self, share_group_snapshot_id,
                                          status='error',
                                          version=LATEST_MICROVERSION):
         headers, _junk = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
-        self.reset_state(
-            share_group_snapshot_id, status=status,
-            headers=headers, s_type='group-snapshots', version=version)
+        return self.reset_state(
+            share_group_snapshot_id, status=status, headers=headers,
+            s_type='group-snapshots', version=version)
 
     def share_group_snapshot_force_delete(self, share_group_snapshot_id,
                                           version=LATEST_MICROVERSION):
         headers, _junk = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
-        self.force_delete(
+        return self.force_delete(
             share_group_snapshot_id, s_type='share-group-snapshots',
             headers=headers, version=version)
 
@@ -1362,7 +1424,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post('share-servers/manage', body,
                                extra_headers=True, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def unmanage_share_server(self, share_server_id,
                               version=LATEST_MICROVERSION):
@@ -1370,13 +1433,14 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post('share-servers/%s/action' % share_server_id,
                                body, extra_headers=True, version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def share_server_reset_state(self, share_server_id,
                                  status=constants.SERVER_STATE_ACTIVE,
                                  version=LATEST_MICROVERSION):
-        self.reset_state(share_server_id, status=status,
-                         s_type='share-servers', version=version)
+        return self.reset_state(
+            share_server_id, status=status, s_type='share-servers',
+            version=version)
 
 ###############
 
@@ -1401,9 +1465,10 @@ class SharesV2Client(shares_client.SharesClient):
         }
 
         body = json.dumps(body)
-        return self.post('shares/%s/action' % share_id, body,
-                         headers=EXPERIMENTAL, extra_headers=True,
-                         version=version)
+        resp, body = self.post('shares/%s/action' % share_id, body,
+                               headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        return rest_client.ResponseBody(resp, body)
 
     def migration_complete(self, share_id, version=LATEST_MICROVERSION,
                            action_name='migration_complete'):
@@ -1411,9 +1476,10 @@ class SharesV2Client(shares_client.SharesClient):
             action_name: None,
         }
         body = json.dumps(post_body)
-        return self.post('shares/%s/action' % share_id, body,
-                         headers=EXPERIMENTAL, extra_headers=True,
-                         version=version)
+        resp, body = self.post('shares/%s/action' % share_id, body,
+                               headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        return rest_client.ResponseBody(resp, body)
 
     def migration_cancel(self, share_id, version=LATEST_MICROVERSION,
                          action_name='migration_cancel'):
@@ -1421,9 +1487,10 @@ class SharesV2Client(shares_client.SharesClient):
             action_name: None,
         }
         body = json.dumps(post_body)
-        return self.post('shares/%s/action' % share_id, body,
-                         headers=EXPERIMENTAL, extra_headers=True,
-                         version=version)
+        resp, body = self.post('shares/%s/action' % share_id, body,
+                               headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        return rest_client.ResponseBody(resp, body)
 
     def migration_get_progress(self, share_id, version=LATEST_MICROVERSION,
                                action_name='migration_get_progress'):
@@ -1431,10 +1498,11 @@ class SharesV2Client(shares_client.SharesClient):
             action_name: None,
         }
         body = json.dumps(post_body)
-        result = self.post('shares/%s/action' % share_id, body,
-                           headers=EXPERIMENTAL, extra_headers=True,
-                           version=version)
-        return json.loads(result[1])
+        resp, body = self.post('shares/%s/action' % share_id, body,
+                               headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_task_state(
             self, share_id, task_state, version=LATEST_MICROVERSION,
@@ -1445,9 +1513,10 @@ class SharesV2Client(shares_client.SharesClient):
             }
         }
         body = json.dumps(post_body)
-        return self.post('shares/%s/action' % share_id, body,
-                         headers=EXPERIMENTAL, extra_headers=True,
-                         version=version)
+        resp, body = self.post('shares/%s/action' % share_id, body,
+                               headers=EXPERIMENTAL, extra_headers=True,
+                               version=version)
+        return rest_client.ResponseBody(resp, body)
 
 ################
 
@@ -1467,7 +1536,8 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_replica(self, replica_id, version=LATEST_MICROVERSION):
         """Get the details of share_replica."""
@@ -1478,7 +1548,8 @@ class SharesV2Client(shares_client.SharesClient):
                               extra_headers=extra_headers,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_replicas(self, share_id=None, version=LATEST_MICROVERSION):
         """Get list of replicas."""
@@ -1489,7 +1560,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_replicas_summary(self, share_id=None,
                                     version=LATEST_MICROVERSION):
@@ -1501,7 +1573,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_replica(self, replica_id, version=LATEST_MICROVERSION):
         """Delete share_replica."""
@@ -1513,7 +1586,7 @@ class SharesV2Client(shares_client.SharesClient):
                                  extra_headers=extra_headers,
                                  version=version)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def promote_share_replica(self, replica_id, expected_status=202,
                               version=LATEST_MICROVERSION):
@@ -1530,7 +1603,11 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers,
                                version=version)
         self.expected_success(expected_status, resp.status)
-        return self._parse_resp(body)
+        try:
+            body = json.loads(body)
+        except json.decoder.JSONDecodeError:
+            pass
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_replica_export_locations(self, replica_id,
                                             expected_status=200,
@@ -1541,7 +1618,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(expected_status, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_replica_export_location(self, replica_id,
                                           export_location_id,
@@ -1554,7 +1632,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, headers=headers,
                               extra_headers=extra_headers, version=version)
         self.expected_success(expected_status, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_share_replica_status(self, replica_id,
                                    status=constants.STATUS_AVAILABLE,
@@ -1574,7 +1653,7 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_share_replica_state(self, replica_id,
                                   state=constants.REPLICATION_STATE_ACTIVE,
@@ -1594,7 +1673,7 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def resync_share_replica(self, replica_id, expected_result=202,
                              version=LATEST_MICROVERSION):
@@ -1611,7 +1690,7 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers,
                                version=version)
         self.expected_success(expected_result, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def force_delete_share_replica(self, replica_id,
                                    version=LATEST_MICROVERSION):
@@ -1628,7 +1707,7 @@ class SharesV2Client(shares_client.SharesClient):
                                extra_headers=extra_headers,
                                version=version)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_networks(self, detailed=False, params=None,
                             version=LATEST_MICROVERSION):
@@ -1637,7 +1716,8 @@ class SharesV2Client(shares_client.SharesClient):
         uri += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_networks_with_detail(self, params=None,
                                         version=LATEST_MICROVERSION):
@@ -1649,7 +1729,8 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get("share-networks/%s" % share_network_id,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ################
 
@@ -1664,15 +1745,25 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post("snapshots/%s/action" % snapshot_id,
                                json.dumps(body), version=LATEST_MICROVERSION)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_snapshot_access_rules(self, snapshot_id,
+                                   version=LATEST_MICROVERSION):
+        resp, body = self.get("snapshots/%s/access-list" % snapshot_id,
+                              version=version)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_snapshot_access_rule(self, snapshot_id, rule_id,
                                  version=LATEST_MICROVERSION):
         resp, body = self.get("snapshots/%s/access-list" % snapshot_id,
                               version=version)
-        body = self._parse_resp(body)
-        found_rules = [r for r in body if r['id'] == rule_id]
-
+        body = json.loads(body)
+        body = rest_client.ResponseBody(resp, body)
+        found_rules = [
+            r for r in body['snapshot_access_list'] if r['id'] == rule_id
+        ]
         return found_rules[0] if len(found_rules) > 0 else None
 
     def delete_snapshot_access_rule(self, snapshot_id, rule_id):
@@ -1684,7 +1775,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post("snapshots/%s/action" % snapshot_id,
                                json.dumps(body), version=LATEST_MICROVERSION)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_snapshot_export_location(self, snapshot_id, export_location_uuid,
                                      version=LATEST_MICROVERSION):
@@ -1693,14 +1784,16 @@ class SharesV2Client(shares_client.SharesClient):
                 "snapshot_id": snapshot_id, "el_uuid": export_location_uuid},
             version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshot_export_locations(
             self, snapshot_id, version=LATEST_MICROVERSION):
         resp, body = self.get(
             "snapshots/%s/export-locations" % snapshot_id, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1709,7 +1802,8 @@ class SharesV2Client(shares_client.SharesClient):
         url = 'messages/%s' % message_id
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_messages(self, params=None, version=LATEST_MICROVERSION):
         """List all messages."""
@@ -1717,14 +1811,15 @@ class SharesV2Client(shares_client.SharesClient):
         url += '?%s' % parse.urlencode(params) if params else ''
         resp, body = self.get(url, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_message(self, message_id, version=LATEST_MICROVERSION):
         """Delete a single message."""
         url = 'messages/%s' % message_id
         resp, body = self.delete(url, version=version)
         self.expected_success(204, resp.status)
-        return self._parse_resp(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1742,7 +1837,8 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.dumps({"security_service": post_body})
         resp, body = self.post("security-services", body, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_security_service(self, ss_id, version=LATEST_MICROVERSION,
                                 **kwargs):
@@ -1759,12 +1855,14 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.put("security-services/%s" % ss_id, body,
                               version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_security_service(self, ss_id, version=LATEST_MICROVERSION):
         resp, body = self.get("security-services/%s" % ss_id, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_security_services(self, detailed=False, params=None,
                                version=LATEST_MICROVERSION):
@@ -1775,7 +1873,8 @@ class SharesV2Client(shares_client.SharesClient):
             uri += "?%s" % parse.urlencode(params)
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1794,7 +1893,8 @@ class SharesV2Client(shares_client.SharesClient):
         url = '/share-networks/%s/subnets' % share_network_id
         resp, body = self.post(url, body, version=LATEST_MICROVERSION)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_subnet(self, share_network_subnet_id, share_network_id):
         url = ('share-networks/%(network)s/subnets/%(subnet)s' % {
@@ -1803,7 +1903,8 @@ class SharesV2Client(shares_client.SharesClient):
         )
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_subnet(self, share_network_id, share_network_subnet_id):
         url = ('share-networks/%(network)s/subnets/%(subnet)s' % {
@@ -1812,7 +1913,7 @@ class SharesV2Client(shares_client.SharesClient):
         )
         resp, body = self.delete(url)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -1836,7 +1937,8 @@ class SharesV2Client(shares_client.SharesClient):
                                version=version)
         self.expected_success(200, resp.status)
 
-        return json.loads(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def share_server_migration_start(self, share_server_id, host,
                                      writable=False, new_share_network_id=None,
@@ -1859,7 +1961,7 @@ class SharesV2Client(shares_client.SharesClient):
                                version=version)
         self.expected_success(202, resp.status)
 
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def share_server_migration_complete(self, share_server_id,
                                         version=LATEST_MICROVERSION):
@@ -1873,7 +1975,8 @@ class SharesV2Client(shares_client.SharesClient):
                                version=version)
         self.expected_success(200, resp.status)
 
-        return body
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def share_server_migration_cancel(self, share_server_id,
                                       version=LATEST_MICROVERSION):
@@ -1887,7 +1990,7 @@ class SharesV2Client(shares_client.SharesClient):
                                version=version)
         self.expected_success(202, resp.status)
 
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def share_server_migration_get_progress(self, share_server_id,
                                             version=LATEST_MICROVERSION):
@@ -1899,6 +2002,7 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.post('share-servers/%s/action' % share_server_id,
                                body, headers=EXPERIMENTAL, extra_headers=True,
                                version=version)
-        self.expected_sucess(200, resp.status)
+        self.expected_success(200, resp.status)
 
-        return json.loads(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)

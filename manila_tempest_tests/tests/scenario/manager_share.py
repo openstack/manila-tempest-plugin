@@ -198,7 +198,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         # NOTE(u_glide): Workaround for bug #1465682
         remote_client = remote_client.ssh_client
 
-        self.share = self.shares_client.get_share(self.share['id'])
+        self.share = self.shares_client.get_share(self.share['id'])['share']
         return remote_client
 
     def validate_ping_to_export_location(self, export, remote_client,
@@ -411,7 +411,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 self.__class__.__name__ + '-cephx-id')
             # Check if access is already granted to the client
             access_rules_matching_client = client.list_access_rules(
-                share['id'], metadata={'metadata': {'access_to': access_to}})
+                share['id'],
+                metadata={'metadata': {'access_to': access_to}})['access_list']
             access_rule = (access_rules_matching_client[0] if
                            access_rules_matching_client else None)
 
@@ -426,7 +427,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                 client.update_access_metadata(
                     metadata={"access_to": "{}".format(access_to)},
                     access_id=access_rule['id'])
-        get_access = client.get_access_rule(access_rule['id'])
+        get_access = client.get_access_rule(access_rule['id'])['access']
         # Set 'access_key' and 'access_to' attributes for being use in mount
         # operation.
         setattr(self, 'access_key', get_access['access_key'])
@@ -471,13 +472,13 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             locations = share['export_locations']
         else:
             exports = self.shares_v2_client.list_share_export_locations(
-                share['id'])
+                share['id'])['export_locations']
             locations = [x['path'] for x in exports]
         return locations
 
     def _get_snapshot_export_locations(self, snapshot):
-        exports = (self.shares_v2_client.
-                   list_snapshot_export_locations(snapshot['id']))
+        exports = (self.shares_v2_client.list_snapshot_export_locations(
+            snapshot['id'])['share_snapshot_export_locations'])
         locations = [x['path'] for x in exports]
 
         return locations
@@ -529,7 +530,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             'share_network_id': share_network_id,
             'share_type_id': share_type_id,
         }
-        share = self.shares_client.create_share(**kwargs)
+        share = self.shares_client.create_share(**kwargs)['share']
 
         if cleanup:
             self.addCleanup(client.wait_for_resource_deletion,
@@ -543,7 +544,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
     def _create_snapshot(self, share_id, client=None, **kwargs):
         client = client or self.shares_v2_client
-        snapshot = client.create_snapshot(share_id, **kwargs)
+        snapshot = client.create_snapshot(share_id, **kwargs)['snapshot']
         self.addCleanup(
             client.wait_for_resource_deletion, snapshot_id=snapshot['id'])
         self.addCleanup(client.delete_snapshot, snapshot['id'])
@@ -559,7 +560,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
         client = client or self.shares_admin_client
         servers = client.list_share_servers(
-            search_opts={"share_network": sn_id})
+            search_opts={"share_network": sn_id})['share_servers']
         for server in servers:
             client.delete_share_server(server['id'])
         for server in servers:
@@ -573,7 +574,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
 
         client = client or self.shares_client
-        sn = client.create_share_network(**kwargs)
+        sn = client.create_share_network(**kwargs)['share_network']
 
         self.addCleanup(client.wait_for_resource_deletion,
                         sn_id=sn['id'])
@@ -596,7 +597,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
         client = client or self.shares_v2_client
         access = client.create_access_rule(share_id, access_type, access_to,
-                                           access_level)
+                                           access_level)['access']
 
         share_waiters.wait_for_resource_status(
             client, share_id, "active", status_attr='access_rules_status')
@@ -618,7 +619,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         """
         client = client or self.shares_v2_client
         access = client.create_snapshot_access_rule(
-            snapshot_id, access_type, access_to)
+            snapshot_id, access_type, access_to)['snapshot_access']
 
         if cleanup:
             self.addCleanup(client.delete_snapshot_access_rule,
@@ -626,7 +627,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         share_waiters.wait_for_resource_status(
             client, snapshot_id, 'active',
-            resource_name='snapshot_access_rule', rule_id=access['id'],
+            resource_name='snapshot_access', rule_id=access['id'],
             status_attr='state')
 
         return access

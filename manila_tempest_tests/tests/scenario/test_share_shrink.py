@@ -91,11 +91,12 @@ class ShareShrinkBase(manager.ShareScenarioTest):
             self.shares_v2_client, share['id'],
             ['shrinking_possible_data_loss_error', 'available'])
 
-        share = self.shares_v2_client.get_share(share["id"])
+        share = self.shares_v2_client.get_share(share["id"])['share']
 
         if share["status"] == constants.STATUS_AVAILABLE:
             params = {'resource_id': share['id']}
-            messages = self.shares_v2_client.list_messages(params=params)
+            messages = self.shares_v2_client.list_messages(
+                params=params)['messages']
             self.assertIn('009',
                           [message['action_id'] for message in messages])
             self.assertEqual(share_size, int(share["size"]))
@@ -113,7 +114,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         self.share_shrink_retry_until_success(share["id"],
                                               new_size=default_share_size)
 
-        share = self.shares_v2_client.get_share(share["id"])
+        share = self.shares_v2_client.get_share(share["id"])['share']
         self.assertEqual(default_share_size, int(share["size"]))
 
         LOG.debug('Step 11 - write more data than allocated, should fail')
@@ -130,7 +131,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         """Try share reset, followed by shrink, until timeout"""
 
         check_interval = CONF.share.build_interval * 2
-        share = self.shares_v2_client.get_share(share_id)
+        share = self.shares_v2_client.get_share(share_id)['share']
         share_current_size = share["size"]
         share_status = share[status_attr]
         start = int(time.time())
@@ -149,7 +150,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
                         break
 
             time.sleep(check_interval)
-            share = self.shares_v2_client.get_share(share_id)
+            share = self.shares_v2_client.get_share(share_id)['share']
             share_status = share[status_attr]
             share_current_size = share["size"]
             if share_current_size == new_size:

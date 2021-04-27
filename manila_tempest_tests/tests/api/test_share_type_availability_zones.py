@@ -108,7 +108,7 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
             self.share_type_id, self.az_spec, self.invalid_azs_spec)
         share = self.create_share(share_type_id=self.share_type_id,
                                   cleanup_in_class=False, version='2.47')
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         # Test default scheduler behavior: the share type capabilities should
         # have ensured the share landed in an AZ that is supported
         # regardless of the 'availability_zones' extra-spec
@@ -126,7 +126,7 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
             'availability_zone': self.valid_azs[0] if specify_az else None,
         }
         share = self.create_share(**kwargs)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         if specify_az:
             self.assertEqual(self.valid_azs[0], share['availability_zone'])
         else:
@@ -146,7 +146,8 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
         }
         # Create share group
         share_group = self.create_share_group(**kwargs)
-        share_group = self.shares_v2_client.get_share_group(share_group['id'])
+        share_group = self.shares_v2_client.get_share_group(
+            share_group['id'])['share_group']
         if specify_az:
             self.assertEqual(self.valid_azs[0],
                              share_group['availability_zone'])

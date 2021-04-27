@@ -66,7 +66,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
     @ddt.data("error", "available", "error_deleting", "deleting", "creating")
     def test_reset_share_instance_state(self, status):
         sh_instance = self.shares_v2_client.get_instances_of_share(
-            self.share["id"])[0]
+            self.share["id"])['share_instances'][0]
         share_instance_id = sh_instance["id"]
         self.shares_v2_client.reset_state(
             share_instance_id, s_type="share_instances", status=status)
@@ -100,7 +100,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.shares_v2_client.reset_state(share["id"], status=self.bad_status)
 
         # Check that status was changed
-        check_status = self.shares_v2_client.get_share(share["id"])
+        check_status = self.shares_v2_client.get_share(share["id"])['share']
         self.assertEqual(self.bad_status, check_status["status"])
 
         # Share with status 'error_deleting' should be deleted
@@ -112,7 +112,8 @@ class AdminActionsTest(base.BaseSharesAdminTest):
     def test_force_delete_share_instance(self):
         share = self.create_share(share_type_id=self.share_type_id,
                                   cleanup_in_class=False)
-        instances = self.shares_v2_client.get_instances_of_share(share["id"])
+        instances = self.shares_v2_client.get_instances_of_share(
+            share["id"])['share_instances']
         # Check that instance was created
         self.assertEqual(1, len(instances))
 
@@ -123,7 +124,8 @@ class AdminActionsTest(base.BaseSharesAdminTest):
             instance["id"], s_type="share_instances", status=self.bad_status)
 
         # Check that status was changed
-        check_status = self.shares_v2_client.get_share_instance(instance["id"])
+        check_status = self.shares_v2_client.get_share_instance(
+            instance["id"])['share_instance']
         self.assertEqual(self.bad_status, check_status["status"])
 
         # Share with status 'error_deleting' should be deleted
@@ -148,7 +150,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
             sn["id"], s_type="snapshots", status=self.bad_status)
 
         # Check that status was changed
-        check_status = self.shares_v2_client.get_snapshot(sn["id"])
+        check_status = self.shares_v2_client.get_snapshot(sn["id"])['snapshot']
         self.assertEqual(self.bad_status, check_status["status"])
 
         # Snapshot with status 'error_deleting' should be deleted
@@ -172,7 +174,8 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         # This check will ensure that when a share creation request is handled,
         # if the driver has the "driver handles share servers" option enabled,
         # that a share server will be created, otherwise, not.
-        share_get = self.admin_shares_v2_client.get_share(self.share['id'])
+        share_get = self.admin_shares_v2_client.get_share(
+            self.share['id'])['share']
         share_server = share_get['share_server_id']
         if CONF.share.multitenancy_enabled:
             self.assertNotEmpty(share_server)

@@ -77,7 +77,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.creation_data['kwargs'].update({
                 'share_network_id': cls.share_network['id']})
             cls.sn_id = cls.share_network['id']
@@ -85,14 +85,15 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Data for creating shares in parallel
         data = [cls.creation_data, cls.creation_data]
         cls.shares = cls.create_shares(data)
-        cls.shares = [cls.shares_v2_client.get_share(s['id']) for s in
+        cls.shares = [cls.shares_v2_client.get_share(s['id'])['share'] for s in
                       cls.shares]
         cls.instance_id1 = cls._get_instance(cls.shares[0])
         cls.instance_id2 = cls._get_instance(cls.shares[1])
 
     @classmethod
     def _get_instance(cls, share):
-        share_instances = cls.admin_client.get_instances_of_share(share["id"])
+        share_instances = cls.admin_client.get_instances_of_share(
+            share["id"])['share_instances']
         return share_instances[0]["id"]
 
     def _verify_create_replica(self):
@@ -101,7 +102,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
                                                   self.replica_zone,
                                                   cleanup_in_class=False)
         share_replicas = self.shares_v2_client.list_share_replicas(
-            share_id=self.shares[0]["id"])
+            share_id=self.shares[0]["id"])['share_replicas']
         # Ensure replica is created successfully.
         replica_ids = [replica["id"] for replica in share_replicas]
         self.assertIn(share_replica["id"], replica_ids)
@@ -110,7 +111,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
     def _verify_active_replica_count(self, share_id):
         # List replicas
         replica_list = self.shares_v2_client.list_share_replicas(
-            share_id=share_id)
+            share_id=share_id)['share_replicas']
 
         # Check if there is only 1 'active' replica before promotion.
         active_replicas = self._filter_replica_list(
@@ -142,7 +143,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self._verify_active_replica_count(share["id"])
         # Verify the replica_state for promoted replica
         promoted_replica = self.shares_v2_client.get_share_replica(
-            promoted_replica["id"])
+            promoted_replica["id"])['share_replica']
         self.assertEqual(constants.REPLICATION_STATE_ACTIVE,
                          promoted_replica["replica_state"])
 
@@ -192,7 +193,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Add access rule to the share
         access_type, access_to = self._get_access_rule_data_from_config()
         rule = self.shares_v2_client.create_access_rule(
-            self.shares[0]["id"], access_type, access_to, 'ro')
+            self.shares[0]["id"], access_type, access_to, 'ro')['access']
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.shares[0]["id"],
             constants.RULE_STATE_ACTIVE, resource_name='access_rule',
@@ -251,7 +252,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.shares_v2_client.get_share_replica(share_replica2['id'])
 
         share_replicas = self.admin_client.list_share_replicas(
-            share_id=self.shares[0]["id"])
+            share_id=self.shares[0]["id"])['share_replicas']
         replica_host_set = {r['host'] for r in share_replicas}
 
         # Assert that replicas are created on different pools.
@@ -269,7 +270,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self._check_skip_promotion_tests()
         share = self.create_shares([self.creation_data])[0]
         original_replica = self.shares_v2_client.list_share_replicas(
-            share["id"])[0]
+            share["id"])['share_replicas'][0]
         self._verify_in_sync_replica_promotion(share, original_replica)
 
     @decorators.idempotent_id('3af912f4-b5d7-4241-b2b3-bdf12ff398a4')
@@ -282,17 +283,18 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Add access rule
         access_type, access_to = self._get_access_rule_data_from_config()
         rule = self.shares_v2_client.create_access_rule(
-            share["id"], access_type, access_to, 'ro')
+            share["id"], access_type, access_to, 'ro')['access']
         waiters.wait_for_resource_status(
             self.shares_v2_client, share["id"], constants.RULE_STATE_ACTIVE,
             resource_name='access_rule', rule_id=rule["id"])
 
         original_replica = self.shares_v2_client.list_share_replicas(
-            share["id"])[0]
+            share["id"])['share_replicas'][0]
         self._verify_in_sync_replica_promotion(share, original_replica)
 
         # verify rule's values
-        rules_list = self.shares_v2_client.list_access_rules(share["id"])
+        rules_list = self.shares_v2_client.list_access_rules(
+            share["id"])['access_list']
         self.assertEqual(1, len(rules_list))
         self.assertEqual(access_type, rules_list[0]["access_type"])
         self.assertEqual(access_to, rules_list[0]["access_to"])
@@ -312,9 +314,10 @@ class ReplicationTest(base.BaseSharesMixedTest):
         share = self.create_share(
             share_type_id=self.share_type['id'], cleanup_in_class=False,
             availability_zone=self.share_zone, share_network_id=self.sn_id)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         replica = self.create_share_replica(share['id'], self.replica_zone)
-        replica = self.shares_v2_client.get_share_replica(replica['id'])
+        replica = self.shares_v2_client.get_share_replica(
+            replica['id'])['share_replica']
 
         self.assertEqual(self.share_zone, share['availability_zone'])
         self.assertEqual(self.replica_zone, replica['availability_zone'])
@@ -332,7 +335,7 @@ class ReplicationTest(base.BaseSharesMixedTest):
 
         # Discover the original replica
         initial_replicas = self.shares_v2_client.list_share_replicas(
-            share_id=share['id'])
+            share_id=share['id'])['share_replicas']
         self.assertEqual(1, len(initial_replicas),
                          '%s replicas initially created for share %s' %
                          (len(initial_replicas), share['id']))
@@ -367,7 +370,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_active_replication_state(self):
         # Verify the replica_state of first instance is set to active.
-        replica = self.shares_v2_client.get_share_replica(self.instance_id1)
+        replica = self.shares_v2_client.get_share_replica(
+            self.instance_id1)['share_replica']
         self.assertEqual(
             constants.REPLICATION_STATE_ACTIVE, replica['replica_state'])
 
@@ -417,7 +421,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
 
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.creation_data['kwargs'].update({
                 'share_network_id': cls.share_network['id']})
         cls.sn_id = (
@@ -425,7 +429,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
         # Data for creating shares in parallel
         data = [cls.creation_data, cls.creation_data]
         cls.shares = cls.create_shares(data)
-        cls.shares = [cls.shares_v2_client.get_share(s['id']) for s in
+        cls.shares = [cls.shares_v2_client.get_share(s['id'])['share'] for s in
                       cls.shares]
         cls.instance_id1 = cls._get_instance(cls.shares[0])
         cls.instance_id2 = cls._get_instance(cls.shares[1])
@@ -440,7 +444,8 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
 
     @classmethod
     def _get_instance(cls, share):
-        share_instances = cls.admin_client.get_instances_of_share(share["id"])
+        share_instances = cls.admin_client.get_instances_of_share(
+            share["id"])['share_instances']
         return share_instances[0]["id"]
 
     def _validate_replica_list(self, replica_list, detail=True):
@@ -461,7 +466,8 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('abe0e49d-0b94-4b81-a220-ab047712492d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_replica(self):
-        replica = self.shares_v2_client.get_share_replica(self.replica1["id"])
+        replica = self.shares_v2_client.get_share_replica(
+            self.replica1["id"])['share_replica']
 
         actual_keys = sorted(list(replica.keys()))
         detail_keys = sorted(DETAIL_KEYS)
@@ -475,7 +481,7 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
     def test_detail_list_share_replicas_for_share(self):
         # List replicas for share
         replica_list = self.shares_v2_client.list_share_replicas(
-            share_id=self.shares[0]["id"])
+            share_id=self.shares[0]["id"])['share_replicas']
         replica_ids_list = [rep['id'] for rep in replica_list]
         self.assertIn(self.replica1['id'], replica_ids_list,
                       'Replica %s was not returned in the list of replicas: %s'
@@ -487,7 +493,8 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_detail_list_share_replicas_for_all_shares(self):
         # List replicas for all available shares
-        replica_list = self.shares_v2_client.list_share_replicas()
+        replica_list = self.shares_v2_client.list_share_replicas(
+            )['share_replicas']
         replica_ids_list = [rep['id'] for rep in replica_list]
         for replica in [self.replica1, self.replica2]:
             self.assertIn(replica['id'], replica_ids_list,
@@ -500,7 +507,8 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_summary_list_share_replicas_for_all_shares(self):
         # List replicas
-        replica_list = self.shares_v2_client.list_share_replicas_summary()
+        replica_list = self.shares_v2_client.list_share_replicas_summary(
+            )['share_replicas']
 
         # Verify keys
         self._validate_replica_list(replica_list, detail=False)

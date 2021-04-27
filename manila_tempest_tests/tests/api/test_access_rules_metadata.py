@@ -75,7 +75,8 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         cls.md1 = {"key1": "value1", "key2": "value2"}
         cls.access = cls.shares_v2_client.create_access_rule(
             cls.share["id"], cls.access_type,
-            cls.access_to[cls.access_type].pop(), 'rw', metadata=cls.md1)
+            cls.access_to[cls.access_type].pop(), 'rw',
+            metadata=cls.md1)['access']
 
     @decorators.idempotent_id('4c8e0236-2e7b-4337-be3c-17b51a738644')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -84,10 +85,12 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         # set metadata
         access = self.shares_v2_client.create_access_rule(
             self.share["id"], self.access_type,
-            self.access_to[self.access_type].pop(), 'rw', metadata=data)
+            self.access_to[self.access_type].pop(), 'rw',
+            metadata=data)['access']
 
         # read metadata
-        get_access = self.shares_v2_client.get_access_rule(access["id"])
+        get_access = self.shares_v2_client.get_access_rule(
+            access["id"])['access']
 
         # verify metadata
         self.assertEqual(data, get_access['metadata'])
@@ -97,7 +100,8 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             self.shares_v2_client.delete_access_metadata(access["id"], key)
 
         # verify deletion of metadata
-        access_without_md = self.shares_v2_client.get_access_rule(access["id"])
+        access_without_md = self.shares_v2_client.get_access_rule(
+            access["id"])['access']
         self.assertEqual({}, access_without_md['metadata'])
         self.shares_v2_client.delete_access_rule(self.share["id"],
                                                  access["id"])
@@ -113,7 +117,8 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         self.shares_v2_client.update_access_metadata(
             access_id=self.access['id'], metadata=md2)
         # get metadata
-        get_access = self.shares_v2_client.get_access_rule(self.access['id'])
+        get_access = self.shares_v2_client.get_access_rule(
+            self.access['id'])['access']
 
         # verify metadata
         self.md1.update(md2)
@@ -126,11 +131,13 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         # set metadata
         access = self.shares_v2_client.create_access_rule(
             self.share["id"], self.access_type,
-            self.access_to[self.access_type].pop(), 'rw', metadata=data)
+            self.access_to[self.access_type].pop(), 'rw',
+            metadata=data)['access']
 
         # list metadata with metadata filter
         list_access = self.shares_v2_client.list_access_rules(
-            share_id=self.share["id"], metadata={'metadata': data})
+            share_id=self.share["id"],
+            metadata={'metadata': data})['access_list']
 
         # verify metadata
         self.assertEqual(1, len(list_access))

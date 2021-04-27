@@ -61,7 +61,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.sn_id = cls.share_network['id']
 
         cls.zones = cls.get_availability_zones_matching_share_type(
@@ -75,7 +75,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                                      share_network_id=cls.sn_id,
                                      client=cls.admin_client)
         cls.replica = cls.admin_client.list_share_replicas(
-            share_id=cls.share['id'])[0]
+            share_id=cls.share['id'])['share_replicas'][0]
 
     @staticmethod
     def _filter_share_replica_list(replica_list, r_state):
@@ -101,7 +101,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             share_type_id=self.share_type_id, client=self.admin_client,
             availability_zone=self.share_zone, share_network_id=self.sn_id)
         original_replica = self.admin_client.list_share_replicas(
-            share_id=share['id'], version=version)[0]
+            share_id=share['id'], version=version)['share_replicas'][0]
 
         # NOTE(Yogi1): Cleanup needs to be disabled for replica that is
         # being promoted since it will become the 'primary'/'active' replica.
@@ -116,7 +116,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
 
         # List replicas
         replica_list = self.admin_client.list_share_replicas(
-            share_id=share['id'], version=version)
+            share_id=share['id'], version=version)['share_replicas']
 
         # Check if there is only 1 'active' replica before promotion.
         active_replicas = self._filter_share_replica_list(
@@ -141,7 +141,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
 
         # Check if there is still only 1 'active' replica after promotion.
         replica_list = self.admin_client.list_share_replicas(
-            share_id=self.share["id"], version=version)
+            share_id=self.share["id"], version=version)['share_replicas']
         new_active_replicas = self._filter_share_replica_list(
             replica_list, constants.REPLICATION_STATE_ACTIVE)
         self.assertEqual(1, len(new_active_replicas))

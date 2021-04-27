@@ -76,12 +76,13 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("shares", body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share(self, share_id):
         resp, body = self.delete("shares/%s" % share_id)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def manage_share(self, service_host, protocol, export_path,
                      share_type_id, name=None, description=None):
@@ -98,13 +99,14 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("os-share-manage", body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def unmanage_share(self, share_id):
         resp, body = self.post(
             "os-share-unmanage/%s/unmanage" % share_id, None)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def list_shares(self, detailed=False, params=None):
         """Get list of shares w/o filters."""
@@ -112,7 +114,8 @@ class SharesClient(rest_client.RestClient):
         uri += '?%s' % urlparse.urlencode(params) if params else ''
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_shares_with_detail(self, params=None):
         """Get detailed list of shares w/o filters."""
@@ -121,7 +124,8 @@ class SharesClient(rest_client.RestClient):
     def get_share(self, share_id):
         resp, body = self.get("shares/%s" % share_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_access_rule(self, share_id, access_type="ip",
                            access_to="0.0.0.0", access_level=None):
@@ -135,13 +139,15 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("shares/%s/action" % share_id, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_access_rules(self, share_id):
         body = {"os-access_list": None}
         resp, body = self.post("shares/%s/action" % share_id, json.dumps(body))
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_access_rule(self, share_id, rule_id):
         post_body = {
@@ -152,7 +158,7 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("shares/%s/action" % share_id, body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def extend_share(self, share_id, new_size):
         post_body = {
@@ -163,7 +169,7 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("shares/%s/action" % share_id, body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def shrink_share(self, share_id, new_size):
         post_body = {
@@ -174,7 +180,7 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("shares/%s/action" % share_id, body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def create_snapshot(self, share_id, name=None, description=None,
                         force=False):
@@ -194,12 +200,14 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(post_body)
         resp, body = self.post("snapshots", body)
         self.expected_success(202, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_snapshot(self, snapshot_id):
         resp, body = self.get("snapshots/%s" % snapshot_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshots(self, detailed=False, params=None):
         """Get list of share snapshots w/o filters."""
@@ -207,7 +215,8 @@ class SharesClient(rest_client.RestClient):
         uri += '?%s' % urlparse.urlencode(params) if params else ''
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_snapshots_with_detail(self, params=None):
         """Get detailed list of share snapshots w/o filters."""
@@ -216,12 +225,13 @@ class SharesClient(rest_client.RestClient):
     def delete_snapshot(self, snap_id):
         resp, body = self.delete("snapshots/%s" % snap_id)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def default_quotas(self, tenant_id):
         resp, body = self.get("os-quota-sets/%s/defaults" % tenant_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_quotas(self, tenant_id, user_id=None):
         uri = "os-quota-sets/%s" % tenant_id
@@ -229,7 +239,8 @@ class SharesClient(rest_client.RestClient):
             uri += "?user_id=%s" % user_id
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_quotas(self, tenant_id, user_id=None):
         uri = "os-quota-sets/%s" % tenant_id
@@ -237,7 +248,7 @@ class SharesClient(rest_client.RestClient):
             uri += "?user_id=%s" % user_id
         resp, body = self.delete(uri)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def update_quotas(self, tenant_id, user_id=None, shares=None,
                       snapshots=None, gigabytes=None, snapshot_gigabytes=None,
@@ -263,12 +274,14 @@ class SharesClient(rest_client.RestClient):
 
         resp, body = self.put(uri, put_body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_limits(self):
         resp, body = self.get("limits")
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, *args, **kwargs):
         """Verifies whether provided resource deleted or not.
@@ -281,7 +294,7 @@ class SharesClient(rest_client.RestClient):
             if "rule_id" in kwargs:
                 rule_id = kwargs.get("rule_id")
                 share_id = kwargs.get("share_id")
-                rules = self.list_access_rules(share_id)
+                rules = self.list_access_rules(share_id)['access_list']
                 for rule in rules:
                     if rule["id"] == rule_id:
                         return False
@@ -334,9 +347,10 @@ class SharesClient(rest_client.RestClient):
             time.sleep(self.build_interval)
 
     def list_extensions(self):
-        resp, extensions = self.get("extensions")
+        resp, body = self.get("extensions")
         self.expected_success(200, resp.status)
-        return self._parse_resp(extensions)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share(self, share_id, name=None, desc=None, is_public=None):
         body = {"share": {}}
@@ -349,7 +363,8 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(body)
         resp, body = self.put("shares/%s" % share_id, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def rename_snapshot(self, snapshot_id, name, desc=None):
         body = {"snapshot": {"display_name": name}}
@@ -358,7 +373,8 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(body)
         resp, body = self.put("snapshots/%s" % snapshot_id, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def reset_state(self, s_id, status="error", s_type="shares"):
         """Resets the state of a share or a snapshot.
@@ -370,7 +386,7 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(body)
         resp, body = self.post("%s/%s/action" % (s_type, s_id), body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def force_delete(self, s_id, s_type="shares"):
         """Force delete share or snapshot.
@@ -381,7 +397,7 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(body)
         resp, body = self.post("%s/%s/action" % (s_type, s_id), body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -392,7 +408,8 @@ class SharesClient(rest_client.RestClient):
             uri += '?%s' % urlparse.urlencode(params)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -403,11 +420,12 @@ class SharesClient(rest_client.RestClient):
         post_body = {"metadata": metadata}
         body = json.dumps(post_body)
         if method == "post":
-            resp, metadata = self.post(uri, body)
+            resp, body = self.post(uri, body)
         if method == "put":
-            resp, metadata = self.put(uri, body)
+            resp, body = self.put(uri, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(metadata)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def set_metadata(self, share_id, metadata=None):
         return self._update_metadata(share_id, metadata)
@@ -418,12 +436,13 @@ class SharesClient(rest_client.RestClient):
     def delete_metadata(self, share_id, key):
         resp, body = self.delete("shares/%s/metadata/%s" % (share_id, key))
         self.expected_success(200, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def get_metadata(self, share_id):
         resp, body = self.get("shares/%s/metadata" % share_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_metadata_item(self, share_id, key):
         resp, body = self.get("shares/%s/metadata/%s" % (share_id, key))
@@ -440,7 +459,8 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps({"security_service": post_body})
         resp, body = self.post("security-services", body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_security_service(self, ss_id, **kwargs):
         # ss_id - id of security-service entity
@@ -450,12 +470,14 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps({"security_service": kwargs})
         resp, body = self.put("security-services/%s" % ss_id, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_security_service(self, ss_id):
         resp, body = self.get("security-services/%s" % ss_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_security_services(self, detailed=False, params=None):
         uri = "security-services"
@@ -465,12 +487,13 @@ class SharesClient(rest_client.RestClient):
             uri += "?%s" % urlparse.urlencode(params)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_security_service(self, ss_id):
         resp, body = self.delete("security-services/%s" % ss_id)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -480,7 +503,8 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps({"share_network": kwargs})
         resp, body = self.post("share-networks", body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_network(self, sn_id, **kwargs):
         # kwargs: name, description
@@ -488,17 +512,20 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps({"share_network": kwargs})
         resp, body = self.put("share-networks/%s" % sn_id, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_network(self, sn_id):
         resp, body = self.get("share-networks/%s" % sn_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_networks(self):
         resp, body = self.get("share-networks")
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_share_networks_with_detail(self, params=None):
         """List the details of all shares."""
@@ -507,12 +534,13 @@ class SharesClient(rest_client.RestClient):
             uri += "?%s" % urlparse.urlencode(params)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_network(self, sn_id):
         resp, body = self.delete("share-networks/%s" % sn_id)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -529,21 +557,21 @@ class SharesClient(rest_client.RestClient):
         body = json.dumps(data)
         resp, body = self.post("share-networks/%s/action" % sn_id, body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def add_sec_service_to_share_network(self, sn_id, ss_id):
-        body = self._map_security_service_and_share_network(sn_id, ss_id)
-        return body
+        return self._map_security_service_and_share_network(sn_id, ss_id)
 
     def remove_sec_service_from_share_network(self, sn_id, ss_id):
-        body = self._map_security_service_and_share_network(
+        return self._map_security_service_and_share_network(
             sn_id, ss_id, "remove")
-        return body
 
     def list_sec_services_for_share_network(self, sn_id):
         resp, body = self.get("security-services?share_network_id=%s" % sn_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -553,7 +581,8 @@ class SharesClient(rest_client.RestClient):
             uri += '?%s' % urlparse.urlencode(params)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def create_share_type(self, name, is_public=True, **kwargs):
         post_body = {
@@ -564,22 +593,25 @@ class SharesClient(rest_client.RestClient):
         post_body = json.dumps({'share_type': post_body})
         resp, body = self.post('types', post_body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_type(self, share_type_id):
         resp, body = self.delete("types/%s" % share_type_id)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_type(self, share_type_id):
         resp, body = self.get("types/%s" % share_type_id)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_default_share_type(self):
         resp, body = self.get("types/default")
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def add_access_to_share_type(self, share_type_id, project_id):
         uri = 'types/%s/action' % share_type_id
@@ -587,7 +619,7 @@ class SharesClient(rest_client.RestClient):
         post_body = json.dumps({'addProjectAccess': post_body})
         resp, body = self.post(uri, post_body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def remove_access_from_share_type(self, share_type_id, project_id):
         uri = 'types/%s/action' % share_type_id
@@ -595,14 +627,15 @@ class SharesClient(rest_client.RestClient):
         post_body = json.dumps({'removeProjectAccess': post_body})
         resp, body = self.post(uri, post_body)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def list_access_to_share_type(self, share_type_id):
         uri = 'types/%s/os-share-type-access' % share_type_id
         resp, body = self.get(uri)
         # [{"share_type_id": "%st_id%", "project_id": "%project_id%"}, ]
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -611,13 +644,15 @@ class SharesClient(rest_client.RestClient):
         post_body = json.dumps({'extra_specs': extra_specs})
         resp, body = self.post(url, post_body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_type_extra_spec(self, share_type_id, extra_spec_name):
         uri = "types/%s/extra_specs/%s" % (share_type_id, extra_spec_name)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def get_share_type_extra_specs(self, share_type_id, params=None):
         uri = "types/%s/extra_specs" % share_type_id
@@ -625,7 +660,8 @@ class SharesClient(rest_client.RestClient):
             uri += '?%s' % urlparse.urlencode(params)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_type_extra_spec(self, share_type_id, spec_name,
                                      spec_value):
@@ -634,7 +670,8 @@ class SharesClient(rest_client.RestClient):
         post_body = json.dumps(extra_spec)
         resp, body = self.put(uri, post_body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def update_share_type_extra_specs(self, share_type_id, extra_specs):
         uri = "types/%s/extra_specs" % share_type_id
@@ -642,13 +679,14 @@ class SharesClient(rest_client.RestClient):
         post_body = json.dumps(extra_specs)
         resp, body = self.post(uri, post_body)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_type_extra_spec(self, share_type_id, extra_spec_name):
         uri = "types/%s/extra_specs/%s" % (share_type_id, extra_spec_name)
         resp, body = self.delete(uri)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -659,28 +697,31 @@ class SharesClient(rest_client.RestClient):
             uri += "?%s" % urlparse.urlencode(search_opts)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def delete_share_server(self, share_server_id):
         """Delete share server by its ID."""
         uri = "share-servers/%s" % share_server_id
         resp, body = self.delete(uri)
         self.expected_success(202, resp.status)
-        return body
+        return rest_client.ResponseBody(resp, body)
 
     def show_share_server(self, share_server_id):
         """Get share server info."""
         uri = "share-servers/%s" % share_server_id
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
     def show_share_server_details(self, share_server_id):
         """Get share server details only."""
         uri = "share-servers/%s/details" % share_server_id
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -693,7 +734,8 @@ class SharesClient(rest_client.RestClient):
             uri += "?%s" % urlparse.urlencode(search_opts)
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return json.loads(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
 
 ###############
 
@@ -702,4 +744,5 @@ class SharesClient(rest_client.RestClient):
         uri = 'os-availability-zone'
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)

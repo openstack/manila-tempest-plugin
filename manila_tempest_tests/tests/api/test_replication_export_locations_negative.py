@@ -56,7 +56,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.sn_id = cls.share_network['id']
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type)
@@ -79,7 +79,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
         replica_exports = (
             self.shares_v2_client.list_share_replica_export_locations(
                 replica['id'])
-        )
+        )['export_locations']
 
         for export in replica_exports:
             self.assertRaises(lib_exc.NotFound,
@@ -96,7 +96,8 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
         share = self.create_share(share_type_id=share_type['id'],
                                   availability_zone=self.share_zone,
                                   share_network_id=self.sn_id)
-        share_instances = self.admin_client.get_instances_of_share(share['id'])
+        share_instances = self.admin_client.get_instances_of_share(
+            share['id'])['share_instances']
         for instance in share_instances:
             self.assertRaises(
                 lib_exc.NotFound,

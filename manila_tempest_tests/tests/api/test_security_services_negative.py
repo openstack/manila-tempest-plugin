@@ -98,7 +98,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
         ss = self.create_security_service(**ss_data)
 
         sn = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)
+            self.shares_client.share_network_id)['share_network']
         fresh_sn = self.create_share_network(
             add_security_services=False,
             neutron_net_id=sn["neutron_net_id"],

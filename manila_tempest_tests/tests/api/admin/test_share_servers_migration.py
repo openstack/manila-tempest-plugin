@@ -69,7 +69,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
     def _setup_migration(self, share):
         """Initial share server migration setup."""
 
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         server_id = share['share_server_id']
 
         # (andrer) Verify if have at least one backend compatible with
@@ -85,7 +85,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
 
         # (andrer) Check the share export locations.
         old_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'])
+            share['id'])['export_locations']
         self.assertNotEmpty(old_exports)
         old_exports = [x['path'] for x in old_exports
                        if x['is_admin_only'] is False]
@@ -104,7 +104,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
             self.shares_v2_client, share['id'], constants.RULE_STATE_ACTIVE,
             status_attr='access_rules_status')
 
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         return share, server_id, dest_host, snapshot
 
@@ -115,11 +115,12 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
                     if not isinstance(expected_status, (tuple, list, set))
                     else expected_status)
 
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         self.assertIn(share['status'], statuses)
 
         if snapshot_id:
-            snapshot = self.shares_v2_client.get_snapshot(snapshot_id)
+            snapshot = self.shares_v2_client.get_snapshot(
+                snapshot_id)['snapshot']
             self.assertIn(snapshot['status'], statuses)
 
     def _validate_share_server_migration_complete(
@@ -129,14 +130,14 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
 
         # Check the export locations
         new_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'], version=version)
+            share['id'], version=version)['export_locations']
         self.assertNotEmpty(new_exports)
         new_exports = [x['path'] for x in new_exports if
                        x['is_admin_only'] is False]
         self.assertNotEmpty(new_exports)
 
         # Check the share host, share_network, share_server and status.
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         self.assertEqual(share['host'].split('#')[0], dest_host)
         self.assertEqual(share_network_id, share['share_network_id'])
         self.assertEqual(dest_server_id, share['share_server_id'])
@@ -150,12 +151,14 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
             )
 
         # Check the share server destination status.
-        dest_server = self.shares_v2_client.show_share_server(dest_server_id)
+        dest_server = self.shares_v2_client.show_share_server(
+            dest_server_id)['share_server']
         self.assertIn(dest_server['task_state'],
                       constants.TASK_STATE_MIGRATION_SUCCESS)
 
         # Check if the access rules are in the share.
-        rules = self.shares_v2_client.list_access_rules(share['id'])
+        rules = self.shares_v2_client.list_access_rules(
+            share['id'])['access_list']
         if self.protocol == 'cifs':
             expected_rules = [{
                 'state': constants.RULE_STATE_ACTIVE,
@@ -227,7 +230,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         params = {'source_share_server_id': src_server_id,
                   'status': constants.STATUS_SERVER_MIGRATING_TO}
         dest_server = self.admin_shares_v2_client.list_share_servers(
-            search_opts=params)
+            search_opts=params)['share_servers']
         dest_server_id = dest_server[0]['id'] if dest_server else None
 
         return dest_server_id
@@ -269,7 +272,7 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
                                   share_type_id=self.share_type['id'],
                                   share_network_id=share_network_id,
                                   cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         # Initial migration setup.
         share, src_server_id, dest_host, snapshot_id = self._setup_migration(
@@ -292,7 +295,8 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         dest_server_id = self._get_share_server_destination_for_migration(
             src_server_id)
 
-        dest_server = self.shares_v2_client.show_share_server(dest_server_id)
+        dest_server = self.shares_v2_client.show_share_server(
+            dest_server_id)['share_server']
         self.assertEqual(dest_host, dest_server['host'])
         self.assertEqual(share_network_id, dest_server['share_network_id'])
 
@@ -324,7 +328,7 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         dest_share_network_id = share_network_id
         if new_share_network:
             src_share_network = self.shares_v2_client.get_share_network(
-                share_network_id)
+                share_network_id)['share_network']
             share_net_info = (
                 utils.share_network_get_default_subnet(src_share_network))
             dest_share_network_id = self.create_share_network(
@@ -336,7 +340,7 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
                                   share_type_id=self.share_type['id'],
                                   share_network_id=share_network_id,
                                   cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         # Initial migration setup.
         share, src_server_id, dest_host, snapshot_id = self._setup_migration(
@@ -360,7 +364,8 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         dest_server_id = self._get_share_server_destination_for_migration(
             src_server_id)
 
-        dest_server = self.shares_v2_client.show_share_server(dest_server_id)
+        dest_server = self.shares_v2_client.show_share_server(
+            dest_server_id)['share_server']
         self.assertEqual(dest_host, dest_server['host'])
         self.assertEqual(dest_share_network_id,
                          dest_server['share_network_id'])
@@ -380,7 +385,8 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
 
         # Check if the source server went to inactive status if it exists.
         try:
-            src_server = self.shares_v2_client.show_share_server(src_server_id)
+            src_server = self.shares_v2_client.show_share_server(
+                src_server_id)['share_server']
         except exceptions.NotFound:
             src_server = None
 
@@ -389,7 +395,7 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
                 src_server['status'], constants.SERVER_STATE_INACTIVE)
 
         # Validate the share server migration complete.
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         self._validate_share_server_migration_complete(
             share, dest_host, dest_server_id, snapshot_id=snapshot_id,
             share_network_id=dest_share_network_id)
@@ -402,7 +408,7 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         share = self.create_share(share_protocol=self.protocol,
                                   share_type_id=self.share_type['id'],
                                   cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         # Find a backend compatible or not for the share server
         # check compatibility operation.
         if compatible:

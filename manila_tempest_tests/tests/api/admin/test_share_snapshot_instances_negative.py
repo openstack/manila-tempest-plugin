@@ -61,7 +61,7 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_instance_by_non_admin(self):
         instances = self.admin_client.list_snapshot_instances(
-            snapshot_id=self.snapshot['id'])
+            snapshot_id=self.snapshot['id'])['snapshot_instances']
         self.assertRaises(
             lib_exc.Forbidden,
             self.member_client.get_snapshot_instance,
@@ -71,7 +71,7 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_reset_snapshot_instance_status_by_non_admin(self):
         instances = self.admin_client.list_snapshot_instances(
-            snapshot_id=self.snapshot['id'])
+            snapshot_id=self.snapshot['id'])['snapshot_instances']
         self.assertRaises(
             lib_exc.Forbidden,
             self.member_client.reset_snapshot_instance_status,

@@ -66,7 +66,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
                                state=constants.STATUS_AVAILABLE):
         # Manage the share and wait for the expected state.
         # Return the managed share object.
-        managed_share = self.shares_v2_client.manage_share(**params)
+        managed_share = self.shares_v2_client.manage_share(**params)['share']
         waiters.wait_for_resource_status(
             self.shares_v2_client, managed_share['id'], state)
 
@@ -82,7 +82,8 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             valid_params['share_server_id'] = share['share_server_id']
 
         if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.9"):
-            el = self.shares_v2_client.list_share_export_locations(share["id"])
+            el = self.shares_v2_client.list_share_export_locations(
+                share["id"])['export_locations']
             valid_params['export_path'] = el[0]['path']
 
         if invalid_params:
@@ -168,7 +169,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             # and leave it in manage_error state
             invalid_share = self.shares_v2_client.manage_share(
                 **invalid_params
-            )
+            )['share']
             waiters.wait_for_resource_status(
                 self.shares_v2_client, invalid_share['id'],
                 constants.STATUS_MANAGE_ERROR)
@@ -200,7 +201,8 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         managed_share = self._manage_share_and_wait(manage_params)
 
         # update managed share's reference
-        managed_share = self.shares_v2_client.get_share(managed_share['id'])
+        managed_share = self.shares_v2_client.get_share(
+            managed_share['id'])['share']
         manage_params = self._get_manage_params_from_share(managed_share)
 
         # the second attempt to manage the same share should fail
@@ -262,7 +264,8 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         invalid_params.update(
             {'export_path': data_utils.rand_name(name='invalid-share-export')}
         )
-        invalid_share = self.shares_v2_client.manage_share(**invalid_params)
+        invalid_share = self.shares_v2_client.manage_share(
+            **invalid_params)['share']
 
         waiters.wait_for_resource_status(
             self.shares_v2_client, invalid_share['id'],
@@ -299,7 +302,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         share = self._create_share_for_manage()
 
         snap = self.create_snapshot_wait_for_active(share["id"])
-        snap = self.shares_v2_client.get_snapshot(snap['id'])
+        snap = self.shares_v2_client.get_snapshot(snap['id'])['snapshot']
 
         self.assertRaises(
             lib_exc.Forbidden,

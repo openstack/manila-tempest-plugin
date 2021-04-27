@@ -43,7 +43,7 @@ class ShareInstancesNegativeTest(base.BaseSharesAdminTest):
             'export_location_' + export_location_type: 'fake',
         }
         share_instances = self.shares_v2_client.list_share_instances(
-            params=filters, version="2.34")
+            params=filters, version="2.34")['share_instances']
 
         self.assertGreater(len(share_instances), 0)
 
@@ -57,6 +57,6 @@ class ShareInstancesNegativeTest(base.BaseSharesAdminTest):
             'export_location_' + export_location_type: 'fake_not_exist',
         }
         share_instances = self.shares_v2_client.list_share_instances(
-            params=filters)
+            params=filters)['share_instances']
 
         self.assertEqual(0, len(share_instances))

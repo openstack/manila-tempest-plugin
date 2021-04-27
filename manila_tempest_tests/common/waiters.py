@@ -33,7 +33,7 @@ def _get_access_rule(body, rule_id):
 
 
 def _get_name_of_raise_method(resource_name):
-    if resource_name == 'snapshot_access_rule':
+    if resource_name == 'snapshot_access':
         return 'AccessRuleBuildErrorException'
     if resource_name == 'share_replica':
         return 'ShareInstanceBuildErrorException'
@@ -56,24 +56,30 @@ def wait_for_resource_status(client, resource_id, status,
         'share_instance': 'get_share_instance',
         'snapshot_instance': 'get_snapshot_instance',
         'access_rule': 'list_access_rules',
-        'snapshot_access_rule': 'get_snapshot_access_rule',
+        'snapshot_access': 'list_snapshot_access_rules',
         'share_group': 'get_share_group',
         'share_group_snapshot': 'get_share_group_snapshot',
         'share_replica': 'get_share_replica',
     }
 
+    action_name = get_resource_action[resource_name]
+    # This code snippet is intended to set the dictionary key of the returned
+    # response for share access rule and for snapshot access rule.
+    if 'access' in resource_name:
+        rn = '_'.join(action_name.split('_')[1:-1]) + '_list'
+    else:
+        rn = resource_name
+
     # Since API v2 requests require an additional parameter for micro-versions,
     # it's necessary to pass the required parameters according to the version.
-    resource_action = getattr(client, get_resource_action[resource_name])
+    resource_action = getattr(client, action_name)
     method_args = [resource_id]
     method_kwargs = {}
     if isinstance(client, shares_client.SharesV2Client):
         method_kwargs.update({'version': version})
-        if resource_name == 'snapshot_access_rule':
-            method_args.insert(1, rule_id)
-    body = resource_action(*method_args, **method_kwargs)
+    body = resource_action(*method_args, **method_kwargs)[rn]
 
-    if resource_name == 'access_rule':
+    if 'access' in resource_name:
         status_attr = 'state'
         body = _get_access_rule(body, rule_id)
 
@@ -83,9 +89,9 @@ def wait_for_resource_status(client, resource_id, status,
     exp_status = status if isinstance(status, list) else [status]
     while resource_status not in exp_status:
         time.sleep(client.build_interval)
-        body = resource_action(*method_args, **method_kwargs)
+        body = resource_action(*method_args, **method_kwargs)[rn]
 
-        if resource_name == 'access_rule':
+        if 'access' in resource_name:
             status_attr = 'state'
             body = _get_access_rule(body, rule_id)
 
@@ -111,12 +117,12 @@ def wait_for_migration_status(client, share_id, dest_host, status_to_wait,
     statuses = ((status_to_wait,)
                 if not isinstance(status_to_wait, (tuple, list, set))
                 else status_to_wait)
-    share = client.get_share(share_id, version=version)
+    share = client.get_share(share_id, version=version)['share']
     migration_timeout = CONF.share.migration_timeout
     start = int(time.time())
     while share['task_state'] not in statuses:
         time.sleep(client.build_interval)
-        share = client.get_share(share_id, version=version)
+        share = client.get_share(share_id, version=version)['share']
         if share['task_state'] in statuses:
             break
         elif share['task_state'] == 'migration_error':
@@ -165,7 +171,7 @@ def wait_for_message(client, resource_id):
 
     while not message:
         time.sleep(client.build_interval)
-        for msg in client.list_messages():
+        for msg in client.list_messages()['messages']:
             if msg['resource_id'] == resource_id:
                 return msg
 

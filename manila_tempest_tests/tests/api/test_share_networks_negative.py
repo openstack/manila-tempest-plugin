@@ -126,7 +126,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     def test_try_delete_share_network_with_existing_shares(self):
         # Get valid network data for successful share creation
         share_network = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)
+            self.shares_client.share_network_id)['share_network']
         new_sn = self.create_share_network(
             neutron_net_id=share_network['neutron_net_id'],
             neutron_subnet_id=share_network['neutron_subnet_id'],
@@ -152,7 +152,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
         }
         share_networks = (
             self.shares_v2_client.list_share_networks_with_detail(
-                params=filters))
+                params=filters)['share_networks'])
 
         self.assertEqual(0, len(share_networks))
 
@@ -161,7 +161,8 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_share_network_contains_more_than_one_subnet(self):
         share_network = self.create_share_network()
-        az = self.shares_v2_client.list_availability_zones()[0]
+        az = self.shares_v2_client.list_availability_zones(
+            )['availability_zones'][0]
         az_name = az['name']
 
         # Generate subnet data
@@ -181,7 +182,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
 
         self.shares_v2_client.delete_subnet(share_network['id'], subnet['id'])
         share_network = self.shares_v2_client.get_share_network(
-            share_network['id'])
+            share_network['id'])['share_network']
         default_subnet = share_network['share_network_subnets'][0]
         self.assertIsNone(default_subnet['availability_zone'])
 

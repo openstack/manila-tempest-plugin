@@ -43,7 +43,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # get metadata of share
-        metadata = self.shares_client.get_metadata(share["id"])
+        metadata = self.shares_client.get_metadata(share["id"])['metadata']
 
         # verify metadata
         self.assertEqual(md, metadata)
@@ -62,7 +62,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         self.shares_client.set_metadata(share["id"], md)
 
         # read metadata
-        get_md = self.shares_client.get_metadata(share["id"])
+        get_md = self.shares_client.get_metadata(share["id"])['metadata']
 
         # verify metadata
         self.assertEqual(md, get_md)
@@ -77,7 +77,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
             self.shares_client.delete_metadata(share["id"], key)
 
         # verify deletion of metadata
-        get_metadata = self.shares_client.get_metadata(share["id"])
+        get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
         self.assertEqual({}, get_metadata)
 
     @decorators.idempotent_id('c94851f4-2559-4712-9297-9912db1da7ff')
@@ -98,7 +98,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         self.shares_client.update_all_metadata(share["id"], md2)
 
         # get metadata
-        get_md = self.shares_client.get_metadata(share["id"])
+        get_md = self.shares_client.get_metadata(share["id"])['metadata']
 
         # verify metadata
         self.assertEqual(md2, get_md)
@@ -110,7 +110,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data['k'], body_get.get('k'))
 
     @decorators.idempotent_id('34c5bd96-ced7-42ef-a114-570cc63cf81d')
@@ -121,7 +122,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertIn(max_key, body_get)
         self.assertEqual(data[max_key], body_get.get(max_key))
 
@@ -132,7 +134,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data['key'], body_get['key'])
 
     @decorators.idempotent_id('759ec4ab-2537-44ad-852b-1af85c6ca933')
@@ -143,7 +146,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data['key'], body_get['key'])
 
     @decorators.idempotent_id('c5ca19ba-3595-414a-8ff9-fbc88cd801ba')
@@ -153,7 +157,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data, body_get)
 
     @decorators.idempotent_id('5eff5619-b7cd-42f1-85e0-47d3d47098dd')
@@ -164,7 +169,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data, body_get)
 
     @decorators.idempotent_id('44a572f1-6b5c-49d0-8f2e-1583ec3428d8')
@@ -174,7 +180,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data, body_get)
 
     @decorators.idempotent_id('694d95e1-ba8c-49fc-a888-6f9f0d51d77d')
@@ -185,5 +192,6 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         self.shares_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(self.share["id"])
+        body_get = self.shares_client.get_metadata(
+            self.share["id"])['metadata']
         self.assertEqual(data, body_get)

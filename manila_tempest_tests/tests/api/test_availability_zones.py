@@ -35,7 +35,8 @@ class AvailabilityZonesTest(base.BaseSharesTest):
     def test_list_availability_zones_legacy_url_api_v1(self):
         # NOTE(vponomaryov): remove this test with removal of availability zone
         # extension url support.
-        azs = self.shares_client.list_availability_zones()
+        azs = self.shares_client.list_availability_zones(
+            )['availability_zones']
         self._list_availability_zones_assertions(azs)
 
     @decorators.idempotent_id('7054f2f4-bc77-4d60-82a6-2f23b93d281e')
@@ -45,12 +46,13 @@ class AvailabilityZonesTest(base.BaseSharesTest):
         # NOTE(vponomaryov): remove this test with removal of availability zone
         # extension url support.
         azs = self.shares_v2_client.list_availability_zones(
-            url='os-availability-zone', version='2.6')
+            url='os-availability-zone', version='2.6')['availability_zones']
         self._list_availability_zones_assertions(azs)
 
     @decorators.idempotent_id('4caadb86-2988-4adb-b705-aece99235c1e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.7")
     def test_list_availability_zones(self):
-        azs = self.shares_v2_client.list_availability_zones(version='2.7')
+        azs = self.shares_v2_client.list_availability_zones(
+            version='2.7')['availability_zones']
         self._list_availability_zones_assertions(azs)

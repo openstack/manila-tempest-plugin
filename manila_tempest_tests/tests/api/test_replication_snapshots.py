@@ -68,7 +68,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.sn_id = cls.share_network['id']
 
         cls.zones = cls.get_availability_zones_matching_share_type(
@@ -89,7 +89,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                   availability_zone=self.share_zone,
                                   share_network_id=self.sn_id)
         original_replica = self.shares_v2_client.list_share_replicas(
-            share["id"])[0]
+            share["id"])['share_replicas'][0]
 
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone,
@@ -104,7 +104,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         self.promote_share_replica(share_replica['id'])
         self.delete_share_replica(original_replica['id'])
 
-        snapshot = self.shares_v2_client.get_snapshot(snapshot['id'])
+        snapshot = self.shares_v2_client.get_snapshot(
+            snapshot['id'])['snapshot']
         self.assertEqual(constants.STATUS_AVAILABLE, snapshot['status'])
 
         if CONF.share.capability_create_share_from_snapshot_support:
@@ -127,7 +128,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         snapshot = self.create_snapshot_wait_for_active(share["id"])
 
         original_replica = self.shares_v2_client.list_share_replicas(
-            share["id"])[0]
+            share["id"])['share_replicas'][0]
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone,
                                                   cleanup=False)
@@ -145,7 +146,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         self.promote_share_replica(share_replica['id'])
         self.delete_share_replica(original_replica['id'])
 
-        snapshot = self.shares_v2_client.get_snapshot(snapshot['id'])
+        snapshot = self.shares_v2_client.get_snapshot(
+            snapshot['id'])['snapshot']
         self.assertEqual(constants.STATUS_AVAILABLE, snapshot['status'])
 
         if CONF.share.capability_create_share_from_snapshot_support:
@@ -168,7 +170,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         snapshot1 = self.create_snapshot_wait_for_active(share["id"])
 
         original_replica = self.shares_v2_client.list_share_replicas(
-            share["id"])[0]
+            share["id"])['share_replicas'][0]
 
         share_replica = self.create_share_replica(share["id"],
                                                   self.replica_zone,
@@ -191,10 +193,12 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         # still being created successfully.
         self.delete_share_replica(original_replica['id'])
 
-        snapshot1 = self.shares_v2_client.get_snapshot(snapshot1['id'])
+        snapshot1 = self.shares_v2_client.get_snapshot(
+            snapshot1['id'])['snapshot']
         self.assertEqual(constants.STATUS_AVAILABLE, snapshot1['status'])
 
-        snapshot2 = self.shares_v2_client.get_snapshot(snapshot2['id'])
+        snapshot2 = self.shares_v2_client.get_snapshot(
+            snapshot2['id'])['snapshot']
         self.assertEqual(constants.STATUS_AVAILABLE, snapshot2['status'])
 
         if CONF.share.capability_create_share_from_snapshot_support:
@@ -244,7 +248,7 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
                                        snapshot_id=orig_snapshot['id'],
                                        share_network_id=self.sn_id)
         original_replica = self.shares_v2_client.list_share_replicas(
-            snap_share["id"])[0]
+            snap_share["id"])['share_replicas'][0]
         share_replica = self.create_share_replica(snap_share["id"],
                                                   self.replica_zone,
                                                   cleanup=False)

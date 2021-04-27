@@ -39,7 +39,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
         """Test that we get only the 1 share instance back for the share."""
         share_instances = self.shares_v2_client.get_instances_of_share(
             self.share['id'], version='2.3'
-        )
+        )['share_instances']
 
         self.assertEqual(1, len(share_instances),
                          'Too many share instances found; expected 1, '
@@ -58,7 +58,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
         """Test that we list the share instance back."""
         share_instances = self.shares_v2_client.list_share_instances(
             version='2.3'
-        )
+        )['share_instances']
 
         share_ids = [si['share_id'] for si in share_instances]
 
@@ -74,10 +74,10 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
 
         share_instances = self.shares_v2_client.get_instances_of_share(
             self.share['id'], version=version,
-        )
+        )['share_instances']
 
         si = self.shares_v2_client.get_share_instance(
-            share_instances[0]['id'], version=version)
+            share_instances[0]['id'], version=version)['share_instance']
 
         expected_keys = [
             'host', 'share_id', 'id', 'share_network_id', 'status',
@@ -110,17 +110,17 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
             self, export_location_type):
         share_instances_except = (
             self.shares_v2_client.get_instances_of_share(
-                self.share['id']))
+                self.share['id']))['share_instances']
         export_locations = (
             self.shares_v2_client.list_share_instance_export_locations(
-                share_instances_except[0]['id']))
+                share_instances_except[0]['id']))['export_locations']
 
         filters = {
             'export_location_' + export_location_type:
                 export_locations[0][export_location_type],
         }
         share_instances = self.shares_v2_client.list_share_instances(
-            params=filters)
+            params=filters)['share_instances']
 
         self.assertEqual(1, len(share_instances))
         self.assertEqual(share_instances_except[0]['id'],

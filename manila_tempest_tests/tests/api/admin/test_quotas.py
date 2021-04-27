@@ -50,7 +50,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('f62c48e3-9736-4f0c-9f9b-f139f393ac0a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_default_quotas(self):
-        quotas = self.client.default_quotas(self.tenant_id)
+        quotas = self.client.default_quotas(self.tenant_id)['quota_set']
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
         self.assertGreater(int(quotas["shares"]), -2)
@@ -66,7 +66,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('1ff57cfa-cd8d-495f-86eb-9fead307428e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_quotas(self):
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
         self.assertGreater(int(quotas["shares"]), -2)
@@ -83,7 +83,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_quotas_for_user(self):
         quotas = self.client.show_quotas(
-            self.tenant_id, self.user_id)
+            self.tenant_id, self.user_id)['quota_set']
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
         self.assertGreater(int(quotas["shares"]), -2)
@@ -101,7 +101,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported(PRE_SHARE_GROUPS_MICROVERSION)
     def test_show_sg_quotas_using_too_old_microversion(self):
         quotas = self.client.show_quotas(
-            self.tenant_id, version=PRE_SHARE_GROUPS_MICROVERSION)
+            self.tenant_id, version=PRE_SHARE_GROUPS_MICROVERSION)['quota_set']
 
         for key in ('share_groups', 'share_group_snapshots'):
             self.assertNotIn(key, quotas)
@@ -112,7 +112,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     def test_show_sg_quotas_for_user_using_too_old_microversion(self):
         quotas = self.client.show_quotas(
             self.tenant_id, self.user_id,
-            version=PRE_SHARE_GROUPS_MICROVERSION)
+            version=PRE_SHARE_GROUPS_MICROVERSION)['quota_set']
 
         for key in ('share_groups', 'share_group_snapshots'):
             self.assertNotIn(key, quotas)
@@ -124,7 +124,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     def test_show_replica_quotas_for_user_using_too_old_microversion(self):
         quotas = self.client.show_quotas(
             self.tenant_id, self.user_id,
-            version=PRE_SHARE_REPLICA_QUOTAS_MICROVERSION)
+            version=PRE_SHARE_REPLICA_QUOTAS_MICROVERSION)['quota_set']
 
         for key in ('share_replicas', 'replica_gigabytes'):
             self.assertNotIn(key, quotas)
@@ -159,11 +159,11 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
             keys.append('replica_gigabytes')
 
         # Get current project quotas
-        p_quotas = self.client.show_quotas(self.tenant_id)
+        p_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # Get current share type quotas
         st_quotas = self.client.show_quotas(
-            self.tenant_id, share_type=share_type[share_type_key])
+            self.tenant_id, share_type=share_type[share_type_key])['quota_set']
 
         # Share type quotas have values equal to project's
         for key in keys:
@@ -214,7 +214,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_tenant_quota_shares(self):
         # get current quotas
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
         new_quota = int(quotas["shares"]) + 2
 
         # set new quota for shares
@@ -233,7 +233,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_update_tenant_quota_share_groups(self, quota_key):
         # Get current quotas
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
         new_quota = int(quotas[quota_key]) + 2
 
         # Set new quota
@@ -245,7 +245,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_user_quota_shares(self):
         # get current quotas
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
         new_quota = int(quotas["shares"]) - 1
 
         # set new quota for shares
@@ -266,7 +267,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_update_user_quota_share_groups(self, quota_key):
         # Get current quotas
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
         new_quota = int(quotas[quota_key]) - 1
 
         # Set new quota
@@ -292,7 +294,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         # Update the kwargs with user_id in case the user_id need to be
         # specified in the request
         kwargs.update({'user_id': self.user_id}) if use_user_id else None
-        quotas = self.client.show_quotas(self.tenant_id, **kwargs)
+        quotas = self.client.show_quotas(self.tenant_id, **kwargs)['quota_set']
         new_quota = int(quotas[quota_key]) - 1
 
         # Add the updated quota into the kwargs
@@ -319,7 +321,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
 
         # Get current quotas
         quotas = self.client.show_quotas(
-            self.tenant_id, share_type=share_type[share_type_key])
+            self.tenant_id, share_type=share_type[share_type_key])['quota_set']
         quota_keys = ['shares', 'gigabytes', 'snapshots', 'snapshot_gigabytes']
 
         if replica_quotas_supported:
@@ -341,7 +343,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
             self.assertEqual(new_quota, int(updated[q]))
 
         current_quotas = self.client.show_quotas(
-            self.tenant_id, share_type=share_type[share_type_key])
+            self.tenant_id, share_type=share_type[share_type_key])['quota_set']
 
         for q in quota_keys:
             self.assertEqual(int(quotas[q]) - 1, current_quotas[q])
@@ -350,7 +352,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_tenant_quota_snapshots(self):
         # get current quotas
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
         new_quota = int(quotas["snapshots"]) + 2
 
         # set new quota for snapshots
@@ -362,7 +364,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_user_quota_snapshots(self):
         # get current quotas
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
         new_quota = int(quotas["snapshots"]) - 1
 
         # set new quota for snapshots
@@ -376,7 +379,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_tenant_quota_gigabytes(self):
         # get current quotas
-        custom = self.client.show_quotas(self.tenant_id)
+        custom = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # make quotas for update
         gigabytes = int(custom["gigabytes"]) + 2
@@ -390,7 +393,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_tenant_quota_snapshot_gigabytes(self):
         # get current quotas
-        custom = self.client.show_quotas(self.tenant_id)
+        custom = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # make quotas for update
         snapshot_gigabytes = int(custom["snapshot_gigabytes"]) + 2
@@ -406,7 +409,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_user_quota_gigabytes(self):
         # get current quotas
-        custom = self.client.show_quotas(self.tenant_id, self.user_id)
+        custom = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         # make quotas for update
         gigabytes = int(custom["gigabytes"]) - 1
@@ -422,7 +426,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_user_quota_snapshot_gigabytes(self):
         # get current quotas
-        custom = self.client.show_quotas(self.tenant_id, self.user_id)
+        custom = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         # make quotas for update
         snapshot_gigabytes = int(custom["snapshot_gigabytes"]) - 1
@@ -439,7 +444,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_tenant_quota_share_networks(self):
         # get current quotas
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
         new_quota = int(quotas["share_networks"]) + 2
 
         # set new quota for share-networks
@@ -452,7 +457,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_update_user_quota_share_networks(self):
         # get current quotas
         quotas = self.client.show_quotas(
-            self.tenant_id, self.user_id)
+            self.tenant_id, self.user_id)['quota_set']
         new_quota = int(quotas["share_networks"]) - 1
 
         # set new quota for share-networks
@@ -466,10 +471,10 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_reset_tenant_quotas(self):
         # Get default_quotas
-        default = self.client.default_quotas(self.tenant_id)
+        default = self.client.default_quotas(self.tenant_id)['quota_set']
 
         # Get current quotas
-        custom = self.client.show_quotas(self.tenant_id)
+        custom = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # Make quotas for update
         data = {
@@ -514,7 +519,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         self.client.reset_quotas(self.tenant_id)
 
         # Verify quotas
-        reseted = self.client.show_quotas(self.tenant_id)
+        reseted = self.client.show_quotas(self.tenant_id)['quota_set']
         self.assertEqual(int(default["shares"]), int(reseted["shares"]))
         self.assertEqual(int(default["snapshots"]), int(reseted["snapshots"]))
         self.assertEqual(int(default["gigabytes"]), int(reseted["gigabytes"]))
@@ -559,7 +564,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         quota_keys = ['shares', 'snapshots', 'gigabytes', 'snapshot_gigabytes']
 
         # get default_quotas
-        default_quotas = self.client.default_quotas(self.tenant_id)
+        default_quotas = self.client.default_quotas(
+            self.tenant_id)['quota_set']
 
         kwargs = {}
 
@@ -602,9 +608,9 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
             self.tenant_id, share_type=share_type[share_type_key])
 
         # verify quotas
-        current_p_quota = self.client.show_quotas(self.tenant_id)
+        current_p_quota = self.client.show_quotas(self.tenant_id)['quota_set']
         current_st_quota = self.client.show_quotas(
-            self.tenant_id, share_type=share_type[share_type_key])
+            self.tenant_id, share_type=share_type[share_type_key])['quota_set']
         for key in quota_keys:
             self.assertEqual(updated_p_quota[key], current_p_quota[key])
 
@@ -617,7 +623,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_quota_for_shares(self):
         self.update_quotas(self.tenant_id, shares=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('shares'))
 
@@ -626,7 +632,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_user_quota_for_shares(self):
         self.update_quotas(self.tenant_id, user_id=self.user_id, shares=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('shares'))
 
@@ -635,7 +642,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_quota_for_snapshots(self):
         self.update_quotas(self.tenant_id, snapshots=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('snapshots'))
 
@@ -644,7 +651,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_user_quota_for_snapshots(self):
         self.update_quotas(self.tenant_id, user_id=self.user_id, snapshots=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('snapshots'))
 
@@ -653,7 +661,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_quota_for_gigabytes(self):
         self.update_quotas(self.tenant_id, gigabytes=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('gigabytes'))
 
@@ -662,7 +670,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_quota_for_snapshot_gigabytes(self):
         self.update_quotas(self.tenant_id, snapshot_gigabytes=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('snapshot_gigabytes'))
 
@@ -671,7 +679,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_user_quota_for_gigabytes(self):
         self.update_quotas(self.tenant_id, user_id=self.user_id, gigabytes=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('gigabytes'))
 
@@ -682,7 +691,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
                            user_id=self.user_id,
                            snapshot_gigabytes=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('snapshot_gigabytes'))
 
@@ -691,7 +701,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_quota_for_share_networks(self):
         self.update_quotas(self.tenant_id, share_networks=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('share_networks'))
 
@@ -702,7 +712,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
                            user_id=self.user_id,
                            share_networks=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('share_networks'))
 
@@ -714,7 +725,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     def test_unlimited_quota_for_share_groups(self):
         self.update_quotas(self.tenant_id, share_groups=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('share_groups'))
 
@@ -728,7 +739,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
                            user_id=self.user_id,
                            share_group_snapshots=-1)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get('share_group_snapshots'))
 
@@ -741,7 +753,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         kwargs = {quota_key: -1}
         self.update_quotas(self.tenant_id, **kwargs)
 
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertEqual(-1, quotas.get(quota_key))
 
@@ -754,7 +766,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         kwargs = {quota_key: -1}
         self.update_quotas(self.tenant_id, user_id=self.user_id, **kwargs)
 
-        quotas = self.client.show_quotas(self.tenant_id, self.user_id)
+        quotas = self.client.show_quotas(
+            self.tenant_id, self.user_id)['quota_set']
 
         self.assertEqual(-1, quotas.get(quota_key))
 
@@ -858,7 +871,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
                 (4, 4, 2, 1, {'share_type': st_1['id']}),
                 (4, 3, 2, 1, {'share_type': st_2['name']})):
             quotas = self.client.detail_quotas(
-                tenant_id=self.tenant_id, **kwargs)
+                tenant_id=self.tenant_id, **kwargs)['quota_set']
             self.assertEqual(0, quotas['gigabytes']['reserved'])
             self.assertEqual(g_l, quotas['gigabytes']['limit'])
             self.assertEqual(g_use, quotas['gigabytes']['in_use'])
@@ -873,7 +886,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         for kwargs in ({}, {'share_type': st_1['name']},
                        {'user_id': self.user_id}, {'share_type': st_2['id']}):
             quotas = self.client.detail_quotas(
-                tenant_id=self.tenant_id, **kwargs)
+                tenant_id=self.tenant_id, **kwargs)['quota_set']
             for key in ('shares', 'gigabytes'):
                 self.assertEqual(0, quotas[key]['reserved'])
                 self.assertEqual(0, quotas[key]['in_use'])
@@ -893,9 +906,10 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
 
     def _check_usages(self, sg_in_use, sgs_in_use):
         """Helper method for 'test_share_group_quotas_usages' test."""
-        p_quotas = self.client.detail_quotas(tenant_id=self.tenant_id)
+        p_quotas = self.client.detail_quotas(
+            tenant_id=self.tenant_id)['quota_set']
         u_quotas = self.client.detail_quotas(
-            tenant_id=self.tenant_id, user_id=self.user_id)
+            tenant_id=self.tenant_id, user_id=self.user_id)['quota_set']
         self._check_sg_usages(p_quotas, sg_in_use, 3)
         self._check_sg_usages(u_quotas, sg_in_use, 2)
         self._check_sgs_usages(p_quotas, sgs_in_use)

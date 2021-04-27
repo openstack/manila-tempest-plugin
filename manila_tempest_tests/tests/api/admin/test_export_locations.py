@@ -47,9 +47,9 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id,
                                      client=cls.admin_client)
-        cls.share = cls.admin_client.get_share(cls.share['id'])
+        cls.share = cls.admin_client.get_share(cls.share['id'])['share']
         cls.share_instances = cls.admin_client.get_instances_of_share(
-            cls.share['id'])
+            cls.share['id'])['share_instances']
 
     def _verify_export_location_structure(
             self, export_locations, role='admin', version=LATEST_MICROVERSION,
@@ -115,7 +115,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
     @utils.skip_if_microversion_not_supported('2.13')
     def test_list_share_export_locations(self):
         export_locations = self.admin_client.list_share_export_locations(
-            self.share['id'], version='2.13')
+            self.share['id'], version='2.13')['export_locations']
 
         self._verify_export_location_structure(export_locations,
                                                version='2.13')
@@ -125,7 +125,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
     @utils.skip_if_microversion_not_supported('2.14')
     def test_list_share_export_locations_with_preferred_flag(self):
         export_locations = self.admin_client.list_share_export_locations(
-            self.share['id'], version='2.14')
+            self.share['id'], version='2.14')['export_locations']
 
         self._verify_export_location_structure(export_locations,
                                                version='2.14')
@@ -134,18 +134,18 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_export_location(self):
         export_locations = self.admin_client.list_share_export_locations(
-            self.share['id'])
+            self.share['id'])['export_locations']
 
         for export_location in export_locations:
             el = self.admin_client.get_share_export_location(
-                self.share['id'], export_location['id'])
+                self.share['id'], export_location['id'])['export_location']
             self._verify_export_location_structure(el, format='detail')
 
     @decorators.idempotent_id('397969c6-7fc8-4bf8-86c7-300b96857c54')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_share_export_locations_by_member(self):
         export_locations = self.member_client.list_share_export_locations(
-            self.share['id'])
+            self.share['id'])['export_locations']
 
         self._verify_export_location_structure(export_locations, role='member')
 
@@ -153,13 +153,13 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_export_location_by_member(self):
         export_locations = self.admin_client.list_share_export_locations(
-            self.share['id'])
+            self.share['id'])['export_locations']
 
         for export_location in export_locations:
             if export_location['is_admin_only']:
                 continue
             el = self.member_client.get_share_export_location(
-                self.share['id'], export_location['id'])
+                self.share['id'], export_location['id'])['export_location']
             self._verify_export_location_structure(el, role='member',
                                                    format='detail')
 
@@ -170,7 +170,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         for share_instance in self.share_instances:
             export_locations = (
                 self.admin_client.list_share_instance_export_locations(
-                    share_instance['id'], version='2.13'))
+                    share_instance['id'], version='2.13'))['export_locations']
             self._verify_export_location_structure(export_locations,
                                                    version='2.13')
 
@@ -181,7 +181,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         for share_instance in self.share_instances:
             export_locations = (
                 self.admin_client.list_share_instance_export_locations(
-                    share_instance['id'], version='2.14'))
+                    share_instance['id'], version='2.14'))['export_locations']
             self._verify_export_location_structure(export_locations,
                                                    version='2.14')
 
@@ -191,22 +191,22 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         for share_instance in self.share_instances:
             export_locations = (
                 self.admin_client.list_share_instance_export_locations(
-                    share_instance['id']))
+                    share_instance['id'])['export_locations'])
             for el in export_locations:
                 el = self.admin_client.get_share_instance_export_location(
-                    share_instance['id'], el['id'])
+                    share_instance['id'], el['id'])['export_location']
                 self._verify_export_location_structure(el, format='detail')
 
     @decorators.idempotent_id('581acd8d-b89d-4684-8310-b910b46acc7a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_share_contains_all_export_locations_of_all_share_instances(self):
         share_export_locations = self.admin_client.list_share_export_locations(
-            self.share['id'])
+            self.share['id'])['export_locations']
         share_instances_export_locations = []
         for share_instance in self.share_instances:
             share_instance_export_locations = (
                 self.admin_client.list_share_instance_export_locations(
-                    share_instance['id']))
+                    share_instance['id'])['export_locations'])
             share_instances_export_locations.extend(
                 share_instance_export_locations)
 

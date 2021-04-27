@@ -54,7 +54,8 @@ class PublicSharesTest(base.BaseSharesMixedTest):
         )
 
         params = {'is_public': True}
-        shares = self.alt_shares_v2_client.list_shares_with_detail(params)
+        shares = self.alt_shares_v2_client.list_shares_with_detail(
+            params)['shares']
 
         keys = [
             'status', 'description', 'links', 'availability_zone',
@@ -84,7 +85,7 @@ class PublicSharesTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False,
                                   version=LATEST_MICROVERSION)
 
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         self.assertEqual(share_name, share['name'])
         self.assertEqual('a share we will update', share['description'])
         self.assertFalse(share['is_public'])
@@ -94,13 +95,13 @@ class PublicSharesTest(base.BaseSharesMixedTest):
         new_name = data_utils.rand_name('tempest-new-share-name')
         new_desc = 'share is now updated'
         updated = self.admin_shares_v2_client.update_share(
-            share['id'], name=new_name, desc=new_desc, is_public=True)
+            share['id'], name=new_name, desc=new_desc, is_public=True)['share']
         self.assertEqual(new_name, updated['name'])
         self.assertEqual(new_desc, updated['description'])
         self.assertTrue(updated['is_public'])
 
         # this share must now be publicly accessible
-        share = self.alt_shares_v2_client.get_share(share['id'])
+        share = self.alt_shares_v2_client.get_share(share['id'])['share']
         self.assertEqual(new_name, share['name'])
         self.assertEqual(new_desc, share['description'])
         self.assertTrue(share['is_public'])

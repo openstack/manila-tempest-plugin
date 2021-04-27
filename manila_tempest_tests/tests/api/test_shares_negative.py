@@ -117,9 +117,9 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # get parent's share network
-        parent_share = self.shares_client.get_share(share["id"])
+        parent_share = self.shares_client.get_share(share["id"])['share']
         parent_sn = self.shares_client.get_share_network(
-            parent_share["share_network_id"])
+            parent_share["share_network_id"])['share_network']
 
         # create new share-network - net duplicate of parent's share
         new_duplicated_sn = self.create_share_network(

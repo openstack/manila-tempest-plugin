@@ -54,7 +54,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
     @decorators.attr(type=[base.TAG_POSITIVE, base.TAG_API])
     @decorators.idempotent_id('37127e11-7aa7-46b2-ab05-e3bf36d94fd8')
     def test_list_messages(self):
-        body = self.shares_v2_client.list_messages()
+        body = self.shares_v2_client.list_messages()['messages']
         self.assertIsInstance(body, list)
         self.assertTrue(self.message['id'], [x['id'] for x in body])
         message = body[0]
@@ -83,7 +83,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
     def test_list_messages_filtered(self):
         self.create_user_message()
         params = {'resource_id': self.message['resource_id']}
-        body = self.shares_v2_client.list_messages(params=params)
+        body = self.shares_v2_client.list_messages(params=params)['messages']
         self.assertIsInstance(body, list)
         ids = [x['id'] for x in body]
         self.assertEqual([self.message['id']], ids)
@@ -94,7 +94,8 @@ class UserMessageTest(base.BaseSharesAdminTest):
         self.addCleanup(self.shares_v2_client.delete_message,
                         self.message['id'])
 
-        message = self.shares_v2_client.get_message(self.message['id'])
+        message = self.shares_v2_client.get_message(
+            self.message['id'])['message']
 
         self.assertEqual(set(MESSAGE_KEYS), set(message.keys()))
         self.assertTrue(uuidutils.is_uuid_like(message['id']))
@@ -133,7 +134,8 @@ class UserMessageTest(base.BaseSharesAdminTest):
         params1 = {'created_since': str(time_1)}
         # should return all user messages created by this test including
         # self.message
-        messages = self.shares_v2_client.list_messages(params=params1)
+        messages = self.shares_v2_client.list_messages(
+            params=params1)['messages']
         ids = [x['id'] for x in messages]
         self.assertGreaterEqual(len(ids), 2)
         self.assertIn(self.message['id'], ids)
@@ -147,7 +149,8 @@ class UserMessageTest(base.BaseSharesAdminTest):
                    'created_before': str(time_2)}
         # should not return new_message, but return a list that is equal to 1
         # and include self.message
-        messages = self.shares_v2_client.list_messages(params=params2)
+        messages = self.shares_v2_client.list_messages(
+            params=params2)['messages']
         self.assertIsInstance(messages, list)
         ids = [x['id'] for x in messages]
         self.assertGreaterEqual(len(ids), 1)
@@ -163,7 +166,8 @@ class UserMessageTest(base.BaseSharesAdminTest):
 
         params3 = {'created_before': str(time_2)}
         # should not include self.message
-        messages = self.shares_v2_client.list_messages(params=params3)
+        messages = self.shares_v2_client.list_messages(
+            params=params3)['messages']
         ids = [x['id'] for x in messages]
         self.assertGreaterEqual(len(ids), 1)
         self.assertNotIn(new_message['id'], ids)

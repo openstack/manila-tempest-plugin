@@ -39,11 +39,11 @@ def _create_delete_ro_access_rule(self, version):
 
     if utils.is_microversion_eq(version, '1.0'):
         rule = self.shares_client.create_access_rule(
-            self.share["id"], self.access_type, self.access_to, 'ro')
+            self.share["id"], self.access_type, self.access_to, 'ro')['access']
     else:
         rule = self.shares_v2_client.create_access_rule(
             self.share["id"], self.access_type, self.access_to, 'ro',
-            version=version)
+            version=version)['access']
 
     self.assertEqual('ro', rule['access_level'])
     for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -65,7 +65,8 @@ def _create_delete_ro_access_rule(self, version):
             status_attr='access_rules_status', version=version)
         # If the 'access_rules_status' transitions to 'active',
         # rule state must too
-        rules = self.shares_v2_client.list_access_rules(self.share['id'])
+        rules = self.shares_v2_client.list_access_rules(
+            self.share['id'])['access_list']
         rule = [r for r in rules if r['id'] == rule['id']][0]
         self.assertEqual("active", rule['state'])
 
@@ -122,11 +123,11 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], self.access_type, access_to)
+                self.share["id"], self.access_type, access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], self.access_type, access_to,
-                version=version)
+                version=version)['access']
 
         self.assertEqual('rw', rule['access_level'])
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -177,11 +178,11 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], self.access_type, access_to)
+                self.share["id"], self.access_type, access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], self.access_type, access_to,
-                version=version)
+                version=version)['access']
 
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
             self.assertNotIn(key, rule.keys())
@@ -280,11 +281,11 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], self.access_type, self.access_to)
+                self.share["id"], self.access_type, self.access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], self.access_type, self.access_to,
-                version=version)
+                version=version)['access']
 
         self.assertEqual('rw', rule['access_level'])
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -384,11 +385,11 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], self.access_type, self.access_to)
+                self.share["id"], self.access_type, self.access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], self.access_type, self.access_to,
-                version=version)
+                version=version)['access']
 
         self.assertEqual('rw', rule['access_level'])
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -434,11 +435,11 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
     def test_create_delete_cert_ro_access_rule(self, version):
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], 'cert', 'client2.com', 'ro')
+                self.share["id"], 'cert', 'client2.com', 'ro')['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], 'cert', 'client2.com', 'ro',
-                version=version)
+                version=version)['access']
 
         self.assertEqual('ro', rule['access_level'])
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -513,7 +514,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
     def test_create_delete_cephx_rule(self, version, access_to, access_level):
         rule = self.shares_v2_client.create_access_rule(
             self.share["id"], self.access_type, access_to, version=version,
-            access_level=access_level)
+            access_level=access_level)['access']
 
         self.assertEqual(access_level, rule['access_level'])
         for key in ('deleted', 'deleted_at', 'instance_mappings'):
@@ -532,7 +533,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
     def test_different_users_in_same_tenant_can_use_same_cephx_id(self):
         # Grant access to the share
         access1 = self.shares_v2_client.create_access_rule(
-            self.share['id'], self.access_type, self.access_to, 'rw')
+            self.share['id'], self.access_type, self.access_to, 'rw')['access']
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.share["id"], "active",
             resource_name='access_rule', rule_id=access1["id"])
@@ -550,7 +551,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
         # Grant access to the second share using the same cephx ID that was
         # used in access1
         access2 = user_client.shares_v2_client.create_access_rule(
-            share2['id'], self.access_type, self.access_to, 'rw')
+            share2['id'], self.access_type, self.access_to, 'rw')['access']
         waiters.wait_for_resource_status(
             user_client.shares_v2_client, share2['id'], "active",
             resource_name='access_rule', rule_id=access2['id'])
@@ -608,11 +609,11 @@ class ShareRulesTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], self.access_type, self.access_to)
+                self.share["id"], self.access_type, self.access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 self.share["id"], self.access_type, self.access_to,
-                metadata=metadata, version=version)
+                metadata=metadata, version=version)['access']
 
         # verify added rule keys since 2.33 when create rule
         if utils.is_microversion_ge(version, '2.33'):
@@ -643,10 +644,11 @@ class ShareRulesTest(base.BaseSharesMixedTest):
 
         # list rules
         if utils.is_microversion_eq(version, '1.0'):
-            rules = self.shares_client.list_access_rules(self.share["id"])
+            rules = self.shares_client.list_access_rules(
+                self.share["id"])['access_list']
         else:
-            rules = self.shares_v2_client.list_access_rules(self.share["id"],
-                                                            version=version)
+            rules = self.shares_v2_client.list_access_rules(
+                self.share["id"], version=version)['access_list']
 
         # verify keys
         keys = ("id", "access_type", "access_to", "access_level")
@@ -703,11 +705,11 @@ class ShareRulesTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                share["id"], self.access_type, self.access_to)
+                share["id"], self.access_type, self.access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
                 share["id"], self.access_type, self.access_to,
-                version=version)
+                version=version)['access']
 
         # rules must start out in 'new' until 2.28 & 'queued_to_apply' after
         if utils.is_microversion_le(version, "2.27"):

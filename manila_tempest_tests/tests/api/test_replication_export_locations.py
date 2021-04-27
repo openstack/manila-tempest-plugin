@@ -59,7 +59,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.sn_id = cls.share_network['id']
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type)
@@ -77,20 +77,21 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         replica = self.create_share_replica(share['id'], self.replica_zone,
                                             cleanup=cleanup_replica)
         replicas = self.shares_v2_client.list_share_replicas(
-            share_id=share['id'])
+            share_id=share['id'])['share_replicas']
         primary_replica = [r for r in replicas if r['id'] != replica['id']][0]
 
         # Refresh share and replica
-        share = self.shares_v2_client.get_share(share['id'])
-        replica = self.shares_v2_client.get_share_replica(replica['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
+        replica = self.shares_v2_client.get_share_replica(
+            replica['id'])['share_replica']
 
         # Grab export locations of the share instances using admin API
         replica_exports = self._remove_admin_only_exports(
             self.admin_client.list_share_instance_export_locations(
-                replica['id']))
+                replica['id'])['export_locations'])
         primary_replica_exports = self._remove_admin_only_exports(
             self.admin_client.list_share_instance_export_locations(
-                primary_replica['id']))
+                primary_replica['id'])['export_locations'])
 
         return share, replica, primary_replica_exports, replica_exports
 
@@ -131,7 +132,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
         # Share export locations list API
         share_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'], version=version)
+            share['id'], version=version)['export_locations']
 
         self._validate_export_location_api_behavior(replica, replica_exports,
                                                     primary_replica_exports,
@@ -150,7 +151,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
             self._create_share_and_replica_get_exports(cleanup_replica=False)
         )
         primary_replica = self.shares_v2_client.get_share_replica(
-            primary_replica_exports[0]['share_instance_id'])
+            primary_replica_exports[0]['share_instance_id'])['share_replica']
         waiters.wait_for_resource_status(
             self.shares_v2_client, replica['id'],
             constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
@@ -158,7 +159,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
         # Share export locations list API
         share_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'], version=version)
+            share['id'], version=version)['export_locations']
 
         # Validate API behavior
         self._validate_export_location_api_behavior(replica, replica_exports,
@@ -170,15 +171,15 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
         # Refresh for verification
         current_secondary_replica = self.shares_v2_client.get_share_replica(
-            primary_replica['id'])
+            primary_replica['id'])['share_replica']
         current_primary_replica_exports = self._remove_admin_only_exports(
             self.admin_client.list_share_instance_export_locations(
-                replica['id'], version=version))
+                replica['id'], version=version)['export_locations'])
         current_secondary_replica_exports = self._remove_admin_only_exports(
             self.admin_client.list_share_instance_export_locations(
-                primary_replica['id'], version=version))
+                primary_replica['id'], version=version)['export_locations'])
         share_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'], version=version)
+            share['id'], version=version)['export_locations']
 
         # Validate API behavior
         self._validate_export_location_api_behavior(
@@ -200,7 +201,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
             self._create_share_and_replica_get_exports()
         )
         primary_replica = self.shares_v2_client.get_share_replica(
-            expected_primary_exports[0]['share_instance_id'])
+            expected_primary_exports[0]['share_instance_id'])['share_replica']
         expected_primary_export_paths = [e['path'] for e in
                                          expected_primary_exports]
         expected_replica_export_paths = [e['path'] for e in
@@ -209,7 +210,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         # For the primary replica
         actual_primary_exports = (
             self.shares_v2_client.list_share_replica_export_locations(
-                primary_replica['id'])
+                primary_replica['id'])['export_locations']
         )
 
         self.assertEqual(len(expected_primary_exports),
@@ -224,7 +225,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
             export_location_details = (
                 self.shares_v2_client.get_share_replica_export_location(
-                    primary_replica['id'], export['id'])
+                    primary_replica['id'], export['id'])['export_location']
             )
             self.assertEqual(sorted(el_detail_keys),
                              sorted(export_location_details.keys()))
@@ -234,7 +235,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         # For the secondary replica
         actual_replica_exports = (
             self.shares_v2_client.list_share_replica_export_locations(
-                replica['id'])
+                replica['id'])['export_locations']
         )
 
         self.assertEqual(len(expected_replica_exports),
@@ -249,7 +250,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
 
             export_location_details = (
                 self.shares_v2_client.get_share_replica_export_location(
-                    replica['id'], export['id'])
+                    replica['id'], export['id'])['export_location']
             )
             self.assertEqual(sorted(el_detail_keys),
                              sorted(export_location_details.keys()))

@@ -57,9 +57,10 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
                                      client=cls.admin_client)
         cls.snapshot = cls.create_snapshot_wait_for_active(
             cls.share['id'], client=cls.admin_client)
-        cls.snapshot = cls.admin_client.get_snapshot(cls.snapshot['id'])
+        cls.snapshot = cls.admin_client.get_snapshot(
+            cls.snapshot['id'])['snapshot']
         cls.snapshot_instances = cls.admin_client.list_snapshot_instances(
-            snapshot_id=cls.snapshot['id'])
+            snapshot_id=cls.snapshot['id'])['snapshot_instances']
 
     @decorators.idempotent_id('53f0f184-7398-4e7a-ac21-fa432570db7f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -85,7 +86,7 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
     def test_get_snapshot_export_location_by_different_project_user(self):
         export_locations = (
             self.admin_client.list_snapshot_export_locations(
-                self.snapshot['id']))
+                self.snapshot['id'])['share_snapshot_export_locations'])
 
         for export_location in export_locations:
             if export_location['is_admin_only']:
@@ -113,7 +114,8 @@ class SnapshotExportLocationsNegativeTest(base.BaseSharesMixedTest):
         for snapshot_instance in self.snapshot_instances:
             export_locations = (
                 self.admin_client.list_snapshot_instance_export_locations(
-                    snapshot_instance['id']))
+                    snapshot_instance['id'])['share_snapshot_export_locations']
+            )
             for el in export_locations:
                 self.assertRaises(
                     lib_exc.Forbidden,

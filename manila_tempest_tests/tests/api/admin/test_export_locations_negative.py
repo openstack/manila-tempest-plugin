@@ -46,9 +46,9 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
         # create share
         cls.share = cls.create_share(client=cls.admin_client,
                                      share_type_id=cls.share_type_id)
-        cls.share = cls.admin_client.get_share(cls.share['id'])
+        cls.share = cls.admin_client.get_share(cls.share['id'])['share']
         cls.share_instances = cls.admin_client.get_instances_of_share(
-            cls.share['id'])
+            cls.share['id'])['share_instances']
 
     @decorators.idempotent_id('8eac1355-f272-4913-8a49-1a8a9cb086bd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -86,7 +86,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
         for share_instance in self.share_instances:
             export_locations = (
                 self.admin_client.list_share_instance_export_locations(
-                    share_instance['id']))
+                    share_instance['id'])['export_locations'])
             for el in export_locations:
                 self.assertRaises(lib_exc.Forbidden,
                                   (self.admin_member_client.
@@ -105,7 +105,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share_export_location_by_different_project_user(self):
         export_locations = self.admin_client.list_share_export_locations(
-            self.share['id'])
+            self.share['id'])['export_locations']
 
         for export_location in export_locations:
             self.assertRaises(

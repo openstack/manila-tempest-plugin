@@ -98,7 +98,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
                                            new_size=extended_share_size)
         waiters.wait_for_resource_status(
             self.shares_v2_client, share["id"], constants.STATUS_AVAILABLE)
-        share = self.shares_v2_client.get_share(share["id"])
+        share = self.shares_v2_client.get_share(share["id"])['share']
         self.assertEqual(extended_share_size, int(share["size"]))
 
         LOG.debug('Step 8 - writing more data, should succeed')

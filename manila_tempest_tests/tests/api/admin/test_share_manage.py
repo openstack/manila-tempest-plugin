@@ -79,7 +79,8 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             # After 'unmanage' operation, share instance should be deleted.
             # Assert not related to 'manage' test, but placed here for
             # resource optimization.
-            share_instance_list = self.shares_v2_client.list_share_instances()
+            share_instance_list = self.shares_v2_client.list_share_instances(
+                )['share_instances']
             share_ids = [si['share_id'] for si in share_instance_list]
             self.assertNotIn(share['id'], share_ids)
 
@@ -100,7 +101,8 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
         }
         if CONF.share.multitenancy_enabled:
             manage_params['share_server_id'] = share['share_server_id']
-        managed_share = self.shares_v2_client.manage_share(**manage_params)
+        managed_share = self.shares_v2_client.manage_share(
+            **manage_params)['share']
 
         # Add managed share to cleanup queue
         self.method_resources.insert(

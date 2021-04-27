@@ -66,7 +66,7 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
         cls.access = cls.shares_v2_client.create_access_rule(
             cls.share["id"], cls.access_type, cls.access_to,
-            'rw', metadata={u"key1": u"value1"})
+            'rw', metadata={u"key1": u"value1"})['access']
 
     @decorators.idempotent_id('d2d41db8-ae00-4641-a5ec-499cee1877f1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)

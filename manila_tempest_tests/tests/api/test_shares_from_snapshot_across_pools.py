@@ -104,7 +104,7 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
 
         # Retrieving the share using admin client because the shares's host
         # field is necessary to do the assert
-        share_get_a = self.admin_client.get_share(share_a["id"])
+        share_get_a = self.admin_client.get_share(share_a["id"])['share']
 
         # Create snapshot from source share
         snap = self.create_snapshot_wait_for_active(share_get_a["id"])
@@ -121,7 +121,7 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
 
         # Retrieving the share using admin client because the shares's host
         # field is necessary to do the assert
-        share_get_b = self.admin_client.get_share(share_b['id'])
+        share_get_b = self.admin_client.get_share(share_b['id'])['share']
 
         # Verify share created from snapshot
         msg = ("Expected snapshot_id %s as "

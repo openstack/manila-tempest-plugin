@@ -124,7 +124,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('75d39eda-a2b5-4271-a61d-9e2c86370b3e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_size_bigger_than_quota(self):
-        quotas = self.client.show_quotas(self.tenant_id)
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
         overquota = int(quotas['gigabytes']) + 2
 
         # try schedule share with size, bigger than gigabytes quota
@@ -152,7 +152,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     def test_try_set_user_quota_shares_bigger_than_tenant_quota(self):
 
         # get current quotas for tenant
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # try set user quota for shares bigger than tenant quota
         bigger_value = int(tenant_quotas["shares"]) + 2
@@ -168,7 +168,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     def test_try_set_user_quota_snaps_bigger_than_tenant_quota(self):
 
         # get current quotas for tenant
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # try set user quota for snapshots bigger than tenant quota
         bigger_value = int(tenant_quotas["snapshots"]) + 2
@@ -184,7 +184,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     def test_try_set_user_quota_gigabytes_bigger_than_tenant_quota(self):
 
         # get current quotas for tenant
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # try set user quota for gigabytes bigger than tenant quota
         bigger_value = int(tenant_quotas["gigabytes"]) + 2
@@ -199,7 +199,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_user_quota_snap_gigabytes_bigger_than_tenant_quota(self):
         # get current quotas for tenant
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # try set user quota for snapshot gigabytes bigger than tenant quota
         bigger_value = int(tenant_quotas["snapshot_gigabytes"]) + 2
@@ -215,7 +215,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     def test_try_set_user_quota_share_networks_bigger_than_tenant_quota(self):
 
         # get current quotas for tenant
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # try set user quota for share_networks bigger than tenant quota
         bigger_value = int(tenant_quotas["share_networks"]) + 2
@@ -233,7 +233,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         SHARE_REPLICA_QUOTAS_MICROVERSION)
     def test_try_set_user_quota_replicas_bigger_than_tenant_quota(self, key):
         # get current quotas for tenant
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # try set user quota for snapshots bigger than tenant quota
         bigger_value = int(tenant_quotas[key]) + 2
@@ -290,7 +290,8 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
 
         kwargs = {"share_type": "fake_nonexistent_share_type"}
         if op == 'update':
-            tenant_quotas = self.client.show_quotas(self.tenant_id)
+            tenant_quotas = self.client.show_quotas(
+                self.tenant_id)['quota_set']
             kwargs['shares'] = tenant_quotas['shares']
 
         self.assertRaises(lib_exc.NotFound,
@@ -304,7 +305,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported("2.39")
     def test_try_update_share_type_quota_for_share_networks(self, key):
         share_type = self.create_share_type()
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         # Try to set 'share_networks' quota for share type
         self.assertRaises(lib_exc.BadRequest,
@@ -319,7 +320,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_try_update_share_type_quota_for_share_groups(self, quota_name):
         share_type = self.create_share_type()
-        tenant_quotas = self.client.show_quotas(self.tenant_id)
+        tenant_quotas = self.client.show_quotas(self.tenant_id)['quota_set']
 
         self.assertRaises(lib_exc.BadRequest,
                           self.update_quotas,
@@ -334,7 +335,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_share_group_quotas_using_too_old_microversion(self, quota_key):
         tenant_quotas = self.client.show_quotas(
-            self.tenant_id, version=SHARE_GROUPS_MICROVERSION)
+            self.tenant_id, version=SHARE_GROUPS_MICROVERSION)['quota_set']
         kwargs = {
             "version": PRE_SHARE_GROUPS_MICROVERSION,
             quota_key: tenant_quotas[quota_key],
@@ -352,7 +353,8 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         SHARE_REPLICA_QUOTAS_MICROVERSION)
     def test_share_replica_quotas_using_too_old_microversion(self, quota_key):
         tenant_quotas = self.client.show_quotas(
-            self.tenant_id, version=SHARE_REPLICA_QUOTAS_MICROVERSION)
+            self.tenant_id,
+            version=SHARE_REPLICA_QUOTAS_MICROVERSION)['quota_set']
         kwargs = {
             "version": PRE_SHARE_REPLICA_QUOTAS_MICROVERSION,
             quota_key: tenant_quotas[quota_key],
@@ -371,7 +373,8 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         share_type = self.create_share_type()
         kwargs = {"version": "2.38", "share_type": share_type["name"]}
         if op == 'update':
-            tenant_quotas = self.client.show_quotas(self.tenant_id)
+            tenant_quotas = self.client.show_quotas(
+                self.tenant_id)['quota_set']
             kwargs['shares'] = tenant_quotas['shares']
 
         self.assertRaises(lib_exc.BadRequest,
@@ -387,7 +390,8 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         share_type = self.create_share_type()
         kwargs = {"share_type": share_type["name"], "user_id": self.user_id}
         if op == 'update':
-            tenant_quotas = self.client.show_quotas(self.tenant_id)
+            tenant_quotas = self.client.show_quotas(
+                self.tenant_id)['quota_set']
             kwargs['shares'] = tenant_quotas['shares']
 
         self.assertRaises(lib_exc.BadRequest,
@@ -456,7 +460,8 @@ class ReplicaQuotasNegativeTest(rep_neg_test.ReplicationNegativeBase):
         self.update_quotas(self.tenant_id, client=self.admin_client, **kwargs)
 
         # Get the updated quotas and add a cleanup
-        updated_quota = self.admin_client.show_quotas(self.tenant_id)
+        updated_quota = self.admin_client.show_quotas(
+            self.tenant_id)['quota_set']
 
         # Make sure that the new value was properly set
         self.assertEqual(new_limit, updated_quota[quota_key])

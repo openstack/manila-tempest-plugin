@@ -176,7 +176,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
 
         new_shares = self.shares_v2_client.list_shares(
             params={'share_group_id': new_share_group['id']},
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)['shares']
 
         self.assertEmpty(
             new_shares, 'Expected 0 new shares, got %s' % len(new_shares))
@@ -232,7 +232,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
 
         # Get latest share group info
         share_group = self.shares_v2_client.get_share_group(
-            share_group['id'], '2.34')
+            share_group['id'], '2.34')['share_group']
 
         self.assertIn('availability_zone', share_group)
         if where_specify_az in ('sg', 'sg_and_share'):
@@ -258,7 +258,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
         share = self.create_share(**s_kwargs)
 
         # Get latest share info
-        share = self.shares_v2_client.get_share(share['id'], '2.34')
+        share = self.shares_v2_client.get_share(share['id'], '2.34')['share']
 
         # Verify that share always has the same AZ as share group does
         self.assertEqual(

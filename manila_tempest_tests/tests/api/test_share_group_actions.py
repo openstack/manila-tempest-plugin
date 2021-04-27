@@ -122,7 +122,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
 
         # Get share group
         share_group = self.shares_v2_client.get_share_group(
-            self.share_group['id'], version=version)
+            self.share_group['id'], version=version)['share_group']
 
         # Verify keys
         actual_keys = set(share_group.keys())
@@ -145,7 +145,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         # Get share
         share = self.shares_v2_client.get_share(
             self.shares[0]['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)['share']
 
         # Verify keys
         expected_keys = {
@@ -177,7 +177,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
 
         # List share groups
         share_groups = self.shares_v2_client.list_share_groups(
-            version=version)
+            version=version)['share_groups']
 
         # Verify keys
         self.assertGreater(len(share_groups), 0)
@@ -211,7 +211,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             params = {'name~': 'tempest', 'description~': 'tempest'}
         # List share groups
         share_groups = self.shares_v2_client.list_share_groups(
-            detailed=True, params=params, version=version)
+            detailed=True, params=params, version=version)['share_groups']
 
         # Verify keys
         for sg in share_groups:
@@ -242,7 +242,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             detailed=True,
             params={'share_group_id': self.share_group['id']},
             version=constants.MIN_SHARE_GROUP_MICROVERSION,
-        )
+        )['shares']
 
         share_ids = [share['id'] for share in shares]
 
@@ -274,7 +274,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
             version=version,
-        )
+        )['share_group_snapshot']
 
         # Verify keys
         actual_keys = set(sg_snapshot.keys())
@@ -301,7 +301,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
             version=constants.MIN_SHARE_GROUP_MICROVERSION,
-        )
+        )['share_group_snapshot']
         sg_snapshot_members = sg_snapshot['members']
         member_share_ids = [m['share_id'] for m in sg_snapshot_members]
         self.assertEqual(
@@ -338,7 +338,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         sg_snapshot = self.shares_v2_client.get_share_group_snapshot(
             self.sg_snapshot['id'],
             version=version,
-        )
+        )['share_group_snapshot']
         snapshot_members = sg_snapshot['members']
 
         new_share_group = self.create_share_group(
@@ -351,7 +351,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         new_share_group = self.shares_v2_client.get_share_group(
             new_share_group['id'],
             version=version,
-        )
+        )['share_group']
 
         # Verify that share_network information matches source share group
         self.assertEqual(
@@ -362,7 +362,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             params={'share_group_id': new_share_group['id']},
             detailed=True,
             version=version,
-        )
+        )['shares']
 
         # Verify each new share is available
         for share in new_shares:
@@ -444,7 +444,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
         share_group = self.shares_v2_client.get_share_group(
             self.share_group['id'],
             version=version
-        )
+        )['share_group']
         self.assertEqual(self.share_group_name, share_group["name"])
         self.assertEqual(self.share_group_desc, share_group["description"])
 
@@ -456,7 +456,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             name=new_name,
             description=new_desc,
             version=version,
-        )
+        )['share_group']
         self.assertEqual(new_name, updated["name"])
         self.assertEqual(new_desc, updated["description"])
 
@@ -464,7 +464,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
         share_group = self.shares_v2_client.get_share_group(
             self.share_group['id'],
             version=version,
-        )
+        )['share_group']
         self.assertEqual(new_name, share_group["name"])
         self.assertEqual(new_desc, share_group["description"])
 
@@ -502,13 +502,13 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
             name=value2,
             description=value2,
             version=version,
-        )
+        )['share_group']
         self.assertEqual(value2, updated["name"])
         self.assertEqual(value2, updated["description"])
 
         # Get share group
         share_group = self.shares_v2_client.get_share_group(
-            share_group['id'], version=version)
+            share_group['id'], version=version)['share_group']
         self.assertEqual(value2, share_group["name"])
         self.assertEqual(value2, share_group["description"])
 

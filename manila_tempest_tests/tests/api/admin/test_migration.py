@@ -108,7 +108,7 @@ class MigrationBase(base.BaseSharesAdminTest):
             self.assertIsNotNone(dest_pool.get('name'))
 
         old_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'])
+            share['id'])['export_locations']
         self.assertNotEmpty(old_exports)
         old_exports = [x['path'] for x in old_exports
                        if x['is_admin_only'] is False]
@@ -130,7 +130,7 @@ class MigrationBase(base.BaseSharesAdminTest):
             status_attr='access_rules_status')
 
         dest_pool = dest_pool['name']
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         return share, dest_pool
 
@@ -144,7 +144,7 @@ class MigrationBase(base.BaseSharesAdminTest):
                     else status_to_wait)
 
         new_exports = self.shares_v2_client.list_share_export_locations(
-            share['id'], version=version)
+            share['id'], version=version)['export_locations']
         self.assertNotEmpty(new_exports)
         new_exports = [x['path'] for x in new_exports if
                        x['is_admin_only'] is False]
@@ -160,7 +160,8 @@ class MigrationBase(base.BaseSharesAdminTest):
         if complete:
             self.assertEqual(dest_pool, share['host'])
 
-            rules = self.shares_v2_client.list_access_rules(share['id'])
+            rules = self.shares_v2_client.list_access_rules(
+                share['id'])['access_list']
             expected_rules = [{
                 'state': constants.RULE_STATE_ACTIVE,
                 'access_to': '50.50.50.50',
@@ -205,7 +206,7 @@ class MigrationBase(base.BaseSharesAdminTest):
     def _create_secondary_share_network(self, old_share_network_id):
 
         old_share_network = self.shares_v2_client.get_share_network(
-            old_share_network_id)
+            old_share_network_id)['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(old_share_network)
             if utils.share_network_subnets_are_supported()
@@ -223,7 +224,7 @@ class MigrationBase(base.BaseSharesAdminTest):
         share = self.create_share(self.protocol,
                                   size=new_size,
                                   share_type_id=self.share_type_id)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         share, dest_pool = self._setup_migration(share)
 
@@ -242,14 +243,14 @@ class MigrationBase(base.BaseSharesAdminTest):
             self.shares_v2_client.extend_share(share['id'], new_size)
             waiters.wait_for_resource_status(
                 self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
-            share = self.shares_v2_client.get_share(share["id"])
+            share = self.shares_v2_client.get_share(share["id"])['share']
             self.assertEqual(new_size, int(share["size"]))
         else:
             new_size = CONF.share.share_size
             self.shares_v2_client.shrink_share(share['id'], new_size)
             waiters.wait_for_resource_status(
                 self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
-            share = self.shares_v2_client.get_share(share["id"])
+            share = self.shares_v2_client.get_share(share["id"])['share']
             self.assertEqual(new_size, int(share["size"]))
 
         self._cleanup_share(share)
@@ -273,7 +274,7 @@ class MigrationBase(base.BaseSharesAdminTest):
 
     def _validate_snapshot(self, share, snapshot1, snapshot2):
         snapshot_list = self.shares_v2_client.list_snapshots_for_share(
-            share['id'])
+            share['id'])['snapshots']
         msg = "Share %s has no snapshot." % share['id']
         # Verify that snapshot list is not empty
         self.assertNotEmpty(snapshot_list, msg)
@@ -308,7 +309,7 @@ class MigrationBase(base.BaseSharesAdminTest):
 
         share = self.create_share(
             self.protocol, share_type_id=share_type_id)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         if snapshot_capable:
             self.assertEqual(False, share['snapshot_support'])
@@ -379,7 +380,7 @@ class MigrationCancelNFSTest(MigrationBase):
 
         share = self.create_share(self.protocol,
                                   share_type_id=self.share_type_id)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share, dest_pool = self._setup_migration(share)
         task_state = (constants.TASK_STATE_DATA_COPYING_COMPLETED
                       if force_host_assisted
@@ -422,7 +423,7 @@ class MigrationCancelNFSTest(MigrationBase):
     def test_migration_cancel_share_with_snapshot(self):
         share = self.create_share(self.protocol,
                                   share_type_id=self.share_type_id)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         share, dest_pool = self._setup_migration(share)
         snapshot1 = self.create_snapshot_wait_for_active(share['id'])
@@ -467,7 +468,7 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
         share = self.create_share(self.protocol,
                                   share_type_id=self.share_type_id,
                                   cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share, dest_pool = self._setup_migration(share, opposite=True)
 
         old_share_network_id = share['share_network_id']
@@ -521,7 +522,7 @@ class MigrationTwoPhaseNFSTest(MigrationBase):
 
         share = self.create_share(self.protocol,
                                   share_type_id=self.share_type_id)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
         share, dest_pool = self._setup_migration(share)
 
         old_share_network_id = share['share_network_id']
@@ -609,7 +610,7 @@ class MigrationOfShareWithSnapshotNFSTest(MigrationBase):
         share = self.create_share(self.protocol,
                                   share_type_id=ss_type['id'],
                                   cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         share, dest_pool = self._setup_migration(share)
         snapshot1 = self.create_snapshot_wait_for_active(

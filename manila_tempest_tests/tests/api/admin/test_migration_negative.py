@@ -68,7 +68,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
         cls.share = cls.create_share(cls.protocol,
                                      size=CONF.share.share_size + 1,
                                      share_type_id=cls.share_type_id)
-        cls.share = cls.shares_client.get_share(cls.share['id'])
+        cls.share = cls.shares_client.get_share(cls.share['id'])['share']
 
         dest_pool = utils.choose_matching_backend(
             cls.share, pools, cls.share_type)

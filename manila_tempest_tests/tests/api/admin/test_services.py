@@ -25,13 +25,13 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
 
     def setUp(self):
         super(ServicesAdminTest, self).setUp()
-        self.services = self.shares_client.list_services()
+        self.services = self.shares_client.list_services()['services']
 
     @decorators.idempotent_id('74cd12ab-a1f5-40fb-9110-d9035b4b20c5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_list_services(self, client_name):
-        services = getattr(self, client_name).list_services()
+        services = getattr(self, client_name).list_services()['services']
         self.assertNotEqual(0, len(services))
 
         for service in services:
@@ -43,7 +43,7 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
     def test_get_services_by_host_name(self, client_name):
         host = self.services[0]["host"]
         params = {"host": host}
-        services = getattr(self, client_name).list_services(params)
+        services = getattr(self, client_name).list_services(params)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(host, service["host"])
@@ -54,7 +54,7 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
     def test_get_services_by_binary_name(self, client_name):
         binary = self.services[0]["binary"]
         params = {"binary": binary, }
-        services = getattr(self, client_name).list_services(params)
+        services = getattr(self, client_name).list_services(params)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(binary, service["binary"])
@@ -65,7 +65,7 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
     def test_get_services_by_availability_zone(self, client_name):
         zone = self.services[0]["zone"]
         params = {"zone": zone, }
-        services = getattr(self, client_name).list_services(params)
+        services = getattr(self, client_name).list_services(params)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(zone, service["zone"])
@@ -76,7 +76,7 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
     def test_get_services_by_status(self, client_name):
         status = self.services[0]["status"]
         params = {"status": status, }
-        services = getattr(self, client_name).list_services(params)
+        services = getattr(self, client_name).list_services(params)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(status, service["status"])
@@ -87,7 +87,7 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
     def test_get_services_by_state(self, client_name):
         state = self.services[0]["state"]
         params = {"state": state, }
-        services = getattr(self, client_name).list_services(params)
+        services = getattr(self, client_name).list_services(params)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(state, service["state"])
@@ -103,7 +103,7 @@ class ServicesAdminTest(base.BaseSharesAdminTest):
             "status": self.services[0]["status"],
             "state": self.services[0]["state"],
         }
-        services = getattr(self, client_name).list_services(params)
+        services = getattr(self, client_name).list_services(params)['services']
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(params["host"], service["host"])

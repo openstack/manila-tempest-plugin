@@ -51,7 +51,8 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
     def test_map_ss_to_sn_and_list(self):
 
         # List security services for share network
-        ls = self.cl.list_sec_services_for_share_network(self.sn["id"])
+        ls = self.cl.list_sec_services_for_share_network(
+            self.sn["id"])['security_services']
         self.assertEqual(1, len(ls))
         for key in ["status", "id", "name"]:
             self.assertIn(self.ss[key], ls[0][key])

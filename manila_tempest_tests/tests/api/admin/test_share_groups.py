@@ -191,7 +191,8 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
 
         # Get latest share group information
         orig_sg = self.shares_v2_client.get_share_group(
-            orig_sg['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            orig_sg['id'],
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)['share_group']
 
         # Assert share server information
         self.assertIsNotNone(orig_sg['share_network_id'])

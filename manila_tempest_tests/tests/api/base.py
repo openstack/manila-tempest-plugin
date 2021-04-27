@@ -361,7 +361,7 @@ class BaseSharesTest(test.BaseTestCase):
         if share_group_id:
             kwargs['share_group_id'] = share_group_id
 
-        share = client.create_share(**kwargs)
+        share = client.create_share(**kwargs)['share']
         resource = {"type": "share", "id": share["id"], "client": client,
                     "share_group_id": share_group_id}
         cleanup_list = (cls.class_resources if cleanup_in_class else
@@ -499,7 +499,7 @@ class BaseSharesTest(test.BaseTestCase):
         if kwargs.get('source_share_group_snapshot_id') is None:
             kwargs['share_network_id'] = (share_network_id or
                                           client.share_network_id or None)
-        share_group = client.create_share_group(**kwargs)
+        share_group = client.create_share_group(**kwargs)['share_group']
         resource = {
             "type": "share_group",
             "id": share_group["id"],
@@ -513,7 +513,7 @@ class BaseSharesTest(test.BaseTestCase):
         if kwargs.get('source_share_group_snapshot_id'):
             new_share_group_shares = client.list_shares(
                 detailed=True,
-                params={'share_group_id': share_group['id']})
+                params={'share_group_id': share_group['id']})['shares']
 
             for share in new_share_group_shares:
                 resource = {"type": "share",
@@ -546,7 +546,7 @@ class BaseSharesTest(test.BaseTestCase):
             share_types=share_types,
             is_public=is_public,
             group_specs=group_specs,
-            **kwargs)
+            **kwargs)['share_group_type']
         resource = {
             "type": "share_group_type",
             "id": share_group_type["id"],
@@ -566,7 +566,8 @@ class BaseSharesTest(test.BaseTestCase):
             client = cls.shares_v2_client
         if description is None:
             description = "Tempest's snapshot"
-        snapshot = client.create_snapshot(share_id, name, description, force)
+        snapshot = client.create_snapshot(
+            share_id, name, description, force)['snapshot']
         resource = {
             "type": "snapshot",
             "id": snapshot["id"],
@@ -588,7 +589,8 @@ class BaseSharesTest(test.BaseTestCase):
         if description is None:
             description = "Tempest's share group snapshot"
         sg_snapshot = client.create_share_group_snapshot(
-            share_group_id, name=name, description=description, **kwargs)
+            share_group_id, name=name, description=description,
+            **kwargs)['share_group_snapshot']
         resource = {
             "type": "share_group_snapshot",
             "id": sg_snapshot["id"],
@@ -614,7 +616,7 @@ class BaseSharesTest(test.BaseTestCase):
             '|'.join(['^%s$' % backend for backend in backends])
             if backends else '.*'
         )
-        cls.services = client.list_services()
+        cls.services = client.list_services()['services']
         zones = [service['zone'] for service in cls.services if
                  service['binary'] == 'manila-share' and
                  service['state'] == 'up' and
@@ -659,7 +661,7 @@ class BaseSharesTest(test.BaseTestCase):
         # Get the list of pools for the replication domain
         pools = self.admin_client.list_pools(detail=True)['pools']
         instance_host = self.admin_client.get_share(
-            self.shares[0]['id'])['host']
+            self.shares[0]['id'])['share']['host']
         host_pool = [p for p in pools if p['name'] == instance_host][0]
         rep_domain = host_pool['capabilities']['replication_domain']
         pools_in_rep_domain = [p for p in pools if p['capabilities'][
@@ -673,7 +675,8 @@ class BaseSharesTest(test.BaseTestCase):
                              version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         replica = client.create_share_replica(
-            share_id, availability_zone=availability_zone, version=version)
+            share_id, availability_zone=availability_zone,
+            version=version)['share_replica']
         resource = {
             "type": "share_replica",
             "id": replica["id"],
@@ -705,7 +708,8 @@ class BaseSharesTest(test.BaseTestCase):
     def promote_share_replica(cls, replica_id, client=None,
                               version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
-        replica = client.promote_share_replica(replica_id, version=version)
+        replica = client.promote_share_replica(
+            replica_id, version=version)['share_replica']
         waiters.wait_for_resource_status(
             client, replica["id"], constants.REPLICATION_STATE_ACTIVE,
             resource_name='share_replica', status_attr="replica_state")
@@ -747,7 +751,7 @@ class BaseSharesTest(test.BaseTestCase):
 
         if client is None:
             client = cls.shares_client
-        share_network = client.create_share_network(**kwargs)
+        share_network = client.create_share_network(**kwargs)['share_network']
         resource = {
             "type": "share_network",
             "id": share_network["id"],
@@ -772,7 +776,8 @@ class BaseSharesTest(test.BaseTestCase):
                                     **kwargs):
         if client is None:
             client = cls.shares_v2_client
-        share_network_subnet = client.create_subnet(**kwargs)
+        share_network_subnet = client.create_subnet(
+            **kwargs)['share_network_subnet']
         resource = {
             "type": "share-network-subnet",
             "id": share_network_subnet["id"],
@@ -792,7 +797,8 @@ class BaseSharesTest(test.BaseTestCase):
                                 cleanup_in_class=False, **kwargs):
         if client is None:
             client = cls.shares_client
-        security_service = client.create_security_service(ss_type, **kwargs)
+        security_service = client.create_security_service(
+            ss_type, **kwargs)['security_service']
         resource = {
             "type": "security_service",
             "id": security_service["id"],
@@ -820,7 +826,7 @@ class BaseSharesTest(test.BaseTestCase):
         client = client or cls.shares_v2_client
         updated_quotas = client.update_quotas(project_id,
                                               user_id=user_id,
-                                              **kwargs)
+                                              **kwargs)['quota_set']
         resource = {
             "type": "quotas",
             "id": project_id,
@@ -835,7 +841,7 @@ class BaseSharesTest(test.BaseTestCase):
     def clear_share_replicas(cls, share_id, client=None):
         client = client or cls.shares_v2_client
         share_replicas = client.list_share_replicas(
-            share_id=share_id)
+            share_id=share_id)['share_replicas']
 
         for replica in share_replicas:
             try:
@@ -1029,7 +1035,7 @@ class BaseSharesTest(test.BaseTestCase):
 
         params = {'share_type_id': bogus_type['id'],
                   'share_network_id': self.shares_v2_client.share_network_id}
-        share = self.shares_v2_client.create_share(**params)
+        share = self.shares_v2_client.create_share(**params)['share']
         self.addCleanup(self.shares_v2_client.delete_share, share['id'])
         waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], "error")
@@ -1045,7 +1051,7 @@ class BaseSharesTest(test.BaseTestCase):
         access_to = access_to or a_to
 
         rule = client.create_access_rule(share_id, access_type, access_to,
-                                         access_level)
+                                         access_level)['access']
         waiters.wait_for_resource_status(
             client, share_id, status, resource_name='access_rule',
             rule_id=rule['id'],
@@ -1112,10 +1118,11 @@ class BaseSharesAdminTest(BaseSharesTest):
         }
 
         share = self.create_share(**creation_data)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.9"):
-            el = self.shares_v2_client.list_share_export_locations(share["id"])
+            el = self.shares_v2_client.list_share_export_locations(
+                share["id"])['export_locations']
             share["export_locations"] = el
 
         return share
@@ -1153,7 +1160,7 @@ class BaseSharesAdminTest(BaseSharesTest):
             name=name,
             description=description,
             share_server_id=share_server_id
-        )
+        )['share']
         waiters.wait_for_resource_status(
             self.shares_v2_client, managed_share['id'],
             constants.STATUS_AVAILABLE
@@ -1175,7 +1182,7 @@ class BaseSharesAdminTest(BaseSharesTest):
             params.get('share_network_id', share_server['share_network_id']),
             params.get('identifier', share_server['identifier']),
             share_network_subnet_id=subnet_id,
-        )
+        )['share_server']
         waiters.wait_for_resource_status(
             self.shares_v2_client, managed_share_server['id'],
             constants.SERVER_STATE_ACTIVE, resource_name='share_server'
@@ -1205,7 +1212,7 @@ class BaseSharesAdminTest(BaseSharesTest):
 
         params = {'share_type_id': bogus_type['id'],
                   'share_network_id': self.shares_v2_client.share_network_id}
-        share = self.shares_v2_client.create_share(**params)
+        share = self.shares_v2_client.create_share(**params)['share']
         self.addCleanup(self.shares_v2_client.delete_share, share['id'])
         waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], "error")

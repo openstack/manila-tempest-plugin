@@ -102,10 +102,11 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         # create rule
         if utils.is_microversion_eq(version, '1.0'):
             rule = self.shares_client.create_access_rule(
-                self.share["id"], access_type, access_to)
+                self.share["id"], access_type, access_to)['access']
         else:
             rule = self.shares_v2_client.create_access_rule(
-                self.share["id"], access_type, access_to, version=version)
+                self.share["id"], access_type, access_to,
+                version=version)['access']
 
         if utils.is_microversion_eq(version, '1.0'):
             waiters.wait_for_resource_status(
@@ -157,7 +158,7 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
             raise self.skipException(reason)
 
         rule = self.shares_v2_client.create_access_rule(
-            self.share["id"], "ip", access_to)
+            self.share["id"], "ip", access_to)['access']
         self.addCleanup(self.shares_v2_client.delete_access_rule,
                         self.share["id"], rule['id'])
         waiters.wait_for_resource_status(
@@ -449,7 +450,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
                           raise_rule_in_error_state=False)
 
         share_alt_updated = self.alt_shares_v2_client.get_share(
-            share2['id'])
+            share2['id'])['share']
         self.assertEqual('error', share_alt_updated['access_rules_status'])
 
     @decorators.idempotent_id('1a9f46f0-d4e1-40ac-8726-aedd0320d583')
@@ -473,7 +474,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
 
         # Share's "access_rules_status" must be in "error" status
         share_alt_updated = self.alt_shares_v2_client.get_share(
-            share_alt['id'])
+            share_alt['id'])['share']
         self.assertEqual('error', share_alt_updated['access_rules_status'])
 
         # Add second access rule to different client by "alt" user.

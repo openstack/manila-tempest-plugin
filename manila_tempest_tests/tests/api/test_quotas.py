@@ -49,7 +49,8 @@ class SharesQuotasTest(base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_default_quotas(self, client_name):
-        quotas = getattr(self, client_name).default_quotas(self.tenant_id)
+        quotas = getattr(self, client_name).default_quotas(
+            self.tenant_id)['quota_set']
         uses_v2_client = client_name == 'shares_v2_client'
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
@@ -64,7 +65,8 @@ class SharesQuotasTest(base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data('shares_client', 'shares_v2_client')
     def test_show_quotas(self, client_name):
-        quotas = getattr(self, client_name).show_quotas(self.tenant_id)
+        quotas = getattr(self, client_name).show_quotas(
+            self.tenant_id)['quota_set']
         uses_v2_client = client_name == 'shares_v2_client'
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
@@ -80,7 +82,7 @@ class SharesQuotasTest(base.BaseSharesTest):
     @ddt.data('shares_client', 'shares_v2_client')
     def test_show_quotas_for_user(self, client_name):
         quotas = getattr(self, client_name).show_quotas(
-            self.tenant_id, self.user_id)
+            self.tenant_id, self.user_id)['quota_set']
         uses_v2_client = client_name == 'shares_v2_client'
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
@@ -108,7 +110,7 @@ class SharesQuotasTest(base.BaseSharesTest):
             keys.append('replica_gigabytes')
         if with_user:
             quota_args.update({"user_id": self.user_id})
-        quotas = self.shares_v2_client.detail_quotas(**quota_args)
+        quotas = self.shares_v2_client.detail_quotas(**quota_args)['quota_set']
         quota_keys = list(quotas.keys())
         for outer in keys:
             self.assertIn(outer, quota_keys)

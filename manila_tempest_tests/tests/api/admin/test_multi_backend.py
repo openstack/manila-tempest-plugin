@@ -86,7 +86,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
     def test_share_backend_name_reporting(self):
         # Share's 'host' should be like "hostname@backend_name"
         for share in self.shares:
-            get = self.shares_client.get_share(share['id'])
+            get = self.shares_client.get_share(share['id'])['share']
             self.assertEqual(2, len(get["host"].split("@")))
 
     @decorators.idempotent_id('691fbcef-6d8d-4ad9-b493-501bbb3dcf3c')
@@ -95,7 +95,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
         # Share type should be the same as provided with share creation
         for share, share_type in zip(self.shares, self.sts):
             share_details = self.shares_v2_client.get_share(
-                share['id'], version="2.5")
+                share['id'], version="2.5")['share']
             self.assertEqual(share_type["name"], share_details["share_type"])
 
     @decorators.idempotent_id('f25e0cb0-d656-4f16-a761-ec23992cd9e7')
@@ -104,7 +104,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
         # Share type should be the same as provided with share creation
         for share, share_type in zip(self.shares, self.sts):
             share_details = self.shares_v2_client.get_share(
-                share['id'], version="2.6")
+                share['id'], version="2.6")['share']
             self.assertEqual(share_type["id"], share_details["share_type"])
             self.assertEqual(
                 share_type["name"], share_details["share_type_name"])
@@ -116,6 +116,6 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
         if CONF.share.backend_names[0] == CONF.share.backend_names[1]:
             raise self.skipException("Share backends "
                                      "configured with same name. Skipping.")
-        get1 = self.shares_client.get_share(self.shares[0]['id'])
-        get2 = self.shares_client.get_share(self.shares[1]['id'])
+        get1 = self.shares_client.get_share(self.shares[0]['id'])['share']
+        get2 = self.shares_client.get_share(self.shares[1]['id'])['share']
         self.assertNotEqual(get1["host"], get2["host"])

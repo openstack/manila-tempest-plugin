@@ -70,7 +70,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         # will be created
         original_share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
-        )
+        )['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(original_share_network)
             if utils.share_network_subnets_are_supported()
@@ -90,7 +90,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
                 neutron_net_id=share_network['neutron_net_id'],
                 neutron_subnet_id=share_network['neutron_subnet_id'],
                 availability_zone=az
-            )
+            )['share_network_subnet']
             params = {'share_network_subnet_id': az_subnet['id']}
 
         # create share
@@ -98,12 +98,13 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
             share_type_id=self.share_type['id'],
             share_network_id=share_network['id'], availability_zone=az
         )
-        share = self.shares_v2_client.get_share(share['id'])
-        el = self.shares_v2_client.list_share_export_locations(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
+        el = self.shares_v2_client.list_share_export_locations(
+            share['id'])['export_locations']
         share['export_locations'] = el
         share_server = self.shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
 
         keys = [
             "id",
@@ -136,7 +137,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         # an unmanaged share will never be auto-deleted.
         share_server = self.shares_v2_client.show_share_server(
             share_server['id']
-        )
+        )['share_server']
         self.assertIs(False, share_server['is_auto_deletable'])
 
         # unmanage share server and manage it again
@@ -153,7 +154,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         # check managed share server
         managed_share_server = self.shares_v2_client.show_share_server(
             managed_share_server['id']
-        )
+        )['share_server']
 
         # all expected keys are present in the managed share server
         for key in keys:

@@ -103,7 +103,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             cls.sn_id = None
             if cls.replication_multitenancy:
                 cls.share_network = cls.shares_v2_client.get_share_network(
-                    cls.shares_v2_client.share_network_id)
+                    cls.shares_v2_client.share_network_id)['share_network']
                 cls.sn_id = cls.share_network['id']
 
     @decorators.idempotent_id('196f2bc5-e13a-4730-ac51-61e339068a06')

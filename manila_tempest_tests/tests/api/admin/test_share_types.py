@@ -246,12 +246,14 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
             self.shares_client, share["id"], "available")
 
         # Verify share info
-        get = self.shares_v2_client.get_share(share["id"], version="2.5")
+        get = self.shares_v2_client.get_share(
+            share["id"], version="2.5")['share']
         self.assertEqual(share_name, get["name"])
         self.assertEqual(share["id"], get["id"])
         self.assertEqual(shr_type_name, get["share_type"])
 
-        get = self.shares_v2_client.get_share(share["id"], version="2.6")
+        get = self.shares_v2_client.get_share(
+            share["id"], version="2.6")['share']
         self.assertEqual(st_create["id"], get["share_type"])
         self.assertEqual(shr_type_name, get["share_type_name"])
 
@@ -274,7 +276,8 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertFalse(any(st_id in st["id"] for st in sts))
 
         # List projects that have access for share type - none expected
-        access = self.shares_v2_client.list_access_to_share_type(st_id)
+        access = self.shares_v2_client.list_access_to_share_type(
+            st_id)['share_type_access']
         self.assertEmpty(access)
 
         # Add project access to share type
@@ -287,7 +290,8 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertTrue(any(st_id in st["id"] for st in sts))
 
         # List projects that have access for share type - one expected
-        access = self.shares_v2_client.list_access_to_share_type(st_id)
+        access = self.shares_v2_client.list_access_to_share_type(
+            st_id)['share_type_access']
         expected = [{'share_type_id': st_id, 'project_id': project_id}, ]
         self.assertEqual(expected, access)
 
@@ -301,7 +305,8 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertFalse(any(st_id in st["id"] for st in sts))
 
         # List projects that have access for share type - none expected
-        access = self.shares_v2_client.list_access_to_share_type(st_id)
+        access = self.shares_v2_client.list_access_to_share_type(
+            st_id)['share_type_access']
         self.assertEmpty(access)
 
     @decorators.idempotent_id('90dca5c5-f28e-4f16-90ed-78f5d725664e')

@@ -41,9 +41,9 @@ class ServicesAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_service_by_invalid_params(self):
         # All services are expected if send the request with invalid parameter
-        services = self.admin_client.list_services()
+        services = self.admin_client.list_services()['services']
         params = {'fake_param': 'fake_param_value'}
-        services_fake = self.admin_client.list_services(params)
+        services_fake = self.admin_client.list_services(params)['services']
         self.assertEqual(len(services), len(services_fake))
 
         # "update_at" field could be updated before second request,
@@ -62,35 +62,35 @@ class ServicesAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_service_by_invalid_host(self):
         params = {'host': 'fake_host'}
-        services_fake = self.admin_client.list_services(params)
+        services_fake = self.admin_client.list_services(params)['services']
         self.assertEqual(0, len(services_fake))
 
     @decorators.idempotent_id('766461b0-e89a-4113-8229-24c4d11d585a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_service_by_invalid_binary(self):
         params = {'binary': 'fake_binary'}
-        services_fake = self.admin_client.list_services(params)
+        services_fake = self.admin_client.list_services(params)['services']
         self.assertEqual(0, len(services_fake))
 
     @decorators.idempotent_id('ac570fde-690d-4448-9cce-ce35e0a14b88')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_service_by_invalid_zone(self):
         params = {'zone': 'fake_zone'}
-        services_fake = self.admin_client.list_services(params)
+        services_fake = self.admin_client.list_services(params)['services']
         self.assertEqual(0, len(services_fake))
 
     @decorators.idempotent_id('da0fef1d-c4d3-4c33-a836-5f836e85df69')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_service_by_invalid_status(self):
         params = {'status': 'fake_status'}
-        services_fake = self.admin_client.list_services(params)
+        services_fake = self.admin_client.list_services(params)['services']
         self.assertEqual(0, len(services_fake))
 
     @decorators.idempotent_id('41936575-3a96-455b-8069-7f6563abf0e2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_service_by_invalid_state(self):
         params = {'state': 'fake_state'}
-        services_fake = self.admin_client.list_services(params)
+        services_fake = self.admin_client.list_services(params)['services']
         self.assertEqual(0, len(services_fake))
 
     @decorators.idempotent_id('3c72227b-7fa1-4294-bdf4-413ec4c324e5')

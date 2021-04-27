@@ -49,13 +49,15 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('3e1e4da7-049f-404e-8673-142695a9a785')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_delete_subnet(self):
-        share_network = self.shares_v2_client.create_share_network()
+        share_network = self.shares_v2_client.create_share_network(
+            )['share_network']
         share_network = self.shares_v2_client.get_share_network(
             share_network['id']
-        )
+        )['share_network']
         default_subnet = share_network['share_network_subnets'][0]
 
-        az = self.shares_v2_client.list_availability_zones()[0]
+        az = self.shares_v2_client.list_availability_zones(
+            )['availability_zones'][0]
         az_name = az['name']
 
         # Generate subnet data
@@ -88,7 +90,8 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_share_network_subnet(self):
         share_network = self.create_share_network()
-        az = self.shares_v2_client.list_availability_zones()[0]
+        az = self.shares_v2_client.list_availability_zones(
+            )['availability_zones'][0]
         az_name = az['name']
 
         # Generate subnet data
@@ -100,8 +103,8 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         created = self.create_share_network_subnet(**data)
 
         # Shows the share network subnet
-        shown = self.shares_v2_client.get_subnet(created['id'],
-                                                 share_network['id'])
+        shown = self.shares_v2_client.get_subnet(
+            created['id'], share_network['id'])['share_network_subnet']
 
         # Asserts
         self.assertDictContainsSubset(data, shown)
@@ -127,7 +130,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
 
         original_share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
-        )
+        )['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(original_share_network))
         share_network = self.create_share_network(
@@ -136,7 +139,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         )
         share_network = self.shares_v2_client.get_share_network(
             share_network['id']
-        )
+        )['share_network']
         default_subnet = share_network['share_network_subnets'][0]
         availability_zone = compatible_azs[0]
 
@@ -160,10 +163,10 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # case of Dummy driver).
         self.assertIn(share['status'], ('creating', 'available'))
 
-        share = self.admin_shares_v2_client.get_share(share['id'])
+        share = self.admin_shares_v2_client.get_share(share['id'])['share']
         share_server = self.admin_shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
 
         # Default subnet was created during share network creation
         self.assertIsNone(default_subnet['availability_zone'])
@@ -197,7 +200,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
 
         original_share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
-        )
+        )['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(original_share_network))
         share_network = self.create_share_network(
@@ -206,7 +209,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         )
         share_network = self.shares_v2_client.get_share_network(
             share_network['id']
-        )
+        )['share_network']
         default_subnet = share_network['share_network_subnets'][0]
         # Save one availability zone to remain associated with default subnet
         destination_az = compatible_azs.pop()
@@ -236,10 +239,10 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # creation is really fast as in case of Dummy driver).
         self.assertIn(share['status'], ('creating', 'available'))
 
-        share = self.admin_shares_v2_client.get_share(share['id'])
+        share = self.admin_shares_v2_client.get_share(share['id'])['share']
         share_server = self.admin_shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
         # If no availability zone was provided during share creation, it is
         # expected that the Scheduler selects one of the compatible backends to
         # place the share. The destination availability zone may or may not

@@ -65,13 +65,13 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
 
         cls.ss_kerberos = cls.alt_shares_v2_client.create_security_service(
             ss_type='kerberos',
-            **cls.data_sn_with_ldap_ss)
+            **cls.data_sn_with_ldap_ss)['security_service']
 
         cls.sn_with_kerberos_ss = (
             cls.alt_shares_v2_client.create_share_network(
                 cleanup_in_class=True,
                 add_security_services=False,
-                **cls.data_sn_with_kerberos_ss)
+                **cls.data_sn_with_kerberos_ss)['share_network']
         )
 
         cls.alt_shares_v2_client.add_sec_service_to_share_network(
@@ -82,7 +82,7 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_all_tenants(self):
         listed = self.admin_shares_v2_client.list_share_networks_with_detail(
-            {'all_tenants': 1})
+            {'all_tenants': 1})['share_networks']
         self.assertTrue(any(self.sn_with_ldap_ss['id'] == sn['id']
                             for sn in listed))
         self.assertTrue(any(self.sn_with_kerberos_ss['id'] == sn['id']
@@ -92,7 +92,9 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_filter_by_project_id(self):
         listed = self.admin_shares_v2_client.list_share_networks_with_detail(
-            {'project_id': self.sn_with_kerberos_ss['project_id']})
+            {
+                'project_id': self.sn_with_kerberos_ss['project_id']
+            })['share_networks']
         self.assertTrue(any(self.sn_with_kerberos_ss['id'] == sn['id']
                             for sn in listed))
         self.assertTrue(all(self.sn_with_kerberos_ss['project_id'] ==

@@ -143,7 +143,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
 
         # List projects that have access for share type - none expected
         access = self.admin_shares_v2_client.list_access_to_share_type(
-            share_type['id'])
+            share_type['id'])['share_type_access']
         self.assertEmpty(access)
 
         # Although the share type should not be found on alt project,
@@ -153,6 +153,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
                           share_type_id=share_type['name'])
 
         # The share should not be listed
-        share_list = self.alt_shares_v2_client.list_shares(detailed=True)
+        share_list = self.alt_shares_v2_client.list_shares(
+            detailed=True)['shares']
         self.assertFalse(
             any(share_type['id'] in s['share_type'] for s in share_list))

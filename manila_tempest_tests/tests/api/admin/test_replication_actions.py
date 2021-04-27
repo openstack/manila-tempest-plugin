@@ -64,7 +64,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.sn_id = cls.share_network['id']
 
         cls.zones = cls.get_availability_zones_matching_share_type(
@@ -79,7 +79,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
                                      share_network_id=cls.sn_id,
                                      client=cls.admin_client)
         cls.replica = cls.admin_client.list_share_replicas(
-            share_id=cls.share['id'])[0]
+            share_id=cls.share['id'])['share_replicas'][0]
 
     @decorators.idempotent_id('b39f319e-2515-42c0-85c4-21c2fb2123bf')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -91,7 +91,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         self.admin_client.extend_share(self.share["id"], new_size)
         waiters.wait_for_resource_status(
             self.admin_client, self.share["id"], "available")
-        share = self.admin_client.get_share(self.share["id"])
+        share = self.admin_client.get_share(self.share["id"])['share']
         self.assertEqual(new_size, int(share["size"]))
 
     @decorators.idempotent_id('743bfb8e-a314-4e8e-92b5-079bd3eae72d')
@@ -99,12 +99,12 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
     @testtools.skipUnless(CONF.share.run_shrink_tests,
                           'Shrink share tests are disabled.')
     def test_shrink_replicated_share(self):
-        share = self.admin_client.get_share(self.share["id"])
+        share = self.admin_client.get_share(self.share["id"])['share']
         new_size = self.share["size"] - 1
         self.admin_client.shrink_share(self.share["id"], new_size)
         waiters.wait_for_resource_status(
             self.admin_client, share["id"], "available")
-        shrink_share = self.admin_client.get_share(self.share["id"])
+        shrink_share = self.admin_client.get_share(self.share["id"])['share']
         self.assertEqual(new_size, int(shrink_share["size"]))
 
     @decorators.idempotent_id('84150cd6-2777-4806-8aa3-51359f16816e')
@@ -120,9 +120,9 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
                                   share_network_id=self.sn_id,
                                   cleanup_in_class=True,
                                   client=self.admin_client)
-        share = self.admin_client.get_share(share["id"])
+        share = self.admin_client.get_share(share["id"])['share']
         export_locations = self.admin_client.list_share_export_locations(
-            share["id"])
+            share["id"])['export_locations']
         export_path = export_locations[0]['path']
 
         self.admin_client.unmanage_share(share['id'])
@@ -131,7 +131,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
         # Manage the previously unmanaged share
         managed_share = self.admin_client.manage_share(
             share['host'], share['share_proto'],
-            export_path, self.share_type_id)
+            export_path, self.share_type_id)['share']
         waiters.wait_for_resource_status(
             self.admin_client, managed_share['id'], 'available')
 

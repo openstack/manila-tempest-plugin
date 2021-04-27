@@ -60,7 +60,7 @@ class ReplicationNegativeBase(base.BaseSharesMixedTest):
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
-                cls.shares_v2_client.share_network_id)
+                cls.shares_v2_client.share_network_id)['share_network']
             cls.sn_id = cls.share_network['id']
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type, client=cls.admin_client)
@@ -78,7 +78,7 @@ class ReplicationNegativeBase(base.BaseSharesMixedTest):
                                  share_network_id=sn_id)
         share_instances = cls.admin_client.get_instances_of_share(
             share["id"], version=_MIN_SUPPORTED_MICROVERSION
-        )
+        )['share_instances']
         instance_id = share_instances[0]["id"]
         return share, instance_id
 
@@ -214,7 +214,8 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         hosts = [p['name'] for p in pools]
         self.create_share_replica(self.share1["id"], self.replica_zone,
                                   cleanup_in_class=False)
-        share_host = self.admin_client.get_share(self.share1['id'])['host']
+        share_host = self.admin_client.get_share(
+            self.share1['id'])['share']['host']
 
         for host in hosts:
             if host != share_host:
@@ -251,7 +252,8 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         data['neutron_net_id'] = subnet['neutron_net_id']
         data['neutron_subnet_id'] = subnet['neutron_subnet_id']
         data['availability_zone'] = self.share_zone
-        share_net = self.shares_v2_client.create_share_network(**data)
+        share_net = self.shares_v2_client.create_share_network(
+            **data)['share_network']
         share, instance_id = self._create_share_get_instance(
             share_network_id=share_net['id'])
 

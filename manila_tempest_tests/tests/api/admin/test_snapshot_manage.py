@@ -71,7 +71,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
                                      share_protocol=cls.protocol)
 
         # Get updated data
-        cls.share = cls.shares_v2_client.get_share(cls.share['id'])
+        cls.share = cls.shares_v2_client.get_share(cls.share['id'])['share']
 
     def _test_manage(self, snapshot, version=CONF.share.max_api_microversion):
         name = ("Name for 'managed' snapshot that had ID %s" %
@@ -92,7 +92,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
             # - size: Hitachi HNAS Driver
             driver_options={'size': snapshot['size']},
             version=version,
-        )
+        )['snapshot']
 
         # Add managed snapshot to cleanup queue
         self.method_resources.insert(
@@ -119,7 +119,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         self.assertEqual(set(expected_keys), set(actual_keys))
 
         # Verify data of managed snapshot
-        get_snapshot = self.shares_v2_client.get_snapshot(snapshot['id'])
+        get_snapshot = self.shares_v2_client.get_snapshot(
+            snapshot['id'])['snapshot']
         self.assertEqual(name, get_snapshot['name'])
         self.assertEqual(description, get_snapshot['description'])
         self.assertEqual(snapshot['share_id'], get_snapshot['share_id'])
@@ -152,7 +153,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         # Create snapshot
         snapshot = self.create_snapshot_wait_for_active(
             self.share['id'], snap_name, snap_desc)
-        snapshot = self.shares_v2_client.get_snapshot(snapshot['id'])
+        snapshot = self.shares_v2_client.get_snapshot(
+            snapshot['id'])['snapshot']
         # Unmanage snapshot
         self.shares_v2_client.unmanage_snapshot(snapshot['id'],
                                                 version=version)

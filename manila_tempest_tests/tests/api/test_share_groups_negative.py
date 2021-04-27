@@ -245,7 +245,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
         # Verify share group is not put into error state from conflict
         sg = self.shares_v2_client.get_share_group(
             self.share_group['id'],
-            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)['share_group']
         self.assertEqual('available', sg['status'])
 
     @decorators.idempotent_id('edd329b8-7188-481f-9445-8f6d913538fa')
@@ -255,7 +255,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             detailed=True,
             params={'share_group_id': 'foobar'},
             version=constants.MIN_SHARE_GROUP_MICROVERSION,
-        )
+        )['shares']
         self.assertEqual(0, len(shares), 'Incorrect number of shares returned')
 
     @decorators.idempotent_id('5dc10968-cbff-46d9-a1aa-bafccc7a1905')
@@ -265,7 +265,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             detailed=True,
             params={'share_group_id': self.share['id']},
             version=constants.MIN_SHARE_GROUP_MICROVERSION,
-        )
+        )['shares']
         self.assertEqual(0, len(shares), 'Incorrect number of shares returned')
 
     @decorators.idempotent_id('f805f683-fe05-4534-9f40-a74be42ff82b')
@@ -283,7 +283,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
             detailed=True,
             params={'share_group_id': share_group['id']},
             version=constants.MIN_SHARE_GROUP_MICROVERSION,
-        )
+        )['shares']
         self.assertEqual(0, len(shares), 'Incorrect number of shares returned')
 
     @decorators.idempotent_id('8fc20c22-082f-4851-bcc3-d2f3af57f027')
@@ -303,14 +303,15 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('64527564-9cd6-42db-8897-910f4fc1a151')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_sg_and_share_with_different_azs(self):
-        azs = self.shares_v2_client.list_availability_zones()
+        azs = self.shares_v2_client.list_availability_zones(
+            )['availability_zones']
 
         if len(azs) < 2:
             raise self.skipException(
                 'Test requires presence of at least 2 availability zones.')
         else:
             share_group = self.shares_v2_client.get_share_group(
-                self.share_group['id'], '2.34')
+                self.share_group['id'], '2.34')['share_group']
             different_az = [
                 az['name']
                 for az in azs

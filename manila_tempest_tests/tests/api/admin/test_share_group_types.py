@@ -80,7 +80,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         # Read share group type
         sg_type_r = self.shares_v2_client.get_share_group_type(
-            sg_type_c['id'], version=version)
+            sg_type_c['id'], version=version)['share_group_type']
         keys = set(sg_type_r.keys())
         self.assertTrue(
             constants.SHARE_GROUP_TYPE_REQUIRED_KEYS.issubset(keys),
@@ -166,7 +166,8 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         self.shares_v2_client.update_share_group_type_spec(
             sg_type['id'], 'key1', 'value3', version=version)
-        sg_type = self.shares_v2_client.get_share_group_type(sg_type['id'])
+        sg_type = self.shares_v2_client.get_share_group_type(
+            sg_type['id'])['share_group_type']
 
         self.assertIn('key1', sg_type['group_specs'])
         self.assertIn('key2', sg_type['group_specs'])
@@ -192,7 +193,8 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         self.shares_v2_client.update_share_group_type_specs(
             sg_type['id'], group_specs)
-        sg_type = self.shares_v2_client.get_share_group_type(sg_type['id'])
+        sg_type = self.shares_v2_client.get_share_group_type(
+            sg_type['id'])['share_group_type']
 
         for k, v in group_specs.items():
             self.assertIn(k, sg_type['group_specs'])
@@ -224,7 +226,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         self.shares_v2_client.delete_share_group_type_spec(
             sg_type['id'], key_to_delete, version=version)
         sg_type = self.shares_v2_client.get_share_group_type(
-            sg_type['id'], version=version)
+            sg_type['id'], version=version)['share_group_type']
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
@@ -253,12 +255,12 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         # It should not be listed without access
         sgt_list = self.shares_v2_client.list_share_group_types(
-            version=version)
+            version=version)['share_group_types']
         self.assertFalse(any(sgt_id == sgt["id"] for sgt in sgt_list))
 
         # List projects that have access for share group type - none expected
         access = self.shares_v2_client.list_access_to_share_group_type(
-            sgt_id, version=version)
+            sgt_id, version=version)['share_group_type_access']
         self.assertEmpty(access)
 
         # Add project access to share group type
@@ -267,12 +269,12 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         # Now it should be listed
         sgt_list = self.shares_v2_client.list_share_group_types(
-            version=version)
+            version=version)['share_group_types']
         self.assertTrue(any(sgt_id == sgt["id"] for sgt in sgt_list))
 
         # List projects that have access for share group type - one expected
         access = self.shares_v2_client.list_access_to_share_group_type(
-            sgt_id, version=version)
+            sgt_id, version=version)['share_group_type_access']
         expected = [{'share_group_type_id': sgt_id, 'project_id': project_id}]
         self.assertEqual(expected, access)
 
@@ -282,12 +284,12 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         # It should not be listed without access
         sgt_list = self.shares_v2_client.list_share_group_types(
-            version=version)
+            version=version)['share_group_types']
         self.assertFalse(any(sgt_id == sgt["id"] for sgt in sgt_list))
 
         # List projects that have access for share group type - none expected
         access = self.shares_v2_client.list_access_to_share_group_type(
-            sgt_id, version=version)
+            sgt_id, version=version)['share_group_type_access']
         self.assertEmpty(access)
 
     @decorators.idempotent_id('b8b20a96-cecc-4677-8a77-aae3b93e5b96')
@@ -312,7 +314,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         # List share group type
         sg_type_list = self.shares_v2_client.list_share_group_types(
-            version=version)
+            version=version)['share_group_types']
         for sg_type_get in sg_type_list:
             if utils.is_microversion_ge(version, '2.46'):
                 self.assertIn('is_default', sg_type_get)
@@ -323,7 +325,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         # Show share group type
         sg_type_id = sg_type_c['id']
         sg_type_show = self.shares_v2_client.get_share_group_type(
-            sg_type_id, version=version)
+            sg_type_id, version=version)['share_group_type']
         if utils.is_microversion_ge(version, '2.46'):
             self.assertIn('is_default', sg_type_show)
             self.assertIs(False, sg_type_show['is_default'])

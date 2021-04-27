@@ -42,10 +42,13 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         super(ShareNetworkSubnetsNegativeTest, cls).resource_setup()
         # Create a new share network which will be used in the tests
         cls.share_network = cls.shares_v2_client.create_share_network(
-            cleanup_in_class=True)
+            cleanup_in_class=True)['share_network']
         cls.share_network_id = cls.share_network['id']
         cls.share_type = cls.create_share_type()
-        cls.az = cls.shares_v2_client.list_availability_zones()[0]
+        cls.az = (
+            cls.shares_v2_client.list_availability_zones()
+            ['availability_zones'][0]
+        )
         cls.az_name = cls.az['name']
 
     @decorators.idempotent_id('d20b6105-22d1-4fc0-8468-45dd019240c0')
@@ -70,7 +73,8 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(True, False)
     def test_add_share_network_subnet_in_same_az_exists(self, is_default):
-        share_network = self.shares_v2_client.create_share_network()
+        share_network = self.shares_v2_client.create_share_network(
+            )['share_network']
         data = {}
 
         if not is_default:
@@ -118,7 +122,8 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         # Generate subnet data
         data = self.generate_subnet_data()
         data['share_network_id'] = self.share_network_id
-        az = self.shares_v2_client.list_availability_zones()[0]
+        az = self.shares_v2_client.list_availability_zones(
+            )['availability_zones'][0]
         data['availability_zone'] = az['name']
 
         subnet = self.create_share_network_subnet(**data)
@@ -131,7 +136,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                                             subnet['id'])
         share_network = self.shares_v2_client.get_share_network(
             self.share_network_id
-        )
+        )['share_network']
 
         self.assertIsNotNone(share_network)
         self.assertRaises(lib_exc.NotFound,
@@ -153,7 +158,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
         share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
-        )
+        )['share_network']
         share_network_id = share_network['id']
         subnet = utils.share_network_get_default_subnet(share_network)
 
@@ -171,13 +176,14 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                 'availability_zone': az}
 
         # Create a share into the share network
-        share = self.shares_v2_client.create_share(**args)
+        share = self.shares_v2_client.create_share(**args)['share']
         waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         # Gets the export locations to be used in the future
-        el = self.shares_v2_client.list_share_export_locations(share['id'])
+        el = self.shares_v2_client.list_share_export_locations(
+            share['id'])['export_locations']
         share['export_locations'] = el
 
         # Unmanages the share to make the share server become is_auto
@@ -200,7 +206,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
             name='share_to_be_deleted',
             description='share managed to be deleted',
             share_server_id=share['share_server_id']
-        )
+        )['share']
 
         # Do some necessary cleanup
         waiters.wait_for_resource_status(
@@ -228,7 +234,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
         original_share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
-        )
+        )['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(original_share_network))
         share_network = self.create_share_network(
@@ -237,7 +243,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         )
         share_network = self.shares_v2_client.get_share_network(
             share_network['id']
-        )
+        )['share_network']
         share_network_id = share_network['id']
         default_subnet = share_network['share_network_subnets'][0]
 
@@ -255,13 +261,13 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                 'availability_zone': az}
 
         # Create a share into the share network
-        share = self.shares_v2_client.create_share(**args)
+        share = self.shares_v2_client.create_share(**args)['share']
         waiters.wait_for_resource_status(
             self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
-        share = self.admin_shares_v2_client.get_share(share['id'])
+        share = self.admin_shares_v2_client.get_share(share['id'])['share']
         share_server = self.admin_shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
         # Match share server subnet
         self.assertEqual(subnet['id'],
                          share_server['share_network_subnet_id'])

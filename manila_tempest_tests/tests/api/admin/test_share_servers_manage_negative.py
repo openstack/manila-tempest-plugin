@@ -59,7 +59,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
             cleanup_in_class=True,
             extra_specs=cls.extra_specs)
         cls.original_share_network = cls.shares_v2_client.get_share_network(
-            cls.shares_v2_client.share_network_id)
+            cls.shares_v2_client.share_network_id)['share_network']
         cls.share_net_info = (
             utils.share_network_get_default_subnet(cls.original_share_network)
             if utils.share_network_subnets_are_supported() else
@@ -75,7 +75,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
             share_type_id=self.share_type['id'],
             share_network_id=share_network['id']
         )
-        return self.shares_v2_client.get_share(share['id'])
+        return self.shares_v2_client.get_share(share['id'])['share']
 
     @ddt.data(
         ('host', 'invalid_host'),
@@ -98,11 +98,12 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
 
         # create share
         share = self._create_share_with_new_share_network()
-        el = self.shares_v2_client.list_share_export_locations(share['id'])
+        el = self.shares_v2_client.list_share_export_locations(
+            share['id'])['export_locations']
         share['export_locations'] = el
         share_server = self.shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
 
         self._unmanage_share_and_wait(share)
         self._unmanage_share_server_and_wait(share_server)
@@ -225,7 +226,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # create share
         share = self.create_share(
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         # try to change it to wrong state
         self.assertRaises(
@@ -245,7 +246,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # create share
         share = self.create_share(
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         # try to unmanage
         self.assertRaises(
@@ -265,11 +266,12 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
     def test_manage_share_server_invalid_identifier(self):
         # create share
         share = self._create_share_with_new_share_network()
-        el = self.shares_v2_client.list_share_export_locations(share['id'])
+        el = self.shares_v2_client.list_share_export_locations(
+            share['id'])['export_locations']
         share['export_locations'] = el
         share_server = self.shares_v2_client.show_share_server(
             share['share_server_id']
-        )
+        )['share_server']
 
         self._unmanage_share_and_wait(share)
         self._unmanage_share_server_and_wait(share_server)
@@ -286,14 +288,15 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
 
         # unmanage the share server in manage_error
         search_opts = {'identifier': 'invalid_id'}
-        invalid_servers = self.shares_v2_client.list_share_servers(search_opts)
+        invalid_servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
         self._unmanage_share_server_and_wait(invalid_servers[0])
 
         # manage in the correct way
         managed_share_server = self._manage_share_server(share_server)
         managed_share_server = self.shares_v2_client.show_share_server(
             managed_share_server['id']
-        )
+        )['share_server']
         managed_share = self._manage_share(
             share,
             name="managed share that had ID %s" % share['id'],
@@ -314,10 +317,10 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
         # create share
         share = self.create_share(
             share_type_id=self.share_type['id'])
-        share = self.shares_v2_client.get_share(share['id'])
+        share = self.shares_v2_client.get_share(share['id'])['share']
 
         share_server = self.shares_v2_client.show_share_server(
-            share['share_server_id'])
+            share['share_server_id'])['share_server']
 
         # try with more data around the identifier
         invalid_params = share_server.copy()

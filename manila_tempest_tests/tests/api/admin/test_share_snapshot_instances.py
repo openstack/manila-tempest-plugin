@@ -46,7 +46,8 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
         snap = cls.create_snapshot_wait_for_active(cls.share["id"])
-        cls.snapshot = cls.shares_v2_client.get_snapshot(snap['id'])
+        cls.snapshot = cls.shares_v2_client.get_snapshot(
+            snap['id'])['snapshot']
 
     @ddt.data(True, False)
     @decorators.idempotent_id('bcb29129-9713-4481-8e74-97682c62f218')
@@ -54,7 +55,8 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
     def test_list_snapshot_instances_by_snapshot(self, detail):
         """Test that we get only the 1 snapshot instance from snapshot."""
         snapshot_instances = self.shares_v2_client.list_snapshot_instances(
-            detail=detail, snapshot_id=self.snapshot['id'])
+            detail=detail,
+            snapshot_id=self.snapshot['id'])['snapshot_instances']
 
         expected_keys = ['id', 'snapshot_id', 'status']
 
@@ -86,7 +88,8 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot_instances(self):
         """Test that we get at least the snapshot instance."""
-        snapshot_instances = self.shares_v2_client.list_snapshot_instances()
+        snapshot_instances = self.shares_v2_client.list_snapshot_instances(
+            )['snapshot_instances']
 
         snapshot_ids = [si['snapshot_id'] for si in snapshot_instances]
 
@@ -98,9 +101,9 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot_instance(self):
         instances = self.shares_v2_client.list_snapshot_instances(
-            snapshot_id=self.snapshot['id'])
+            snapshot_id=self.snapshot['id'])['snapshot_instances']
         instance_detail = self.shares_v2_client.get_snapshot_instance(
-            instance_id=instances[0]['id'])
+            instance_id=instances[0]['id'])['snapshot_instance']
 
         expected_keys = (
             'id', 'created_at', 'updated_at', 'progress', 'provider_location',
@@ -123,7 +126,7 @@ class ShareSnapshotInstancesTest(base.BaseSharesAdminTest):
         snapshot = self.create_snapshot_wait_for_active(self.share["id"])
 
         snapshot_instances = self.shares_v2_client.list_snapshot_instances(
-            snapshot_id=snapshot['id'])
+            snapshot_id=snapshot['id'])['snapshot_instances']
 
         sii = snapshot_instances[0]['id']
 
