@@ -1,0 +1,19 @@
+# Stable branch jobs to test the trunk version of manila-tempest-plugin against
+# released stable branches of manila
+- job:
+    name: manila-tempest-plugin-lvm-wallaby
+    parent: manila-tempest-plugin-lvm
+    override-checkout: stable/wallaby
+    nodeset: openstack-single-node-focal
+
+- job:
+    name: manila-tempest-plugin-lvm-victoria
+    parent: manila-tempest-plugin-lvm
+    override-checkout: stable/victoria
+    nodeset: openstack-single-node-focal
+
+- job:
+    name: manila-tempest-plugin-lvm-ussuri
+    parent: manila-tempest-plugin-lvm
+    override-checkout: stable/ussuri
+    nodeset: openstack-single-node-bionic

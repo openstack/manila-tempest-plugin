@@ -7,6 +7,9 @@
         - manila-tempest-plugin-dummy-no-dhss
         - manila-tempest-plugin-dummy-dhss
         - manila-tempest-plugin-lvm
+        - manila-tempest-plugin-lvm-wallaby
+        - manila-tempest-plugin-lvm-victoria
+        - manila-tempest-plugin-lvm-ussuri
         - manila-tempest-plugin-zfsonlinux:
             voting: false
         - manila-tempest-plugin-cephfs-native:
