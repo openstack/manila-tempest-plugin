@@ -336,7 +336,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data('2.0', '2.23')
     def test_try_delete_required_spec_snapshot_support_version(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         st = self._create_share_type()
         # Try delete extra spec 'snapshot_support'
         self.assertRaises(

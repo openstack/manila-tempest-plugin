@@ -31,7 +31,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
     @classmethod
     def skip_checks(cls):
         super(ShareNetworkSubnetsTest, cls).skip_checks()
-        utils.check_skip_if_microversion_lt("2.51")
+        utils.check_skip_if_microversion_not_supported("2.51")
 
     @classmethod
     def resource_setup(cls):

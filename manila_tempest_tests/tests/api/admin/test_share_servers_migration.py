@@ -40,7 +40,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         if not CONF.share.run_share_server_migration_tests:
             raise cls.skipException(
                 'Share server migration tests are disabled.')
-        utils.check_skip_if_microversion_lt('2.57')
+        utils.check_skip_if_microversion_not_supported('2.57')
 
     @classmethod
     def resource_setup(cls):

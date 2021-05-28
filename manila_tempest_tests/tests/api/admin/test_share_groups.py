@@ -38,7 +38,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
         if not CONF.share.run_share_group_tests:
             raise cls.skipException('Share Group tests disabled.')
 
-        utils.check_skip_if_microversion_lt(
+        utils.check_skip_if_microversion_not_supported(
             constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @classmethod
@@ -67,7 +67,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_create_share_group_with_single_share_type_min(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         share_group = self.create_share_group(
             share_group_type_id=self.sg_type_id,
             cleanup_in_class=False,
@@ -142,7 +142,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_default_share_group_type_applied(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         try:
             default_type = self.shares_v2_client.get_default_share_group_type(
                 version=version

@@ -70,7 +70,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
     @ddt.data('2.3', '2.9', '2.10', '2.30', '2.54')
     def test_get_share_instance(self, version):
         """Test that we get the proper keys back for the instance."""
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
 
         share_instances = self.shares_v2_client.get_instances_of_share(
             self.share['id'], version=version,
@@ -105,7 +105,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
     @ddt.data('path', 'id')
     @decorators.idempotent_id('c27b415d-341c-42f0-a269-2c94f69fbee1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.35")
+    @utils.skip_if_microversion_not_supported("2.35")
     def test_list_share_instances_with_export_location_path_and_id(
             self, export_location_type):
         share_instances_except = (

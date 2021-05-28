@@ -68,7 +68,7 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
             raise cls.skipException(
                 'Create share from snapshot in another pool or az tests are '
                 'disabled.')
-        utils.check_skip_if_microversion_lt("2.54")
+        utils.check_skip_if_microversion_not_supported("2.54")
 
     @decorators.idempotent_id('6f1fa7d0-94f2-4373-8730-b0986781cc88')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)

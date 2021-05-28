@@ -46,7 +46,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
 
-        utils.check_skip_if_microversion_lt('2.12')
+        utils.check_skip_if_microversion_not_supported('2.12')
         utils.skip_if_manage_not_supported_for_version()
 
     @classmethod
@@ -145,7 +145,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         utils.skip_if_manage_not_supported_for_version(version)
 
         # Skip in case specified version is not supported
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
 
         snap_name = data_utils.rand_name("tempest-snapshot-name")
         snap_desc = data_utils.rand_name("tempest-snapshot-description")

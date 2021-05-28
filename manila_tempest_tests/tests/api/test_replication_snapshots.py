@@ -38,7 +38,8 @@ class ReplicationSnapshotTest(base.BaseSharesMixedTest):
         if not CONF.share.run_snapshot_tests:
             raise cls.skipException('Snapshot tests disabled.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

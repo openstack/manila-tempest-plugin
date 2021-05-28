@@ -31,7 +31,7 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
         if not CONF.share.run_share_group_tests:
             raise cls.skipException('Share Group tests disabled.')
 
-        utils.check_skip_if_microversion_lt(
+        utils.check_skip_if_microversion_not_supported(
             constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @classmethod

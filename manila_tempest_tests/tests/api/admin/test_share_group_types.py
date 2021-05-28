@@ -40,7 +40,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         if not CONF.share.run_share_group_tests:
             raise cls.skipException('Share Group tests disabled.')
 
-        utils.check_skip_if_microversion_lt(
+        utils.check_skip_if_microversion_not_supported(
             constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @classmethod
@@ -65,7 +65,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
              constants.SHARE_GROUPS_GRADUATION_VERSION])))
     @ddt.unpack
     def test_create_get_delete_share_group_type(self, st_key, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
 
         # Create share group type
@@ -151,7 +151,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_update_single_share_group_type_spec(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         group_specs = {'key1': 'value1', 'key2': 'value2'}
 
@@ -207,7 +207,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_delete_single_share_group_type_spec_min(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         group_specs = {'key1': 'value1', 'key2': 'value2'}
 
@@ -237,7 +237,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
                             constants.SHARE_GROUPS_GRADUATION_VERSION,
                             LATEST_MICROVERSION]))
     def test_private_share_group_type_access(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
         group_specs = {"key1": "value1", "key2": "value2"}
         project_id = self.shares_v2_client.tenant_id
@@ -297,7 +297,7 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
     @ddt.data(*utils.deduplicate(('2.45', '2.46', LATEST_MICROVERSION)))
     def test_share_group_type_create_show_list_with_is_default_key(self,
                                                                    version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         name = data_utils.rand_name("tempest-manila")
 
         # Create share group type

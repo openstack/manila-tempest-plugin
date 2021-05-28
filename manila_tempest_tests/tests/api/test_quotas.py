@@ -99,7 +99,7 @@ class SharesQuotasTest(base.BaseSharesTest):
     @decorators.idempotent_id('795614f6-4a18-47d5-b817-0b294e9d4c48')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_show_quotas_detail(self, microversion, with_user):
-        utils.skip_if_microversion_not_supported(microversion)
+        utils.check_skip_if_microversion_not_supported(microversion)
         quota_args = {"tenant_id": self.tenant_id, "version": microversion, }
         keys = ['gigabytes', 'snapshot_gigabytes', 'shares',
                 'snapshots', 'share_networks']

@@ -156,7 +156,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
 
         self.assertEqual(0, len(share_networks))
 
-    @utils.skip_if_microversion_lt("2.51")
+    @utils.skip_if_microversion_not_supported("2.51")
     @decorators.idempotent_id('8a995305-ede9-4002-a9cd-f24ff4d71f63')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_share_network_contains_more_than_one_subnet(self):
@@ -185,7 +185,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
         default_subnet = share_network['share_network_subnets'][0]
         self.assertIsNone(default_subnet['availability_zone'])
 
-    @utils.skip_if_microversion_lt("2.51")
+    @utils.skip_if_microversion_not_supported("2.51")
     @decorators.idempotent_id('d84c3c5c-5913-42d4-9a66-0d5a78295adb')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_network_inexistent_az(self):

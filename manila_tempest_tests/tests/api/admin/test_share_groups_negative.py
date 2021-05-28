@@ -34,7 +34,7 @@ class ShareGroupsNegativeTest(base.BaseSharesAdminTest):
         if not CONF.share.run_share_group_tests:
             raise cls.skipException('Share Group tests disabled.')
 
-        utils.check_skip_if_microversion_lt(
+        utils.check_skip_if_microversion_not_supported(
             constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @decorators.idempotent_id('b90537b7-634d-4fca-b451-770fbcca7927')

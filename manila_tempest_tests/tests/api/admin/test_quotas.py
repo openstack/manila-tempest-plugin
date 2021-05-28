@@ -136,7 +136,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
     @ddt.unpack
     @decorators.idempotent_id('836e1725-2853-4d54-b281-8173773d8527')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @utils.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_not_supported("2.39")
     def test_show_share_type_quotas(self, share_type_key, is_st_public):
         # Check if the used microversion supports 'share_replica' and
         # 'replica_gigabytes' quotas
@@ -305,7 +305,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @ddt.unpack
     @decorators.idempotent_id('155ea3de-b3b5-4aa0-be8b-eebcc19ce874')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @utils.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_not_supported("2.39")
     def test_update_share_type_quota(self, share_type_key, is_st_public):
         # Check if the used microversion supports 'share_replica' and
         # 'replica_gigabytes' quotas
@@ -548,7 +548,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @ddt.unpack
     @decorators.idempotent_id('15e57302-5a14-4be4-8720-95b639c2bfad')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @utils.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_not_supported("2.39")
     def test_reset_share_type_quotas(self, share_type_key, is_st_public):
         share_type = self._create_share_type(is_public=is_st_public)
         quota_keys = ['shares', 'snapshots', 'gigabytes', 'snapshot_gigabytes']
@@ -767,7 +767,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @ddt.data(11, -1)
     @decorators.idempotent_id('315cb76f-920d-4cb9-ac7d-16be8e95e1b2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @utils.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_not_supported("2.39")
     def test_update_share_type_quotas_bigger_than_project_quota(self, st_q):
         share_type = self._create_share_type()
 
@@ -783,7 +783,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('c95be1eb-6331-4c37-9fac-ed6c36270457')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @utils.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_not_supported("2.39")
     def test_set_share_type_quota_bigger_than_users_quota(self):
         share_type = self._create_share_type()
 
@@ -805,7 +805,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('4687eb25-17b3-4995-ace2-62f8bda29c57')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.39")
+    @utils.skip_if_microversion_not_supported("2.39")
     def test_quotas_usages(self):
         # Create share types
         st_1, st_2 = (self._create_share_type()
@@ -900,7 +900,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
         CONF.share.run_share_group_tests, 'Share Group tests disabled.')
-    @utils.skip_if_microversion_lt(SHARE_GROUPS_MICROVERSION)
+    @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_share_group_quotas_usages(self):
         # Set quotas for project (3 SG, 1 SGS) and user (2 SG, 1 SGS)
         self.update_quotas(self.tenant_id,

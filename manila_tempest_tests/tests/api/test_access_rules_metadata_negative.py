@@ -49,7 +49,7 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
             cls.message = "Rule tests are disabled"
             raise cls.skipException(cls.message)
 
-        utils.check_skip_if_microversion_lt(
+        utils.check_skip_if_microversion_not_supported(
             constants.MIN_SHARE_ACCESS_METADATA_MICROVERSION)
 
     @classmethod

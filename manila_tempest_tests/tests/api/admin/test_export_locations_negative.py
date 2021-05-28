@@ -29,7 +29,7 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
     @classmethod
     def skip_checks(cls):
         super(ExportLocationsNegativeTest, cls).skip_checks()
-        utils.check_skip_if_microversion_lt("2.9")
+        utils.check_skip_if_microversion_not_supported("2.9")
 
     @classmethod
     def resource_setup(cls):
@@ -120,7 +120,7 @@ class ExportLocationsAPIOnlyNegativeTest(base.BaseSharesAdminTest):
     @classmethod
     def skip_checks(cls):
         super(ExportLocationsAPIOnlyNegativeTest, cls).skip_checks()
-        utils.check_skip_if_microversion_lt("2.9")
+        utils.check_skip_if_microversion_not_supported("2.9")
 
     @decorators.idempotent_id('4b5b4e89-0c80-4383-b272-62d5e0419d9a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)

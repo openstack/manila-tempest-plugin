@@ -38,7 +38,8 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         if not CONF.share.run_replication_tests:
             raise cls.skipException('Replication tests are disabled.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
@@ -90,7 +91,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                             LATEST_MICROVERSION]))
     def test_promote_out_of_sync_share_replica(self, version):
         """Test promote 'out_of_sync' share replica to active state."""
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         if (self.replication_type
                 not in constants.REPLICATION_PROMOTION_CHOICES):
             msg = "Option backend_replication_type should be one of (%s)!"
@@ -153,7 +154,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                             LATEST_MICROVERSION]))
     def test_force_delete_share_replica(self, version):
         """Test force deleting a replica that is in 'error_deleting' status."""
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
@@ -176,7 +177,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                             LATEST_MICROVERSION]))
     def test_reset_share_replica_status(self, version):
         """Test resetting a replica's 'status' attribute."""
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
@@ -197,7 +198,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                             LATEST_MICROVERSION]))
     def test_reset_share_replica_state(self, version):
         """Test resetting a replica's 'replica_state' attribute."""
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,
@@ -218,7 +219,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                             LATEST_MICROVERSION]))
     def test_resync_share_replica(self, version):
         """Test resyncing a replica."""
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         replica = self.create_share_replica(self.share['id'],
                                             self.replica_zone,
                                             cleanup_in_class=False,

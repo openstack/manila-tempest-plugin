@@ -38,7 +38,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
         if not CONF.share.run_mount_snapshot_tests:
             raise cls.skipException('Mountable snapshots tests are disabled.')
 
-        utils.check_skip_if_microversion_lt("2.32")
+        utils.check_skip_if_microversion_not_supported("2.32")
 
     @classmethod
     def setup_clients(cls):

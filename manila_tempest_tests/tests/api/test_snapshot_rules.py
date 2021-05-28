@@ -80,7 +80,7 @@ class ShareSnapshotIpRulesForNFSTest(BaseShareSnapshotRulesTest):
             msg = "IP rule tests for %s protocol are disabled." % cls.protocol
             raise cls.skipException(msg)
 
-        utils.check_skip_if_microversion_lt('2.32')
+        utils.check_skip_if_microversion_not_supported('2.32')
 
     @classmethod
     def resource_setup(cls):
@@ -108,7 +108,7 @@ class ShareSnapshotUserRulesForCIFSTest(BaseShareSnapshotRulesTest):
             msg = ("User rule tests for %s protocol are "
                    "disabled." % cls.protocol)
             raise cls.skipException(msg)
-        utils.check_skip_if_microversion_lt('2.32')
+        utils.check_skip_if_microversion_not_supported('2.32')
 
     @classmethod
     def resource_setup(cls):

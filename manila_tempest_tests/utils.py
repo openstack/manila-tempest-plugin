@@ -95,23 +95,8 @@ def skip_if_microversion_not_supported(microversion):
     return lambda f: f
 
 
-def skip_if_microversion_lt(microversion):
-    """Decorator for tests that are microversion-specific."""
-    if is_microversion_lt(CONF.share.max_api_microversion, microversion):
-        reason = ("Skipped. Test requires microversion greater than or "
-                  "equal to '%s'." % microversion)
-        return testtools.skip(reason)
-    return lambda f: f
-
-
-def check_skip_if_microversion_lt(microversion):
-    if is_microversion_lt(CONF.share.max_api_microversion, microversion):
-        reason = ("Skipped. Test requires microversion greater than or "
-                  "equal to '%s'." % microversion)
-        raise testtools.TestCase.skipException(reason)
-
-
 def check_skip_if_microversion_not_supported(microversion):
+    """Callable method for tests that are microversion-specific."""
     if not is_microversion_supported(microversion):
         reason = ("Skipped. Test requires microversion '%s'." % microversion)
         raise testtools.TestCase.skipException(reason)

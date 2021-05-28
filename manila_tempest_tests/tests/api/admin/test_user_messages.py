@@ -45,7 +45,7 @@ class UserMessageTest(base.BaseSharesAdminTest):
     @classmethod
     def skip_checks(cls):
         super(UserMessageTest, cls).skip_checks()
-        utils.check_skip_if_microversion_lt(MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(MICROVERSION)
 
     def setUp(self):
         super(UserMessageTest, self).setUp()

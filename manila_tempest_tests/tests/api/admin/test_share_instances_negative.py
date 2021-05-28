@@ -49,7 +49,7 @@ class ShareInstancesNegativeTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('ce0d045c-e418-42fa-86e4-ead493fc0663')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.35")
+    @utils.skip_if_microversion_not_supported("2.35")
     @ddt.data('path', 'id')
     def test_list_share_instances_with_export_location_not_exist(
             self, export_location_type):

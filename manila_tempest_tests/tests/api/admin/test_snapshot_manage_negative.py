@@ -33,7 +33,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
     protocol = 'nfs'
 
     @classmethod
-    @utils.skip_if_microversion_lt("2.12")
+    @utils.skip_if_microversion_not_supported("2.12")
     @testtools.skipUnless(
         CONF.share.run_manage_unmanage_snapshot_tests,
         "Manage/unmanage snapshot tests are disabled.")

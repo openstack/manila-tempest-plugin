@@ -21,6 +21,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -283,7 +284,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.delete_share, '')
 
-    @base.skip_if_microversion_lt("2.61")
+    @utils.skip_if_microversion_not_supported("2.61")
     @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fe86')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_size_greater_than_specified_in_share_type(self):
@@ -293,7 +294,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           size=int(CONF.share.share_size) + 5,
                           share_type_id=self.share_type_min_2_max_5_id)
 
-    @base.skip_if_microversion_lt("2.61")
+    @utils.skip_if_microversion_not_supported("2.61")
     @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fe87')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_size_less_than_specified_in_share_type(self):

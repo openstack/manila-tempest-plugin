@@ -128,7 +128,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*utils.deduplicate(['2.24', LATEST_MICROVERSION]))
     def test_delete_snapshot_support_extra_spec(self, version):
-        utils.skip_if_microversion_not_supported(version)
+        utils.check_skip_if_microversion_not_supported(version)
         # Delete one extra spec for share type
         self.shares_v2_client.delete_share_type_extra_spec(
             self.st_id, 'snapshot_support', version=version)

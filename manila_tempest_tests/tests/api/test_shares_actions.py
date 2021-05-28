@@ -369,7 +369,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('f446e8cb-5bef-45ac-8b87-f4136f44ca69')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.36")
+    @utils.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_detail_filter_by_existed_description(self):
         # list shares by description, at least one share is expected
         params = {"description": self.share_desc}
@@ -378,7 +378,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('1276b97b-cf46-4953-973f-f995985a1ce4')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.36")
+    @utils.skip_if_microversion_not_supported("2.36")
     def test_list_shares_with_detail_filter_by_inexact_name(self):
         # list shares by name, at least one share is expected
         params = {"name~": 'tempest-share'}
@@ -428,7 +428,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('0019afa2-fae2-417f-a7e0-2af665a966b0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.42")
+    @utils.skip_if_microversion_not_supported("2.42")
     def test_list_shares_with_detail_with_count(self):
         # list shares by name, at least one share is expected
         params = {"with_count": 'true'}
@@ -446,7 +446,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         if version is None:
             snapshot = self.shares_client.get_snapshot(self.snap["id"])
         else:
-            utils.skip_if_microversion_not_supported(version)
+            utils.check_skip_if_microversion_not_supported(version)
             snapshot = self.shares_v2_client.get_snapshot(
                 self.snap["id"], version=version)
 
@@ -523,7 +523,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         if version is None:
             snaps = self.shares_client.list_snapshots_with_detail()
         else:
-            utils.skip_if_microversion_not_supported(version)
+            utils.check_skip_if_microversion_not_supported(version)
             snaps = self.shares_v2_client.list_snapshots_with_detail(
                 version=version, params=params)
 

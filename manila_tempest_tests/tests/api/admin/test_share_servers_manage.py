@@ -37,7 +37,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         if not CONF.share.run_manage_unmanage_tests:
             raise cls.skipException('Manage/unmanage tests are disabled.')
 
-        utils.check_skip_if_microversion_lt('2.49')
+        utils.check_skip_if_microversion_not_supported('2.49')
 
     @classmethod
     def resource_setup(cls):

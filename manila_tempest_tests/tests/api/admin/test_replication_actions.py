@@ -37,7 +37,8 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
             raise cls.skipException(
                 'Only for driver_handles_share_servers = False driver mode.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

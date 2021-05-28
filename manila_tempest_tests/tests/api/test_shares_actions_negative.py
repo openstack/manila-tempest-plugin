@@ -186,7 +186,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('ffc3dc76-2f92-4308-a125-1d3905ed72ba')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.35")
+    @utils.skip_if_microversion_not_supported("2.35")
     @ddt.data('path', 'id')
     def test_list_shares_with_export_location_not_exist(
             self, export_location_type):

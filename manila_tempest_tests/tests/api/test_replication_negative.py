@@ -37,7 +37,8 @@ class ReplicationNegativeBase(base.BaseSharesMixedTest):
         if not CONF.share.run_replication_tests:
             raise cls.skipException('Replication tests are disabled.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
@@ -207,7 +208,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           CONF.share.run_driver_assisted_migration_tests,
                           "Share migration tests are disabled.")
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.29")
+    @utils.skip_if_microversion_not_supported("2.29")
     def test_migration_of_replicated_share(self):
         pools = self.admin_client.list_pools(detail=True)['pools']
         hosts = [p['name'] for p in pools]
@@ -226,7 +227,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
 
     @decorators.idempotent_id('bf01bcfc-57cb-4e56-957f-8aa9f1b9be1b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @utils.skip_if_microversion_lt("2.48")
+    @utils.skip_if_microversion_not_supported("2.48")
     def test_try_add_replica_share_type_azs_unsupported_az(self):
         self.admin_shares_v2_client.update_share_type_extra_spec(
             self.share_type['id'], 'availability_zones', 'non-existent az')
@@ -242,7 +243,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
-    @utils.skip_if_microversion_lt("2.51")
+    @utils.skip_if_microversion_not_supported("2.51")
     def test_try_add_replica_nonexistent_subnet(self):
         # Create a new share network only for a specific az
         data = self.generate_share_network_data()
@@ -268,7 +269,8 @@ class ReplicationAPIOnlyNegativeTest(base.BaseSharesTest):
         if not CONF.share.run_replication_tests:
             raise cls.skipException('Replication tests are disabled.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @decorators.idempotent_id('72395c9b-4432-4a8b-84b4-60303e6bc962')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)

@@ -40,7 +40,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
         if not CONF.share.run_replication_tests:
             raise cls.skipException('Replication tests are disabled.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):
@@ -380,7 +381,8 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
         if not CONF.share.run_replication_tests:
             raise cls.skipException('Replication tests are disabled.')
 
-        utils.check_skip_if_microversion_lt(_MIN_SUPPORTED_MICROVERSION)
+        utils.check_skip_if_microversion_not_supported(
+            _MIN_SUPPORTED_MICROVERSION)
 
     @classmethod
     def resource_setup(cls):

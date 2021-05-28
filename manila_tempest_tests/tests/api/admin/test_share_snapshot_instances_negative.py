@@ -32,7 +32,7 @@ class SnapshotInstancesNegativeTest(base.BaseSharesMixedTest):
         if not CONF.share.run_snapshot_tests:
             raise cls.skipException('Snapshot tests are disabled.')
 
-        utils.check_skip_if_microversion_lt('2.19')
+        utils.check_skip_if_microversion_not_supported('2.19')
 
     @classmethod
     def resource_setup(cls):
@@ -86,7 +86,7 @@ class SnapshotInstancesNegativeNoResourceTest(base.BaseSharesMixedTest):
         if not CONF.share.run_snapshot_tests:
             raise cls.skipException('Snapshot tests are disabled.')
 
-        utils.check_skip_if_microversion_lt('2.19')
+        utils.check_skip_if_microversion_not_supported('2.19')
 
     @classmethod
     def resource_setup(cls):

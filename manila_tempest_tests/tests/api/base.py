@@ -94,10 +94,6 @@ class handle_cleanup_exceptions(object):
         return True  # Suppress error if any
 
 
-skip_if_microversion_not_supported = utils.skip_if_microversion_not_supported
-skip_if_microversion_lt = utils.skip_if_microversion_lt
-
-
 class BaseSharesTest(test.BaseTestCase):
     """Base test case class for all Manila API tests."""
 
