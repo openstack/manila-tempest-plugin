@@ -28,7 +28,6 @@
         - manila-tempest-plugin
       devstack_plugins:
         manila: https://opendev.org/openstack/manila
-        manila-tempest-plugin: https://opendev.org/openstack/manila-tempest-plugin
       devstack_services:
         cinder: false
         s-account: false
@@ -88,7 +87,6 @@
         - manila-tempest-plugin
       devstack_plugins:
         manila: https://opendev.org/openstack/manila
-        manila-tempest-plugin: https://opendev.org/openstack/manila-tempest-plugin
       test_results_stage_name: test_results
       zuul_copy_output:
         '{{ devstack_base_dir }}/tempest/etc/tempest.conf': logs
