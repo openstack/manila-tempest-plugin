@@ -61,7 +61,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
         if CONF.share.capability_snapshot_support:
             extra_specs.update({'snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         # create share
@@ -213,7 +213,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
 
         self.shares_v2_client.migrate_share(
             self.share['id'], self.dest_pool,
-            new_share_type_id=self.new_type_invalid['share_type']['id'],
+            new_share_type_id=self.new_type_invalid['id'],
             new_share_network_id=new_share_network_id)
         waiters.wait_for_migration_status(
             self.shares_v2_client, self.share['id'], self.dest_pool,
@@ -285,7 +285,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
             self.share['id'], self.dest_pool,
-            new_share_type_id=new_type_opposite['share_type']['id'],
+            new_share_type_id=new_type_opposite['id'],
             new_share_network_id=new_share_network_id)
 
     @decorators.idempotent_id('1f529b09-e404-4f0e-9423-bb4b117b5522')
@@ -300,7 +300,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
             self.share['id'], self.dest_pool,
-            new_share_type_id=new_share_type['share_type']['id'])
+            new_share_type_id=new_share_type['id'])
 
     @decorators.idempotent_id('90cf0ae4-4251-4142-bfa8-41f67a9e5b23')
     @testtools.skipUnless(CONF.share.run_driver_assisted_migration_tests,

@@ -40,7 +40,7 @@ class ExtraSpecsReadAdminTest(base.BaseSharesAdminTest):
         cls.share_type = cls.create_share_type(
             cls.share_type_name, extra_specs=cls.required_extra_specs)
 
-        cls.st_id = cls.share_type["share_type"]["id"]
+        cls.st_id = cls.share_type["id"]
         cls.custom_extra_specs = {"key1": "value1", "key2": "value2"}
         cls.expected_extra_specs = copy.copy(cls.custom_extra_specs)
         cls.expected_extra_specs.update(cls.required_extra_specs)
@@ -77,7 +77,7 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
         self.share_type = self.create_share_type(
             self.share_type_name, extra_specs=self.required_extra_specs)
 
-        self.st_id = self.share_type['share_type']['id']
+        self.st_id = self.share_type['id']
 
         # Create extra specs for share type
         self.shares_client.create_share_type_extra_specs(

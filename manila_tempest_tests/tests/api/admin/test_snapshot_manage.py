@@ -67,7 +67,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
             extra_specs=cls.extra_specs)
 
         # Create the base share
-        cls.share = cls.create_share(share_type_id=cls.st['share_type']['id'],
+        cls.share = cls.create_share(share_type_id=cls.st['id'],
                                      share_protocol=cls.protocol)
 
         # Get updated data

@@ -59,11 +59,10 @@ class ReplicationTest(base.BaseSharesMixedTest):
             )
         cls.extra_specs = cls.add_extra_specs_to_dict(
             {"replication_type": cls.replication_type})
-        share_type = cls.create_share_type(
+        cls.share_type = cls.create_share_type(
             name,
             extra_specs=cls.extra_specs,
             client=cls.admin_client)
-        cls.share_type = share_type["share_type"]
 
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type, client=cls.admin_client)
@@ -400,11 +399,10 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
             )
         cls.extra_specs = cls.add_extra_specs_to_dict(
             {"replication_type": cls.replication_type})
-        share_type = cls.create_share_type(
+        cls.share_type = cls.create_share_type(
             name,
             extra_specs=cls.extra_specs,
             client=cls.admin_client)
-        cls.share_type = share_type["share_type"]
 
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type, client=cls.admin_client)

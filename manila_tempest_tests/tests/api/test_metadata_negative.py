@@ -51,7 +51,7 @@ class SharesMetadataNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(SharesMetadataNegativeTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
         # create share

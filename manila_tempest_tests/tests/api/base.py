@@ -805,23 +805,6 @@ class BaseSharesTest(test.BaseTestCase):
         return security_service
 
     @classmethod
-    def create_share_type(cls, name, is_public=True, client=None,
-                          cleanup_in_class=True, **kwargs):
-        if client is None:
-            client = cls.shares_v2_client
-        share_type = client.create_share_type(name, is_public, **kwargs)
-        resource = {
-            "type": "share_type",
-            "id": share_type["share_type"]["id"],
-            "client": client,
-        }
-        if cleanup_in_class:
-            cls.class_resources.insert(0, resource)
-        else:
-            cls.method_resources.insert(0, resource)
-        return share_type
-
-    @classmethod
     def update_share_type(cls, share_type_id, name=None,
                           is_public=None, description=None,
                           client=None):
@@ -847,15 +830,6 @@ class BaseSharesTest(test.BaseTestCase):
         if cleanup:
             cls.method_resources.insert(0, resource)
         return updated_quotas
-
-    @staticmethod
-    def add_extra_specs_to_dict(extra_specs=None):
-        """Add any required extra-specs to share type dictionary"""
-        dhss = six.text_type(CONF.share.multitenancy_enabled)
-        extra_specs_dict = {"driver_handles_share_servers": dhss}
-        if extra_specs:
-            extra_specs_dict.update(extra_specs)
-        return extra_specs_dict
 
     @classmethod
     def clear_share_replicas(cls, share_id, client=None):
@@ -1091,17 +1065,38 @@ class BaseSharesAdminTest(BaseSharesTest):
     def setup_clients(cls):
         super(BaseSharesAdminTest, cls).setup_clients()
         # Initialise share clients
+        cls.admin_shares_client = cls.os_admin.share_v1.SharesClient()
         cls.admin_shares_v2_client = cls.os_admin.share_v2.SharesV2Client()
 
+    @staticmethod
+    def add_extra_specs_to_dict(extra_specs=None):
+        """Add any required extra-specs to share type dictionary"""
+        dhss = six.text_type(CONF.share.multitenancy_enabled)
+        extra_specs_dict = {"driver_handles_share_servers": dhss}
+        if extra_specs:
+            extra_specs_dict.update(extra_specs)
+        return extra_specs_dict
+
     @classmethod
-    def _create_share_type(cls, is_public=True, specs=None,
-                           cleanup_in_class=True):
-        name = data_utils.rand_name("unique_st_name")
-        extra_specs = cls.add_extra_specs_to_dict(specs)
-        return cls.create_share_type(
-            name, extra_specs=extra_specs, is_public=is_public,
-            client=cls.admin_shares_v2_client,
-            cleanup_in_class=cleanup_in_class)['share_type']
+    def create_share_type(cls, name=None, is_public=True, client=None,
+                          cleanup_in_class=True, extra_specs=None, **kwargs):
+        name = name or data_utils.rand_name(
+            cls.__class__.__name__ + 'share-type')
+        client = client or cls.admin_shares_v2_client
+        extra_specs = cls.add_extra_specs_to_dict(extra_specs=extra_specs)
+        share_type = client.create_share_type(name, is_public,
+                                              extra_specs=extra_specs,
+                                              **kwargs)['share_type']
+        resource = {
+            "type": "share_type",
+            "id": share_type["id"],
+            "client": client,
+        }
+        if cleanup_in_class:
+            cls.class_resources.insert(0, resource)
+        else:
+            cls.method_resources.insert(0, resource)
+        return share_type
 
     @classmethod
     def _create_share_group_type(cls):
@@ -1112,7 +1107,7 @@ class BaseSharesAdminTest(BaseSharesTest):
 
     def _create_share_for_manage(self):
         creation_data = {
-            'share_type_id': self.st['share_type']['id'],
+            'share_type_id': self.st['id'],
             'share_protocol': self.protocol,
         }
 
@@ -1154,7 +1149,7 @@ class BaseSharesAdminTest(BaseSharesTest):
             service_host=share['host'],
             export_path=share['export_locations'][0],
             protocol=share['share_proto'],
-            share_type_id=self.share_type['share_type']['id'],
+            share_type_id=self.share_type['id'],
             name=name,
             description=description,
             share_server_id=share_server_id
@@ -1195,9 +1190,40 @@ class BaseSharesAdminTest(BaseSharesTest):
         self.shares_v2_client.wait_for_resource_deletion(
             server_id=share_server_id)
 
+    def create_user_message(self):
+        """Trigger a 'no valid host' situation to generate a message."""
+        extra_specs = {
+            'vendor_name': 'foobar',
+            'driver_handles_share_servers': CONF.share.multitenancy_enabled,
+        }
+        share_type_name = data_utils.rand_name("share-type")
 
-class BaseSharesMixedTest(BaseSharesTest):
-    """Base test case class for all Shares API tests with all user roles."""
+        bogus_type = self.create_share_type(
+            client=self.admin_shares_v2_client,
+            name=share_type_name,
+            extra_specs=extra_specs)
+
+        params = {'share_type_id': bogus_type['id'],
+                  'share_network_id': self.shares_v2_client.share_network_id}
+        share = self.shares_v2_client.create_share(**params)
+        self.addCleanup(self.shares_v2_client.delete_share, share['id'])
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, share['id'], "error")
+        return waiters.wait_for_message(self.shares_v2_client, share['id'])
+
+
+class BaseSharesMixedTest(BaseSharesAdminTest):
+    """Base test case class for all Shares API tests with all user roles.
+
+       Tests deriving from this class can use the primary project's clients
+       (self.shares_client, self.shares_v2_client) and the alt project user's
+       clients (self.alt_shares_client, self.alt_shares_v2_client) to perform
+       API calls and validations. Although admin clients are available for use,
+       their use should be limited to performing bootstrapping (e.g., creating
+       a share type, or resetting state of a resource, etc.). No API validation
+       must be performed against admin APIs. Use BaseAdminTest as a base class
+       for such tests.
+    """
     credentials = ('primary', 'alt', 'admin')
 
     # Will be cleaned up in resource_cleanup if the class
@@ -1218,9 +1244,6 @@ class BaseSharesMixedTest(BaseSharesTest):
     @classmethod
     def setup_clients(cls):
         super(BaseSharesMixedTest, cls).setup_clients()
-        # Initialise share clients
-        cls.admin_shares_client = cls.os_admin.share_v1.SharesClient()
-        cls.admin_shares_v2_client = cls.os_admin.share_v2.SharesV2Client()
         cls.alt_shares_client = cls.os_alt.share_v1.SharesClient()
         cls.alt_shares_v2_client = cls.os_alt.share_v2.SharesV2Client()
         # Initialise network clients
@@ -1291,20 +1314,3 @@ class BaseSharesMixedTest(BaseSharesTest):
         os.shares_v1_client = os.share_v1.SharesClient()
         os.shares_v2_client = os.share_v2.SharesV2Client()
         return os
-
-    @classmethod
-    def _create_share_type(cls, is_public=True, specs=None,
-                           cleanup_in_class=True):
-        name = data_utils.rand_name("unique_st_name")
-        extra_specs = cls.add_extra_specs_to_dict(specs)
-        return cls.create_share_type(
-            name, extra_specs=extra_specs, is_public=is_public,
-            client=cls.admin_shares_v2_client,
-            cleanup_in_class=cleanup_in_class)['share_type']
-
-    @classmethod
-    def _create_share_group_type(cls):
-        share_group_type_name = data_utils.rand_name("unique_sgtype_name")
-        return cls.create_share_group_type(
-            name=share_group_type_name, share_types=[cls.share_type_id],
-            client=cls.admin_shares_v2_client)

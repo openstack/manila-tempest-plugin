@@ -50,12 +50,10 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
         # Create 2 share_types
         name = data_utils.rand_name("tempest-manila")
         extra_specs = cls.add_extra_specs_to_dict()
-        share_type = cls.create_share_type(name, extra_specs=extra_specs)
-        cls.share_type = share_type['share_type']
+        cls.share_type = cls.create_share_type(name, extra_specs=extra_specs)
 
         name = data_utils.rand_name("tempest-manila")
-        share_type = cls.create_share_type(name, extra_specs=extra_specs)
-        cls.share_type2 = share_type['share_type']
+        cls.share_type2 = cls.create_share_type(name, extra_specs=extra_specs)
 
     @decorators.idempotent_id('e2ba1754-cecc-4178-ad39-eefbb59e4d6d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)

@@ -34,7 +34,7 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ShareTypeAvailabilityZonesTest, cls).resource_setup()
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         cls.share_group_type = cls._create_share_group_type()
         cls.share_group_type_id = cls.share_group_type['id']
@@ -57,7 +57,7 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
             data_utils.rand_name('az_share_type'),
             cleanup_in_class=False,
             extra_specs=extra_specs,
-            client=self.admin_shares_v2_client)['share_type']
+            client=self.admin_shares_v2_client)
         self.assertEqual(
             'az1,az2,az 3', share_type['extra_specs']['availability_zones'])
 
@@ -77,14 +77,14 @@ class ShareTypeAvailabilityZonesTest(base.BaseSharesMixedTest):
             data_utils.rand_name('support_some_azs_share_type'),
             cleanup_in_class=False,
             extra_specs=extra_specs,
-            client=self.admin_shares_v2_client)['share_type']
+            client=self.admin_shares_v2_client)
 
         extra_specs = self.add_extra_specs_to_dict()
         share_type_no_az_spec = self.create_share_type(
             data_utils.rand_name('support_any_az_share_type'),
             cleanup_in_class=False,
             extra_specs=extra_specs,
-            client=self.admin_shares_v2_client)['share_type']
+            client=self.admin_shares_v2_client)
 
         share_types = self.admin_shares_v2_client.list_share_types(
             params={'extra_specs': {'availability_zones': filter}}

@@ -85,11 +85,11 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         st_create = self.create_share_type(
             name, extra_specs=extra_specs, version=version,
             description=description)
-        self.assertEqual(name, st_create['share_type']['name'])
+        self.assertEqual(name, st_create['name'])
         self._verify_description(
-            description, st_create['share_type'], version)
-        self._verify_is_public_key_name(st_create['share_type'], version)
-        st_id = st_create["share_type"]["id"]
+            description, st_create, version)
+        self._verify_is_public_key_name(st_create, version)
+        st_id = st_create["id"]
 
         # Get share type
         get = self.shares_v2_client.get_share_type(st_id, version=version)
@@ -139,11 +139,11 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         st_create = self.create_share_type(
             name, extra_specs=extra_specs, version=version,
             description=description)
-        self.assertEqual(name, st_create['share_type']['name'])
+        self.assertEqual(name, st_create['name'])
         self._verify_description(
-            description, st_create['share_type'], version)
-        self._verify_is_public_key_name(st_create['share_type'], version)
-        st_id = st_create["share_type"]["id"]
+            description, st_create, version)
+        self._verify_is_public_key_name(st_create, version)
+        st_id = st_create["id"]
 
         # Update share type
         updated_st = self.shares_v2_client.update_share_type(
@@ -177,11 +177,11 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         st_create = self.create_share_type(
             name, extra_specs=extra_specs, version=version,
             description=description)
-        self.assertEqual(name, st_create['share_type']['name'])
+        self.assertEqual(name, st_create['name'])
         self._verify_description(
-            description, st_create['share_type'], version)
-        self._verify_is_public_key_name(st_create['share_type'], version)
-        st_id = st_create["share_type"]["id"]
+            description, st_create, version)
+        self._verify_is_public_key_name(st_create, version)
+        st_id = st_create["id"]
 
         # Update share type
         updated_st = self.shares_v2_client.update_share_type(
@@ -206,8 +206,8 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         st_create = self.create_share_type(
             name, extra_specs=extra_specs, version=version,
             description=description)
-        self._verify_is_public_key_name(st_create['share_type'], version)
-        st_id = st_create["share_type"]["id"]
+        self._verify_is_public_key_name(st_create, version)
+        st_id = st_create["id"]
 
         # list share types
         st_list = self.shares_v2_client.list_share_types(version=version)
@@ -240,7 +240,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
 
         # Create share with share type
         share = self.create_share(
-            name=share_name, share_type_id=st_create["share_type"]["id"])
+            name=share_name, share_type_id=st_create["id"])
         self.assertEqual(share["name"], share_name)
         waiters.wait_for_resource_status(
             self.shares_client, share["id"], "available")
@@ -252,7 +252,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         self.assertEqual(shr_type_name, get["share_type"])
 
         get = self.shares_v2_client.get_share(share["id"], version="2.6")
-        self.assertEqual(st_create["share_type"]["id"], get["share_type"])
+        self.assertEqual(st_create["id"], get["share_type"])
         self.assertEqual(shr_type_name, get["share_type_name"])
 
     @decorators.idempotent_id('d2261a27-d4a4-4237-9fad-f6fd8f27783a')
@@ -265,8 +265,8 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
         # Create private share type
         st_create = self.create_share_type(
             name, False, extra_specs=extra_specs)
-        self.assertEqual(name, st_create['share_type']['name'])
-        st_id = st_create["share_type"]["id"]
+        self.assertEqual(name, st_create['name'])
+        st_id = st_create["id"]
 
         # It should not be listed without access
         st_list = self.shares_v2_client.list_share_types()
@@ -314,7 +314,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
 
         # Create share type
         st_create = self.create_share_type(
-            name, extra_specs=extra_specs, version=version)['share_type']
+            name, extra_specs=extra_specs, version=version)
 
         if utils.is_microversion_ge(version, '2.46'):
             self.assertIn('is_default', st_create)

@@ -56,7 +56,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         cls.user_id = cls.client.user_id
         cls.tenant_id = cls.client.tenant_id
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         # create share group type
         cls.share_group_type = cls._create_share_group_type()
@@ -303,7 +303,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.39")
     def test_try_update_share_type_quota_for_share_networks(self, key):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
         tenant_quotas = self.client.show_quotas(self.tenant_id)
 
         # Try to set 'share_networks' quota for share type
@@ -318,7 +318,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported(SHARE_GROUPS_MICROVERSION)
     def test_try_update_share_type_quota_for_share_groups(self, quota_name):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
         tenant_quotas = self.client.show_quotas(self.tenant_id)
 
         self.assertRaises(lib_exc.BadRequest,
@@ -368,7 +368,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.38")
     def test_share_type_quotas_using_too_old_microversion(self, op):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
         kwargs = {"version": "2.38", "share_type": share_type["name"]}
         if op == 'update':
             tenant_quotas = self.client.show_quotas(self.tenant_id)
@@ -384,7 +384,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.39")
     def test_quotas_providing_share_type_and_user_id(self, op):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
         kwargs = {"share_type": share_type["name"], "user_id": self.user_id}
         if op == 'update':
             tenant_quotas = self.client.show_quotas(self.tenant_id)
@@ -400,7 +400,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.39")
     def test_update_share_type_quotas_bigger_than_project_quota(self, st_q):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
         self.update_quotas(self.tenant_id, shares=10)
 
         self.assertRaises(lib_exc.BadRequest,

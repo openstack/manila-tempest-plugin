@@ -51,7 +51,7 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         extra_specs = None
         if CONF.share.run_snapshot_tests:
             extra_specs = {'snapshot_support': True}
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(cls.protocol,
@@ -188,7 +188,6 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                                             extra_specs=extra_specs,
                                             client=self.admin_client,
                                             cleanup_in_class=False)
-        share_type = share_type['share_type']
         share = self.create_share(share_type_id=share_type['id'],
                                   cleanup_in_class=False,
                                   wait_for_status=False)
@@ -219,7 +218,7 @@ class ShareUserRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         extra_specs = None
         if CONF.share.run_snapshot_tests:
             extra_specs = {'snapshot_support': True}
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(cls.protocol,
@@ -324,7 +323,7 @@ class ShareCertRulesForGLUSTERFSNegativeTest(base.BaseSharesMixedTest):
         extra_specs = None
         if CONF.share.run_snapshot_tests:
             extra_specs = {'snapshot_support': True}
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(cls.protocol,
@@ -396,7 +395,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
                    cls.protocol)
             raise cls.skipException(msg)
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(cls.protocol,
@@ -513,7 +512,7 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
         extra_specs = None
         if CONF.share.run_snapshot_tests:
             extra_specs = {'snapshot_support': True}
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id)

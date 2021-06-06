@@ -41,7 +41,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         cls.ss = cls.create_security_service(cleanup_in_class=True)
         cls.cl = cls.shares_client
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('e3d17444-8ed4-445e-bc65-c748dbc5d21f')

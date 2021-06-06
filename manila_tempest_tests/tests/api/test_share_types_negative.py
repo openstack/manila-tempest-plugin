@@ -46,8 +46,8 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ShareTypesNegativeTest, cls).resource_setup()
-        cls.st = cls._create_share_type()
-        cls.st2 = cls._create_share_type()
+        cls.st = cls.create_share_type()
+        cls.st2 = cls.create_share_type()
 
     @decorators.idempotent_id('d6a6ac4d-6582-408d-ba55-6f5128eb940e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)

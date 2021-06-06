@@ -27,7 +27,7 @@ class PublicSharesTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(PublicSharesTest, cls).resource_setup()
         # create share_type
-        share_type = cls._create_share_type()
+        share_type = cls.create_share_type()
         cls.share_type_id = share_type['id']
 
     @decorators.idempotent_id('557a0474-9e30-47b4-a766-19e2afb13e66')

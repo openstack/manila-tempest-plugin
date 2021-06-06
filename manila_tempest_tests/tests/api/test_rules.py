@@ -96,7 +96,7 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ShareIpRulesForNFSTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
         # create share
@@ -261,7 +261,7 @@ class ShareUserRulesForNFSTest(base.BaseSharesMixedTest):
         super(ShareUserRulesForNFSTest, cls).resource_setup()
 
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
         # create share
@@ -363,7 +363,7 @@ class ShareCertRulesForGLUSTERFSTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ShareCertRulesForGLUSTERFSTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
         # create share
@@ -492,7 +492,7 @@ class ShareCephxRulesForCephFSTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ShareCephxRulesForCephFSTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
         # create share
@@ -586,7 +586,7 @@ class ShareRulesTest(base.BaseSharesMixedTest):
         cls.access_type, cls.access_to = (
             cls._get_access_rule_data_from_config()
         )
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
 

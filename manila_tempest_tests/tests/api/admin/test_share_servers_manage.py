@@ -84,7 +84,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         if add_subnet_field:
             # Get a compatible availability zone
             az = self.get_availability_zones_matching_share_type(
-                self.share_type['share_type'])[0]
+                self.share_type)[0]
             az_subnet = self.shares_v2_client.create_subnet(
                 share_network['id'],
                 neutron_net_id=share_network['neutron_net_id'],
@@ -95,7 +95,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
 
         # create share
         share = self.create_share(
-            share_type_id=self.share_type['share_type']['id'],
+            share_type_id=self.share_type['id'],
             share_network_id=share_network['id'], availability_zone=az
         )
         share = self.shares_v2_client.get_share(share['id'])

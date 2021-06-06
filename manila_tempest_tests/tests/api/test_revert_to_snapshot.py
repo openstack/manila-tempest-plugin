@@ -75,7 +75,7 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             extra_specs=cls.revert_enabled_extra_specs,
             client=cls.admin_client)
 
-        cls.st_id = cls.share_type['share_type']['id']
+        cls.st_id = cls.share_type['id']
 
         cls.share = cls.create_share(share_type_id=cls.st_id)
 
@@ -92,11 +92,10 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
                 "snapshot_support": True,
                 constants.REVERT_TO_SNAPSHOT_SUPPORT: True,
             })
-            share_type = cls.create_share_type(
+            cls.replicated_share_type = cls.create_share_type(
                 cls.replicated_share_type_name,
                 extra_specs=extra_specs,
                 client=cls.admin_client)
-            cls.replicated_share_type = share_type["share_type"]
             cls.zones = cls.get_availability_zones_matching_share_type(
                 cls.replicated_share_type, client=cls.admin_client)
             cls.share_zone = cls.zones[0]

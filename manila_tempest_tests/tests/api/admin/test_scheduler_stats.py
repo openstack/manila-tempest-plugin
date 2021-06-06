@@ -40,7 +40,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
         extra_specs = cls.add_extra_specs_to_dict(extra_specs=extra_specs)
         return cls.create_share_type(
             name, extra_specs=extra_specs,
-            client=cls.admin_client)["share_type"]
+            client=cls.admin_client)
 
     @classmethod
     def resource_setup(cls):
@@ -176,7 +176,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
     @ddt.unpack
     def test_pool_list_with_share_type_filter_with_detail(
             self, detail, share_type_key):
-        st = self._create_share_type()
+        st = self.create_share_type()
         search_opts = {"share_type": st[share_type_key]}
         kwargs = {'search_opts': search_opts}
 

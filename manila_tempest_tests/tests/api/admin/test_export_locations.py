@@ -42,7 +42,7 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         cls.admin_client = cls.admin_shares_v2_client
         cls.member_client = cls.admin_project_member_client.shares_v2_client
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id,

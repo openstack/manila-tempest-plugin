@@ -30,18 +30,15 @@ CONF = config.CONF
 @ddt.ddt
 class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
 
-    def _create_share_type(self):
-        name = data_utils.rand_name("unique_st_name")
-        extra_specs = self.add_extra_specs_to_dict({"key": "value"})
-        return self.create_share_type(
-            name,
-            extra_specs=extra_specs,
-            client=self.admin_shares_v2_client)["share_type"]
+    @classmethod
+    def resource_setup(cls):
+        super(ExtraSpecsAdminNegativeTest, cls).resource_setup()
+        cls.extra_specs = cls.add_extra_specs_to_dict({"key": "value"})
 
     @decorators.idempotent_id('195c1cc6-249a-4f82-b420-4901d2557b3a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_extra_specs_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.create_share_type_extra_specs,
@@ -51,7 +48,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('dc883ec3-1bae-4ed7-8bf5-2cdc7027e37b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_list_extra_specs_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.get_share_type_extra_specs,
@@ -60,7 +57,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('1d3e687e-b2fb-4b96-8428-324ff881eea2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_extra_spec_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.get_share_type_extra_spec,
@@ -69,7 +66,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('4c9505d9-d4ef-42fa-8410-8ab88ec0c852')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_extra_specs_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.get_share_type_extra_specs,
@@ -78,7 +75,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('36c5ada4-9efd-4f6a-b58d-24f08a2433ce')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_read_extra_specs_on_share_type_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         share_type = self.shares_v2_client.get_share_type(st['id'])
         # Verify a non-admin can only read the required extra-specs
         expected_keys = ['driver_handles_share_servers', 'snapshot_support']
@@ -97,7 +94,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('62a9b77a-f796-4bd9-baf9-7c24b3f55560')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_extra_spec_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.update_share_type_extra_spec,
@@ -106,7 +103,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('207cec3c-8ed9-4d6d-8fc8-3aecaacdff93')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_extra_specs_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.update_share_type_extra_specs,
@@ -115,7 +112,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('3f43c5d0-23c5-4b76-98c7-a3f9adb33c89')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_extra_specs_with_user(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Forbidden,
             self.shares_v2_client.delete_share_type_extra_spec,
@@ -125,7 +122,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_too_long_key(self):
         too_big_key = "k" * 256
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_shares_v2_client.create_share_type_extra_specs,
@@ -136,7 +133,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_too_long_value_with_creation(self):
         too_big_value = "v" * 256
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_shares_v2_client.create_share_type_extra_specs,
@@ -147,7 +144,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_too_long_value_with_update(self):
         too_big_value = "v" * 256
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.admin_shares_v2_client.create_share_type_extra_specs(
             st["id"],
             self.add_extra_specs_to_dict({"key": "value"}))
@@ -161,7 +158,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_too_long_value_with_update_of_one_key(self):
         too_big_value = "v" * 256
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.admin_shares_v2_client.create_share_type_extra_specs(
             st["id"],
             self.add_extra_specs_to_dict({"key": "value"}))
@@ -204,7 +201,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('7b9bee14-5ca5-4110-a56a-b3030b6b3948')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_es_with_empty_specs(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_shares_v2_client.create_share_type_extra_specs,
@@ -213,7 +210,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('7f199925-44d2-4d92-bedc-2636c07621fb')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_es_with_invalid_specs(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_shares_v2_client.create_share_type_extra_specs,
@@ -222,7 +219,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('51241ed9-350b-4218-bfb0-c446d660d70b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_extra_spec_with_empty_key(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_shares_v2_client.get_share_type_extra_spec,
@@ -231,7 +228,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('271d825b-2c57-429a-8dca-2cb9dd140dd0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_extra_spec_with_invalid_key(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_shares_v2_client.get_share_type_extra_spec,
@@ -272,7 +269,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('cd68d020-24d2-4f68-8691-782b4815c1b0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_with_invalid_key(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_shares_v2_client.delete_share_type_extra_spec,
@@ -297,7 +294,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('eab96e92-9b95-44b0-89a2-e907a103039d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_spec_with_empty_key(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_shares_v2_client.update_share_type_extra_spec,
@@ -314,7 +311,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('d2595594-eaad-43dc-b847-0a009a17d854')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_with_invalid_specs(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_shares_v2_client.update_share_type_extra_specs,
@@ -323,7 +320,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('6849eada-89a8-4009-a91d-87367621f9aa')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_spec_driver_handles_share_servers(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
 
         # Try delete extra spec 'driver_handles_share_servers'
         self.assertRaises(
@@ -337,7 +334,7 @@ class ExtraSpecsAdminNegativeTest(base.BaseSharesMixedTest):
     @ddt.data('2.0', '2.23')
     def test_try_delete_required_spec_snapshot_support_version(self, version):
         utils.check_skip_if_microversion_not_supported(version)
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         # Try delete extra spec 'snapshot_support'
         self.assertRaises(
             lib_exc.Forbidden,

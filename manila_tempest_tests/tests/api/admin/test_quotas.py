@@ -44,7 +44,7 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
         cls.user_id = cls.client.user_id
         cls.tenant_id = cls.client.tenant_id
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('f62c48e3-9736-4f0c-9f9b-f139f393ac0a')
@@ -201,7 +201,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
             extra_specs.update({'snapshot_support': True})
         if CONF.share.capability_create_share_from_snapshot_support:
             extra_specs.update({'create_share_from_snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share group type
         cls.share_group_type = cls._create_share_group_type()
@@ -315,7 +315,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         # Check if the used microversion supports 'share_replica' and
         # 'replica_gigabytes' quotas
         replica_quotas_supported = utils.share_replica_quotas_are_supported()
-        share_type = self._create_share_type(is_public=is_st_public)
+        share_type = self.create_share_type(is_public=is_st_public)
 
         # Get current quotas
         quotas = self.client.show_quotas(
@@ -555,7 +555,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.39")
     def test_reset_share_type_quotas(self, share_type_key, is_st_public):
-        share_type = self._create_share_type(is_public=is_st_public)
+        share_type = self.create_share_type(is_public=is_st_public)
         quota_keys = ['shares', 'snapshots', 'gigabytes', 'snapshot_gigabytes']
 
         # get default_quotas
@@ -774,7 +774,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.39")
     def test_update_share_type_quotas_bigger_than_project_quota(self, st_q):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
 
         self.update_quotas(self.tenant_id, shares=10)
 
@@ -790,7 +790,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @utils.skip_if_microversion_not_supported("2.39")
     def test_set_share_type_quota_bigger_than_users_quota(self):
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
 
         self.update_quotas(self.tenant_id, force=False, shares=13)
 
@@ -813,7 +813,7 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
     @utils.skip_if_microversion_not_supported("2.39")
     def test_quotas_usages(self):
         # Create share types
-        st_1, st_2 = (self._create_share_type()
+        st_1, st_2 = (self.create_share_type()
                       for i in (1, 2))
 
         # Set quotas for project, user and both share types
