@@ -852,26 +852,9 @@ class BaseSharesTest(test.BaseTestCase):
     def add_extra_specs_to_dict(extra_specs=None):
         """Add any required extra-specs to share type dictionary"""
         dhss = six.text_type(CONF.share.multitenancy_enabled)
-        snapshot_support = six.text_type(
-            CONF.share.capability_snapshot_support)
-        create_from_snapshot_support = six.text_type(
-            CONF.share.capability_create_share_from_snapshot_support)
-
-        extra_specs_dict = {
-            "driver_handles_share_servers": dhss,
-        }
-
-        optional = {
-            "snapshot_support": snapshot_support,
-            "create_share_from_snapshot_support": create_from_snapshot_support,
-        }
-        # NOTE(gouthamr): In micro-versions < 2.24, snapshot_support is a
-        # required extra-spec
-        extra_specs_dict.update(optional)
-
+        extra_specs_dict = {"driver_handles_share_servers": dhss}
         if extra_specs:
             extra_specs_dict.update(extra_specs)
-
         return extra_specs_dict
 
     @classmethod
@@ -1111,12 +1094,14 @@ class BaseSharesAdminTest(BaseSharesTest):
         cls.admin_shares_v2_client = cls.os_admin.share_v2.SharesV2Client()
 
     @classmethod
-    def _create_share_type(cls, is_public=True, specs=None):
+    def _create_share_type(cls, is_public=True, specs=None,
+                           cleanup_in_class=True):
         name = data_utils.rand_name("unique_st_name")
         extra_specs = cls.add_extra_specs_to_dict(specs)
         return cls.create_share_type(
             name, extra_specs=extra_specs, is_public=is_public,
-            client=cls.admin_shares_v2_client)['share_type']
+            client=cls.admin_shares_v2_client,
+            cleanup_in_class=cleanup_in_class)['share_type']
 
     @classmethod
     def _create_share_group_type(cls):
@@ -1308,12 +1293,14 @@ class BaseSharesMixedTest(BaseSharesTest):
         return os
 
     @classmethod
-    def _create_share_type(cls, is_public=True, specs=None):
+    def _create_share_type(cls, is_public=True, specs=None,
+                           cleanup_in_class=True):
         name = data_utils.rand_name("unique_st_name")
         extra_specs = cls.add_extra_specs_to_dict(specs)
         return cls.create_share_type(
             name, extra_specs=extra_specs, is_public=is_public,
-            client=cls.admin_shares_v2_client)['share_type']
+            client=cls.admin_shares_v2_client,
+            cleanup_in_class=cleanup_in_class)['share_type']
 
     @classmethod
     def _create_share_group_type(cls):

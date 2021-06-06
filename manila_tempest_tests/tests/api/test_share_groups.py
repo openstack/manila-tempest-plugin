@@ -17,6 +17,7 @@ import ddt
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -43,7 +44,12 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ShareGroupsTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        if CONF.share.capability_create_share_from_snapshot_support:
+            extra_specs.update({'create_share_from_snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         # create share group type
@@ -97,6 +103,8 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('cf7984af-1e1d-4eaf-bf9a-d8ddf5cebd01')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
     def test_create_delete_empty_share_group_snapshot_min(self):
         # Create base share group
         share_group = self.create_share_group(
@@ -138,6 +146,8 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('727d9c69-4c3b-4375-a91b-8b3efd349976')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipUnless(CONF.share.run_snapshot_tests,
+                          "Snapshot tests are disabled.")
     def test_create_share_group_from_empty_share_group_snapshot_min(self):
         # Create base share group
         share_group = self.create_share_group(

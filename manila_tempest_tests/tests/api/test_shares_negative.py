@@ -32,7 +32,12 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(SharesNegativeTest, cls).resource_setup()
         # create share_type
-        cls.share_type = cls._create_share_type()
+        extra_specs = {}
+        if CONF.share.capability_snapshot_support:
+            extra_specs.update({'snapshot_support': True})
+        if CONF.share.capability_create_share_from_snapshot_support:
+            extra_specs.update({'create_share_from_snapshot_support': True})
+        cls.share_type = cls._create_share_type(specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('b9bb8dee-0c7c-4e51-909c-028335b1a6a0')
@@ -61,7 +66,6 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
         "Create share from snapshot tests are disabled.")
     def test_create_share_from_snap_with_less_size(self):
         # requires minimum 5Gb available space
-
         skip_msg = "Check disc space for this test"
 
         try:  # create share

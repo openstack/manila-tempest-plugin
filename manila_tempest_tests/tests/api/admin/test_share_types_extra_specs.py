@@ -128,12 +128,25 @@ class ExtraSpecsWriteAdminTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(*utils.deduplicate(['2.24', LATEST_MICROVERSION]))
     def test_delete_snapshot_support_extra_spec(self, version):
+        """Is snapshot_support really an optional extra-spec if API > v2.24?"""
         utils.check_skip_if_microversion_not_supported(version)
-        # Delete one extra spec for share type
+
+        # set snapshot_support extra-spec
+        self.shares_v2_client.update_share_type_extra_specs(
+            self.st_id, {'snapshot_support': 'True'})
+
+        # Get extra specs
+        share_type_extra_specs = self.shares_client.get_share_type_extra_specs(
+            self.st_id)
+
+        self.assertIn('snapshot_support', share_type_extra_specs)
+        self.assertEqual('True', share_type_extra_specs['snapshot_support'])
+
+        # Delete the 'snapshot_support' extra spec from the share type
         self.shares_v2_client.delete_share_type_extra_spec(
             self.st_id, 'snapshot_support', version=version)
 
-        # Get metadata
+        # Get extra specs
         share_type_extra_specs = self.shares_client.get_share_type_extra_specs(
             self.st_id)
 
