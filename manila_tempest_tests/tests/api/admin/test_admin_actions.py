@@ -16,6 +16,7 @@
 import ddt
 from tempest import config
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
@@ -130,6 +131,10 @@ class AdminActionsTest(base.BaseSharesAdminTest):
             instance["id"], s_type="share_instances")
         self.shares_v2_client.wait_for_resource_deletion(
             share_instance_id=instance["id"])
+        # Verify that the share has been deleted.
+        self.assertRaises(lib_exc.NotFound,
+                          self.shares_v2_client.get_share,
+                          share['id'])
 
     @decorators.idempotent_id('d5a48182-ecd7-463e-a31a-148c81d3c5ed')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
