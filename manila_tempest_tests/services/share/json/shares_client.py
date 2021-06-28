@@ -425,6 +425,11 @@ class SharesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
+    def get_metadata_item(self, share_id, key):
+        resp, body = self.get("shares/%s/metadata/%s" % (share_id, key))
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
 ###############
 
     def create_security_service(self, ss_type="ldap", **kwargs):

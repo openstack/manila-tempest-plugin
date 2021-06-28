@@ -67,6 +67,11 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # verify metadata
         self.assertEqual(md, get_md)
 
+        # verify metadata items
+        for key in md:
+            get_value = self.shares_client.get_metadata_item(share["id"], key)
+            self.assertEqual(md[key], get_value[key])
+
         # delete metadata
         for key in md.keys():
             self.shares_client.delete_metadata(share["id"], key)
