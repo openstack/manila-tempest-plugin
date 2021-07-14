@@ -34,7 +34,7 @@ class SharesFromSnapshotAcrossPools(base.BaseSharesMixedTest):
         # create share_type
         extra_specs = {"create_share_from_snapshot_support": True,
                        "snapshot_support": True}
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
         cls.admin_client = cls.admin_shares_v2_client
         cls.pools = cls.get_pools_matching_share_type(cls.share_type,

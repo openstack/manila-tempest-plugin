@@ -43,7 +43,7 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
             client=cls.admin_shares_v2_client)
         cls.share_group_type = cls.create_share_group_type(
             data_utils.rand_name("unique_sgt_name"),
-            share_types=[cls.share_type['share_type']['id']],
+            share_types=[cls.share_type['id']],
             client=cls.admin_shares_v2_client)
 
     @decorators.idempotent_id('1f8e3f98-4df7-4383-94d6-4ad058ef79c1')
@@ -87,7 +87,7 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
             lib_exc.BadRequest,
             self.admin_shares_v2_client.create_share_group_type,
             name=data_utils.rand_name("tempest_manila"),
-            share_types=[self.share_type['share_type']['id']],
+            share_types=[self.share_type['id']],
             group_specs="expecting_error_code_400")
 
     @decorators.idempotent_id('8fb8bd73-0219-460d-993e-bff7ddec29e8')
@@ -111,17 +111,17 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
     def test_try_create_duplicate_of_share_group_type(self):
         unique_name = data_utils.rand_name("unique_sgt_name")
         list_of_ids = set()
-        for step in (1, 2):
+        for _ in (1, 2):
             sg_type = self.create_share_group_type(
                 unique_name,
-                share_types=[self.share_type['share_type']['id']],
+                share_types=[self.share_type['id']],
                 client=self.admin_shares_v2_client,
                 cleanup_in_class=False)
             self.assertRaises(
                 lib_exc.Conflict,
                 self.create_share_group_type,
                 unique_name,
-                share_types=[self.share_type['share_type']['id']],
+                share_types=[self.share_type['id']],
                 client=self.admin_shares_v2_client)
             list_of_ids.add(sg_type['id'])
             self.assertEqual(unique_name, sg_type['name'])

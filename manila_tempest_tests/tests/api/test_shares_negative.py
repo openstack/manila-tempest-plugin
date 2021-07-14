@@ -37,7 +37,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
             extra_specs.update({'snapshot_support': True})
         if CONF.share.capability_create_share_from_snapshot_support:
             extra_specs.update({'create_share_from_snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('b9bb8dee-0c7c-4e51-909c-028335b1a6a0')
@@ -150,9 +150,9 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(SharesAPIOnlyNegativeTest, cls).resource_setup()
         # create share_type
-        cls.share_type = cls._create_share_type()
-        cls.share_type_min_2_max_5 = cls._create_share_type(
-            specs={
+        cls.share_type = cls.create_share_type()
+        cls.share_type_min_2_max_5 = cls.create_share_type(
+            extra_specs={
                 'provisioning:max_share_size': int(CONF.share.share_size) + 4,
                 'provisioning:min_share_size': int(CONF.share.share_size) + 1
             })

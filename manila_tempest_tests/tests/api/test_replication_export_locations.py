@@ -52,7 +52,7 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
             )
         cls.extra_specs = cls.add_extra_specs_to_dict(
             {"replication_type": cls.replication_type})
-        share_type = cls.create_share_type(
+        cls.share_type = cls.create_share_type(
             name,
             extra_specs=cls.extra_specs,
             client=cls.admin_client)
@@ -61,7 +61,6 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
             cls.share_network = cls.shares_v2_client.get_share_network(
                 cls.shares_v2_client.share_network_id)
             cls.sn_id = cls.share_network['id']
-        cls.share_type = share_type["share_type"]
         cls.zones = cls.get_availability_zones_matching_share_type(
             cls.share_type)
         cls.share_zone = cls.zones[0]

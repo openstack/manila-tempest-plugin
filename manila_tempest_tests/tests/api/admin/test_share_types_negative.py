@@ -25,13 +25,10 @@ from manila_tempest_tests.tests.api import base
 @ddt.ddt
 class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
 
-    def _create_share_type(self):
-        name = data_utils.rand_name("unique_st_name")
-        extra_specs = self.add_extra_specs_to_dict({"key": "value"})
-        return self.create_share_type(
-            name,
-            extra_specs=extra_specs,
-            client=self.admin_shares_v2_client)["share_type"]
+    @classmethod
+    def resource_setup(cls):
+        super(ShareTypesAdminNegativeTest, cls).resource_setup()
+        cls.extra_specs = cls.add_extra_specs_to_dict({"key": "value"})
 
     @decorators.idempotent_id('0efe4ed6-9318-4174-aef7-fca4b6aa6444')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
@@ -45,8 +42,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
     def test_create_share_type_with_empty_name(self):
         self.assertRaises(
             lib_exc.BadRequest,
-            self.create_share_type, '',
-            client=self.admin_shares_v2_client)
+            self.admin_shares_v2_client.create_share_type, '')
 
     @decorators.idempotent_id('ca59430b-d1fb-4e8f-b1e3-6ab6a6b40984')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
@@ -86,7 +82,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('1f481bab-5205-49ee-bf01-b1848a32f9ee')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_create_duplicate_of_share_type(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(lib_exc.Conflict,
                           self.create_share_type,
                           st["name"],
@@ -96,7 +92,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('c13f54eb-17a4-4403-be87-f6a3ca18de6e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_share_type_allowed_for_public(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(lib_exc.Conflict,
                           self.admin_shares_v2_client.add_access_to_share_type,
                           st["id"],
@@ -105,7 +101,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('bf1d68fb-b954-4b3b-af54-115f3b67b3b3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_remove_share_type_allowed_for_public(self):
-        st = self._create_share_type()
+        st = self.create_share_type(extra_specs=self.extra_specs)
         self.assertRaises(
             lib_exc.Conflict,
             self.admin_shares_v2_client.remove_access_from_share_type,
@@ -137,7 +133,7 @@ class ShareTypesAdminNegativeTest(base.BaseSharesMixedTest):
         share_type = self.create_share_type(
             client=self.admin_shares_v2_client,
             name=name, is_public=False,
-            extra_specs=self.add_extra_specs_to_dict())['share_type']
+            extra_specs=self.add_extra_specs_to_dict())
 
         # The share type should not be listed without access
         share_type_list = (

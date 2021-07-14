@@ -60,7 +60,7 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         extra_specs = {}
         if CONF.share.capability_snapshot_support:
             extra_specs.update({'snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
 
         # create two non routable IPs to be used in NFS access rulesi
         cls.access_rules_ip_rw = utils.rand_ip()

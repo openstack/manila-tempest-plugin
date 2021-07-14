@@ -46,7 +46,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
             extra_specs.update({'snapshot_support': True})
         if CONF.share.capability_create_share_from_snapshot_support:
             extra_specs.update({'create_share_from_snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         # create share
@@ -689,7 +689,7 @@ class SharesRenameTest(base.BaseSharesMixedTest):
         extra_specs = {}
         if CONF.share.capability_snapshot_support:
             extra_specs.update({'snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         # create share

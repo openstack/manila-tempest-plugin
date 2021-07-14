@@ -31,7 +31,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ShareNetworksNegativeTest, cls).resource_setup()
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('66289664-bf01-40dd-a76d-fd2c953bbceb')

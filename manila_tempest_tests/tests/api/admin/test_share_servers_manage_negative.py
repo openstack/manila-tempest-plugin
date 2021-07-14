@@ -72,7 +72,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
             cleanup_in_class=True
         )
         share = self.create_share(
-            share_type_id=self.share_type['share_type']['id'],
+            share_type_id=self.share_type['id'],
             share_network_id=share_network['id']
         )
         return self.shares_v2_client.get_share(share['id'])
@@ -224,7 +224,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
 
         # create share
         share = self.create_share(
-            share_type_id=self.share_type['share_type']['id'])
+            share_type_id=self.share_type['id'])
         share = self.shares_v2_client.get_share(share['id'])
 
         # try to change it to wrong state
@@ -244,7 +244,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
 
         # create share
         share = self.create_share(
-            share_type_id=self.share_type['share_type']['id'])
+            share_type_id=self.share_type['id'])
         share = self.shares_v2_client.get_share(share['id'])
 
         # try to unmanage
@@ -313,7 +313,7 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
 
         # create share
         share = self.create_share(
-            share_type_id=self.share_type['share_type']['id'])
+            share_type_id=self.share_type['id'])
         share = self.shares_v2_client.get_share(share['id'])
 
         share_server = self.shares_v2_client.show_share_server(

@@ -62,7 +62,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
 
         # Create share
         cls.share = cls.create_share(
-            share_type_id=cls.st['share_type']['id'],
+            share_type_id=cls.st['id'],
             share_protocol=cls.protocol
         )
 

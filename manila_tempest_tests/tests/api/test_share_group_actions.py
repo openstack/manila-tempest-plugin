@@ -52,7 +52,7 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
             extra_specs.update({'snapshot_support': True})
         if CONF.share.capability_create_share_from_snapshot_support:
             extra_specs.update({'create_share_from_snapshot_support': True})
-        cls.share_type = cls._create_share_type(specs=extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=extra_specs)
         cls.share_type_id = cls.share_type['id']
 
         cls.share_group_type = cls._create_share_group_type()
@@ -406,7 +406,7 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
         super(ShareGroupRenameTest, cls).resource_setup()
 
         # Create a share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
         # Create a share group type

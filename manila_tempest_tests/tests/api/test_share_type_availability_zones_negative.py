@@ -30,7 +30,7 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ShareTypeAvailabilityZonesNegativeTest, cls).resource_setup()
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         cls.share_group_type = cls._create_share_group_type()
         cls.share_group_type_id = cls.share_group_type['id']
@@ -67,7 +67,7 @@ class ShareTypeAvailabilityZonesNegativeTest(base.BaseSharesMixedTest):
             data_utils.rand_name('support_any_az_share_type'),
             cleanup_in_class=False,
             extra_specs=self.add_extra_specs_to_dict(),
-            client=self.admin_shares_v2_client)['share_type']
+            client=self.admin_shares_v2_client)
 
         share_types = self.admin_shares_v2_client.list_share_types(params={
             'extra_specs': {'availability_zones': self.invalid_azs_spec}}

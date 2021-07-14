@@ -44,7 +44,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         cls.share_network = cls.shares_v2_client.create_share_network(
             cleanup_in_class=True)
         cls.share_network_id = cls.share_network['id']
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.az = cls.shares_v2_client.list_availability_zones()[0]
         cls.az_name = cls.az['name']
 

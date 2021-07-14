@@ -33,7 +33,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(SecurityServicesNegativeTest, cls).resource_setup()
         # create share_type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('f5cdf074-f5d4-4d9e-990b-c3d9385dfc2b')

@@ -41,7 +41,7 @@ class ShareGroupsNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_create_share_group_with_wrong_consistent_snapshot_spec(self):
         # Create valid share type for share group type
-        share_type = self._create_share_type(cleanup_in_class=False)
+        share_type = self.create_share_type(cleanup_in_class=False)
 
         # Create share group type with wrong value for
         # 'consistent_snapshot_support' capability, we always expect

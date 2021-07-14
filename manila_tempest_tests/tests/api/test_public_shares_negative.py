@@ -23,7 +23,7 @@ class PublicSharesNegativeTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(PublicSharesNegativeTest, cls).resource_setup()
         # create share_type
-        share_type = cls._create_share_type()
+        share_type = cls.create_share_type()
         share_type_id = share_type['id']
         # create a public share - manila's default RBAC only allows
         # administrator users operating at system scope to create public shares

@@ -40,7 +40,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         cls.extra_specs = {
             'driver_handles_share_servers': CONF.share.multitenancy_enabled,
         }
-        cls.share_type = cls._create_share_type(specs=cls.extra_specs)
+        cls.share_type = cls.create_share_type(extra_specs=cls.extra_specs)
         cls.share_type_id = cls.share_type['id']
         # create share_network
         cls.share_network = cls.create_share_network()

@@ -44,7 +44,7 @@ class MigrationShareServerNegative(
             extra_specs=extra_specs,
             cleanup_in_class=cleanup_in_class)
         share = cls.create_share(share_protocol=cls.protocol,
-                                 share_type_id=share_type['share_type']['id'],
+                                 share_type_id=share_type['id'],
                                  cleanup_in_class=cleanup_in_class)
         share = cls.shares_v2_client.get_share(share['id'])
         share_server_id = share['share_server_id']

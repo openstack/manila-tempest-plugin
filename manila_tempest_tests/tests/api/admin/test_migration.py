@@ -76,7 +76,7 @@ class MigrationBase(base.BaseSharesAdminTest):
             name=data_utils.rand_name('original_share_type_for_migration'),
             cleanup_in_class=True,
             extra_specs=utils.get_configured_extra_specs())
-        cls.share_type_id = cls.share_type['share_type']['id']
+        cls.share_type_id = cls.share_type['id']
 
         cls.new_type = cls.create_share_type(
             name=data_utils.rand_name('new_share_type_for_migration'),
@@ -92,9 +92,9 @@ class MigrationBase(base.BaseSharesAdminTest):
     def _setup_migration(self, share, opposite=False):
 
         if opposite:
-            dest_type = self.new_type_opposite['share_type']
+            dest_type = self.new_type_opposite
         else:
-            dest_type = self.new_type['share_type']
+            dest_type = self.new_type
 
         dest_pool = utils.choose_matching_backend(share, self.pools, dest_type)
 
@@ -268,7 +268,7 @@ class MigrationBase(base.BaseSharesAdminTest):
         else:
             new_share_network_id = None
 
-        new_share_type_id = self.new_type['share_type']['id']
+        new_share_type_id = self.new_type['id']
         return task_state, new_share_network_id, new_share_type_id
 
     def _validate_snapshot(self, share, snapshot1, snapshot2):
@@ -298,13 +298,13 @@ class MigrationBase(base.BaseSharesAdminTest):
         ss_type, no_ss_type = self._create_share_type_for_snapshot_capability()
 
         if snapshot_capable:
-            share_type = ss_type['share_type']
-            share_type_id = no_ss_type['share_type']['id']
-            new_share_type_id = ss_type['share_type']['id']
+            share_type = ss_type
+            share_type_id = no_ss_type['id']
+            new_share_type_id = ss_type['id']
         else:
-            share_type = no_ss_type['share_type']
-            share_type_id = ss_type['share_type']['id']
-            new_share_type_id = no_ss_type['share_type']['id']
+            share_type = no_ss_type
+            share_type_id = ss_type['id']
+            new_share_type_id = no_ss_type['id']
 
         share = self.create_share(
             self.protocol, share_type_id=share_type_id)
@@ -472,7 +472,7 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
 
         old_share_network_id = share['share_network_id']
         old_share_type_id = share['share_type']
-        new_share_type_id = self.new_type_opposite['share_type']['id']
+        new_share_type_id = self.new_type_opposite['id']
 
         task_state = (constants.TASK_STATE_DATA_COPYING_COMPLETED
                       if force_host_assisted
@@ -607,7 +607,7 @@ class MigrationOfShareWithSnapshotNFSTest(MigrationBase):
         ss_type, __ = self._create_share_type_for_snapshot_capability()
 
         share = self.create_share(self.protocol,
-                                  share_type_id=ss_type['share_type']['id'],
+                                  share_type_id=ss_type['id'],
                                   cleanup_in_class=False)
         share = self.shares_v2_client.get_share(share['id'])
 
@@ -622,7 +622,7 @@ class MigrationOfShareWithSnapshotNFSTest(MigrationBase):
         share = self.migrate_share(
             share['id'], dest_pool,
             wait_for_status=task_state,
-            new_share_type_id=ss_type['share_type']['id'],
+            new_share_type_id=ss_type['id'],
             new_share_network_id=new_share_network_id, preserve_snapshots=True)
 
         share = self.migration_complete(share['id'], dest_pool)

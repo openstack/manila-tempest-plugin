@@ -92,7 +92,7 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
             'service_host': share['host'],
             'export_path': export_path,
             'protocol': share['share_proto'],
-            'share_type_id': self.st['share_type']['id'],
+            'share_type_id': self.st['id'],
             'name': name,
             'description': description,
             'is_public': is_public,
@@ -119,10 +119,10 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
         self.assertEqual(share['share_proto'], managed_share['share_proto'])
 
         if utils.is_microversion_ge(version, "2.6"):
-            self.assertEqual(self.st['share_type']['id'],
+            self.assertEqual(self.st['id'],
                              managed_share['share_type'])
         else:
-            self.assertEqual(self.st['share_type']['name'],
+            self.assertEqual(self.st['name'],
                              managed_share['share_type'])
 
         if utils.is_microversion_ge(version, "2.8"):

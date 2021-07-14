@@ -72,7 +72,7 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
             extra_specs=cls.revert_enabled_extra_specs,
             client=cls.admin_client)
 
-        cls.st_id = cls.share_type['share_type']['id']
+        cls.st_id = cls.share_type['id']
 
         cls.share = cls.create_share(share_type_id=cls.st_id)
         cls.share2 = cls.create_share(share_type_id=cls.st_id)

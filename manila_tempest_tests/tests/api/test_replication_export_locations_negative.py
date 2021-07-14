@@ -49,11 +49,10 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
             )
         cls.extra_specs = cls.add_extra_specs_to_dict(
             {"replication_type": cls.replication_type})
-        share_type = cls.create_share_type(
+        cls.share_type = cls.create_share_type(
             name,
             extra_specs=cls.extra_specs,
             client=cls.admin_client)
-        cls.share_type = share_type["share_type"]
         cls.sn_id = None
         if cls.multitenancy_enabled:
             cls.share_network = cls.shares_v2_client.get_share_network(
@@ -93,7 +92,7 @@ class ReplicationExportLocationsNegativeTest(base.BaseSharesMixedTest):
     def test_get_replica_export_location_for_non_replica(self):
         """Is NotFound raised for non-replica share instances"""
         # Create a share type with no support for replication
-        share_type = self._create_share_type()
+        share_type = self.create_share_type()
         share = self.create_share(share_type_id=share_type['id'],
                                   availability_zone=self.share_zone,
                                   share_network_id=self.sn_id)

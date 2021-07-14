@@ -40,7 +40,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(SharesNFSTest, cls).resource_setup()
         # create share_type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
     @decorators.idempotent_id('21ad41fb-04cf-493c-bc2f-66c80220898b')
@@ -126,8 +126,8 @@ class SharesNFSTest(base.BaseSharesMixedTest):
                           "Snapshot tests are disabled.")
     def test_create_delete_snapshot(self):
         extra_specs = {'snapshot_support': True}
-        share_type = self._create_share_type(specs=extra_specs,
-                                             cleanup_in_class=False)
+        share_type = self.create_share_type(extra_specs=extra_specs,
+                                            cleanup_in_class=False)
         share = self.create_share(self.protocol,
                                   share_type_id=share_type['id'],
                                   cleanup_in_class=False)
@@ -174,8 +174,8 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             'snapshot_support': True,
             'create_share_from_snapshot_support': True,
         }
-        share_type = self._create_share_type(specs=extra_specs,
-                                             cleanup_in_class=False)
+        share_type = self.create_share_type(extra_specs=extra_specs,
+                                            cleanup_in_class=False)
         share = self.create_share(self.protocol,
                                   share_type_id=share_type['id'],
                                   cleanup_in_class=False)
@@ -220,8 +220,8 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             'snapshot_support': True,
             'create_share_from_snapshot_support': True,
         }
-        share_type = self._create_share_type(specs=extra_specs,
-                                             cleanup_in_class=False)
+        share_type = self.create_share_type(extra_specs=extra_specs,
+                                            cleanup_in_class=False)
         share = self.create_share(self.protocol,
                                   share_type_id=share_type['id'],
                                   cleanup_in_class=False)

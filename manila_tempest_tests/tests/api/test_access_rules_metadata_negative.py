@@ -60,7 +60,7 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
             cls._get_access_rule_data_from_config()
         )
         # create share type
-        cls.share_type = cls._create_share_type()
+        cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
