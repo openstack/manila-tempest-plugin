@@ -148,7 +148,7 @@ class ShareGroupsTest(base.BaseSharesAdminTest):
         try:
             default_type = self.shares_v2_client.get_default_share_group_type(
                 version=version
-            )
+            )['share_group_type']
         except exceptions.NotFound:
             msg = "There is no default share group type"
             raise self.skipException(msg)
