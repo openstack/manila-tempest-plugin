@@ -299,6 +299,20 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
+    def list_shares_in_recycle_bin(self, detailed=False,
+                                   params=None, version=LATEST_MICROVERSION,
+                                   experimental=False):
+        """Get list of shares in recycle bin with w/o filters."""
+        headers = EXPERIMENTAL if experimental else None
+        uri = 'shares/detail' if detailed else 'shares'
+        uri += '?is_soft_deleted=true'
+        uri += '&%s' % parse.urlencode(params) if params else ''
+        resp, body = self.get(uri, headers=headers, extra_headers=experimental,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
     def list_shares_with_detail(self, params=None,
                                 version=LATEST_MICROVERSION,
                                 experimental=False):
@@ -339,6 +353,22 @@ class SharesV2Client(shares_client.SharesClient):
         uri = "shares/%s" % share_id
         uri += '?%s' % (parse.urlencode(params) if params else '')
         resp, body = self.delete(uri, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def soft_delete_share(self, share_id, version=LATEST_MICROVERSION):
+        post_body = {"soft_delete": None}
+        body = json.dumps(post_body)
+        resp, body = self.post(
+            "shares/%s/action" % share_id, body, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def restore_share(self, share_id, version=LATEST_MICROVERSION):
+        post_body = {"restore": None}
+        body = json.dumps(post_body)
+        resp, body = self.post(
+            "shares/%s/action" % share_id, body, version=version)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 

@@ -21,6 +21,7 @@ from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -294,3 +295,68 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.NotFound,
                           self.alt_shares_v2_client.get_share,
                           self.share['id'])
+
+    @utils.skip_if_microversion_not_supported("2.69")
+    @decorators.idempotent_id('36cbe23b-08d2-49d9-bb42-f9eb2a804cb1')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_soft_delete_share_has_been_soft_deleted(self):
+        share = self.create_share(share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+
+        # soft delete the share
+        self.shares_v2_client.soft_delete_share(share['id'])
+
+        # try soft delete the share again
+        self.assertRaises(lib_exc.Forbidden,
+                          self.shares_v2_client.soft_delete_share,
+                          share['id'])
+
+        # restore the share for resource_cleanup
+        self.shares_v2_client.restore_share(share['id'])
+        waiters.wait_for_restore(self.shares_v2_client, share['id'])
+
+    @utils.skip_if_microversion_not_supported("2.69")
+    @decorators.idempotent_id('cf675ac9-0970-49fc-a051-8a94555c73b5')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_soft_delete_share_with_invalid_share_state(self):
+        share = self.create_share(share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+
+        # set "error_deleting" state
+        self.admin_client.reset_state(share['id'], status="error_deleting")
+
+        # try soft delete the share
+        self.assertRaises(lib_exc.Forbidden,
+                          self.shares_v2_client.soft_delete_share,
+                          share['id'])
+
+        # rollback to available status
+        self.admin_client.reset_state(share['id'], status="available")
+
+    @utils.skip_if_microversion_not_supported("2.69")
+    @decorators.idempotent_id('f6106ee4-1a01-444f-b623-912a5e751d49')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_soft_delete_share_from_other_project(self):
+        share = self.create_share(share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+
+        # try soft delete the share
+        self.assertRaises(lib_exc.Forbidden,
+                          self.alt_shares_v2_client.soft_delete_share,
+                          share['id'])
+
+    @utils.skip_if_microversion_not_supported("2.69")
+    @decorators.idempotent_id('0ccd44dd-2fda-403e-bc23-7ce428550f36')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_soft_delete_share_with_wrong_id(self):
+        self.assertRaises(lib_exc.NotFound,
+                          self.alt_shares_v2_client.soft_delete_share,
+                          "wrong_share_id")
+
+    @utils.skip_if_microversion_not_supported("2.69")
+    @decorators.idempotent_id('87345725-f187-4d7d-86b1-62284e8c75ae')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_restore_share_with_wrong_id(self):
+        self.assertRaises(lib_exc.NotFound,
+                          self.alt_shares_v2_client.restore_share,
+                          "wrong_share_id")
