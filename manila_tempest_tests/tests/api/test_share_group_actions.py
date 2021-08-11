@@ -80,8 +80,8 @@ class ShareGroupActionsTest(base.BaseSharesMixedTest):
         # Create 2 shares - inside first and second share groups
         cls.share_name = data_utils.rand_name("tempest-share-name")
         cls.share_desc = data_utils.rand_name("tempest-share-description")
-        cls.share_size = 1
-        cls.share_size2 = 2
+        cls.share_size = CONF.share.share_size
+        cls.share_size2 = CONF.share.share_size + 2
         cls.shares = cls.create_shares([
             {'kwargs': {
                 'name': cls.share_name,
