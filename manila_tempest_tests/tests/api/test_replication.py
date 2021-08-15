@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -26,12 +27,14 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
 CONF = config.CONF
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 _MIN_SUPPORTED_MICROVERSION = '2.11'
 SUMMARY_KEYS = ['share_id', 'id', 'replica_state', 'status']
 DETAIL_KEYS = SUMMARY_KEYS + ['availability_zone', 'updated_at',
                               'share_network_id', 'created_at']
 
 
+@ddt.ddt
 class ReplicationTest(base.BaseSharesMixedTest):
 
     @classmethod
@@ -96,11 +99,15 @@ class ReplicationTest(base.BaseSharesMixedTest):
             share["id"])['share_instances']
         return share_instances[0]["id"]
 
-    def _verify_create_replica(self):
+    def _verify_create_replica(self, version=LATEST_MICROVERSION):
         # Create the replica
-        share_replica = self.create_share_replica(self.shares[0]["id"],
-                                                  self.replica_zone,
-                                                  cleanup_in_class=False)
+        share_net_id = None
+        if utils.is_microversion_ge(version, (
+                constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION)):
+            share_net_id = self.sn_id
+        share_replica = self.create_share_replica(
+            self.shares[0]["id"], self.replica_zone,
+            share_network_id=share_net_id, cleanup_in_class=False)
         share_replicas = self.shares_v2_client.list_share_replicas(
             share_id=self.shares[0]["id"])['share_replicas']
         # Ensure replica is created successfully.
@@ -154,6 +161,18 @@ class ReplicationTest(base.BaseSharesMixedTest):
             msg = "Option backend_replication_type should be one of (%s)!"
             raise self.skipException(
                 msg % ','.join(constants.REPLICATION_PROMOTION_CHOICES))
+
+    @decorators.idempotent_id('c59e3198-062b-4284-8a3b-189a62213573')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipUnless(
+        CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @ddt.data(
+        *utils.deduplicate([constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION,
+                            LATEST_MICROVERSION]))
+    def test_create_share_replica_with_provided_network(self, version):
+        utils.check_skip_if_microversion_not_supported(version)
+        share_replica = self._verify_create_replica(version)
+        self.assertIsNotNone(share_replica)
 
     @decorators.idempotent_id('8858617f-292d-4e5c-9e15-794b7f1b2e3c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)

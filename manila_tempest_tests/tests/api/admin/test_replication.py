@@ -105,9 +105,13 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
 
         # NOTE(Yogi1): Cleanup needs to be disabled for replica that is
         # being promoted since it will become the 'primary'/'active' replica.
+        share_net_id = None
+        if utils.is_microversion_ge(version, (
+                constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION)):
+            share_net_id = self.sn_id
         replica = self.create_share_replica(
-            share["id"], self.replica_zone, cleanup=False,
-            client=self.admin_client, version=version)
+            share["id"], self.replica_zone, share_network_id=share_net_id,
+            cleanup=False, client=self.admin_client, version=version)
         # Wait for replica state to update after creation
         waiters.wait_for_resource_status(
             self.admin_client, replica['id'],
@@ -156,11 +160,15 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     def test_force_delete_share_replica(self, version):
         """Test force deleting a replica that is in 'error_deleting' status."""
         utils.check_skip_if_microversion_not_supported(version)
-        replica = self.create_share_replica(self.share['id'],
-                                            self.replica_zone,
-                                            cleanup_in_class=False,
-                                            client=self.admin_client,
-                                            version=version)
+        share_net_id = None
+        if utils.is_microversion_ge(version, (
+                constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION)):
+            share_net_id = self.sn_id
+        replica = self.create_share_replica(
+            self.share['id'], self.replica_zone,
+            share_network_id=share_net_id,
+            cleanup_in_class=False,
+            client=self.admin_client, version=version)
         self.admin_client.reset_share_replica_status(
             replica['id'], constants.STATUS_ERROR_DELETING, version=version)
         waiters.wait_for_resource_status(
@@ -179,11 +187,15 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     def test_reset_share_replica_status(self, version):
         """Test resetting a replica's 'status' attribute."""
         utils.check_skip_if_microversion_not_supported(version)
-        replica = self.create_share_replica(self.share['id'],
-                                            self.replica_zone,
-                                            cleanup_in_class=False,
-                                            client=self.admin_client,
-                                            version=version)
+        share_net_id = None
+        if utils.is_microversion_ge(version, (
+                constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION)):
+            share_net_id = self.sn_id
+        replica = self.create_share_replica(
+            self.share['id'], self.replica_zone,
+            share_network_id=share_net_id,
+            cleanup_in_class=False, client=self.admin_client,
+            version=version)
         self.admin_client.reset_share_replica_status(replica['id'],
                                                      constants.STATUS_ERROR,
                                                      version=version)
@@ -200,11 +212,15 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     def test_reset_share_replica_state(self, version):
         """Test resetting a replica's 'replica_state' attribute."""
         utils.check_skip_if_microversion_not_supported(version)
-        replica = self.create_share_replica(self.share['id'],
-                                            self.replica_zone,
-                                            cleanup_in_class=False,
-                                            client=self.admin_client,
-                                            version=version)
+        share_net_id = None
+        if utils.is_microversion_ge(version, (
+                constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION)):
+            share_net_id = self.sn_id
+        replica = self.create_share_replica(
+            self.share['id'], self.replica_zone,
+            share_network_id=share_net_id,
+            cleanup_in_class=False, client=self.admin_client,
+            version=version)
         self.admin_client.reset_share_replica_state(replica['id'],
                                                     constants.STATUS_ERROR,
                                                     version=version)
@@ -222,11 +238,12 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     def test_resync_share_replica(self, version):
         """Test resyncing a replica."""
         utils.check_skip_if_microversion_not_supported(version)
-        replica = self.create_share_replica(self.share['id'],
-                                            self.replica_zone,
-                                            cleanup_in_class=False,
-                                            client=self.admin_client,
-                                            version=version)
+        share_net_id = None
+        if utils.is_microversion_ge(version, (
+                constants.SHARE_REPLICA_SHARE_NET_PARAM_VERSION)):
+            share_net_id = self.sn_id
+        replica = self.create_share_replica(
+            self.share['id'], share_network_id=share_net_id, version=version)
         waiters.wait_for_resource_status(
             self.admin_client, replica['id'],
             constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',

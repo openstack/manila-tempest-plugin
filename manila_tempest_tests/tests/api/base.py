@@ -676,14 +676,17 @@ class BaseSharesTest(test.BaseTestCase):
 
     @classmethod
     def create_share_replica(cls, share_id, availability_zone=None,
+                             scheduler_hints=None,
+                             share_network_id=None,
                              client=None, cleanup_in_class=False,
                              cleanup=True,
-                             version=CONF.share.max_api_microversion,
-                             scheduler_hints=None):
+                             version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         replica = client.create_share_replica(
             share_id, availability_zone=availability_zone,
-            version=version, scheduler_hints=scheduler_hints)['share_replica']
+            scheduler_hints=scheduler_hints,
+            share_network_id=share_network_id,
+            version=version)['share_replica']
         resource = {
             "type": "share_replica",
             "id": replica["id"],
