@@ -5,15 +5,21 @@
     parent: manila-tempest-plugin-lvm
     override-checkout: stable/wallaby
     nodeset: openstack-single-node-focal
+    vars:
+        tempest_exclude_regex: ''
 
 - job:
     name: manila-tempest-plugin-lvm-victoria
     parent: manila-tempest-plugin-lvm
     override-checkout: stable/victoria
     nodeset: openstack-single-node-focal
+    vars:
+        tempest_exclude_regex: ''
 
 - job:
     name: manila-tempest-plugin-lvm-ussuri
     parent: manila-tempest-plugin-lvm
     override-checkout: stable/ussuri
     nodeset: openstack-single-node-bionic
+    vars:
+        tempest_exclude_regex: ''

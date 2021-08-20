@@ -58,7 +58,9 @@
     timeout: 10800
     irrelevant-files: *irrelevant-files
     required-projects: *manila-tempest-required-projects
-    vars: *manila-tempest-base-vars
+    vars:
+      <<: *manila-tempest-base-vars
+      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
 
 - job:
     name: manila-tempest-plugin-standalone-base
