@@ -1081,6 +1081,8 @@ class BaseSharesAdminTest(BaseSharesTest):
         extra_specs_dict = {"driver_handles_share_servers": dhss}
         if extra_specs:
             extra_specs_dict.update(extra_specs)
+        if CONF.share.capability_thin_provisioned:
+            extra_specs_dict['thin_provisioning'] = 'True'
         return extra_specs_dict
 
     @classmethod
