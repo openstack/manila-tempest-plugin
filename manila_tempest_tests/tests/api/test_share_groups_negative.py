@@ -65,7 +65,7 @@ class ShareGroupsNegativeTest(base.BaseSharesMixedTest):
         # Create a share in the share group
         cls.share_name = data_utils.rand_name("tempest-share-name")
         cls.share_desc = data_utils.rand_name("tempest-share-description")
-        cls.share_size = 1
+        cls.share_size = CONF.share.share_size
         cls.share = cls.create_share(
             name=cls.share_name,
             description=cls.share_desc,

@@ -114,7 +114,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
     def test_manage_share_for_replication_type(self):
         """Manage a share with replication share type."""
         # Create a share and unmanage it
-        share = self.create_share(size=2,
+        share = self.create_share(size=CONF.share.share_size,
                                   share_type_id=self.share_type_id,
                                   availability_zone=self.share_zone,
                                   share_network_id=self.sn_id,
@@ -164,7 +164,7 @@ class ReplicationActionsAdminTest(base.BaseSharesMixedTest):
                           'Manage/Unmanage Tests are disabled.')
     def test_unmanage_replicated_share_with_no_replica(self):
         """Unmanage a replication type share that does not have replica."""
-        share = self.create_share(size=2,
+        share = self.create_share(size=CONF.share.share_size,
                                   share_type_id=self.share_type_id,
                                   share_network_id=self.sn_id,
                                   availability_zone=self.share_zone,
