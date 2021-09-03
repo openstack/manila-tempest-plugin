@@ -131,6 +131,16 @@ ShareGroup = [
                help="Backend capability to create consistent snapshots of "
                     "share group members. Will be used with creation "
                     "of new share group types as group spec."),
+    cfg.BoolOpt("capability_thin_provisioned",
+                default=False,
+                help="Defines whether to create shares as thin provisioned, "
+                     "adding the extra spec 'thin_provisioning' as 'True' for "
+                     "setting up the custom share types. It may be useful to "
+                     "run tempest with  back end storage systems without much "
+                     "space. Take care enabling it, the manila scheduler "
+                     "capability filter will request this capability in all "
+                     "share types and the the capacity filter will allow "
+                     "oversubscription."),
     cfg.StrOpt("share_network_id",
                default="",
                help="Some backend drivers requires share network "
