@@ -383,17 +383,6 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             resource_name='share_server'
         )
 
-        # Check if the source server went to inactive status if it exists.
-        try:
-            src_server = self.shares_v2_client.show_share_server(
-                src_server_id)['share_server']
-        except exceptions.NotFound:
-            src_server = None
-
-        if src_server:
-            self.assertEqual(
-                src_server['status'], constants.SERVER_STATE_INACTIVE)
-
         # Validate the share server migration complete.
         share = self.shares_v2_client.get_share(share['id'])['share']
         self._validate_share_server_migration_complete(
