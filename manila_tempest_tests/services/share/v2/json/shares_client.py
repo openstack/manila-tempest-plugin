@@ -243,9 +243,11 @@ class SharesV2Client(shares_client.SharesClient):
                      metadata=None, share_network_id=None,
                      share_type_id=None, is_public=False,
                      share_group_id=None, availability_zone=None,
-                     version=LATEST_MICROVERSION, experimental=False):
+                     version=LATEST_MICROVERSION, experimental=False,
+                     scheduler_hints=None):
         headers = EXPERIMENTAL if experimental else None
         metadata = metadata or {}
+        scheduler_hints = scheduler_hints or {}
         if name is None:
             name = data_utils.rand_name("tempest-created-share")
         if description is None:
@@ -275,6 +277,9 @@ class SharesV2Client(shares_client.SharesClient):
             post_body["share"]["share_type"] = share_type_id
         if share_group_id:
             post_body["share"]["share_group_id"] = share_group_id
+        if scheduler_hints:
+            post_body["share"]["scheduler_hints"] = scheduler_hints
+
         body = json.dumps(post_body)
         resp, body = self.post("shares", body, headers=headers,
                                extra_headers=experimental, version=version)
