@@ -388,8 +388,11 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         self._validate_share_server_migration_complete(
             share, dest_host, dest_server_id, snapshot_id=snapshot_id,
             share_network_id=dest_share_network_id)
-        self.admin_shares_client.wait_for_resource_deletion(
-            server_id=src_server_id)
+
+        # Source share server is only deleted after Wallaby release (2.63).
+        if utils.is_microversion_gt(CONF.share.max_api_microversion, "2.63"):
+            self.admin_shares_client.wait_for_resource_deletion(
+                server_id=src_server_id)
 
     @decorators.idempotent_id('52e154eb-2d39-45af-b5c1-49ea569ab804')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
