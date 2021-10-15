@@ -83,6 +83,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
         return [replica['id'] for replica in replica_list
                 if replica['replica_state'] == r_state]
 
+    @decorators.unstable_test(bug='1631314')
     @decorators.idempotent_id('0213cdfd-6a0f-4f24-a154-69796888a64a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
@@ -211,6 +212,7 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
             self.admin_client, replica['id'], constants.STATUS_ERROR,
             resource_name='share_replica', status_attr='replica_state')
 
+    @decorators.unstable_test(bug='1631314')
     @decorators.idempotent_id('2969565a-85e8-4c61-9dfb-cc7f7ca9f6dd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(

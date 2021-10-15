@@ -137,6 +137,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
                           self.shares_v2_client.delete_share,
                           self.share1["id"])
 
+    @decorators.unstable_test(bug='1631314')
     @decorators.idempotent_id('b9c2e57b-f1ae-475c-9d0b-df75dbe93b61')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_promote_out_of_sync_share_replica(self):

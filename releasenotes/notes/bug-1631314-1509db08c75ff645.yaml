@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    `Bug #1631314 <https://bugs.launchpad.net/manila/+bug/1631314>`_:
+    Fixed an issue on unstable replication tests.
