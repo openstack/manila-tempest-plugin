@@ -33,6 +33,8 @@ class ManilaTempestPlugin(plugins.TempestPlugin):
     def register_opts(self, conf):
         conf.register_opt(config_share.service_option,
                           group='service_available')
+        conf.register_opt(config_share.manila_scope_enforcement,
+                          group='enforce_scope')
         conf.register_group(config_share.share_group)
         conf.register_opts(config_share.ShareGroup, group='share')
 
@@ -54,7 +56,8 @@ class ManilaTempestPlugin(plugins.TempestPlugin):
 
     def get_opt_lists(self):
         return [(config_share.share_group.name, config_share.ShareGroup),
-                ('service_available', [config_share.service_option])]
+                ('service_available', [config_share.service_option]),
+                ('enforce_scope', [config_share.manila_scope_enforcement])]
 
     def get_service_clients(self):
         shares_config = config.service_client_config('share')

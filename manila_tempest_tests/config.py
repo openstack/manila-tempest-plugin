@@ -21,6 +21,15 @@ service_option = cfg.BoolOpt("manila",
                              help="Whether or not manila is expected to be "
                                   "available")
 
+manila_scope_enforcement = cfg.BoolOpt('manila',
+                                       default=False,
+                                       help="Does the Share service API "
+                                            "policies enforce scope? "
+                                            "This configuration value should "
+                                            "be same as manila.conf: "
+                                            "[oslo_policy].enforce_scope "
+                                            "option.")
+
 share_group = cfg.OptGroup(name="share", title="Share Service Options")
 
 ShareGroup = [
