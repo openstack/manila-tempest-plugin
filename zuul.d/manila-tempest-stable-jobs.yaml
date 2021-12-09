@@ -1,6 +1,16 @@
 # Stable branch jobs to test the trunk version of manila-tempest-plugin against
 # released stable branches of manila
 - job:
+    name: manila-tempest-plugin-lvm-xena
+    parent: manila-tempest-plugin-lvm
+    override-checkout: stable/xena
+    nodeset: openstack-single-node-focal
+    vars:
+        # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
+        # fixed.
+        tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+
+- job:
     name: manila-tempest-plugin-lvm-wallaby
     parent: manila-tempest-plugin-lvm
     override-checkout: stable/wallaby
@@ -13,13 +23,5 @@
     parent: manila-tempest-plugin-lvm
     override-checkout: stable/victoria
     nodeset: openstack-single-node-focal
-    vars:
-        tempest_exclude_regex: ''
-
-- job:
-    name: manila-tempest-plugin-lvm-ussuri
-    parent: manila-tempest-plugin-lvm
-    override-checkout: stable/ussuri
-    nodeset: openstack-single-node-bionic
     vars:
         tempest_exclude_regex: ''

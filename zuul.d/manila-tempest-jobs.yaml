@@ -60,6 +60,8 @@
     required-projects: *manila-tempest-required-projects
     vars:
       <<: *manila-tempest-base-vars
+      # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
+      # fixed.
       tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
 
 - job:
