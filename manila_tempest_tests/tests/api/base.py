@@ -18,7 +18,6 @@ import re
 import traceback
 
 from oslo_log import log
-import six
 from tempest import config
 from tempest.lib.common import cred_client
 from tempest.lib.common.utils import data_utils
@@ -636,8 +635,8 @@ class BaseSharesTest(test.BaseTestCase):
         extra_specs = {}
         for k, v in share_type['extra_specs'].items():
             extra_specs[k] = (
-                True if six.text_type(v).lower() == 'true'
-                else False if six.text_type(v).lower() == 'false' else v
+                True if str(v).lower() == 'true'
+                else False if str(v).lower() == 'false' else v
             )
         return [
             pool for pool in pools if all(y in pool['capabilities'].items()
@@ -1077,7 +1076,7 @@ class BaseSharesAdminTest(BaseSharesTest):
     @staticmethod
     def add_extra_specs_to_dict(extra_specs=None):
         """Add any required extra-specs to share type dictionary"""
-        dhss = six.text_type(CONF.share.multitenancy_enabled)
+        dhss = str(CONF.share.multitenancy_enabled)
         extra_specs_dict = {"driver_handles_share_servers": dhss}
         if extra_specs:
             extra_specs_dict.update(extra_specs)

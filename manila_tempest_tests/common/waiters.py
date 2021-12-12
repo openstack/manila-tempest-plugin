@@ -15,7 +15,6 @@
 
 import time
 
-import six
 from tempest import config
 from tempest.lib import exceptions
 
@@ -137,7 +136,7 @@ def wait_for_migration_status(client, share_id, dest_host, status_to_wait,
                            'dest': dest_host,
                            'share_id': share['id'],
                            'timeout': client.build_timeout,
-                           'status': six.text_type(statuses),
+                           'status': str(statuses),
                        })
             raise exceptions.TimeoutException(message)
     return share

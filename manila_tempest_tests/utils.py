@@ -18,7 +18,6 @@ import random
 import re
 
 from netaddr import ip
-import six
 from tempest import config
 import testtools
 
@@ -110,12 +109,12 @@ def rand_ip(network=False):
     conflicts in real-world testing.
     """
     test_net_3 = '203.0.113.'
-    address = test_net_3 + six.text_type(random.randint(0, 255))
+    address = test_net_3 + str(random.randint(0, 255))
     if network:
-        mask_length = six.text_type(random.randint(24, 32))
+        mask_length = str(random.randint(24, 32))
         address = '/'.join((address, mask_length))
         ip_network = ip.IPNetwork(address)
-        return '/'.join((six.text_type(ip_network.network), mask_length))
+        return '/'.join((str(ip_network.network), mask_length))
     return address
 
 
@@ -124,10 +123,10 @@ def rand_ipv6_ip(network=False):
     ran_add = ["%x" % random.randrange(0, 16 ** 4) for i in range(6)]
     address = "2001:0DB8:" + ":".join(ran_add)
     if network:
-        mask_length = six.text_type(random.randint(32, 128))
+        mask_length = str(random.randint(32, 128))
         address = '/'.join((address, mask_length))
         ip_network = ip.IPNetwork(address)
-        return '/'.join((six.text_type(ip_network.network), mask_length))
+        return '/'.join((str(ip_network.network), mask_length))
     return address
 
 
@@ -135,8 +134,8 @@ def choose_matching_backend(share, pools, share_type):
     extra_specs = {}
     # fix extra specs with string values instead of boolean
     for k, v in share_type['extra_specs'].items():
-        extra_specs[k] = (True if six.text_type(v).lower() == 'true'
-                          else False if six.text_type(v).lower() == 'false'
+        extra_specs[k] = (True if str(v).lower() == 'true'
+                          else False if str(v).lower() == 'false'
                           else v)
     selected_pool = next(
         (x for x in pools if (x['name'] != share['host'] and all(

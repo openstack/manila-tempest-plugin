@@ -20,7 +20,6 @@ import netaddr
 from oslo_log import log
 from oslo_utils import netutils
 from oslo_utils import uuidutils
-import six
 from tempest.common import compute
 from tempest.common import image as common_image
 from tempest.common.utils.linux import remote_client
@@ -630,7 +629,7 @@ class NetworkScenarioTest(ScenarioTest):
             try:
                 return subnets_client.create_subnet(**subnet)
             except lib_exc.Conflict as e:
-                if 'overlaps with another subnet' not in six.text_type(e):
+                if 'overlaps with another subnet' not in str(e):
                     raise
 
         result = None

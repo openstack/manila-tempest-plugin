@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from oslo_utils import uuidutils
-import six
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -47,7 +46,7 @@ class UserMessageNegativeTest(base.BaseSharesMixedTest):
     def test_show_nonexistent_message(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.get_message,
-                          six.text_type(uuidutils.generate_uuid()))
+                          str(uuidutils.generate_uuid()))
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
     @decorators.idempotent_id('2f5be1aa-974b-4f6a-ae3a-084578e64f82')
@@ -61,7 +60,7 @@ class UserMessageNegativeTest(base.BaseSharesMixedTest):
     def test_delete_nonexistent_message(self):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.delete_message,
-                          six.text_type(uuidutils.generate_uuid()))
+                          str(uuidutils.generate_uuid()))
 
     @decorators.attr(type=[base.TAG_NEGATIVE, base.TAG_API])
     @utils.skip_if_microversion_not_supported(QUERY_BY_TIMESTAMP_MICROVERSION)

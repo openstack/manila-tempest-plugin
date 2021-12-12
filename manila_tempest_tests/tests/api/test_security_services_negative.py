@@ -14,7 +14,6 @@
 #    under the License.
 
 from oslo_log import log
-import six
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -120,7 +119,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
             LOG.warning("Caught exception. It is expected in case backend "
                         "fails having security-service with improper data "
                         "that leads to share-server creation error. "
-                        "%s", six.text_type(e))
+                        "%s", str(e))
 
         self.assertRaises(lib_exc.Forbidden,
                           self.shares_client.update_security_service,

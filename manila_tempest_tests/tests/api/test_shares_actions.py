@@ -14,7 +14,6 @@
 #    under the License.
 
 import ddt
-import six
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -93,7 +92,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # get share
         share = self.shares_v2_client.get_share(
-            self.shares[0]['id'], version=six.text_type(version))['share']
+            self.shares[0]['id'], version=str(version))['share']
 
         # verify keys
         expected_keys = [
@@ -125,13 +124,13 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         # verify values
         msg = "Expected name: '%s', actual name: '%s'" % (self.share_name,
                                                           share["name"])
-        self.assertEqual(self.share_name, six.text_type(share["name"]), msg)
+        self.assertEqual(self.share_name, str(share["name"]), msg)
 
         msg = ("Expected description: '%s', "
                "actual description: '%s'" % (self.share_desc,
                                              share["description"]))
         self.assertEqual(
-            self.share_desc, six.text_type(share["description"]), msg)
+            self.share_desc, str(share["description"]), msg)
 
         msg = "Expected size: '%s', actual size: '%s'" % (
             CONF.share.share_size, share["size"])
@@ -211,7 +210,7 @@ class SharesActionsTest(base.BaseSharesMixedTest):
 
         # list shares
         shares = self.shares_v2_client.list_shares_with_detail(
-            version=six.text_type(version))['shares']
+            version=str(version))['shares']
 
         # verify keys
         keys = [

@@ -13,7 +13,6 @@
 import ddt
 from oslo_log import log as logging
 from oslo_utils import units
-import six
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
@@ -133,7 +132,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
                                                       block_count,
                                                       '/dev/urandom')
         except exceptions.SSHExecCommandFailed as e:
-            if 'stale file handle' in six.text_type(e).lower():
+            if 'stale file handle' in str(e).lower():
                 LOG.warning("Client was disconnected during extend process")
                 self.unmount_share(remote_client)
                 self.mount_share(mount_location, remote_client)

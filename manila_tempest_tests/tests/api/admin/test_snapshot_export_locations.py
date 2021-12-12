@@ -15,7 +15,6 @@
 
 import ddt
 from oslo_utils import uuidutils
-import six
 from tempest import config
 from tempest.lib import decorators
 from testtools import testcase as tc
@@ -94,7 +93,7 @@ class SnapshotExportLocationsTest(base.BaseSharesMixedTest):
             # Check the format of ever-present summary keys
             self.assertTrue(uuidutils.is_uuid_like(export_location['id']))
             self.assertIsInstance(export_location['path'],
-                                  six.string_types)
+                                  str)
 
             if role == 'admin':
                 self.assertIn(export_location['is_admin_only'], (True, False))

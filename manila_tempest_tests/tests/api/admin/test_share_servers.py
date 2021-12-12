@@ -16,7 +16,6 @@
 import re
 
 import ddt
-import six
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -120,7 +119,7 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         else:
             msg = ("Appropriate server was not found. Its share_network_data"
                    ": '%s'. List of servers: '%s'.") % (self.sn_name_and_id,
-                                                        six.text_type(servers))
+                                                        str(servers))
             raise lib_exc.NotFound(message=msg)
         search_opts = {"host": host}
         servers = self.shares_v2_client.list_share_servers(
@@ -226,8 +225,8 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
 
         # If details are present they and their values should be only strings
         for k, v in details.items():
-            self.assertIsInstance(k, six.string_types)
-            self.assertIsInstance(v, six.string_types)
+            self.assertIsInstance(k, str)
+            self.assertIsInstance(v, str)
 
     @decorators.idempotent_id('2fdf8d29-3ab8-4424-b684-6253f45b9666')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)

@@ -15,9 +15,8 @@
 
 import json
 import time
+from urllib import parse as urlparse
 
-import six
-from six.moves.urllib import parse as urlparse
 from tempest import config
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
@@ -322,7 +321,7 @@ class SharesClient(rest_client.RestClient):
                 self.show_share_server, kwargs.get("server_id"))
         else:
             raise share_exceptions.InvalidResource(
-                message=six.text_type(kwargs))
+                message=str(kwargs))
 
     def _is_resource_deleted(self, func, res_id, **kwargs):
         try:
