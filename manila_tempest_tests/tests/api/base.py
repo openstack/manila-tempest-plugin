@@ -910,9 +910,12 @@ class BaseSharesTest(test.BaseTestCase):
             "driver_handles_share_servers": dhss,
         }
 
+        # NOTE(ccloud): only thin provisioned volumes are supported. Thick
+        # provisioning does not work together with logical space reporting:
         optional = {
             "snapshot_support": snapshot_support,
             "create_share_from_snapshot_support": create_from_snapshot_support,
+            "netapp:thin_provisioned" : 'True',
         }
         # NOTE(gouthamr): In micro-versions < 2.24, snapshot_support is a
         # required extra-spec
