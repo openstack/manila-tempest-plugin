@@ -181,3 +181,29 @@ class AdminActionsTest(base.BaseSharesAdminTest):
             self.assertNotEmpty(share_server)
         else:
             self.assertEmpty(share_server)
+
+    @decorators.idempotent_id('83d94560-e9b4-47c1-b21e-400531528e27')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.64")
+    @testtools.skipUnless(
+        CONF.share.run_extend_tests,
+        "Share extend tests are disabled.")
+    @ddt.data(True, False)
+    def test_extend_share_force(self, force_flag):
+        # Force extend were supported from v2.64
+        # If a admin tries to do force extend, it should be success
+        share = self.create_share(share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+        new_size = int(share['size']) + 1
+
+        # force extend share and wait for active status
+        self.admin_shares_v2_client.extend_share(share['id'], new_size,
+                                                 force=force_flag)
+        waiters.wait_for_resource_status(
+            self.shares_client, share['id'], 'available')
+
+        # check new size
+        share_get = self.shares_v2_client.get_share(share['id'])['share']
+        msg = ("Share could not be extended. Expected %s, got %s." % (
+            new_size, share_get['size']))
+        self.assertEqual(new_size, share_get['size'], msg)

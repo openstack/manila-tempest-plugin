@@ -390,17 +390,22 @@ class SharesV2Client(shares_client.SharesClient):
 ###############
 
     def extend_share(self, share_id, new_size, version=LATEST_MICROVERSION,
-                     action_name=None):
+                     action_name=None, force=False):
         if action_name is None:
             if utils.is_microversion_gt(version, "2.6"):
                 action_name = 'extend'
             else:
                 action_name = 'os-extend'
+
         post_body = {
             action_name: {
                 "new_size": new_size,
             }
         }
+
+        if utils.is_microversion_gt(version, "2.63"):
+            post_body[action_name]["force"] = force
+
         body = json.dumps(post_body)
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version)

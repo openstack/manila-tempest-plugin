@@ -121,6 +121,20 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
                           share['id'],
                           new_size)
 
+    @decorators.idempotent_id('f9d2ba94-4032-d17a-b4ab-a2b67f650a39')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.64")
+    @testtools.skipUnless(
+        CONF.share.run_extend_tests,
+        "Share extend tests are disabled.")
+    def test_share_force_extend_non_admin_user(self):
+        # only admin cloud force extend share with micversion >= 2.64
+        # non-admin will get unauthorized error.
+        new_size = int(self.share['size']) + 1
+        self.assertRaises(lib_exc.Forbidden,
+                          self.shares_v2_client.extend_share, self.share['id'],
+                          new_size, force=True)
+
     @decorators.idempotent_id('99d42f94-8da1-4c04-ad5b-9738d6acc139')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(
