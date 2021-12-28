@@ -93,7 +93,7 @@ ShareGroup = [
     # Capabilities
     cfg.StrOpt("capability_storage_protocol",
                deprecated_name="storage_protocol",
-               default="NFS_CIFS",
+               default="NFS_CIFS_MULTI",
                help="Backend protocol to target when creating volume types."),
     cfg.BoolOpt("capability_snapshot_support",
                 help="Defines extra spec that satisfies specific back end "
