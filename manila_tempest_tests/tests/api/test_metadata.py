@@ -31,6 +31,19 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # create share
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
 
+    def _verify_share_metadata(self, share, md):
+
+        # get metadata of share
+        metadata = self.shares_client.get_metadata(share["id"])['metadata']
+
+        # verify metadata
+        self.assertEqual(md, metadata)
+
+        # verify metadata items
+        for key in md:
+            get_value = self.shares_client.get_metadata_item(share["id"], key)
+            self.assertEqual(md[key], get_value[key])
+
     @decorators.idempotent_id('9070249f-6e94-4a38-a036-08debee547c3')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_in_share_creation(self):
@@ -42,11 +55,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
                                   metadata=md,
                                   cleanup_in_class=False)
 
-        # get metadata of share
-        metadata = self.shares_client.get_metadata(share["id"])['metadata']
-
         # verify metadata
-        self.assertEqual(md, metadata)
+        self._verify_share_metadata(share, md)
 
     @decorators.idempotent_id('2725ab8e-cc04-4032-9393-74726ba43eb7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -61,16 +71,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # set metadata
         self.shares_client.set_metadata(share["id"], md)
 
-        # read metadata
-        get_md = self.shares_client.get_metadata(share["id"])['metadata']
-
         # verify metadata
-        self.assertEqual(md, get_md)
-
-        # verify metadata items
-        for key in md:
-            get_value = self.shares_client.get_metadata_item(share["id"], key)
-            self.assertEqual(md[key], get_value[key])
+        self._verify_share_metadata(share, md)
 
         # delete metadata
         for key in md.keys():
@@ -78,7 +80,73 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         # verify deletion of metadata
         get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
-        self.assertEqual({}, get_metadata)
+        self.assertEmpty(get_metadata)
+
+    @decorators.idempotent_id('4e5f8159-62b6-4d5c-f729-d8b1f029d7de')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_set_metadata_not_delete_pre_metadata(self):
+        md1 = {u"key9": u"value9", u"key10": u"value10", }
+        md2 = {u"key11": u"value11", u"key12": u"value12", }
+
+        # create share
+        share = self.create_share(share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+
+        # set metadata
+        self.shares_client.set_metadata(share["id"], md1)
+
+        # verify metadata
+        self._verify_share_metadata(share, md1)
+
+        # set metadata again
+        self.shares_client.set_metadata(share["id"], md2)
+
+        # verify metadata
+        md1.update(md2)
+        md = md1
+
+        # verify metadata
+        self._verify_share_metadata(share, md)
+
+        # delete metadata
+        for key in md.keys():
+            self.shares_client.delete_metadata(share["id"], key)
+
+        # verify deletion of metadata
+        get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
+        self.assertEmpty(get_metadata)
+
+    @decorators.idempotent_id('2ec70ba5-050b-3b17-c862-c149e53543c0')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_set_metadata_key_already_exist(self):
+        md1 = {u"key9": u"value9", u"key10": u"value10", }
+        md2 = {u"key9": u"value13", u"key11": u"value11", }
+
+        # create share
+        share = self.create_share(share_type_id=self.share_type_id,
+                                  cleanup_in_class=False)
+
+        # set metadata
+        self.shares_client.set_metadata(share["id"], md1)
+
+        # verify metadata
+        self._verify_share_metadata(share, md1)
+
+        # set metadata again
+        self.shares_client.set_metadata(share["id"], md2)
+
+        # verify metadata
+        md = {u"key9": u"value13", u"key10": u"value10",
+              u"key11": u"value11"}
+        self._verify_share_metadata(share, md)
+
+        # delete metadata
+        for key in md.keys():
+            self.shares_client.delete_metadata(share["id"], key)
+
+        # verify deletion of metadata
+        get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
+        self.assertEmpty(get_metadata)
 
     @decorators.idempotent_id('c94851f4-2559-4712-9297-9912db1da7ff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -97,11 +165,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # update metadata
         self.shares_client.update_all_metadata(share["id"], md2)
 
-        # get metadata
-        get_md = self.shares_client.get_metadata(share["id"])['metadata']
-
         # verify metadata
-        self.assertEqual(md2, get_md)
+        self._verify_share_metadata(share, md2)
 
     @decorators.idempotent_id('698ba406-493f-4c69-a093-273676fed438')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
