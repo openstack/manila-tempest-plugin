@@ -426,6 +426,25 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
                           self.create_share,
                           share_type_id=self.share_type_id)
 
+    @decorators.idempotent_id('a2267f4d-63ef-4631-a01d-3723707e5516')
+    @testtools.skipUnless(
+        CONF.share.run_snapshot_tests, 'Snapshot tests are disabled.')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_create_snapshot_over_quota_limit(self):
+        extra_specs = {'snapshot_support': True}
+        share_type = self.create_share_type(extra_specs=extra_specs)
+        share = self.create_share(share_type_id=share_type['id'])
+
+        # Update snapshot quota
+        self.update_quotas(self.tenant_id, snapshots=1)
+
+        # Create share from updated snapshot, wait for status 'available'
+        self.create_snapshot_wait_for_active(share['id'])
+
+        self.assertRaises(lib_exc.OverLimit,
+                          self.create_snapshot_wait_for_active,
+                          share['id'])
+
 
 @ddt.ddt
 class ReplicaQuotasNegativeTest(rep_neg_test.ReplicationNegativeBase):
