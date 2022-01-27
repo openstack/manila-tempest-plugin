@@ -113,20 +113,3 @@ class SharesMetadataNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.NotFound,
                           self.shares_client.delete_metadata,
                           self.share["id"], "wrong_key")
-
-    @decorators.idempotent_id('c6c70d55-7ed0-439f-ae34-f19af55361f6')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data(("foo.xml", False), ("foo.json", False),
-              ("foo.xml", True), ("foo.json", True))
-    @ddt.unpack
-    def test_try_delete_metadata_with_unsupport_format_key(
-            self, key, is_v2_client):
-        md = {key: u"value.test"}
-
-        client = self.shares_v2_client if is_v2_client else self.shares_client
-        # set metadata
-        client.set_metadata(self.share["id"], md)
-
-        self.assertRaises(lib_exc.NotFound,
-                          client.delete_metadata,
-                          self.share["id"], key)
