@@ -40,7 +40,7 @@ ShareGroup = [
                     "This value is only used to validate the versions "
                     "response from Manila."),
     cfg.StrOpt("max_api_microversion",
-               default="2.69",
+               default="2.70",
                help="The maximum api microversion is configured to be the "
                     "value of the latest microversion supported by Manila."),
     cfg.StrOpt("region",
@@ -287,6 +287,16 @@ ShareGroup = [
                 default=False,
                 help="Defines whether to run share servers migration tests. "
                      "Enable this option if the used driver supports it."),
+    cfg.BoolOpt("run_share_server_multiple_subnet_tests",
+                default=False,
+                help="Defines whether to run the share server multiple "
+                     "subnets tests. Enable this option if the used driver "
+                     "supports it."),
+    cfg.BoolOpt("run_network_allocation_update_tests",
+                default=False,
+                help="Defines whether to run the network allocation update "
+                     "tests. Enable this option if the used driver "
+                     "supports it."),
 
     cfg.StrOpt("image_with_share_tools",
                default="manila-service-image-master",

@@ -196,8 +196,13 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
         if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.49"):
             keys.append("is_auto_deletable")
             keys.append("identifier")
-        if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.51"):
+        if utils.is_microversion_ge(
+            CONF.share.max_api_microversion, "2.51") and (
+                utils.is_microversion_lt(
+                    CONF.share.max_api_microversion, "2.70")):
             keys.append("share_network_subnet_id")
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, "2.70"):
+            keys.append("share_network_subnet_ids")
         # all expected keys are present
         for key in keys:
             self.assertIn(key, server.keys())

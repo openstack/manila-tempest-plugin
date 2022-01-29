@@ -94,6 +94,16 @@ def skip_if_microversion_not_supported(microversion):
     return lambda f: f
 
 
+def skip_if_is_microversion_ge(left, right):
+    """Skip if version for left is greater than or equal to the right one."""
+
+    if is_microversion_ge(left, right):
+        reason = ("Skipped. Test requires microversion "
+                  "< than '%s'." % right)
+        return testtools.skip(reason)
+    return lambda f: f
+
+
 def check_skip_if_microversion_not_supported(microversion):
     """Callable method for tests that are microversion-specific."""
     if not is_microversion_supported(microversion):

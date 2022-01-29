@@ -217,3 +217,31 @@ def wait_for_restore(client, share_id, version=LATEST_MICROVERSION):
                            'timeout': client.build_timeout,
                        })
             raise exceptions.TimeoutException(message)
+
+
+def wait_for_subnet_create_check(client, share_network_id,
+                                 neutron_net_id=None,
+                                 neutron_subnet_id=None,
+                                 availability_zone=None):
+    result = client.subnet_create_check(
+        share_network_id, neutron_net_id=neutron_net_id,
+        neutron_subnet_id=neutron_subnet_id,
+        availability_zone=availability_zone)
+    start = int(time.time())
+    while not result['compatible']:
+        time.sleep(client.build_interval)
+        result = client.subnet_create_check(
+            share_network_id, neutron_net_id=neutron_net_id,
+            neutron_subnet_id=neutron_subnet_id,
+            availability_zone=availability_zone)
+        if result['compatible']:
+            break
+        elif int(time.time()) - start >= client.build_timeout or (
+                result['compatible'] is False):
+            message = ('Subnet create check failed within the '
+                       'required time %(timeout)s seconds for share network '
+                       '%(share_network)s.' % {
+                           'timeout': client.build_timeout,
+                           'share_network': share_network_id,
+                       })
+            raise exceptions.TimeoutException(message)

@@ -127,6 +127,8 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
             msg = ("This test needs at least two compatible storage "
                    "availability zones.")
             raise self.skipException(msg)
+        check_multiple_subnet = utils.is_microversion_ge(
+            CONF.share.max_api_microversion, '2.70')
 
         original_share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
@@ -173,8 +175,12 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # Match new subnet content
         self.assertDictContainsSubset(data, subnet)
         # Match share server subnet
-        self.assertEqual(subnet['id'],
-                         share_server['share_network_subnet_id'])
+        if check_multiple_subnet:
+            self.assertIn(subnet['id'],
+                          share_server['share_network_subnet_ids'])
+        else:
+            self.assertIn(subnet['id'],
+                          share_server['share_network_subnet_id'])
         # Delete share
         self.shares_v2_client.delete_share(share['id'])
         self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
@@ -197,10 +203,11 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
             msg = ("This test needs at least two compatible storage "
                    "availability zones.")
             raise self.skipException(msg)
+        check_multiple_subnet = utils.is_microversion_ge(
+            CONF.share.max_api_microversion, '2.70')
 
         original_share_network = self.shares_v2_client.get_share_network(
-            self.shares_v2_client.share_network_id
-        )['share_network']
+            self.shares_v2_client.share_network_id)['share_network']
         share_net_info = (
             utils.share_network_get_default_subnet(original_share_network))
         share_network = self.create_share_network(
@@ -254,8 +261,12 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # Default subnet was created during share network creation
         self.assertIsNone(default_subnet['availability_zone'])
         # Match share server subnet
-        self.assertEqual(expected_subnet_id,
-                         share_server['share_network_subnet_id'])
+        if not check_multiple_subnet:
+            self.assertEqual(
+                expected_subnet_id, share_server['share_network_subnet_id'])
+        else:
+            self.assertIn(
+                expected_subnet_id, share_server['share_network_subnet_ids'])
         if create_share_with_az:
             self.assertEqual(destination_az,
                              share['availability_zone'])
