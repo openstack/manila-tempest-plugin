@@ -25,6 +25,7 @@ from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
 CONF = config.CONF
+LATEST_MICROVERSION = CONF.share.max_api_microversion
 
 
 @base.skip_if_microversion_lt("2.51")
@@ -60,6 +61,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(True, False)
+    @utils.skip_if_is_microversion_ge(LATEST_MICROVERSION, "2.70")
     def test_add_share_network_subnet_in_same_az_exists(self, is_default):
         share_network = self.shares_v2_client.create_share_network()
         data = {}
@@ -206,7 +208,17 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         # Get a compatible availability zone
         az = self.get_availability_zones_matching_share_type(
             self.share_type)[0]
-
+        check_multiple_subnets = utils.is_microversion_ge(
+            CONF.share.max_api_microversion, '2.70')
+        original_share_network = self.shares_v2_client.get_share_network(
+            self.shares_v2_client.share_network_id
+        )
+        share_net_info = (
+            utils.share_network_get_default_subnet(original_share_network))
+        share_network = self.create_share_network(
+            neutron_net_id=share_net_info['neutron_net_id'],
+            neutron_subnet_id=share_net_info['neutron_subnet_id'],
+        )
         share_network = self.shares_v2_client.get_share_network(
             self.shares_v2_client.share_network_id
         )
@@ -235,8 +247,12 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
             share['share_server_id']
         )
         # Match share server subnet
-        self.assertEqual(subnet['id'],
-                         share_server['share_network_subnet_id'])
+        if check_multiple_subnets:
+            self.assertIn(subnet['id'],
+                          share_server['share_network_subnet_ids'])
+        else:
+            self.assertEqual(subnet['id'],
+                             share_server['share_network_subnet_id'])
 
         # Assert that the user cannot delete a subnet that contain shares
         self.assertRaises(lib_exc.Conflict,

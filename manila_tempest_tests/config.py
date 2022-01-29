@@ -242,6 +242,20 @@ ShareGroup = [
                      "at share networks and run the backend driver. You may "
                      "disable this feature if the backend driver fails on "
                      "wrong data."),
+    cfg.BoolOpt("run_share_server_migration_tests",
+                default=False,
+                help="Defines whether to run share servers migration tests. "
+                     "Enable this option if the used driver supports it."),
+    cfg.BoolOpt("run_share_server_multiple_subnet_tests",
+                default=False,
+                help="Defines whether to run the share server multiple "
+                     "subnets tests. Enable this option if the used driver "
+                     "supports it."),
+    cfg.BoolOpt("run_network_allocation_update_tests",
+                default=False,
+                help="Defines whether to run the network allocation update "
+                     "tests. Enable this option if the used driver "
+                     "supports it."),
 
     cfg.StrOpt("image_with_share_tools",
                default="manila-service-image-master",

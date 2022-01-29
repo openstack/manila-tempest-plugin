@@ -14,11 +14,13 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -178,3 +180,24 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
             self.shares_v2_client.create_share_network,
             availability_zone='inexistent-availability-zone',
         )
+
+    @utils.skip_if_microversion_not_supported("2.70")
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @decorators.idempotent_id('f6f47c64-6821-4d4a-aa7d-3b0244158197')
+    def test_check_add_share_network_subnet_share_network_not_found(self):
+        data = self.generate_subnet_data()
+        self.assertRaises(lib_exc.NotFound,
+                          self.shares_v2_client.subnet_create_check,
+                          'fake_inexistent_id',
+                          **data)
+
+    @utils.skip_if_microversion_not_supported("2.70")
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @decorators.idempotent_id('d9a487fb-6638-4f93-8b69-3e1a85bfbc7d')
+    def test_check_add_share_network_subnet_az_not_found(self):
+        share_network = self.create_share_network()
+        data = {'availability_zone': 'non-existent-az'}
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.subnet_create_check,
+                          share_network['id'], **data)
