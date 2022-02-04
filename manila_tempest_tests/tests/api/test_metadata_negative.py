@@ -66,7 +66,7 @@ class SharesMetadataNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('759ca34d-1c87-43f3-8da2-8e1d373049ac')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_try_upd_metadata_with_empty_key(self):
+    def test_try_update_metadata_with_empty_key(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.update_all_metadata,
                           self.share["id"], {"": "value"})
@@ -82,7 +82,7 @@ class SharesMetadataNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('33ef3047-6ca3-4547-a681-b52314382dcb')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_try_upd_metadata_with_too_big_key(self):
+    def test_try_update_metadata_with_too_big_key(self):
         too_big_key = "x" * 256
         md = {too_big_key: "value"}
         self.assertRaises(lib_exc.BadRequest,
@@ -100,7 +100,7 @@ class SharesMetadataNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('c2eddcf0-cf81-4f9f-b06d-c9165ab8553e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_try_upd_metadata_with_too_big_value(self):
+    def test_try_update_metadata_with_too_big_value(self):
         too_big_value = "x" * 1024
         md = {"key": too_big_value}
         self.assertRaises(lib_exc.BadRequest,

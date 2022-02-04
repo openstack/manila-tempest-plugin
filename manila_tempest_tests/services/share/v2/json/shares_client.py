@@ -515,7 +515,8 @@ class SharesV2Client(shares_client.SharesClient):
 ###############
 
     def create_snapshot(self, share_id, name=None, description=None,
-                        force=False, version=LATEST_MICROVERSION):
+                        force=False, metadata=None,
+                        version=LATEST_MICROVERSION):
         if name is None:
             name = data_utils.rand_name("tempest-created-share-snap")
         if description is None:
@@ -529,6 +530,9 @@ class SharesV2Client(shares_client.SharesClient):
                 "share_id": share_id,
             }
         }
+        if utils.is_microversion_ge(version, "2.73") and metadata:
+            post_body["snapshot"]["metadata"] = metadata
+
         body = json.dumps(post_body)
         resp, body = self.post("snapshots", body, version=version)
         self.expected_success(202, resp.status)
@@ -2071,3 +2075,73 @@ class SharesV2Client(shares_client.SharesClient):
 
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+#################
+
+    def _update_metadata(self, resource, resource_id, metadata=None,
+                         method="post", parent_resource=None, parent_id=None):
+        if parent_resource is None:
+            uri = f'{resource}s/{resource_id}/metadata'
+        else:
+            uri = (f'{parent_resource}/{parent_id}'
+                   f'/{resource}s/{resource_id}/metadata')
+        if metadata is None:
+            metadata = {}
+        post_body = {"metadata": metadata}
+        body = json.dumps(post_body)
+        if method == "post":
+            resp, body = self.post(uri, body)
+        if method == "put":
+            resp, body = self.put(uri, body)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def set_metadata(self, resource_id, metadata=None, resource='share',
+                     parent_resource=None, parent_id=None):
+        return self._update_metadata(resource, resource_id, metadata,
+                                     method="post",
+                                     parent_resource=parent_resource,
+                                     parent_id=parent_id)
+
+    def update_all_metadata(self, resource_id, metadata=None,
+                            resource='share', parent_resource=None,
+                            parent_id=None):
+        return self._update_metadata(resource, resource_id, metadata,
+                                     method="put",
+                                     parent_resource=parent_resource,
+                                     parent_id=parent_id)
+
+    def delete_metadata(self, resource_id, key, resource='share',
+                        parent_resource=None, parent_id=None):
+        if parent_resource is None:
+            uri = f'{resource}s/{resource_id}/metadata/{key}'
+        else:
+            uri = (f'{parent_resource}/{parent_id}'
+                   f'/{resource}s/{resource_id}/metadata/{key}')
+        resp, body = self.delete(uri)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_metadata(self, resource_id, resource='share',
+                     parent_resource=None, parent_id=None):
+        if parent_resource is None:
+            uri = f'{resource}s/{resource_id}/metadata'
+        else:
+            uri = (f'{parent_resource}/{parent_id}'
+                   f'/{resource}s/{resource_id}/metadata')
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_metadata_item(self, resource_id, key, resource='share',
+                          parent_resource=None, parent_id=None):
+        if parent_resource is None:
+            uri = f'{resource}s/{resource_id}/metadata/{key}'
+        else:
+            uri = (f'{parent_resource}/{parent_id}'
+                   f'/{resource}s/{resource_id}/metadata/{key}')
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)

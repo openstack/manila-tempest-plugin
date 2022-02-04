@@ -562,13 +562,14 @@ class BaseSharesTest(test.BaseTestCase):
     @classmethod
     def create_snapshot_wait_for_active(cls, share_id, name=None,
                                         description=None, force=False,
-                                        client=None, cleanup_in_class=True):
+                                        metadata=None, client=None,
+                                        cleanup_in_class=True):
         if client is None:
             client = cls.shares_v2_client
         if description is None:
             description = "Tempest's snapshot"
         snapshot = client.create_snapshot(
-            share_id, name, description, force)['snapshot']
+            share_id, name, description, force, metadata)['snapshot']
         resource = {
             "type": "snapshot",
             "id": snapshot["id"],

@@ -273,14 +273,14 @@ class TestProjectAdminTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         share = self.create_share(
             self.share_member_client, self.share_type['id'])
         self.do_request(
-            'set_metadata', expected_status=200, share_id=share['id'],
+            'set_metadata', expected_status=200, resource_id=share['id'],
             metadata={'key': 'value'})
 
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
             'set_metadata', expected_status=200,
-            share_id=alt_share['id'], metadata={'key': 'value'})
+            resource_id=alt_share['id'], metadata={'key': 'value'})
 
     @decorators.idempotent_id('2d91e97e-d0e5-4112-8b22-60cd4659586c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -290,14 +290,14 @@ class TestProjectAdminTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             self.share_member_client, self.share_type['id'],
             metadata=metadata)
         self.do_request(
-            'get_metadata', expected_status=200, share_id=share['id'])
+            'get_metadata', expected_status=200, resource_id=share['id'])
 
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'],
             metadata=metadata)
         self.do_request(
             'get_metadata', expected_status=200,
-            share_id=alt_share['id'])
+            resource_id=alt_share['id'])
 
     @decorators.idempotent_id('4cd807d6-bac4-4d0f-a207-c84dfe77f032')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -306,7 +306,7 @@ class TestProjectAdminTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             self.share_member_client, self.share_type['id'],
             metadata={'key': 'value'})
         self.do_request(
-            'delete_metadata', expected_status=200, share_id=share['id'],
+            'delete_metadata', expected_status=200, resource_id=share['id'],
             key='key')
 
         alt_share = self.create_share(
@@ -314,7 +314,7 @@ class TestProjectAdminTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             metadata={'key': 'value'})
         self.do_request(
             'delete_metadata', expected_status=200,
-            share_id=alt_share['id'], key='key')
+            resource_id=alt_share['id'], key='key')
 
 
 class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
@@ -468,14 +468,14 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         share = self.create_share(
             self.client, self.share_type['id'])
         self.do_request(
-            'set_metadata', expected_status=200, share_id=share['id'],
+            'set_metadata', expected_status=200, resource_id=share['id'],
             metadata={'key': 'value'})
 
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
             'set_metadata', expected_status=lib_exc.Forbidden,
-            share_id=alt_share['id'], metadata={'key': 'value'})
+            resource_id=alt_share['id'], metadata={'key': 'value'})
 
     @decorators.idempotent_id('a69a2b85-3374-4621-83a9-89937ddb520b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -485,14 +485,14 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         share = self.create_share(share_client, self.share_type['id'],
                                   metadata=metadata)
         self.do_request(
-            'get_metadata', expected_status=200, share_id=share['id'])
+            'get_metadata', expected_status=200, resource_id=share['id'])
 
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'],
             metadata=metadata)
         self.do_request(
             'get_metadata', expected_status=lib_exc.Forbidden,
-            share_id=alt_share['id'])
+            resource_id=alt_share['id'])
 
     @decorators.idempotent_id('bea5518a-338e-494d-9034-1d03658ed58b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -500,7 +500,7 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         share = self.create_share(
             self.client, self.share_type['id'], metadata={'key': 'value'})
         self.do_request(
-            'delete_metadata', expected_status=200, share_id=share['id'],
+            'delete_metadata', expected_status=200, resource_id=share['id'],
             key='key')
 
         alt_share = self.create_share(
@@ -508,7 +508,7 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             metadata={'key': 'value'})
         self.do_request(
             'delete_metadata', expected_status=lib_exc.Forbidden,
-            share_id=alt_share['id'], key='key')
+            resource_id=alt_share['id'], key='key')
 
 
 class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
@@ -631,13 +631,13 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
             self.share_member_client, self.share_type['id'])
         self.do_request(
             'set_metadata', expected_status=lib_exc.Forbidden,
-            share_id=share['id'], metadata={'key': 'value'})
+            resource_id=share['id'], metadata={'key': 'value'})
 
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
             'set_metadata', expected_status=lib_exc.Forbidden,
-            share_id=alt_share['id'], metadata={'key': 'value'})
+            resource_id=alt_share['id'], metadata={'key': 'value'})
 
     @decorators.idempotent_id('28cacc77-556f-4707-ba2b-5ef3e56d6ef9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -652,14 +652,14 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
             metadata={'key': 'value'})
         self.do_request(
             'delete_metadata', expected_status=lib_exc.Forbidden,
-            share_id=share['id'], key='key')
+            resource_id=share['id'], key='key')
 
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'],
             metadata={'key': 'value'})
         self.do_request(
             'delete_metadata', expected_status=lib_exc.Forbidden,
-            share_id=alt_share['id'], key='key')
+            resource_id=alt_share['id'], key='key')
 
 
 class TestProjectAdminTestsCEPHFS(TestProjectAdminTestsNFS):
