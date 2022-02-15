@@ -45,7 +45,6 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
     def resource_setup(cls):
         super(ReplicationAdminTest, cls).resource_setup()
         cls.admin_client = cls.admin_shares_v2_client
-        cls.member_client = cls.shares_v2_client
         cls.replication_type = CONF.share.backend_replication_type
         cls.multitenancy_enabled = (
             utils.replication_with_multitenancy_support())
@@ -138,7 +137,8 @@ class ReplicationAdminTest(base.BaseSharesMixedTest):
                                    version=version)
         # Original replica will need to be cleaned up before the promoted
         # replica can be deleted.
-        self.addCleanup(self.delete_share_replica, original_replica['id'])
+        self.addCleanup(self.delete_share_replica, original_replica['id'],
+                        client=self.admin_client)
 
         # Check if there is still only 1 'active' replica after promotion.
         replica_list = self.admin_client.list_share_replicas(
