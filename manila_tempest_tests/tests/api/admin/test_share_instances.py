@@ -75,7 +75,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
 
         expected_keys = [
             'host', 'share_id', 'id', 'share_network_id', 'status',
-            'availability_zone', 'share_server_id', 'created_at',
+            'availability_zone', 'share_server_id', 'created_at', 'updated_at',
         ]
         if utils.is_microversion_lt(version, '2.9'):
             expected_keys.extend(["export_location", "export_locations"])
