@@ -350,7 +350,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_soft_delete_share_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_shares_v2_client.soft_delete_share,
+                          self.shares_v2_client.soft_delete_share,
                           "wrong_share_id")
 
     @utils.skip_if_microversion_not_supported("2.69")
@@ -358,5 +358,5 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_restore_share_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.alt_shares_v2_client.restore_share,
+                          self.shares_v2_client.restore_share,
                           "wrong_share_id")
