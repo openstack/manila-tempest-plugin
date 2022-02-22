@@ -687,6 +687,51 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         )
         self.assertEqual(new_size, share_get['size'], msg)
 
+    @utils.skip_if_microversion_not_supported("2.69")
+    @decorators.idempotent_id('7a19fb58-b645-44cc-a6d7-b3508ff8754d')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_soft_delete_and_restore_share(self):
+        share = self.create_share(share_type_id=self.share_type_id)
+
+        # list shares
+        shares = self.shares_v2_client.list_shares()['shares']
+
+        # check the share in share list
+        share_ids = [sh['id'] for sh in shares]
+        self.assertIn(share['id'], share_ids)
+
+        # soft delete the share
+        self.shares_v2_client.soft_delete_share(share['id'])
+        waiters.wait_for_soft_delete(self.shares_v2_client, share['id'])
+
+        # list shares again
+        shares1 = self.shares_v2_client.list_shares()['shares']
+        share_ids1 = [sh['id'] for sh in shares1]
+
+        # list shares in recycle bin
+        shares2 = self.shares_v2_client.list_shares_in_recycle_bin()['shares']
+        share_ids2 = [sh['id'] for sh in shares2]
+
+        # check share has been soft delete to recycle bin
+        self.assertNotIn(share['id'], share_ids1)
+        self.assertIn(share['id'], share_ids2)
+
+        # restore share from recycle bin
+        self.shares_v2_client.restore_share(share['id'])
+        waiters.wait_for_restore(self.shares_v2_client, share['id'])
+
+        # list shares again
+        shares3 = self.shares_v2_client.list_shares()['shares']
+        share_ids3 = [sh['id'] for sh in shares3]
+
+        # list shares in recycle bin again
+        shares4 = self.shares_v2_client.list_shares_in_recycle_bin()['shares']
+        share_ids4 = [sh['id'] for sh in shares4]
+
+        # check share has restored from recycle bin
+        self.assertNotIn(share['id'], share_ids4)
+        self.assertIn(share['id'], share_ids3)
+
 
 class SharesRenameTest(base.BaseSharesMixedTest):
 

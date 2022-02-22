@@ -179,3 +179,41 @@ def wait_for_message(client, resource_id):
                        ' the required time (%s s).' %
                        (resource_id, client.build_timeout))
             raise exceptions.TimeoutException(message)
+
+
+def wait_for_soft_delete(client, share_id, version=LATEST_MICROVERSION):
+    """Wait for a share soft delete to recycle bin."""
+    share = client.get_share(share_id, version=version)['share']
+    start = int(time.time())
+    while not share['is_soft_deleted']:
+        time.sleep(client.build_interval)
+        share = client.get_share(share_id, version=version)['share']
+        if share['is_soft_deleted']:
+            break
+        elif int(time.time()) - start >= client.build_timeout:
+            message = ('Share %(share_id)s failed to be soft deleted to '
+                       'recycle bin within the required time '
+                       '%(timeout)s.' % {
+                           'share_id': share['id'],
+                           'timeout': client.build_timeout,
+                       })
+            raise exceptions.TimeoutException(message)
+
+
+def wait_for_restore(client, share_id, version=LATEST_MICROVERSION):
+    """Wait for a share restore from recycle bin."""
+    share = client.get_share(share_id, version=version)['share']
+    start = int(time.time())
+    while share['is_soft_deleted']:
+        time.sleep(client.build_interval)
+        share = client.get_share(share_id, version=version)['share']
+        if not share['is_soft_deleted']:
+            break
+        elif int(time.time()) - start >= client.build_timeout:
+            message = ('Share %(share_id)s failed to restore from '
+                       'recycle bin within the required time '
+                       '%(timeout)s.' % {
+                           'share_id': share['id'],
+                           'timeout': client.build_timeout,
+                       })
+            raise exceptions.TimeoutException(message)
