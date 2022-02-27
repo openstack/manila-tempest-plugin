@@ -150,7 +150,12 @@ class TestShareExtendNFS(manager.BaseShareScenarioNFSTest, ShareExtendBase):
 
 
 class TestShareExtendCIFS(manager.BaseShareScenarioCIFSTest, ShareExtendBase):
-    pass
+
+    @decorators.idempotent_id('4a9f5cf9-990d-4a35-9ac7-87ef593a09e3')
+    @decorators.unstable_test(bug='1903922')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    def test_create_extend_and_write(self):
+        super(TestShareExtendCIFS, self).test_create_extend_and_write()
 
 
 class TestBaseShareExtendScenarioCEPHFS(manager.BaseShareScenarioCEPHFSTest,
