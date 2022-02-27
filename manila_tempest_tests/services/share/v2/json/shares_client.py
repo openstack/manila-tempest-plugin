@@ -1559,13 +1559,17 @@ class SharesV2Client(shares_client.SharesClient):
         return rest_client.ResponseBody(resp, body)
 
     def create_share_replica(self, share_id, availability_zone=None,
-                             version=LATEST_MICROVERSION):
+                             version=LATEST_MICROVERSION,
+                             scheduler_hints=None):
         """Add a share replica of an existing share."""
         uri = "share-replicas"
         post_body = {
             'share_id': share_id,
             'availability_zone': availability_zone,
         }
+
+        if scheduler_hints:
+            post_body["scheduler_hints"] = scheduler_hints
         headers, extra_headers = utils.get_extra_headers(
             version, constants.SHARE_REPLICA_GRADUATION_VERSION)
         body = json.dumps({'share_replica': post_body})

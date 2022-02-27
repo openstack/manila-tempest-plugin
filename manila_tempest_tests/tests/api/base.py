@@ -656,11 +656,15 @@ class BaseSharesTest(test.BaseTestCase):
         azs = cls.get_availability_zones(backends=backends_matching_share_type)
         return azs
 
-    def get_pools_for_replication_domain(self):
+    def get_pools_for_replication_domain(self, share=None):
         # Get the list of pools for the replication domain
         pools = self.admin_client.list_pools(detail=True)['pools']
-        instance_host = self.admin_client.get_share(
-            self.shares[0]['id'])['share']['host']
+        if share:
+            instance_host = self.admin_client.get_share(
+                share['id'])['share']['host']
+        else:
+            instance_host = self.admin_client.get_share(
+                self.shares[0]['id'])['share']['host']
         host_pool = [p for p in pools if p['name'] == instance_host][0]
         rep_domain = host_pool['capabilities']['replication_domain']
         pools_in_rep_domain = [p for p in pools if p['capabilities'][
@@ -671,11 +675,12 @@ class BaseSharesTest(test.BaseTestCase):
     def create_share_replica(cls, share_id, availability_zone=None,
                              client=None, cleanup_in_class=False,
                              cleanup=True,
-                             version=CONF.share.max_api_microversion):
+                             version=CONF.share.max_api_microversion,
+                             scheduler_hints=None):
         client = client or cls.shares_v2_client
         replica = client.create_share_replica(
             share_id, availability_zone=availability_zone,
-            version=version)['share_replica']
+            version=version, scheduler_hints=scheduler_hints)['share_replica']
         resource = {
             "type": "share_replica",
             "id": replica["id"],
