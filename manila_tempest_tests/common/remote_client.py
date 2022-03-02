@@ -70,8 +70,12 @@ class RemoteClient(object):
         self.server = server
         self.servers_client = servers_client
         self.log_console = CONF.compute_feature_enabled.console_output
+        kwargs = {}
+        if CONF.validation.ssh_key_type:
+            kwargs['ssh_key_type'] = CONF.validation.ssh_key_type
 
-        self.ssh_client = ssh.Client(ip_address, username, password, pkey=pkey)
+        self.ssh_client = ssh.Client(
+            ip_address, username, password, pkey=pkey, **kwargs)
 
     @debug_ssh
     def exec_command(self, cmd):
