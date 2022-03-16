@@ -95,6 +95,8 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
             expected_keys.append("cast_rules_to_readonly")
         if utils.is_microversion_ge(version, '2.54'):
             expected_keys.append("progress")
+        if utils.is_microversion_ge(version, '2.71'):
+            expected_keys.append("updated_at")
         expected_keys = sorted(expected_keys)
         actual_keys = sorted(si.keys())
         self.assertEqual(expected_keys, actual_keys,
