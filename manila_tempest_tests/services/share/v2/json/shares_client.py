@@ -1957,6 +1957,29 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def subnet_create_check(
+        self, share_network_id, neutron_net_id=None,
+        neutron_subnet_id=None, availability_zone=None,
+        reset=False, version=LATEST_MICROVERSION):
+        body = {
+            'share_network_subnet_create_check': {
+                'neutron_net_id': neutron_net_id,
+                'neutron_subnet_id': neutron_subnet_id,
+                'availability_zone': availability_zone,
+                'reset': reset,
+            }
+        }
+
+        body = json.dumps(body)
+        resp, body = self.post(
+            f'share-networks/{share_network_id}/action',
+            body, headers=EXPERIMENTAL, extra_headers=True,
+            version=version)
+        self.expected_success(202, resp.status)
+
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
 ###############
 
     def share_server_migration_check(

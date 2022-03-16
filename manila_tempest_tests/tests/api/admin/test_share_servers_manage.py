@@ -66,6 +66,12 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
             msg = ("Manage share server with share network subnet is "
                    "supported starting from microversion '2.51'.")
             raise self.skipException(msg)
+        check_multiple_subnet = utils.is_microversion_ge(
+            CONF.share.max_api_microversion, '2.70')
+        if check_multiple_subnet:
+            network_subnet = 'share_network_subnet_ids'
+        else:
+            network_subnet = 'share_network_subnet_id'
         # create a new share network to make sure that a new share server
         # will be created
         original_share_network = self.shares_v2_client.get_share_network(
@@ -91,7 +97,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
                 neutron_subnet_id=share_network['neutron_subnet_id'],
                 availability_zone=az
             )['share_network_subnet']
-            params = {'share_network_subnet_id': az_subnet['id']}
+            params = {network_subnet: az_subnet['id']}
 
         # create share
         share = self.create_share(
@@ -119,7 +125,7 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
             "identifier",
         ]
         if add_subnet_field:
-            keys.append('share_network_subnet_id')
+            keys.append(network_subnet)
         # all expected keys are present
         for key in keys:
             self.assertIn(key, share_server)
@@ -127,9 +133,10 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
         # check that the share server is initially auto-deletable
         self.assertIs(True, share_server["is_auto_deletable"])
         self.assertIsNotNone(share_server["identifier"])
-        if add_subnet_field:
-            self.assertEqual(az_subnet["id"],
-                             share_server["share_network_subnet_id"])
+        if add_subnet_field and check_multiple_subnet:
+            self.assertIn(az_subnet["id"], share_server[network_subnet])
+        elif add_subnet_field and not check_multiple_subnet:
+            self.assertEqual(az_subnet["id"], share_server[network_subnet])
 
         self._unmanage_share_and_wait(share)
 

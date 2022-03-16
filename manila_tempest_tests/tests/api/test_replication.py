@@ -187,6 +187,145 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Delete subnet
         self.shares_v2_client.delete_subnet(self.sn_id, subnet['id'])
 
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipIf(
+        not CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @testtools.skipIf(
+        not CONF.share.run_share_server_multiple_subnet_tests,
+        "Share server multiple subnet tests are disabled.")
+    @testtools.skipIf(CONF.share.share_network_id != "",
+                      "This test is not suitable for pre-existing "
+                      "share networks.")
+    @utils.skip_if_microversion_not_supported("2.70")
+    @decorators.idempotent_id('4235e789-dbd6-47a8-8f2e-d70edf78e532')
+    def test_add_delete_share_replica_multiple_subnets(self):
+        extra_specs = {
+            "replication_type": self.replication_type,
+            "driver_handles_share_servers": CONF.share.multitenancy_enabled,
+            "share_server_multiple_subnet_support": True,
+        }
+        share_type = self.create_share_type(
+            extra_specs=extra_specs, client=self.admin_client)
+        default_subnet = utils.share_network_get_default_subnet(
+            self.share_network)
+        new_share_network_id = self.create_share_network(
+            cleanup_in_class=False)['id']
+        subnet_data = {
+            'neutron_net_id': default_subnet.get('neutron_net_id'),
+            'neutron_subnet_id': default_subnet.get('neutron_subnet_id'),
+            'share_network_id': new_share_network_id,
+            'availability_zone': self.replica_zone,
+        }
+        subnet1 = self.create_share_network_subnet(**subnet_data)
+        subnet2 = self.create_share_network_subnet(**subnet_data)
+        # Creating a third subnet in share replica az
+        subnet_data.update({'availability_zone': self.share_zone})
+        subnet3 = self.create_share_network_subnet(**subnet_data)
+        # Create the share and share replica
+        share = self.create_share(
+            share_type_id=share_type['id'], cleanup_in_class=False,
+            availability_zone=self.share_zone,
+            share_network_id=new_share_network_id)
+        share = self.admin_client.get_share(share['id'])['share']
+        replica = self.create_share_replica(share['id'], self.replica_zone)
+        replica = self.admin_client.get_share_replica(
+            replica['id'])['share_replica']
+        share_server = self.admin_client.show_share_server(
+            replica['share_server_id'])['share_server']
+        self.assertIn(subnet1['id'],
+                      share_server['share_network_subnet_ids'])
+        self.assertIn(subnet2['id'],
+                      share_server['share_network_subnet_ids'])
+        # Delete the replica
+        self.delete_share_replica(replica['id'])
+        # Delete share
+        self.shares_v2_client.delete_share(share['id'])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
+        # Delete subnets
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet1['id'])
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet2['id'])
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet3['id'])
+
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipIf(
+        not CONF.share.multitenancy_enabled, "Only for multitenancy.")
+    @testtools.skipIf(
+        not CONF.share.run_network_allocation_update_tests,
+        "Share server network allocation update tests are disabled.")
+    @testtools.skipIf(CONF.share.share_network_id != "",
+                      "This test is not suitable for pre-existing "
+                      "share_network.")
+    @utils.skip_if_microversion_not_supported("2.70")
+    @decorators.idempotent_id('26694947-d4a0-46c8-99e8-2e0eca1b6a08')
+    def test_add_delete_share_replica_network_allocation_update(self):
+        extra_specs = {
+            "replication_type": self.replication_type,
+            "driver_handles_share_servers": CONF.share.multitenancy_enabled,
+            "network_allocation_update_support": True,
+        }
+        share_type = self.create_share_type(extra_specs=extra_specs)
+
+        default_subnet = utils.share_network_get_default_subnet(
+            self.share_network)
+        new_share_network_id = self.create_share_network(
+            cleanup_in_class=False)['id']
+        subnet_data = {
+            'neutron_net_id': default_subnet.get('neutron_net_id'),
+            'neutron_subnet_id': default_subnet.get('neutron_subnet_id'),
+            'share_network_id': new_share_network_id,
+            'availability_zone': self.share_zone,
+        }
+        subnet1 = self.create_share_network_subnet(**subnet_data)
+        subnet_data.update({'availability_zone': self.replica_zone})
+        subnet2 = self.create_share_network_subnet(**subnet_data)
+        # Create the share and share replica
+        share = self.create_share(
+            share_type_id=share_type['id'], cleanup_in_class=False,
+            availability_zone=self.share_zone,
+            share_network_id=new_share_network_id)
+        share = self.admin_client.get_share(share['id'])['share']
+
+        replica = self.create_share_replica(share['id'], self.replica_zone)
+        replica = self.admin_client.get_share_replica(
+            replica['id'])['share_replica']
+
+        # Waits until the check is completed and positive
+        waiters.wait_for_subnet_create_check(
+            self.shares_v2_client, new_share_network_id,
+            neutron_net_id=subnet_data['neutron_net_id'],
+            neutron_subnet_id=subnet_data['neutron_subnet_id'],
+            availability_zone=self.replica_zone)
+        # Creating a third subnet in replica zone to trigger the network
+        # allocation update
+        subnet3 = self.create_share_network_subnet(**subnet_data)
+        waiters.wait_for_resource_status(
+            self.admin_client, replica['share_server_id'],
+            constants.SERVER_STATE_ACTIVE,
+            resource_name="share_server",
+            status_attr="status")
+        share_server = self.admin_client.show_share_server(
+            replica['share_server_id']
+        )['share_server']
+        self.assertIn(subnet2['id'],
+                      share_server['share_network_subnet_ids'])
+        self.assertIn(subnet3['id'],
+                      share_server['share_network_subnet_ids'])
+        # Delete the replica
+        self.delete_share_replica(replica['id'])
+        # Delete share
+        self.shares_v2_client.delete_share(share['id'])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
+        # Delete subnets
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet1['id'])
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet2['id'])
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet3['id'])
+
     @decorators.idempotent_id('00e12b41-b95d-494a-99be-e584aae10f5c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_add_access_rule_create_replica_delete_rule(self):

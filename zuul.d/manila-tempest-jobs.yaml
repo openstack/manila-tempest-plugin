@@ -246,6 +246,8 @@
               backend_names: LONDON,PARIS
               multi_backend: true
               run_share_server_migration_tests: true
+              run_share_server_multiple_subnet_tests: true
+              run_network_allocation_update_tests: true
 
 - job:
     name: manila-tempest-plugin-generic
@@ -490,6 +492,8 @@
               run_replication_tests: true
               run_revert_to_snapshot_tests: true
               run_share_server_migration_tests: true
+              run_share_server_multiple_subnet_tests: true
+              run_network_allocation_update_tests: true
 
 - job:
     name: manila-tempest-plugin-glusterfs-native

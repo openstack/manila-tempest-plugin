@@ -15,12 +15,14 @@
 
 import ddt
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -263,3 +265,130 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
         # Verify that share always has the same AZ as share group does
         self.assertEqual(
             share_group['availability_zone'], share['availability_zone'])
+
+    @utils.skip_if_microversion_not_supported("2.70")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipUnless(CONF.share.multitenancy_enabled,
+                          "Multitenancy is disabled.")
+    @testtools.skipUnless(CONF.share.run_share_server_multiple_subnet_tests,
+                          "Share server multiple subnet tests are disabled.")
+    @testtools.skipIf(CONF.share.share_network_id != "",
+                      "This test is not suitable for pre-existing "
+                      "share networks.")
+    @ddt.data(False, True)
+    @decorators.idempotent_id('17fd1867-03a3-43d0-9be3-daf90b6c5e02')
+    def test_create_sg_and_share_with_multiple_subnets(
+        self, network_allocation_update):
+        if network_allocation_update and not (
+            CONF.share.run_network_allocation_update_tests):
+            raise self.skipException(
+                'Network allocation update tests are disabled.')
+        extra_specs = {
+            'driver_handles_share_servers': CONF.share.multitenancy_enabled,
+            'share_server_multiple_subnet_support': True,
+        }
+        if network_allocation_update:
+            extra_specs['network_allocation_update_support'] = True
+        share_type = self.create_share_type(extra_specs=extra_specs)
+        sg_type_name = data_utils.rand_name("tempest-manila")
+        sg_type = self.create_share_group_type(
+            name=sg_type_name, share_types=share_type['id'],
+            client=self.admin_shares_v2_client)
+        # Get list of existing availability zones, at least one always
+        # should exist
+        azs = self.get_availability_zones_matching_share_type(share_type)
+        if len(azs) == 0:
+            raise self.skipException(
+                "No AZs were found. Make sure there is at least one "
+                "configured.")
+        share_network = self.shares_v2_client.get_share_network(
+            self.shares_v2_client.share_network_id)['share_network']
+        new_share_network_id = self.create_share_network(
+            cleanup_in_class=False)['id']
+
+        default_subnet = utils.share_network_get_default_subnet(
+            share_network)
+        subnet_data = {
+            'neutron_net_id': default_subnet.get('neutron_net_id'),
+            'neutron_subnet_id': default_subnet.get('neutron_subnet_id'),
+            'share_network_id': new_share_network_id,
+            'availability_zone': azs[0]
+        }
+        subnet1 = self.create_share_network_subnet(**subnet_data)
+        if not network_allocation_update:
+            subnet2 = self.create_share_network_subnet(**subnet_data)
+
+        sg_kwargs = {
+            'share_group_type_id': sg_type['id'],
+            'share_type_ids': [share_type['id']],
+            'share_network_id': new_share_network_id,
+            'availability_zone': azs[0],
+            'version': constants.MIN_SHARE_GROUP_MICROVERSION,
+            'cleanup_in_class': False,
+        }
+
+        # Create share group
+        share_group = self.create_share_group(**sg_kwargs)
+
+        # Get latest share group info
+        share_group = self.shares_v2_client.get_share_group(
+            share_group['id'])['share_group']
+
+        self.assertIn('availability_zone', share_group)
+        self.assertEqual(azs[0], share_group['availability_zone'])
+
+        # Test 'consistent_snapshot_support' as part of 2.33 API change
+        self.assertIn('consistent_snapshot_support', share_group)
+        self.assertIn(
+            share_group['consistent_snapshot_support'], ('host', 'pool', None))
+
+        share_data = {
+            'share_type_id': share_type['id'],
+            'share_group_id': share_group['id'],
+            'share_network_id': new_share_network_id,
+            'availability_zone': azs[0],
+            'cleanup_in_class': False,
+        }
+
+        # Create share in share group
+        share = self.create_share(**share_data)
+
+        # Get latest share info
+        share = self.admin_shares_v2_client.get_share(share['id'])['share']
+        # Verify that share always has the same AZ as share group does
+        self.assertEqual(
+            share_group['availability_zone'], share['availability_zone'])
+
+        # Get share server info
+        share_server = self.admin_shares_v2_client.show_share_server(
+            share['share_server_id'])['share_server']
+        if network_allocation_update:
+            waiters.wait_for_subnet_create_check(
+                self.shares_v2_client, new_share_network_id,
+                neutron_net_id=subnet_data['neutron_net_id'],
+                neutron_subnet_id=subnet_data['neutron_subnet_id'],
+                availability_zone=azs[0])
+
+            subnet2 = self.create_share_network_subnet(**subnet_data)
+            waiters.wait_for_resource_status(
+                self.admin_shares_v2_client, share['share_server_id'],
+                constants.SERVER_STATE_ACTIVE,
+                resource_name="share_server",
+                status_attr="status")
+        share_server = self.admin_shares_v2_client.show_share_server(
+            share['share_server_id'])['share_server']
+        # Check if share server has multiple subnets
+        self.assertIn(subnet1['id'], share_server['share_network_subnet_ids'])
+        self.assertIn(subnet2['id'], share_server['share_network_subnet_ids'])
+        # Delete share
+        params = {"share_group_id": share_group['id']}
+        self.shares_v2_client.delete_share(
+            share['id'],
+            params=params,
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+        self.shares_client.wait_for_resource_deletion(share_id=share['id'])
+        # Delete subnet
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet1['id'])
+        self.shares_v2_client.delete_subnet(
+            new_share_network_id, subnet2['id'])
