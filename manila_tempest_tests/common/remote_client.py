@@ -71,8 +71,13 @@ class RemoteClient(object):
         self.servers_client = servers_client
         self.log_console = CONF.compute_feature_enabled.console_output
         kwargs = {}
-        if CONF.validation.ssh_key_type:
+
+        try:
             kwargs['ssh_key_type'] = CONF.validation.ssh_key_type
+        except Exception:
+            # Not all versions of tempest support the
+            # "validation.ssh_key_type" config option
+            pass
 
         self.ssh_client = ssh.Client(
             ip_address, username, password, pkey=pkey, **kwargs)
