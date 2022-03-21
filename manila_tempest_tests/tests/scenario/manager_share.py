@@ -109,7 +109,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         # Tests need to be able to ssh into the VM - so we need
         # a security group, and a tenant private network
         self.security_group = self._create_security_group()
-        self.network = self._create_network(namestart="manila-share")
+        self.network = self.create_network(namestart="manila-share")
         # When not using a "storage network" to connect shares to VMs,
         # we need the subnet to match the IP version we're testing
         subnet_ip_params = {} if self.storage_network else {

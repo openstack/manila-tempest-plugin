@@ -32,7 +32,7 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-class ScenarioTest(manager.ScenarioTest):
+class ScenarioTest(manager.NetworkScenarioTest):
     """Base class for scenario tests. Uses tempest own clients. """
 
     credentials = ['primary']
@@ -368,29 +368,6 @@ class NetworkScenarioTest(ScenarioTest):
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron not available')
 
-    def _create_network(self, networks_client=None,
-                        tenant_id=None,
-                        namestart='network-smoke-',
-                        port_security_enabled=True):
-        if not networks_client:
-            networks_client = self.networks_client
-        if not tenant_id:
-            tenant_id = networks_client.tenant_id
-        name = data_utils.rand_name(namestart)
-        network_kwargs = dict(name=name, tenant_id=tenant_id)
-        # Neutron disables port security by default so we have to check the
-        # config before trying to create the network with port_security_enabled
-        if CONF.network_feature_enabled.port_security:
-            network_kwargs['port_security_enabled'] = port_security_enabled
-        result = networks_client.create_network(**network_kwargs)
-        network = result['network']
-
-        self.assertEqual(network['name'], name)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        networks_client.delete_network,
-                        network['id'])
-        return network
-
     def _create_subnet(self, network, subnets_client=None,
                        routers_client=None, namestart='subnet-smoke',
                        **kwargs):
@@ -563,14 +540,6 @@ class NetworkScenarioTest(ScenarioTest):
         floating_ip = self.floating_ips_client.update_floatingip(
             floating_ip['id'], **kwargs)['floatingip']
         self.assertEqual(port_id, floating_ip['port_id'])
-        return floating_ip
-
-    def _disassociate_floating_ip(self, floating_ip):
-        """:param floating_ip: floating_ips_client.create_floatingip"""
-        kwargs = dict(port_id=None)
-        floating_ip = self.floating_ips_client.update_floatingip(
-            floating_ip['id'], **kwargs)['floatingip']
-        self.assertIsNone(floating_ip['port_id'])
         return floating_ip
 
     def check_floating_ip_status(self, floating_ip, status):
@@ -922,7 +891,7 @@ class NetworkScenarioTest(ScenarioTest):
             router = None
             subnet = None
         else:
-            network = self._create_network(
+            network = self.create_network(
                 networks_client=networks_client,
                 tenant_id=tenant_id,
                 port_security_enabled=port_security_enabled)
