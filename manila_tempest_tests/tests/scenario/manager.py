@@ -331,41 +331,6 @@ class NetworkScenarioTest(ScenarioTest):
                         floating_ip['id'])
         return floating_ip
 
-    def _associate_floating_ip(self, floating_ip, server):
-        port_id, _ = self.get_server_port_id_and_ip4(server)
-        kwargs = dict(port_id=port_id)
-        floating_ip = self.floating_ips_client.update_floatingip(
-            floating_ip['id'], **kwargs)['floatingip']
-        self.assertEqual(port_id, floating_ip['port_id'])
-        return floating_ip
-
-    def check_floating_ip_status(self, floating_ip, status):
-        """Verifies floatingip reaches the given status
-
-        :param dict floating_ip: floating IP dict to check status
-        :param status: target status
-        :raises: AssertionError if status doesn't match
-        """
-        floatingip_id = floating_ip['id']
-
-        def refresh():
-            result = (self.floating_ips_client.
-                      show_floatingip(floatingip_id)['floatingip'])
-            return status == result['status']
-
-        test_utils.call_until_true(refresh,
-                                   CONF.network.build_timeout,
-                                   CONF.network.build_interval)
-        floating_ip = self.floating_ips_client.show_floatingip(
-            floatingip_id)['floatingip']
-        self.assertEqual(status, floating_ip['status'],
-                         message="FloatingIP: {fp} is at status: {cst}. "
-                                 "failed  to reach status: {st}"
-                         .format(fp=floating_ip, cst=floating_ip['status'],
-                                 st=status))
-        LOG.info("FloatingIP: {fp} is at status: {st}"
-                 .format(fp=floating_ip, st=status))
-
     def _check_tenant_network_connectivity(self, server,
                                            username,
                                            private_key,
