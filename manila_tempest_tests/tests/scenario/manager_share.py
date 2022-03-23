@@ -120,7 +120,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             network=self.network,
             namestart="manila-share-sub",
             **subnet_ip_params)
-        router = self._get_router()
+        router = self.get_router()
         self._create_router_interface(subnet_id=self.subnet['id'],
                                       router_id=router['id'])
 
@@ -638,7 +638,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         if not client:
             client = self.routers_client
         if not router_id:
-            router_id = self._get_router()['id']
+            router_id = self.get_router()['id']
         client.add_router_interface(router_id, subnet_id=subnet_id)
         self.addCleanup(
             client.remove_router_interface, router_id, subnet_id=subnet_id)
