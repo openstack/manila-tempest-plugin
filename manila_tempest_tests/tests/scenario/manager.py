@@ -187,31 +187,6 @@ class NetworkScenarioTest(ScenarioTest):
                         floating_ip['id'])
         return floating_ip
 
-    def _check_tenant_network_connectivity(self, server,
-                                           username,
-                                           private_key,
-                                           should_connect=True,
-                                           servers_for_debug=None):
-        if not CONF.network.project_networks_reachable:
-            msg = 'Tenant networks not configured to be reachable.'
-            LOG.info(msg)
-            return
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        try:
-            for ip_addresses in server['addresses'].values():
-                for ip_address in ip_addresses:
-                    self.check_vm_connectivity(ip_address['addr'],
-                                               username,
-                                               private_key,
-                                               should_connect=should_connect,
-                                               server=server)
-        except Exception as e:
-            LOG.exception('Tenant network connectivity check failed')
-            self.log_console_output(servers_for_debug)
-            self._log_net_info(e)
-            raise
-
     def _create_security_group(self, security_group_rules_client=None,
                                tenant_id=None,
                                namestart='secgroup-smoke',
@@ -388,9 +363,3 @@ class NetworkScenarioTest(ScenarioTest):
                     rules.append(sg_rule)
 
         return rules
-
-    def _update_router_admin_state(self, router, admin_state_up):
-        kwargs = dict(admin_state_up=admin_state_up)
-        router = self.routers_client.update_router(
-            router['id'], **kwargs)['router']
-        self.assertEqual(admin_state_up, router['admin_state_up'])
