@@ -187,61 +187,6 @@ class NetworkScenarioTest(ScenarioTest):
                         floating_ip['id'])
         return floating_ip
 
-    def _create_security_group(self, security_group_rules_client=None,
-                               tenant_id=None,
-                               namestart='secgroup-smoke',
-                               security_groups_client=None):
-        if security_group_rules_client is None:
-            security_group_rules_client = self.security_group_rules_client
-        if security_groups_client is None:
-            security_groups_client = self.security_groups_client
-        if tenant_id is None:
-            tenant_id = security_groups_client.tenant_id
-        secgroup = self._create_empty_security_group(
-            namestart=namestart, client=security_groups_client,
-            tenant_id=tenant_id)
-
-        # Add rules to the security group
-        rules = self.create_loginable_secgroup_rule(
-            security_group_rules_client=security_group_rules_client,
-            secgroup=secgroup,
-            security_groups_client=security_groups_client)
-        for rule in rules:
-            self.assertEqual(tenant_id, rule['tenant_id'])
-            self.assertEqual(secgroup['id'], rule['security_group_id'])
-        return secgroup
-
-    def _create_empty_security_group(self, client=None, tenant_id=None,
-                                     namestart='secgroup-smoke'):
-        """Create a security group without rules.
-
-        Default rules will be created:
-         - IPv4 egress to any
-         - IPv6 egress to any
-
-        :param tenant_id: secgroup will be created in this tenant
-        :returns: the created security group
-        """
-        if client is None:
-            client = self.security_groups_client
-        if not tenant_id:
-            tenant_id = client.tenant_id
-        sg_name = data_utils.rand_name(namestart)
-        sg_desc = sg_name + " description"
-        sg_dict = dict(name=sg_name,
-                       description=sg_desc)
-        sg_dict['tenant_id'] = tenant_id
-        result = client.create_security_group(**sg_dict)
-
-        secgroup = result['security_group']
-        self.assertEqual(secgroup['name'], sg_name)
-        self.assertEqual(tenant_id, secgroup['tenant_id'])
-        self.assertEqual(secgroup['description'], sg_desc)
-
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_security_group, secgroup['id'])
-        return secgroup
-
     def _default_security_group(self, client=None, tenant_id=None):
         """Get default secgroup for given tenant_id.
 
