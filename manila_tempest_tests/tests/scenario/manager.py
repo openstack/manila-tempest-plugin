@@ -187,66 +187,6 @@ class NetworkScenarioTest(ScenarioTest):
                         floating_ip['id'])
         return floating_ip
 
-    def _default_security_group(self, client=None, tenant_id=None):
-        """Get default secgroup for given tenant_id.
-
-        :returns: default secgroup for given tenant
-        """
-        if client is None:
-            client = self.security_groups_client
-        if not tenant_id:
-            tenant_id = client.tenant_id
-        sgs = [
-            sg for sg in list(client.list_security_groups().values())[0]
-            if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
-        ]
-        msg = "No default security group for tenant %s." % (tenant_id)
-        self.assertGreater(len(sgs), 0, msg)
-        return sgs[0]
-
-    def _create_security_group_rule(self, secgroup=None,
-                                    sec_group_rules_client=None,
-                                    tenant_id=None,
-                                    security_groups_client=None, **kwargs):
-        """Create a rule from a dictionary of rule parameters.
-
-        Create a rule in a secgroup. if secgroup not defined will search for
-        default secgroup in tenant_id.
-
-        :param secgroup: the security group.
-        :param tenant_id: if secgroup not passed -- the tenant in which to
-            search for default secgroup
-        :param kwargs: a dictionary containing rule parameters:
-            for example, to allow incoming ssh:
-            rule = {
-                    direction: 'ingress'
-                    protocol:'tcp',
-                    port_range_min: 22,
-                    port_range_max: 22
-                    }
-        """
-        if sec_group_rules_client is None:
-            sec_group_rules_client = self.security_group_rules_client
-        if security_groups_client is None:
-            security_groups_client = self.security_groups_client
-        if not tenant_id:
-            tenant_id = security_groups_client.tenant_id
-        if secgroup is None:
-            secgroup = self._default_security_group(
-                client=security_groups_client, tenant_id=tenant_id)
-
-        ruleset = dict(security_group_id=secgroup['id'],
-                       tenant_id=secgroup['tenant_id'])
-        ruleset.update(kwargs)
-
-        sg_rule = sec_group_rules_client.create_security_group_rule(**ruleset)
-        sg_rule = sg_rule['security_group_rule']
-
-        self.assertEqual(secgroup['tenant_id'], sg_rule['tenant_id'])
-        self.assertEqual(secgroup['id'], sg_rule['security_group_id'])
-
-        return sg_rule
-
     def create_loginable_secgroup_rule(self, security_group_rules_client=None,
                                        secgroup=None,
                                        security_groups_client=None):
@@ -293,7 +233,7 @@ class NetworkScenarioTest(ScenarioTest):
             for r_direction in ['ingress', 'egress']:
                 ruleset['direction'] = r_direction
                 try:
-                    sg_rule = self._create_security_group_rule(
+                    sg_rule = self.create_security_group_rule(
                         sec_group_rules_client=sec_group_rules_client,
                         secgroup=secgroup,
                         security_groups_client=security_groups_client,
