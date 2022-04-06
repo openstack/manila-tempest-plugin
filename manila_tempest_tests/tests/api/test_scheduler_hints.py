@@ -70,10 +70,10 @@ class SharesSchedulerHintsTest(base.BaseSharesMixedTest):
         self.assertEqual(backend_a, backend_b)
 
         # get metadata of share
-        metadata_a = self.shares_client.get_metadata(
+        metadata_a = self.shares_v2_client.get_metadata(
             self.share_a["id"])['metadata']
         md_a = {"__affinity_same_host": "%s" % share_b["id"]}
-        metadata_b = self.shares_client.get_metadata(
+        metadata_b = self.shares_v2_client.get_metadata(
             share_b["id"])['metadata']
         md_b = {"__affinity_same_host": "%s" % self.share_a["id"]}
 

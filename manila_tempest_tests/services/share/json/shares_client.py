@@ -23,6 +23,7 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 
 from manila_tempest_tests import share_exceptions
+from manila_tempest_tests import utils
 
 
 CONF = config.CONF
@@ -41,6 +42,9 @@ class SharesClient(rest_client.RestClient):
             self.share_protocol = CONF.share.enable_protocols[0]
         self.share_network_id = CONF.share.share_network_id
         self.share_size = CONF.share.share_size
+
+    def _parse_resp(self, body, verify_top_key=None):
+        return utils._parse_resp(body, verify_top_key=verify_top_key)
 
     def create_share(self, share_protocol=None, size=None,
                      name=None, snapshot_id=None, description=None,
@@ -446,7 +450,7 @@ class SharesClient(rest_client.RestClient):
     def get_metadata_item(self, share_id, key):
         resp, body = self.get("shares/%s/metadata/%s" % (share_id, key))
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        return self._parse_resp(body, verify_top_key='meta')
 
 ###############
 
