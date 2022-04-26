@@ -19,6 +19,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -77,6 +78,9 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             cls.share["id"], cls.access_type,
             cls.access_to[cls.access_type].pop(), 'rw',
             metadata=cls.md1)['access']
+        waiters.wait_for_resource_status(
+            cls.shares_v2_client, cls.share["id"], "active",
+            resource_name='access_rule', rule_id=cls.access["id"])
 
     @decorators.idempotent_id('4c8e0236-2e7b-4337-be3c-17b51a738644')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -87,6 +91,9 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             self.share["id"], self.access_type,
             self.access_to[self.access_type].pop(), 'rw',
             metadata=data)['access']
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.share["id"], "active",
+            resource_name='access_rule', rule_id=access["id"])
 
         # read metadata
         get_access = self.shares_v2_client.get_access_rule(
@@ -133,6 +140,9 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
             self.share["id"], self.access_type,
             self.access_to[self.access_type].pop(), 'rw',
             metadata=data)['access']
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.share["id"], "active",
+            resource_name='access_rule', rule_id=access["id"])
 
         # list metadata with metadata filter
         list_access = self.shares_v2_client.list_access_rules(
