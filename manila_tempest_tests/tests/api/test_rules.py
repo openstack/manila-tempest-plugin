@@ -109,8 +109,11 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('3390df2d-f6f8-4634-a562-87c1be994f6a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*itertools.chain(
-        itertools.product({'1.0', '2.9', '2.37', LATEST_MICROVERSION}, {4}),
-        itertools.product({'2.38', LATEST_MICROVERSION}, {6})
+        itertools.product(
+            utils.deduplicate(['1.0', '2.9', '2.37', LATEST_MICROVERSION]),
+            [4]),
+        itertools.product(
+            utils.deduplicate(['2.38', LATEST_MICROVERSION]), [6])
     ))
     @ddt.unpack
     def test_create_delete_access_rules_with_one_ip(self, version,
@@ -166,8 +169,11 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('5d25168a-d646-443e-8cf1-3151eb7887f5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(*itertools.chain(
-        itertools.product({'1.0', '2.9', '2.37', LATEST_MICROVERSION}, {4}),
-        itertools.product({'2.38', LATEST_MICROVERSION}, {6})
+        itertools.product(
+            utils.deduplicate(['1.0', '2.9', '2.37', LATEST_MICROVERSION]),
+            [4]),
+        itertools.product(
+            utils.deduplicate(['2.38', LATEST_MICROVERSION]), [6])
     ))
     @ddt.unpack
     def test_create_delete_access_rule_with_cidr(self, version, ip_version):
