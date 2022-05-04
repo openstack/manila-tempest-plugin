@@ -307,7 +307,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             linux_client.validate_authentication()
         except Exception:
             LOG.exception('Initializing SSH connection to %s failed', ip)
-            self._log_console_output()
+            self.log_console_output()
             raise
 
         return linux_client
