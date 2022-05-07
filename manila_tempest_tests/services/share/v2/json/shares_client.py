@@ -1836,6 +1836,109 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
+###############
+
+    def get_share_backup(self, backup_id, version=LATEST_MICROVERSION):
+        """Returns the details of a single backup."""
+        resp, body = self.get("share-backups/%s" % backup_id,
+                              headers=EXPERIMENTAL,
+                              extra_headers=True,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_share_backups(self, share_id=None, version=LATEST_MICROVERSION):
+        """Get list of backups."""
+        uri = "share-backups/detail"
+        if share_id:
+            uri += (f'?share_id={share_id}')
+        resp, body = self.get(uri, headers=EXPERIMENTAL,
+                              extra_headers=True, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def create_share_backup(self, share_id, name=None, description=None,
+                            backup_options=None, version=LATEST_MICROVERSION):
+        """Create a share backup."""
+        if name is None:
+            name = data_utils.rand_name("tempest-created-share-backup")
+        if description is None:
+            description = data_utils.rand_name(
+                "tempest-created-share-backup-desc")
+        post_body = {
+            'share_backup': {
+                'name': name,
+                'description': description,
+                'share_id': share_id,
+                'backup_options': backup_options,
+            }
+        }
+        body = json.dumps(post_body)
+        resp, body = self.post('share-backups', body,
+                               headers=EXPERIMENTAL,
+                               extra_headers=True,
+                               version=version)
+
+        self.expected_success(202, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_share_backup(self, backup_id, version=LATEST_MICROVERSION):
+        """Delete share backup."""
+        uri = "share-backups/%s" % backup_id
+        resp, body = self.delete(uri,
+                                 headers=EXPERIMENTAL,
+                                 extra_headers=True,
+                                 version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def restore_share_backup(self, backup_id, version=LATEST_MICROVERSION):
+        """Restore share backup."""
+        uri = "share-backups/%s/action" % backup_id
+        body = {'restore': None}
+        resp, body = self.post(uri, json.dumps(body),
+                               headers=EXPERIMENTAL,
+                               extra_headers=True,
+                               version=version)
+        self.expected_success(202, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_share_backup(self, backup_id, name=None, description=None,
+                            version=LATEST_MICROVERSION):
+        """Update share backup."""
+        uri = "share-backups/%s" % backup_id
+        post_body = {}
+        if name:
+            post_body['name'] = name
+        if description:
+            post_body['description'] = description
+
+        body = json.dumps({'share_backup': post_body})
+        resp, body = self.put(uri, body,
+                              headers=EXPERIMENTAL,
+                              extra_headers=True,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def reset_state_share_backup(self, backup_id,
+                                 status=constants.STATUS_AVAILABLE,
+                                 version=LATEST_MICROVERSION):
+
+        uri = "share-backups/%s/action" % backup_id
+        body = {'reset_status': {'status': status}}
+        resp, body = self.post(uri, json.dumps(body),
+                               headers=EXPERIMENTAL,
+                               extra_headers=True,
+                               version=LATEST_MICROVERSION)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
 ################
 
     def create_snapshot_access_rule(self, snapshot_id, access_type="ip",

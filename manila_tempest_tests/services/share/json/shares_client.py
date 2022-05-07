@@ -323,6 +323,9 @@ class SharesClient(rest_client.RestClient):
         elif "server_id" in kwargs:
             return self._is_resource_deleted(
                 self.show_share_server, kwargs.get("server_id"))
+        elif "backup_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_share_backup, kwargs.get("backup_id"))
         else:
             raise share_exceptions.InvalidResource(
                 message=str(kwargs))

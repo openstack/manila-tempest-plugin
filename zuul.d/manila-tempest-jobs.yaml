@@ -626,6 +626,8 @@
         MANILA_OPTGROUP_membernet_standalone_network_plugin_mask: 24
         MANILA_OPTGROUP_membernet_standalone_network_plugin_network_type: vlan
         MANILA_OPTGROUP_membernet_standalone_network_plugin_segmentation_id: 1010
+        MANILA_CREATE_BACKUP_CONTINUE_TASK_INTERVAL: 30
+        MANILA_RESTORE_BACKUP_CONTINUE_TASK_INTERVAL: 30
       devstack_local_conf:
         test-config:
           "$TEMPEST_CONFIG":
@@ -639,6 +641,7 @@
               enable_user_rules_for_protocols: cifs
               multi_backend: true
               multitenancy_enabled: false
+              run_driver_assisted_backup_tests: true
               run_driver_assisted_migration_tests: true
               run_manage_unmanage_snapshot_tests: true
               run_manage_unmanage_tests: true

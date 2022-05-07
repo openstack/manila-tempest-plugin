@@ -265,6 +265,9 @@ ShareGroup = [
                 default=False,
                 help="Enable or disable migration with "
                      "preserve_snapshots tests set to True."),
+    cfg.BoolOpt("run_driver_assisted_backup_tests",
+                default=False,
+                help="Enable or disable share backup tests."),
     cfg.BoolOpt("run_manage_unmanage_tests",
                 default=False,
                 help="Defines whether to run manage/unmanage tests or not. "
@@ -314,6 +317,10 @@ ShareGroup = [
                default=1500,
                help="Time to wait for share migration before "
                     "timing out (seconds)."),
+    cfg.IntOpt("share_backup_timeout",
+               default=1500,
+               help="Time to wait for share backup before "
+                    "timing out (seconds)."),
     cfg.IntOpt("share_server_migration_timeout",
                default="1500",
                help="Time to wait for share server migration before "
@@ -349,4 +356,7 @@ ShareGroup = [
                     "writing data from /dev/zero might not yield significant "
                     "space savings as these systems are already optimized for "
                     "efficient compression."),
+    cfg.DictOpt("driver_assisted_backup_test_driver_options",
+                default={'dummy': True},
+                help="Share backup driver options specified as dict."),
 ]

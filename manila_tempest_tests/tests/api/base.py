@@ -705,6 +705,31 @@ class BaseSharesTest(test.BaseTestCase):
         return replica
 
     @classmethod
+    def create_backup_wait_for_active(cls, share_id, client=None,
+                                      cleanup_in_class=False, cleanup=True,
+                                      version=CONF.share.max_api_microversion):
+        client = client or cls.shares_v2_client
+        backup_name = data_utils.rand_name('Backup')
+        backup_options = CONF.share.driver_assisted_backup_test_driver_options
+        backup = client.create_share_backup(
+            share_id,
+            name=backup_name,
+            backup_options=backup_options)['share_backup']
+        resource = {
+            "type": "share_backup",
+            "id": backup["id"],
+            "client": client,
+        }
+        if cleanup:
+            if cleanup_in_class:
+                cls.class_resources.insert(0, resource)
+            else:
+                cls.method_resources.insert(0, resource)
+        waiters.wait_for_resource_status(client, backup["id"], "available",
+                                         resource_name='share_backup')
+        return client.get_share_backup(backup['id'])['share_backup']
+
+    @classmethod
     def delete_share_replica(cls, replica_id, client=None,
                              version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
@@ -919,6 +944,9 @@ class BaseSharesTest(test.BaseTestCase):
                     elif res["type"] == "share_replica":
                         client.delete_share_replica(res_id)
                         client.wait_for_resource_deletion(replica_id=res_id)
+                    elif res["type"] == "share_backup":
+                        client.delete_share_backup(res_id)
+                        client.wait_for_resource_deletion(backup_id=res_id)
                     elif res["type"] == "share_network_subnet":
                         sn_id = res["extra_params"]["share_network_id"]
                         client.delete_subnet(sn_id, res_id)
