@@ -87,13 +87,10 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
     def test_set_get_delete_access_metadata(self):
         data = {"key1": "v" * 255, "k" * 255: "value2"}
         # set metadata
-        access = self.shares_v2_client.create_access_rule(
-            self.share["id"], self.access_type,
-            self.access_to[self.access_type].pop(), 'rw',
-            metadata=data)['access']
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, self.share["id"], "active",
-            resource_name='access_rule', rule_id=access["id"])
+        access = self.allow_access(
+            self.share["id"], access_type=self.access_type,
+            access_to=self.access_to[self.access_type].pop(),
+            access_level='rw', metadata=data)
 
         # read metadata
         get_access = self.shares_v2_client.get_access_rule(
@@ -110,10 +107,6 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
         access_without_md = self.shares_v2_client.get_access_rule(
             access["id"])['access']
         self.assertEqual({}, access_without_md['metadata'])
-        self.shares_v2_client.delete_access_rule(self.share["id"],
-                                                 access["id"])
-        self.shares_v2_client.wait_for_resource_deletion(
-            rule_id=access["id"], share_id=self.share["id"])
 
     @decorators.idempotent_id('8c294d7d-0702-49ce-b964-0945ec323370')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -136,13 +129,10 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
     def test_list_access_filter_by_metadata(self):
         data = {"key3": "v3", "key4": "value4"}
         # set metadata
-        access = self.shares_v2_client.create_access_rule(
-            self.share["id"], self.access_type,
-            self.access_to[self.access_type].pop(), 'rw',
-            metadata=data)['access']
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, self.share["id"], "active",
-            resource_name='access_rule', rule_id=access["id"])
+        access = self.allow_access(
+            self.share["id"], access_type=self.access_type,
+            access_to=self.access_to[self.access_type].pop(),
+            access_level='rw', metadata=data)
 
         # list metadata with metadata filter
         list_access = self.shares_v2_client.list_access_rules(

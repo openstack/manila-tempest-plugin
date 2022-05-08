@@ -331,12 +331,9 @@ class ReplicationTest(base.BaseSharesMixedTest):
     def test_add_access_rule_create_replica_delete_rule(self):
         # Add access rule to the share
         access_type, access_to = self._get_access_rule_data_from_config()
-        rule = self.shares_v2_client.create_access_rule(
-            self.shares[0]["id"], access_type, access_to, 'ro')['access']
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, self.shares[0]["id"],
-            constants.RULE_STATE_ACTIVE, resource_name='access_rule',
-            rule_id=rule["id"])
+        self.allow_access(
+            self.shares[0]["id"], access_type=access_type, access_to=access_to,
+            access_level='ro')
 
         # Create the replica
         self._verify_create_replica()
@@ -346,12 +343,6 @@ class ReplicationTest(base.BaseSharesMixedTest):
             self.shares_v2_client, self.shares[0]["id"],
             constants.RULE_STATE_ACTIVE, status_attr='access_rules_status')
 
-        # Delete rule and wait for deletion
-        self.shares_v2_client.delete_access_rule(self.shares[0]["id"],
-                                                 rule["id"])
-        self.shares_v2_client.wait_for_resource_deletion(
-            rule_id=rule["id"], share_id=self.shares[0]['id'])
-
     @decorators.idempotent_id('3af3f19a-1195-464e-870b-1a3918914f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_replica_add_access_rule_delete_replica(self):
@@ -360,12 +351,9 @@ class ReplicationTest(base.BaseSharesMixedTest):
         share_replica = self._verify_create_replica()
 
         # Add access rule
-        self.shares_v2_client.create_access_rule(
-            self.shares[0]["id"], access_type, access_to, 'ro')
-
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, self.shares[0]["id"],
-            constants.RULE_STATE_ACTIVE, status_attr='access_rules_status')
+        self.allow_access(
+            self.shares[0]["id"], access_type=access_type, access_to=access_to,
+            access_level='ro')
 
         # Delete the replica
         self.delete_share_replica(share_replica["id"])
@@ -421,11 +409,9 @@ class ReplicationTest(base.BaseSharesMixedTest):
         share = self.create_shares([self.creation_data])[0]
         # Add access rule
         access_type, access_to = self._get_access_rule_data_from_config()
-        rule = self.shares_v2_client.create_access_rule(
-            share["id"], access_type, access_to, 'ro')['access']
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, share["id"], constants.RULE_STATE_ACTIVE,
-            resource_name='access_rule', rule_id=rule["id"])
+        self.allow_access(
+            share["id"], access_type=access_type, access_to=access_to,
+            access_level='ro')
 
         original_replica = self.shares_v2_client.list_share_replicas(
             share["id"])['share_replicas'][0]

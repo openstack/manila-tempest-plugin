@@ -58,6 +58,8 @@ TAGS_PATTERN = re.compile(
     r"(?=.*\[.*\b(%(p)s|%(n)s)\b.*\])(?=.*\[.*\b(%(a)s|%(b)s|%(ab)s)\b.*\])" %
     TAGS_MAPPER)
 
+LATEST_MICROVERSION = CONF.share.max_api_microversion
+
 
 def verify_test_has_appropriate_tags(self):
     if not TAGS_PATTERN.match(self.id()):
@@ -1046,7 +1048,8 @@ class BaseSharesTest(test.BaseTestCase):
         return waiters.wait_for_message(self.shares_v2_client, share['id'])
 
     def allow_access(self, share_id, client=None, access_type=None,
-                     access_level='rw', access_to=None, status='active',
+                     access_level='rw', access_to=None, metadata=None,
+                     version=LATEST_MICROVERSION, status='active',
                      raise_rule_in_error_state=True, cleanup=True):
 
         client = client or self.shares_v2_client
@@ -1054,15 +1057,23 @@ class BaseSharesTest(test.BaseTestCase):
         access_type = access_type or a_type
         access_to = access_to or a_to
 
-        rule = client.create_access_rule(share_id, access_type, access_to,
-                                         access_level)['access']
+        kwargs = {
+            'access_type': access_type,
+            'access_to': access_to,
+            'access_level': access_level
+        }
+        if client is self.shares_v2_client:
+            kwargs.update({'metadata': metadata, 'version': version})
+
+        rule = client.create_access_rule(share_id, **kwargs)['access']
         waiters.wait_for_resource_status(
             client, share_id, status, resource_name='access_rule',
-            rule_id=rule['id'],
+            rule_id=rule['id'], version=version,
             raise_rule_in_error_state=raise_rule_in_error_state)
         if cleanup:
-            self.addCleanup(client.wait_for_resource_deletion,
-                            rule_id=rule['id'], share_id=share_id)
+            self.addCleanup(
+                client.wait_for_resource_deletion, rule_id=rule['id'],
+                share_id=share_id, version=version)
             self.addCleanup(client.delete_access_rule, share_id, rule['id'])
         return rule
 
