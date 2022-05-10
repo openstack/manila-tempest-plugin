@@ -192,7 +192,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         remote_client = self.get_remote_client(
             server_or_ip=server_ip,
             username=self.ssh_user,
-            private_key=self.keypair['private_key'])
+            private_key=self.keypair['private_key'],
+            server=instance)
 
         # NOTE(u_glide): Workaround for bug #1465682
         remote_client = remote_client.ssh_client
