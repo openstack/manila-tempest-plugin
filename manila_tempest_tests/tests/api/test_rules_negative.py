@@ -99,27 +99,15 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         access_type = "ip"
         access_to = "1.2.3.4"
 
-        # create rule
         if utils.is_microversion_eq(version, '1.0'):
-            rule = self.shares_client.create_access_rule(
-                self.share["id"], access_type, access_to)['access']
+            client = self.shares_client
         else:
-            rule = self.shares_v2_client.create_access_rule(
-                self.share["id"], access_type, access_to,
-                version=version)['access']
+            client = self.shares_v2_client
 
-        if utils.is_microversion_eq(version, '1.0'):
-            waiters.wait_for_resource_status(
-                self.shares_client, self.share["id"], "active",
-                resource_name='access_rule', rule_id=rule["id"])
-        elif utils.is_microversion_eq(version, '2.9'):
-            waiters.wait_for_resource_status(
-                self.shares_v2_client, self.share["id"], "active",
-                resource_name="access_rule", rule_id=rule["id"])
-        else:
-            waiters.wait_for_resource_status(
-                self.shares_v2_client, self.share["id"], "active",
-                status_attr='access_rules_status', version=version)
+        # create rule
+        self.allow_access(
+            self.share["id"], client=client, access_type=access_type,
+            access_to=access_to, version=version)
 
         # try create duplicate of rule
         if utils.is_microversion_eq(version, '1.0'):
@@ -131,18 +119,6 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                               self.shares_v2_client.create_access_rule,
                               self.share["id"], access_type, access_to,
                               version=version)
-
-        # delete rule and wait for deletion
-        if utils.is_microversion_eq(version, '1.0'):
-            self.shares_client.delete_access_rule(self.share["id"],
-                                                  rule["id"])
-            self.shares_client.wait_for_resource_deletion(
-                rule_id=rule["id"], share_id=self.share["id"])
-        else:
-            self.shares_v2_client.delete_access_rule(self.share["id"],
-                                                     rule["id"])
-            self.shares_v2_client.wait_for_resource_deletion(
-                rule_id=rule["id"], share_id=self.share["id"], version=version)
 
     @decorators.idempotent_id('63932d1d-a60a-4af7-ba3b-7cf6c68aaee9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -157,13 +133,8 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                       "is %s" % CONF.share.max_api_microversion)
             raise self.skipException(reason)
 
-        rule = self.shares_v2_client.create_access_rule(
-            self.share["id"], "ip", access_to)['access']
-        self.addCleanup(self.shares_v2_client.delete_access_rule,
-                        self.share["id"], rule['id'])
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, self.share["id"], "active",
-            status_attr='access_rules_status')
+        self.allow_access(
+            self.share["id"], access_type="ip", access_to=access_to)
 
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.create_access_rule,

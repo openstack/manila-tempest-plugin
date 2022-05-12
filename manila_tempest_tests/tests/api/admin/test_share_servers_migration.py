@@ -95,14 +95,11 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         # protocols.
         access_rules = self._get_access_rule_data_for_protocols()
         for rule in access_rules:
-            self.shares_v2_client.create_access_rule(
+            self.allow_access(
                 share['id'], access_type=rule.get('access_type'),
                 access_to=rule.get('access_to'),
                 access_level=rule.get('access_level')
             )
-        waiters.wait_for_resource_status(
-            self.shares_v2_client, share['id'], constants.RULE_STATE_ACTIVE,
-            status_attr='access_rules_status')
 
         share = self.shares_v2_client.get_share(share['id'])['share']
 
@@ -124,8 +121,8 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
             self.assertIn(snapshot['status'], statuses)
 
     def _validate_share_server_migration_complete(
-        self, share, dest_host, dest_server_id, snapshot_id=None,
-        share_network_id=None, version=CONF.share.max_api_microversion):
+            self, share, dest_host, dest_server_id, snapshot_id=None,
+            share_network_id=None, version=CONF.share.max_api_microversion):
         """Validates the share server migration complete. """
 
         # Check the export locations
