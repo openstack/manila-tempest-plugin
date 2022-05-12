@@ -219,33 +219,6 @@ class ScenarioTest(manager.NetworkScenarioTest):
             floating_ip['ip'], thing['id'])
         return floating_ip
 
-    def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                         private_key=None):
-        ssh_client = self.get_remote_client(ip_address,
-                                            private_key=private_key)
-        if dev_name is not None:
-            ssh_client.make_fs(dev_name)
-            ssh_client.mount(dev_name, mount_path)
-        cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % mount_path
-        ssh_client.exec_command(cmd_timestamp)
-        timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
-                                            % mount_path)
-        if dev_name is not None:
-            ssh_client.umount(mount_path)
-        return timestamp
-
-    def get_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                      private_key=None):
-        ssh_client = self.get_remote_client(ip_address,
-                                            private_key=private_key)
-        if dev_name is not None:
-            ssh_client.mount(dev_name, mount_path)
-        timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
-                                            % mount_path)
-        if dev_name is not None:
-            ssh_client.umount(mount_path)
-        return timestamp
-
     def get_server_ip(self, server):
         """Get the server fixed or floating IP.
 
