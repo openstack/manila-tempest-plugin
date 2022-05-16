@@ -20,7 +20,6 @@ from oslo_utils import netutils
 from oslo_utils import uuidutils
 from tempest.common import image as common_image
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
@@ -204,51 +203,6 @@ class ScenarioTest(manager.NetworkScenarioTest):
             LOG.exception(ex_msg)
             self.log_console_output(servers)
             raise
-
-    def create_floating_ip(self, thing, pool_name=None):
-        """Create a floating IP and associates to a server on Nova"""
-
-        if not pool_name:
-            pool_name = CONF.network.floating_network_name
-        floating_ip = (self.compute_floating_ips_client.
-                       create_floating_ip(pool=pool_name)['floating_ip'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.compute_floating_ips_client.delete_floating_ip,
-                        floating_ip['id'])
-        self.compute_floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], thing['id'])
-        return floating_ip
-
-    def get_server_ip(self, server):
-        """Get the server fixed or floating IP.
-
-        Based on the configuration we're in, return a correct ip
-        address for validating that a guest is up.
-        """
-        if CONF.validation.connect_method == 'floating':
-            # The tests calling this method don't have a floating IP
-            # and can't make use of the validation resources. So the
-            # method is creating the floating IP there.
-            return self.create_floating_ip(server)['ip']
-        elif CONF.validation.connect_method == 'fixed':
-            # Determine the network name to look for based on config or creds
-            # provider network resources.
-            if CONF.validation.network_for_ssh:
-                addresses = server['addresses'][
-                    CONF.validation.network_for_ssh]
-            else:
-                creds_provider = self._get_credentials_provider()
-                net_creds = creds_provider.get_primary_creds()
-                network = getattr(net_creds, 'network', None)
-                addresses = (server['addresses'][network['name']]
-                             if network else [])
-            for address in addresses:
-                if (address['version'] == CONF.validation.ip_version_for_ssh
-                        and address['OS-EXT-IPS:type'] == 'fixed'):
-                    return address['addr']
-            raise exceptions.ServerUnreachable(server_id=server['id'])
-        else:
-            raise lib_exc.InvalidConfiguration()
 
 
 class NetworkScenarioTest(ScenarioTest):
