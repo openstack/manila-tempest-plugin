@@ -2,6 +2,7 @@
     templates:
       - check-requirements
       - tempest-plugin-jobs
+    queue: manila
     check:
       jobs:
         - manila-tempest-plugin-dummy-no-dhss
@@ -23,7 +24,6 @@
         - manila-tempest-plugin-glusterfs-nfs:
             voting: false
     gate:
-      queue: manila
       jobs:
         - manila-tempest-plugin-dummy-no-dhss
         - manila-tempest-plugin-dummy-dhss
