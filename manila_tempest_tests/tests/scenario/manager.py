@@ -16,7 +16,6 @@
 
 import netaddr
 from oslo_log import log
-from oslo_utils import netutils
 from oslo_utils import uuidutils
 from tempest.common import image as common_image
 from tempest import config
@@ -183,27 +182,6 @@ class ScenarioTest(manager.NetworkScenarioTest):
         if not isinstance(exc, lib_exc.SSHTimeout):
             LOG.debug('Network information on a devstack host')
 
-    def check_public_network_connectivity(self, ip_address, username,
-                                          private_key, should_connect=True,
-                                          msg=None, servers=None, mtu=None):
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        LOG.debug('checking network connections to IP %s with user: %s',
-                  ip_address, username)
-        try:
-            self.check_vm_connectivity(ip_address,
-                                       username,
-                                       private_key,
-                                       should_connect=should_connect,
-                                       mtu=mtu)
-        except Exception:
-            ex_msg = 'Public network connectivity check failed'
-            if msg:
-                ex_msg += ": " + msg
-            LOG.exception(ex_msg)
-            self.log_console_output(servers)
-            raise
-
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
@@ -314,44 +292,6 @@ class NetworkScenarioTest(ScenarioTest):
 
         return subnet
 
-    def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        if ip_addr:
-            ports = self.os_admin.ports_client.list_ports(
-                device_id=server['id'],
-                fixed_ips='ip_address=%s' % ip_addr)['ports']
-        else:
-            ports = self.os_admin.ports_client.list_ports(
-                device_id=server['id'])['ports']
-        # A port can have more than one IP address in some cases.
-        # If the network is dual-stack (IPv4 + IPv6), this port is associated
-        # with 2 subnets
-
-        def _is_active(port):
-            # NOTE(vsaienko) With Ironic, instances live on separate hardware
-            # servers. Neutron does not bind ports for Ironic instances, as a
-            # result the port remains in the DOWN state. This has been fixed
-            # with the introduction of the networking-baremetal plugin but
-            # it's not mandatory (and is not used on all stable branches).
-            return (port['status'] == 'ACTIVE' or
-                    port.get('binding:vnic_type') == 'baremetal')
-
-        port_map = [(p["id"], fxip["ip_address"])
-                    for p in ports
-                    for fxip in p["fixed_ips"]
-                    if (netutils.is_valid_ipv4(fxip["ip_address"]) and
-                        _is_active(p))]
-        inactive = [p for p in ports if p['status'] != 'ACTIVE']
-        if inactive:
-            LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
-
-        self.assertNotEmpty(port_map,
-                            "No IPv4 addresses found in: %s" % ports)
-        self.assertEqual(len(port_map), 1,
-                         "Found multiple IPv4 addresses: %s. "
-                         "Unable to determine which port to target."
-                         % port_map)
-        return port_map[0]
-
     def _get_network_by_name_or_id(self, identifier):
 
         if uuidutils.is_uuid_like(identifier):
@@ -375,8 +315,8 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.floating_ips_client
         if not port_id:
-            port_id, ip4 = self._get_server_port_id_and_ip4(thing,
-                                                            ip_addr=ip_addr)
+            port_id, ip4 = self.get_server_port_id_and_ip4(thing,
+                                                           ip_addr=ip_addr)
         else:
             ip4 = None
         result = client.create_floatingip(
@@ -392,7 +332,7 @@ class NetworkScenarioTest(ScenarioTest):
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
-        port_id, _ = self._get_server_port_id_and_ip4(server)
+        port_id, _ = self.get_server_port_id_and_ip4(server)
         kwargs = dict(port_id=port_id)
         floating_ip = self.floating_ips_client.update_floatingip(
             floating_ip['id'], **kwargs)['floatingip']
