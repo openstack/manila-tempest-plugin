@@ -21,6 +21,8 @@
             voting: false
         - manila-tempest-plugin-generic:
             voting: false
+        - manila-tempest-plugin-generic-scenario:
+            voting: false
         - manila-tempest-plugin-glusterfs-nfs:
             voting: false
     gate:

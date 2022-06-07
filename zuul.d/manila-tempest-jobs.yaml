@@ -255,7 +255,7 @@
       Test the generic driver multibackend (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-base
     vars:
-      tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
+      tempest_test_regex: '(^manila_tempest_tests.tests.api)(?=.*\[.*\bbackend\b.*\])'
       # The generic driver uses nova VMs as share servers; running with a
       # high concurrency could starve the driver of RAM/Disk/CPUs to
       # function properly in a small single node devstack VM.
@@ -287,6 +287,19 @@
               backend_names: LONDON,PARIS
               multi_backend: true
               image_password: manila
+
+- job:
+    name: manila-tempest-plugin-generic-scenario
+    description: |
+      Test the scenario test cases on the generic driver multibackend
+      (DHSS=True) with NFS and CIFS
+    parent: manila-tempest-plugin-generic
+    vars:
+      tempest_test_regex: '(^manila_tempest_tests.tests.scenario)(?=.*\[.*\bbackend\b.*\])'
+      # The generic driver uses nova VMs as share servers; running with a
+      # high concurrency could starve the driver of RAM/Disk/CPUs to
+      # function properly in a small single node devstack VM.
+      tempest_concurrency: 1
 
 - job:
     name: manila-tempest-plugin-cephfs-native
