@@ -9,6 +9,13 @@
         # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
         # fixed.
         tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+        devstack_localrc:
+            MANILA_SERVICE_IMAGE_ENABLED: True
+            # NOTE(carloss): Pinning manila service image to a Focal version,
+            # since on Zed we moved to Ubuntu Jammy (22), and it requires more
+            # VM resources.
+            MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+            MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
 
 - job:
     name: manila-tempest-plugin-lvm-xena
@@ -19,6 +26,13 @@
         # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
         # fixed.
         tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+        devstack_localrc:
+            # NOTE(carloss): Pinning manila service image to a Focal version,
+            # since on Zed we moved to Ubuntu Jammy (22), and it requires more
+            # VM resources.
+            MANILA_SERVICE_IMAGE_ENABLED: True
+            MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+            MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
 
 - job:
     name: manila-tempest-plugin-lvm-wallaby
@@ -27,3 +41,10 @@
     nodeset: openstack-single-node-focal
     vars:
         tempest_exclude_regex: ''
+        devstack_localrc:
+            # NOTE(carloss): Pinning manila service image to a Focal version,
+            # since on Zed we moved to Ubuntu Jammy (22), and it requires more
+            # VM resources.
+            MANILA_SERVICE_IMAGE_ENABLED: True
+            MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+            MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
