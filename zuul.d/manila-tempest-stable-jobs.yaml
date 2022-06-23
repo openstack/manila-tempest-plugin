@@ -1,50 +1,102 @@
 # Stable branch jobs to test the trunk version of manila-tempest-plugin against
 # released stable branches of manila
+
+- job:
+    name: manila-tempest-plugin-generic-scenario-stable
+    description: |
+      Test the scenario test cases on the generic driver multibackend
+      (DHSS=True) with NFS and CIFS
+    parent: manila-tempest-plugin-generic-scenario-base
+    branches: &manila_tempest_image_pinned_branches ^(stable/(yoga|xena|wallaby|victoria|ussuri)).*$
+    vars: &manila_tempest_image_pinned_vars
+      devstack_localrc:
+        # NOTE(carloss): Pinning manila service image to a Focal version,
+        # since on Zed we moved to Ubuntu Jammy (22), and it requires more
+        # VM resources.
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
+
+- job:
+    name: manila-tempest-plugin-generic-stable
+    description: |
+      Test the scenario test cases on the generic driver multibackend
+      (DHSS=True) with NFS and CIFS
+    parent: manila-tempest-plugin-generic-base
+    branches: *manila_tempest_image_pinned_branches
+    vars: *manila_tempest_image_pinned_vars
+
+- job:
+    name: manila-tempest-plugin-lvm-stable
+    nodeset: openstack-single-node-focal
+    description: |
+      Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
+      environment with IPv6 control plane endpoints.
+    branches: *manila_tempest_image_pinned_branches
+    parent: manila-tempest-plugin-lvm-base
+    vars: *manila_tempest_image_pinned_vars
+
+- job:
+    name: manila-tempest-plugin-cephfs-native-stable
+    description: Test CephFS Native (DHSS=False)
+    parent: manila-tempest-plugin-cephfs-native-base
+    branches: *manila_tempest_image_pinned_branches
+    vars:
+      devstack_localrc:
+        # NOTE(gouthamr): The following need to use the latest images, however, there's a bug
+        # with cephfs on Ubuntu 20.04 LTS: https://tracker.ceph.com/issues/47236
+        # the latest image is built as https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-1.3.0-58-g2859569.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-1.3.0-58-g2859569
+
+- job:
+    name: manila-tempest-plugin-cephfs-nfs-stable
+    description: Test CephFS NFS (DHSS=False)
+    parent: manila-tempest-plugin-cephfs-nfs-base
+    branches: *manila_tempest_image_pinned_branches
+    vars: *manila_tempest_image_pinned_vars
+
+- job:
+    name: manila-tempest-plugin-zfsonlinux-stable
+    description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
+    parent: manila-tempest-plugin-zfsonlinux-base
+    branches: *manila_tempest_image_pinned_branches
+    vars: *manila_tempest_image_pinned_vars
+
 - job:
     name: manila-tempest-plugin-lvm-yoga
-    parent: manila-tempest-plugin-lvm
+    parent: manila-tempest-plugin-lvm-stable
     override-checkout: stable/yoga
-    nodeset: openstack-single-node-focal
     vars:
-        # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
-        # fixed.
-        tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
-        devstack_localrc:
-            MANILA_SERVICE_IMAGE_ENABLED: True
-            # NOTE(carloss): Pinning manila service image to a Focal version,
-            # since on Zed we moved to Ubuntu Jammy (22), and it requires more
-            # VM resources.
-            MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
-            MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
+      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
 
 - job:
     name: manila-tempest-plugin-lvm-xena
-    parent: manila-tempest-plugin-lvm
+    parent: manila-tempest-plugin-lvm-stable
     override-checkout: stable/xena
-    nodeset: openstack-single-node-focal
-    vars:
-        # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
-        # fixed.
-        tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
-        devstack_localrc:
-            # NOTE(carloss): Pinning manila service image to a Focal version,
-            # since on Zed we moved to Ubuntu Jammy (22), and it requires more
-            # VM resources.
-            MANILA_SERVICE_IMAGE_ENABLED: True
-            MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
-            MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
 
 - job:
     name: manila-tempest-plugin-lvm-wallaby
-    parent: manila-tempest-plugin-lvm
+    parent: manila-tempest-plugin-lvm-stable
     override-checkout: stable/wallaby
-    nodeset: openstack-single-node-focal
-    vars:
-        tempest_exclude_regex: ''
-        devstack_localrc:
-            # NOTE(carloss): Pinning manila service image to a Focal version,
-            # since on Zed we moved to Ubuntu Jammy (22), and it requires more
-            # VM resources.
-            MANILA_SERVICE_IMAGE_ENABLED: True
-            MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
-            MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
+
+- project-template:
+    name: manila-tempest-plugin-jobs-using-service-image-stable
+    description: |
+      Runs jobs that will also perform scenario tests in the stable branches
+      older than Yoga.
+    check:
+      jobs:
+        - manila-tempest-plugin-lvm-stable
+        - manila-tempest-plugin-generic-scenario-stable:
+            voting: false
+        - manila-tempest-plugin-generic-stable:
+            voting: false
+        - manila-tempest-plugin-cephfs-native-stable:
+            voting: false
+        - manila-tempest-plugin-cephfs-nfs-stable:
+            voting: false
+        - manila-tempest-plugin-zfsonlinux-stable:
+            voting: false
+    gate:
+      jobs:
+        - manila-tempest-plugin-lvm-stable
