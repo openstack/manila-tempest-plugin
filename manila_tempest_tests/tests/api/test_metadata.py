@@ -34,14 +34,15 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     def _verify_share_metadata(self, share, md):
 
         # get metadata of share
-        metadata = self.shares_client.get_metadata(share["id"])['metadata']
+        metadata = self.shares_v2_client.get_metadata(share["id"])['metadata']
 
         # verify metadata
         self.assertEqual(md, metadata)
 
         # verify metadata items
         for key in md:
-            get_value = self.shares_client.get_metadata_item(share["id"], key)
+            get_value = self.shares_v2_client.get_metadata_item(share["id"],
+                                                                key)
             self.assertEqual(md[key], get_value[key])
 
     @decorators.idempotent_id('9070249f-6e94-4a38-a036-08debee547c3')
@@ -69,17 +70,18 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # set metadata
-        self.shares_client.set_metadata(share["id"], md)
+        self.shares_v2_client.set_metadata(share["id"], md)
 
         # verify metadata
         self._verify_share_metadata(share, md)
 
         # delete metadata
         for key in md.keys():
-            self.shares_client.delete_metadata(share["id"], key)
+            self.shares_v2_client.delete_metadata(share["id"], key)
 
         # verify deletion of metadata
-        get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
+        get_metadata = self.shares_v2_client.get_metadata(share["id"])[
+            'metadata']
         self.assertEmpty(get_metadata)
 
     @decorators.idempotent_id('4e5f8159-62b6-4d5c-f729-d8b1f029d7de')
@@ -93,13 +95,13 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # set metadata
-        self.shares_client.set_metadata(share["id"], md1)
+        self.shares_v2_client.set_metadata(share["id"], md1)
 
         # verify metadata
         self._verify_share_metadata(share, md1)
 
         # set metadata again
-        self.shares_client.set_metadata(share["id"], md2)
+        self.shares_v2_client.set_metadata(share["id"], md2)
 
         # verify metadata
         md1.update(md2)
@@ -110,10 +112,11 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         # delete metadata
         for key in md.keys():
-            self.shares_client.delete_metadata(share["id"], key)
+            self.shares_v2_client.delete_metadata(share["id"], key)
 
         # verify deletion of metadata
-        get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
+        get_metadata = self.shares_v2_client.get_metadata(
+            share["id"])['metadata']
         self.assertEmpty(get_metadata)
 
     @decorators.idempotent_id('2ec70ba5-050b-3b17-c862-c149e53543c0')
@@ -127,13 +130,13 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # set metadata
-        self.shares_client.set_metadata(share["id"], md1)
+        self.shares_v2_client.set_metadata(share["id"], md1)
 
         # verify metadata
         self._verify_share_metadata(share, md1)
 
         # set metadata again
-        self.shares_client.set_metadata(share["id"], md2)
+        self.shares_v2_client.set_metadata(share["id"], md2)
 
         # verify metadata
         md = {u"key9": u"value13", u"key10": u"value10",
@@ -142,10 +145,11 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         # delete metadata
         for key in md.keys():
-            self.shares_client.delete_metadata(share["id"], key)
+            self.shares_v2_client.delete_metadata(share["id"], key)
 
         # verify deletion of metadata
-        get_metadata = self.shares_client.get_metadata(share["id"])['metadata']
+        get_metadata = self.shares_v2_client.get_metadata(
+            share["id"])['metadata']
         self.assertEmpty(get_metadata)
 
     @decorators.idempotent_id('c94851f4-2559-4712-9297-9912db1da7ff')
@@ -160,10 +164,10 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # set metadata
-        self.shares_client.set_metadata(share["id"], md1)
+        self.shares_v2_client.set_metadata(share["id"], md1)
 
         # update metadata
-        self.shares_client.update_all_metadata(share["id"], md2)
+        self.shares_v2_client.update_all_metadata(share["id"], md2)
 
         # verify metadata
         self._verify_share_metadata(share, md2)
@@ -173,9 +177,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     def test_set_metadata_min_size_key(self):
         data = {"k": "value"}
 
-        self.shares_client.set_metadata(self.share["id"], data)
+        self.shares_v2_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data['k'], body_get.get('k'))
 
@@ -185,9 +189,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         max_key = "k" * 255
         data = {max_key: "value"}
 
-        self.shares_client.set_metadata(self.share["id"], data)
+        self.shares_v2_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertIn(max_key, body_get)
         self.assertEqual(data[max_key], body_get.get(max_key))
@@ -197,9 +201,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     def test_set_metadata_min_size_value(self):
         data = {"key": "v"}
 
-        self.shares_client.set_metadata(self.share["id"], data)
+        self.shares_v2_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data['key'], body_get['key'])
 
@@ -209,9 +213,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         max_value = "v" * 1023
         data = {"key": max_value}
 
-        self.shares_client.set_metadata(self.share["id"], data)
+        self.shares_v2_client.set_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data['key'], body_get['key'])
 
@@ -220,9 +224,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     def test_upd_metadata_min_size_key(self):
         data = {"k": "value"}
 
-        self.shares_client.update_all_metadata(self.share["id"], data)
+        self.shares_v2_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data, body_get)
 
@@ -232,9 +236,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         max_key = "k" * 255
         data = {max_key: "value"}
 
-        self.shares_client.update_all_metadata(self.share["id"], data)
+        self.shares_v2_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data, body_get)
 
@@ -243,9 +247,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     def test_upd_metadata_min_size_value(self):
         data = {"key": "v"}
 
-        self.shares_client.update_all_metadata(self.share["id"], data)
+        self.shares_v2_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data, body_get)
 
@@ -255,8 +259,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         max_value = "v" * 1023
         data = {"key": max_value}
 
-        self.shares_client.update_all_metadata(self.share["id"], data)
+        self.shares_v2_client.update_all_metadata(self.share["id"], data)
 
-        body_get = self.shares_client.get_metadata(
+        body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(data, body_get)
