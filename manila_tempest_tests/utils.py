@@ -14,7 +14,6 @@
 #    under the License.
 
 from collections import OrderedDict
-import json
 import random
 import re
 
@@ -226,43 +225,3 @@ def get_extra_headers(request_version, graduation_version):
         headers = EXPERIMENTAL
         extra_headers = True
     return headers, extra_headers
-
-
-def _parse_resp(body, verify_top_key=None):
-    try:
-        body = json.loads(body)
-    except ValueError:
-        return body
-
-    # We assume, that if the first value of the deserialized body's
-    # item set is a dict or a list, that we just return the first value
-    # of deserialized body.
-    # Essentially "cutting out" the first placeholder element in a body
-    # that looks like this:
-    #
-    #  {
-    #    "users": [
-    #      ...
-    #    ]
-    #  }
-    try:
-        # Ensure there are not more than one top-level keys
-        # NOTE(freerunner): Ensure, that JSON is not nullable to
-        # to prevent StopIteration Exception
-        if not hasattr(body, "keys") or len(body.keys()) != 1:
-            return body
-        # Just return the "wrapped" element
-        first_key, first_item = tuple(body.items())[0]
-        if isinstance(first_item, (dict, list)):
-            if verify_top_key is not None:
-                assert_msg = (
-                    "The expected top level key is '%(top_key)s' but we "
-                    "found '%(actual_key)s'." % {
-                        'top_key': verify_top_key,
-                        'actual_key': first_key
-                    })
-                assert verify_top_key == first_key, assert_msg
-            return first_item
-    except (ValueError, IndexError):
-        pass
-    return body
