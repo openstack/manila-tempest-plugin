@@ -63,6 +63,12 @@
     vars: *manila_tempest_image_pinned_vars
 
 - job:
+    name: manila-tempest-plugin-lvm-fips-stable
+    parent: manila-tempest-plugin-lvm-fips-base
+    branches: ^(stable/(yoga|xena|wallaby)).*$
+    vars: *manila_tempest_image_pinned_vars
+
+- job:
     name: manila-tempest-plugin-lvm-yoga
     parent: manila-tempest-plugin-lvm-stable
     override-checkout: stable/yoga

@@ -620,6 +620,34 @@
               # read-only access rules not supported
               enable_ro_access_level_for_protocols: ""
 
+- job:
+    name: manila-tempest-plugin-lvm-fips-base
+    parent: manila-tempest-plugin-lvm-base
+    nodeset: devstack-single-node-centos-9-stream
+    description: |
+      Run LVM DHSS false tests for manila project using FIPS.
+    pre-run:
+      - playbooks/enable-fips.yaml
+    vars:
+      nslookup_target: 'opendev.org'
+      devstack_localrc:
+        MANILA_SETUP_IPV6: false
+        NEUTRON_CREATE_INITIAL_NETWORKS: true
+        IP_VERSION: 4
+      configure_swap_size: 4096
+      devstack_local_conf:
+        test-config:
+          "$TEMPEST_CONFIG":
+            validation:
+              ssh_key_type: 'ecdsa'
+            share:
+              run_ipv6_tests: false
+
+- job:
+    name: manila-tempest-plugin-lvm-fips
+    parent: manila-tempest-plugin-lvm-fips-base
+    branches: ^(?!stable/(yoga|xena|wallaby|victoria|ussuri)).*$
+
 - project-template:
     name: manila-tempest-plugin-jobs-using-service-image
     description: |
