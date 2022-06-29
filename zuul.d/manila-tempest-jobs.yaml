@@ -117,7 +117,8 @@
         tempest: true
 
 - job:
-    name: manila-tempest-plugin-zfsonlinux
+    name: manila-tempest-plugin-zfsonlinux-base
+    abstract: true
     description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
     parent: manila-tempest-plugin-base
     vars:
@@ -162,11 +163,18 @@
               image_password: manila
 
 - job:
-    name: manila-tempest-plugin-lvm
+    name: manila-tempest-plugin-zfsonlinux
+    description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
+    parent: manila-tempest-plugin-zfsonlinux-base
+    branches: &jammy_ubuntu_focal_branches ^(?!stable/(yoga|xena|wallaby|victoria|ussuri)).*$
+
+- job:
+    name: manila-tempest-plugin-lvm-base
     description: |
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
     parent: manila-tempest-plugin-ipv6-base
+    abstract: true
     required-projects:
       - openstack/neutron-dynamic-routing
     vars:
@@ -204,6 +212,14 @@
               backend_names: LONDON,PARIS
               multi_backend: true
               image_password: manila
+
+- job:
+    name: manila-tempest-plugin-lvm
+    description: |
+      Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
+      environment with IPv6 control plane endpoints.
+    branches: *jammy_ubuntu_focal_branches
+    parent: manila-tempest-plugin-lvm-base
 
 - job:
     name: manila-tempest-plugin-container
@@ -250,7 +266,8 @@
               run_network_allocation_update_tests: true
 
 - job:
-    name: manila-tempest-plugin-generic
+    name: manila-tempest-plugin-generic-base
+    abstract: true
     description: |
       Test the generic driver multibackend (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-base
@@ -289,11 +306,20 @@
               image_password: manila
 
 - job:
-    name: manila-tempest-plugin-generic-scenario
+    name: manila-tempest-plugin-generic
     description: |
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
-    parent: manila-tempest-plugin-generic
+    parent: manila-tempest-plugin-generic-base
+    branches: *jammy_ubuntu_focal_branches
+
+- job:
+    name: manila-tempest-plugin-generic-scenario-base
+    abstract: true
+    description: |
+      Test the scenario test cases on the generic driver multibackend
+      (DHSS=True) with NFS and CIFS
+    parent: manila-tempest-plugin-generic-base
     vars:
       tempest_test_regex: '(^manila_tempest_tests.tests.scenario)(?=.*\[.*\bbackend\b.*\])'
       # The generic driver uses nova VMs as share servers; running with a
@@ -302,7 +328,16 @@
       tempest_concurrency: 1
 
 - job:
-    name: manila-tempest-plugin-cephfs-native
+    name: manila-tempest-plugin-generic-scenario
+    description: |
+      Test the scenario test cases on the generic driver multibackend
+      (DHSS=True) with NFS and CIFS
+    parent: manila-tempest-plugin-generic-scenario-base
+    branches: *jammy_ubuntu_focal_branches
+
+- job:
+    name: manila-tempest-plugin-cephfs-native-base
+    abstract: true
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-base
     required-projects:
@@ -340,9 +375,15 @@
               enable_protocols: cephfs
               image_password: manila
 
+- job:
+    name: manila-tempest-plugin-cephfs-native
+    description: Test CephFS Native (DHSS=False)
+    parent: manila-tempest-plugin-cephfs-native-base
+    branches: *jammy_ubuntu_focal_branches
 
 - job:
-    name: manila-tempest-plugin-cephfs-nfs
+    name: manila-tempest-plugin-cephfs-nfs-base
+    abstract: true
     description: Test CephFS NFS (DHSS=False)
     parent: manila-tempest-plugin-base
     required-projects:
@@ -385,6 +426,12 @@
               enable_protocols: nfs
               capability_storage_protocol: NFS
               image_password: manila
+
+- job:
+    name: manila-tempest-plugin-cephfs-nfs
+    description: Test CephFS NFS (DHSS=False)
+    parent: manila-tempest-plugin-cephfs-nfs-base
+    branches: *jammy_ubuntu_focal_branches
 
 - job:
     name: manila-tempest-plugin-dummy-no-dhss
@@ -572,3 +619,25 @@
               enable_protocols: nfs
               # read-only access rules not supported
               enable_ro_access_level_for_protocols: ""
+
+- project-template:
+    name: manila-tempest-plugin-jobs-using-service-image
+    description: |
+      Runs jobs that will also perform scenario tests in the branches that are
+      newer than Yoga.
+    check:
+      jobs:
+        - manila-tempest-plugin-lvm
+        - manila-tempest-plugin-generic-scenario:
+            voting: false
+        - manila-tempest-plugin-generic:
+            voting: false
+        - manila-tempest-plugin-cephfs-native:
+            voting: false
+        - manila-tempest-plugin-cephfs-nfs:
+            voting: false
+        - manila-tempest-plugin-zfsonlinux:
+            voting: false
+    gate:
+      jobs:
+        - manila-tempest-plugin-lvm
