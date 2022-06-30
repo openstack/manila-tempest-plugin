@@ -27,6 +27,9 @@
 
 - job:
     name: manila-tempest-plugin-lvm-stable
+    # NOTE(carloss): we are aware that focal is the current default, but
+    # in order to avoid breakages when devstack-minimal switches to a newer
+    # branch, we are pinning focal here.
     nodeset: openstack-single-node-focal
     description: |
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
