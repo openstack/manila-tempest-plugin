@@ -116,7 +116,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             'ip_version': self.ip_version,
             'use_default_subnetpool': self.ipv6_enabled
         }
-        self.subnet = self._create_subnet(
+        self.subnet = self.create_subnet(
             network=self.network,
             namestart="manila-share-sub",
             **subnet_ip_params)
