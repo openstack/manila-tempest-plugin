@@ -49,6 +49,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def setup_clients(cls):
         super(ShareScenarioTest, cls).setup_clients()
 
+        cls.compute_floating_ips_client = (
+            cls.os_primary.compute_floating_ips_client)
         # Manila clients
         cls.shares_client = cls.os_primary.share_v1.SharesClient()
         cls.shares_v2_client = cls.os_primary.share_v2.SharesV2Client()
