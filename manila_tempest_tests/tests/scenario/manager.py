@@ -160,9 +160,6 @@ class NetworkScenarioTest(ScenarioTest):
                             "Unable to get network by name: %s" % identifier)
         return networks[0]
 
-    def get_networks(self):
-        return self.os_admin.networks_client.list_networks()['networks']
-
     def create_floating_ip(self, thing, external_network_id=None,
                            port_id=None, ip_addr=None, client=None):
         """Create a floating IP and associates to a resource/port on Neutron"""
