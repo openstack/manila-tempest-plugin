@@ -272,9 +272,16 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
 
     @decorators.idempotent_id('d501710e-4710-4c13-a373-75ed6ababb13')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_try_list_security_services_all_tenants(self):
-        listed = self.shares_client.list_security_services(
+    def test_try_list_security_services_all_tenants_ignored(self):
+        alt_security_service = self.create_security_service(
+            **self.generate_security_service_data(),
+            client=self.alt_shares_v2_client)
+        alt_security_service_id = alt_security_service['id']
+        sec_service_list = self.shares_client.list_security_services(
             params={'all_tenants': 1})['security_services']
-        self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
-        self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
-                            for ss in listed))
+        sec_service_ids = [ss['id'] for ss in sec_service_list]
+        self.assertTrue(
+            any(self.ss_ldap['id'] == ss['id'] for ss in sec_service_list))
+        self.assertTrue(
+            any(self.ss_kerberos['id'] == ss['id'] for ss in sec_service_list))
+        self.assertNotIn(alt_security_service_id, sec_service_ids)
