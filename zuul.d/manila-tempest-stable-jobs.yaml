@@ -1,5 +1,5 @@
-# Stable branch jobs to test the trunk version of manila-tempest-plugin against
-# released stable branches of manila
+# Stable wallaby / xena / yoga branch jobs to test the trunk version of
+# manila-tempest-plugin against those released stable branches of manila
 
 - job:
     name: manila-tempest-plugin-generic-scenario-stable
@@ -7,7 +7,7 @@
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-generic-scenario-base
-    branches: &manila_tempest_image_pinned_branches ^(stable/(yoga|xena|wallaby|victoria|ussuri)).*$
+    branches: &manila_tempest_image_pinned_branches ^(stable/(yoga|xena|wallaby)).*$
     vars: &manila_tempest_image_pinned_vars
       devstack_localrc:
         # NOTE(carloss): Pinning manila service image to a Focal version,
