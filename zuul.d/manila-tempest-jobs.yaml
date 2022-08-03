@@ -47,7 +47,6 @@
         MANILA_SERVER_MIGRATION_PERIOD_TASK_INTERVAL: 10
         MANILA_REPLICA_STATE_UPDATE_INTERVAL: 10
 
-
 - job:
     name: manila-tempest-plugin-ipv6-base
     abstract: true
