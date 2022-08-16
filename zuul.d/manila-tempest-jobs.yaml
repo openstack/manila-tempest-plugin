@@ -57,11 +57,7 @@
     timeout: 10800
     irrelevant-files: *irrelevant-files
     required-projects: *manila-tempest-required-projects
-    vars:
-      <<: *manila-tempest-base-vars
-      # NOTE(gouthamr): Disabled until https://launchpad.net/bugs/1940324 is
-      # fixed.
-      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+    vars: *manila-tempest-base-vars
 
 - job:
     name: manila-tempest-plugin-standalone-base
@@ -178,7 +174,27 @@
       - openstack/neutron-dynamic-routing
     vars:
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
+      devstack_services: &devstack-with-ovs
+        # NOTE(gouthamr): LP#1940324 prevents bgp usage with OVN, disable OVN
+        br-ex-tcpdump: false
+        br-int-flows: false
+        ovn-controller: false
+        ovn-northd: false
+        ovs-vswitchd: false
+        ovsdb-server: false
+        q-ovn-metadata-agent: false
+        # Neutron services
+        neutron-local-ip-static: true
+        q-agt: true
+        q-dhcp: true
+        q-l3: true
+        q-meta: true
+        q-metering: true
       devstack_localrc:
+        # NOTE(gouthamr): LP#1940324 prevents bgp usage with OVN, use OVS
+        Q_AGENT: openvswitch
+        Q_ML2_TENANT_NETWORK_TYPE: vxlan
+        Q_ML2_PLUGIN_MECHANISM_DRIVERS: openvswitch
         SHARE_DRIVER: manila.share.drivers.lvm.LVMShareDriver
         MANILA_ENABLED_BACKENDS: london,paris
         MANILA_BACKEND1_CONFIG_GROUP_NAME: london
@@ -390,10 +406,15 @@
       - openstack/neutron-dynamic-routing
     vars:
       tempest_concurrency: 2
+      devstack_services: *devstack-with-ovs # LP 1940324
       devstack_plugins:
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
         neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
       devstack_localrc:
+        # NOTE(gouthamr): LP#1940324 prevents bgp usage with OVN, use OVS
+        Q_AGENT: openvswitch
+        Q_ML2_TENANT_NETWORK_TYPE: vxlan
+        Q_ML2_PLUGIN_MECHANISM_DRIVERS: openvswitch
         VOLUME_BACKING_FILE_SIZE: 60GB
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnfs

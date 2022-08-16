@@ -76,9 +76,7 @@
     parent: manila-tempest-plugin-lvm-base
     nodeset: openstack-single-node-focal
     override-checkout: stable/yoga
-    vars:
-      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
-      <<: *manila_tempest_image_pinned_vars
+    vars: *manila_tempest_image_pinned_vars
 
 - job:
     name: manila-tempest-plugin-lvm-xena
