@@ -384,7 +384,6 @@
               enable_cephx_rules_for_protocols: cephfs
               run_share_group_tests: false
               multitenancy_enabled: false
-              suppress_errors_in_cleanup: true
               backend_names: CEPHFSNATIVE
               capability_storage_protocol: CEPHFS
               enable_protocols: cephfs
@@ -441,7 +440,6 @@
               run_ipv6_tests: true
               run_share_group_tests: false
               multitenancy_enabled: false
-              suppress_errors_in_cleanup: true
               backend_names: CEPHFSNFS
               enable_protocols: nfs
               capability_storage_protocol: NFS
