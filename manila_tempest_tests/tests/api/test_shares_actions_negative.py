@@ -340,8 +340,11 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
         share = self.create_share(share_type_id=self.share_type_id,
                                   cleanup_in_class=False)
 
-        # try soft delete the share
-        self.assertRaises(lib_exc.Forbidden,
+        # NOTE(gouthamr): The client used below is of a member from alt
+        # project. As a fix to bug #1901210, the server responds with
+        # 404 instead of 403, but we'll test for one of the two codes since
+        # the test could be running against a release without the fix.
+        self.assertRaises((lib_exc.Forbidden, lib_exc.NotFound),
                           self.alt_shares_v2_client.soft_delete_share,
                           share['id'])
 

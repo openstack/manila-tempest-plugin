@@ -82,8 +82,11 @@ class AdminActionsNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('3b525c29-b657-493f-aa41-b17676a95fd2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_try_reset_share_state_with_member(self):
-        # Even if member from another tenant, it should be unauthorized
-        self.assertRaises(lib_exc.Forbidden,
+        # NOTE(gouthamr): The client used below is of a member from another
+        # project. As a fix to bug #1901210, the server responds with
+        # 404 instead of 403, but we'll test for one of the two codes since
+        # the test could be running against a release without the fix.
+        self.assertRaises((lib_exc.Forbidden, lib_exc.NotFound),
                           self.member_client.reset_state,
                           self.share["id"])
 
