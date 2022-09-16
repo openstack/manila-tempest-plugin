@@ -333,7 +333,8 @@ class ManageShareServersNegativeTest(base.BaseSharesAdminTest):
             invalid_params)
 
         # try with part of the identifier
-        invalid_params['identifier'] = share_server['identifier'].split("-")[2]
+        invalid_params['identifier'] = (
+            share_server['identifier'].split("-")[-1])
 
         self.assertRaises(
             lib_exc.BadRequest,
