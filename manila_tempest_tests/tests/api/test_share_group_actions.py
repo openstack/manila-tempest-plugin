@@ -481,8 +481,8 @@ class ShareGroupRenameTest(base.BaseSharesMixedTest):
     def test_create_update_read_share_group_with_unicode(self, version):
         utils.check_skip_if_microversion_not_supported(version)
 
-        value1 = u'ಠ_ಠ'
-        value2 = u'ಠ_ರೃ'
+        value1 = 'ಠ_ಠ'
+        value2 = 'ಠ_ರೃ'
 
         # Create share_group
         share_group = self.create_share_group(
