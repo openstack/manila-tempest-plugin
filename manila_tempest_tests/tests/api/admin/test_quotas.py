@@ -35,10 +35,14 @@ SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
 class SharesAdminQuotasTest(base.BaseSharesAdminTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(SharesAdminQuotasTest, cls).skip_checks()
         if not CONF.share.run_quota_tests:
             msg = "Quota tests are disabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def resource_setup(cls):
         super(SharesAdminQuotasTest, cls).resource_setup()
         cls.client = cls.shares_v2_client
         cls.user_id = cls.client.user_id
