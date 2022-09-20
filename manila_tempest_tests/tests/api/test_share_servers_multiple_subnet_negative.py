@@ -32,13 +32,17 @@ class ShareServerMultipleSubNegativeTest(base.BaseSharesMixedTest):
         super(ShareServerMultipleSubNegativeTest, cls).skip_checks()
         if not CONF.share.multitenancy_enabled:
             raise cls.skipException('Multitenancy tests are disabled.')
+        if not CONF.share.run_share_server_multiple_subnet_tests:
+            raise cls.skipException(
+                'Share server multiple subnets and network allocation '
+                'update tests are disabled.')
         utils.check_skip_if_microversion_not_supported("2.70")
 
     @classmethod
     def resource_setup(cls):
         super(ShareServerMultipleSubNegativeTest, cls).resource_setup()
-        cls.share_network = cls.alt_shares_v2_client.get_share_network(
-            cls.alt_shares_v2_client.share_network_id)['share_network']
+        cls.share_network = cls.shares_v2_client.get_share_network(
+            cls.shares_v2_client.share_network_id)['share_network']
 
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @decorators.idempotent_id('1e2a9415-b02f-4c02-812d-bedc361f92ce')
@@ -53,9 +57,9 @@ class ShareServerMultipleSubNegativeTest(base.BaseSharesMixedTest):
         zones = self.get_availability_zones_matching_share_type(
             share_type)
         if not pools or not zones:
-            raise self.skipException("At least one backend that supports "
-                                     "adding multiple subnets into a share "
-                                     "network is needed for this test.")
+            raise self.skipException("At least one backend that does not "
+                                     "support adding multiple subnets into a "
+                                     "share network is needed for this test.")
         extra_specs = {'pool_name': pools[0]['pool'],
                        'availability_zone': zones[0]}
         self.admin_shares_v2_client.update_share_type_extra_specs(
