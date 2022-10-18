@@ -112,6 +112,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
                          "provider_location"]
         if utils.is_microversion_ge(version, '2.17'):
             expected_keys.extend(["user_id", "project_id"])
+        if utils.is_microversion_ge(version, '2.73'):
+            expected_keys.extend(["metadata"])
 
         actual_keys = snapshot.keys()
 
