@@ -469,6 +469,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
                          "description", "id", "share_size", "size"]
         if version and utils.is_microversion_ge(version, '2.17'):
             expected_keys.extend(["user_id", "project_id"])
+        if version and utils.is_microversion_ge(version, '2.73'):
+            expected_keys.append("metadata")
         actual_keys = snapshot.keys()
 
         # strict key check
@@ -547,6 +549,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
                          "share_size", "size"]
         if version and utils.is_microversion_ge(version, '2.17'):
             expected_keys.extend(["user_id", "project_id"])
+        if version and utils.is_microversion_ge(version, '2.73'):
+            expected_keys.append("metadata")
 
         # strict key check
         [self.assertEqual(set(expected_keys), set(s.keys())) for s in snaps]

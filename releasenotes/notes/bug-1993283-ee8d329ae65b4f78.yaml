@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    `Bug #1993283 <https://bugs.launchpad.net/manila/+bug/1993283>`_:
+    Fixed SharesActionsTest cases for API version >= 2.73 since a
+    metadata field was added in that version.
