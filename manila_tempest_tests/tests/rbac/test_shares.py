@@ -119,8 +119,6 @@ class TestProjectAdminTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         project_member = cls.setup_user_client(
             cls.persona, project_id=cls.persona.credentials.project_id)
         cls.share_member_client = project_member.share_v2.SharesV2Client()
-        cls.alt_project_share_v2_client = (
-            cls.os_project_alt_member.share_v2.SharesV2Client())
 
     @decorators.idempotent_id('14a52454-cba0-4973-926a-28e924ae2e63')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -321,12 +319,6 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
 
     credentials = ['project_member', 'project_alt_member']
     protocol = 'nfs'
-
-    @classmethod
-    def setup_clients(cls):
-        super(TestProjectMemberTestsNFS, cls).setup_clients()
-        cls.alt_project_share_v2_client = (
-            cls.os_project_alt_member.share_v2.SharesV2Client())
 
     @decorators.idempotent_id('75b9fd40-ae63-4caf-9c93-0fe24b2ce904')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)

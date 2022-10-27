@@ -35,6 +35,8 @@ class ShareRbacShareNetworkTests(rbac_base.ShareRbacBaseTests,
         super(ShareRbacShareNetworkTests, cls).setup_clients()
         cls.persona = getattr(cls, 'os_%s' % cls.credentials[0])
         cls.client = cls.persona.share_v2.SharesV2Client()
+        cls.alt_project_share_v2_client = (
+            cls.os_project_alt_member.share_v2.SharesV2Client())
 
     @classmethod
     def resource_setup(cls):
@@ -72,8 +74,6 @@ class ProjectAdminTests(ShareRbacShareNetworkTests, base.BaseSharesTest):
         project_member = cls.setup_user_client(
             cls.persona, project_id=cls.persona.credentials.project_id)
         cls.share_member_client = project_member.share_v2.SharesV2Client()
-        cls.alt_project_share_v2_client = (
-            cls.os_project_alt_member.share_v2.SharesV2Client())
 
     @decorators.idempotent_id('358dd850-cd81-4b81-aefa-3dfcb7aa4551')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -147,12 +147,6 @@ class ProjectAdminTests(ShareRbacShareNetworkTests, base.BaseSharesTest):
 class ProjectMemberTests(ShareRbacShareNetworkTests, base.BaseSharesTest):
 
     credentials = ['project_member', 'project_alt_member']
-
-    @classmethod
-    def setup_clients(cls):
-        super(ProjectMemberTests, cls).setup_clients()
-        cls.alt_project_share_v2_client = (
-            cls.os_project_alt_member.share_v2.SharesV2Client())
 
     @decorators.idempotent_id('d051c749-3d1c-4485-86c5-6eb860b49cad')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
