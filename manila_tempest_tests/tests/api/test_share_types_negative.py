@@ -84,12 +84,12 @@ class ShareTypesNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('4a22945c-8988-43a1-88c9-eb86e6abcd8e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.named_data(
-        ('2.50', '2.50', '', None, None),
+        ('2_50', '2.50', '', None, None),
         (LATEST_MICROVERSION, LATEST_MICROVERSION, '', None, None),
-        ('2.50_bad_public', '2.50', None, None, 'not_bool'),
+        ('2_50_bad_public', '2.50', None, None, 'not_bool'),
         (f'{LATEST_MICROVERSION}_bad_public', LATEST_MICROVERSION, None, None,
          'not_bool'),
-        ('2.50_description', '2.50', None, generate_long_description(256),
+        ('2_50_description', '2.50', None, generate_long_description(256),
          None),
         (f'{LATEST_MICROVERSION}_description', LATEST_MICROVERSION, None,
          generate_long_description(256), None),
