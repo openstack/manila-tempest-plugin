@@ -83,9 +83,10 @@ class ShareRbacBaseTests(object):
         return share
 
     @classmethod
-    def create_snapshot(cls, client, share_id, name=None):
+    def create_snapshot(cls, client, share_id, name=None, metadata=None):
         name = name or data_utils.rand_name('snapshot')
-        snapshot = client.create_snapshot(share_id, name=name)['snapshot']
+        snapshot = client.create_snapshot(
+            share_id, name=name, metadata=metadata)['snapshot']
         waiters.wait_for_resource_status(
             client, snapshot['id'], 'available', resource_name='snapshot')
         cls.addClassResourceCleanup(

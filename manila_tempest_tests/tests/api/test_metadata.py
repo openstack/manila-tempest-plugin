@@ -41,8 +41,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         # verify metadata items
         for key in md:
-            get_value = self.shares_v2_client.get_metadata_item(share["id"],
-                                                                key)
+            get_value = self.shares_v2_client.get_metadata_item(
+                share["id"], key)['meta']
             self.assertEqual(md[key], get_value[key])
 
     @decorators.idempotent_id('9070249f-6e94-4a38-a036-08debee547c3')

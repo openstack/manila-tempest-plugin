@@ -24,6 +24,7 @@ from testtools import testcase as tc
 from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.rbac import base as rbac_base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -72,6 +73,18 @@ class ShareRbacSnapshotsTests(rbac_base.ShareRbacBaseTests,
 
     @abc.abstractmethod
     def test_reset_snapshot(self):
+        pass
+
+    @abc.abstractmethod
+    def test_set_snapshot_metadata(self):
+        pass
+
+    @abc.abstractmethod
+    def test_get_snapshot_metadata(self):
+        pass
+
+    @abc.abstractmethod
+    def test_delete_snapshot_metadata(self):
         pass
 
 
@@ -202,6 +215,60 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
             'snapshot_reset_state', expected_status=202,
             snapshot_id=alt_snap['id'], status='error')
 
+    @decorators.idempotent_id('8c0858d5-5670-4c21-ab1f-7d74a7f8cb6d')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_set_snapshot_metadata(self):
+        snap = self.create_snapshot(
+            self.share_member_client, self.share['id'])
+        metadata = {u'key': u'value'}
+        self.do_request(
+            'set_metadata', expected_status=200,
+            resource_id=snap['id'], resource='snapshot', metadata=metadata)
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'])
+        self.do_request(
+            'set_metadata', expected_status=200,
+            resource_id=alt_snap['id'], resource='snapshot', metadata=metadata)
+
+    @decorators.idempotent_id('235b3fe2-55bf-4a43-b703-ca413ce76a41')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_get_snapshot_metadata(self):
+        metadata = {u'key': u'value'}
+        snap = self.create_snapshot(
+            self.share_member_client, self.share['id'],
+            metadata=metadata)
+        self.do_request(
+            'get_metadata_item', expected_status=200,
+            resource_id=snap['id'], key='key', resource='snapshot')
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'],
+            metadata=metadata)
+        self.do_request(
+            'get_metadata_item', expected_status=200,
+            resource_id=alt_snap['id'], key='key', resource='snapshot')
+
+    @decorators.idempotent_id('7490eb85-fcdc-45ae-89ba-14cf34c58b3b')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_delete_snapshot_metadata(self):
+        metadata = {u'key': u'value'}
+        snap = self.create_snapshot(
+            self.share_member_client, self.share['id'], metadata=metadata)
+        self.do_request(
+            'delete_metadata', expected_status=200, resource_id=snap['id'],
+            resource='snapshot', key='key')
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'],
+            metadata=metadata)
+        self.do_request(
+            'delete_metadata', expected_status=200, resource_id=alt_snap['id'],
+            resource='snapshot', key='key')
+
 
 class TestProjectMemberTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
 
@@ -320,6 +387,59 @@ class TestProjectMemberTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
             'snapshot_reset_state', expected_status=lib_exc.Forbidden,
             snapshot_id=alt_snap['id'], status='error')
 
+    @decorators.idempotent_id('a2849a7a-66ae-4cf9-9bac-6420dddd8f03')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_set_snapshot_metadata(self):
+        snap = self.create_snapshot(self.client, self.share['id'])
+        metadata = {u'key': u'value'}
+        self.do_request(
+            'set_metadata', expected_status=200,
+            resource_id=snap['id'], resource='snapshot', metadata=metadata)
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'])
+        self.do_request(
+            'set_metadata', expected_status=lib_exc.NotFound,
+            resource_id=alt_snap['id'], resource='snapshot', metadata=metadata)
+
+    @decorators.idempotent_id('9a3fc032-eb0c-49e9-8026-d26b05520d95')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_get_snapshot_metadata(self):
+        metadata = {u'key': u'value'}
+        share_client = getattr(self, 'share_member_client', self.client)
+        snap = self.create_snapshot(
+            share_client, self.share['id'], metadata=metadata)
+        self.do_request(
+            'get_metadata_item', expected_status=200,
+            resource_id=snap['id'], key='key', resource='snapshot')
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'],
+            metadata=metadata)
+        self.do_request(
+            'get_metadata_item', expected_status=lib_exc.NotFound,
+            resource_id=alt_snap['id'], key='key', resource='snapshot')
+
+    @decorators.idempotent_id('aa3ecadd-b87f-4bcd-ab2c-6a19d27c0adb')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_delete_snapshot_metadata(self):
+        metadata = {u'key': u'value'}
+        snap = self.create_snapshot(
+            self.client, self.share['id'], metadata=metadata)
+        self.do_request(
+            'delete_metadata', expected_status=200, resource_id=snap['id'],
+            resource='snapshot', key='key')
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'],
+            metadata=metadata)
+        self.do_request(
+            'delete_metadata', expected_status=lib_exc.NotFound,
+            resource_id=alt_snap['id'], resource='snapshot', key='key')
+
 
 class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     """Test suite for basic share snapshot operations by reader user
@@ -404,6 +524,47 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_reset_snapshot(self):
         super(TestProjectReaderTestsNFS, self).test_reset_snapshot()
+
+    @decorators.idempotent_id('c9177029-3161-4b5b-b7cb-76f8259a459a')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_set_snapshot_metadata(self):
+        snap = self.create_snapshot(
+            self.share_member_client, self.share['id'])
+        metadata = {u'key': u'value'}
+        self.do_request(
+            'set_metadata', expected_status=lib_exc.Forbidden,
+            resource_id=snap['id'], resource='snapshot', metadata=metadata)
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'])
+        self.do_request(
+            'set_metadata', expected_status=lib_exc.Forbidden,
+            resource_id=alt_snap['id'], resource='snapshot', metadata=metadata)
+
+    @decorators.idempotent_id('e5471262-fb4f-4a80-91c1-cc925b94f2c1')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_get_snapshot_metadata(self):
+        super(TestProjectMemberTestsNFS, self).test_get_snapshot_metadata()
+
+    @decorators.idempotent_id('e1c0251b-b8f4-439f-b697-ea3fc024c2ff')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.73")
+    def test_delete_snapshot_metadata(self):
+        metadata = {u'key': u'value'}
+        snap = self.create_snapshot(
+            self.share_member_client, self.share['id'], metadata=metadata)
+        self.do_request(
+            'delete_metadata', expected_status=lib_exc.Forbidden,
+            resource_id=snap['id'], resource='snapshot', key='key')
+
+        alt_snap = self.create_snapshot(
+            self.alt_project_share_v2_client, self.alt_share['id'],
+            metadata=metadata)
+        self.do_request(
+            'delete_metadata', expected_status=lib_exc.Forbidden,
+            resource_id=alt_snap['id'], resource='snapshot', key='key')
 
 
 class TestProjectAdminTestsCEPHFS(TestProjectAdminTestsNFS):

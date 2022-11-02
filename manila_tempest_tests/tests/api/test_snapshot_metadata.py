@@ -72,7 +72,7 @@ class ShareSnapshotMetadataTest(base.BaseSharesMixedTest):
         # verify metadata items
         for key in md:
             get_value = self.shares_v2_client.get_metadata_item(
-                snapshot['id'], key, resource="snapshot")
+                snapshot['id'], key, resource="snapshot")['meta']
             self.assertEqual(md[key], get_value[key])
 
     @decorators.idempotent_id('5d537913-ce6f-4771-beb2-84e2390b06d3')

@@ -2147,4 +2147,5 @@ class SharesV2Client(shares_client.SharesClient):
                    f'/{resource}s/{resource_id}/metadata/{key}')
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
