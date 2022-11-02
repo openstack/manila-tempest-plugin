@@ -121,7 +121,7 @@ class TestProjectAdminTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         cls.share_member_client = project_member.share_v2.SharesV2Client()
 
     @decorators.idempotent_id('14a52454-cba0-4973-926a-28e924ae2e63')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_share(self):
         share = self.create_share(
             self.share_member_client, self.share_type['id'])

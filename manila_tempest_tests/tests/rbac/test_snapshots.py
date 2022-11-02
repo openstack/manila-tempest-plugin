@@ -96,7 +96,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
             cls.alt_project_share_v2_client, share_type['id'])
 
     @decorators.idempotent_id('e55b1a01-0fcb-42aa-8cc4-b041fc75f1e4')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_snapshot(self):
         snapshot = self.create_snapshot(
             self.share_member_client, self.share['id'])
@@ -110,7 +110,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
             snapshot_id=alt_snapshot['id'])
 
     @decorators.idempotent_id('3b209017-f5ad-4daa-8932-582a75975bbe')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
@@ -139,7 +139,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
                         snapshot_id=snapshot['id'])
 
     @decorators.idempotent_id('6de91ee0-d27e-409a-957b-75489d4e7291')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_snapshot(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
@@ -155,7 +155,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
         self.client.wait_for_resource_deletion(snapshot_id=alt_snap['id'])
 
     @decorators.idempotent_id('3ac10dfb-3445-4052-855a-a17056d16a9c')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_force_delete_snapshot(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
@@ -172,7 +172,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
         self.client.wait_for_resource_deletion(snapshot_id=alt_snap['id'])
 
     @decorators.idempotent_id('513c8fef-9597-4e6c-a811-fb89b456d457')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_rename_snapshot(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
@@ -188,7 +188,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
             snapshot_id=alt_snap['id'], name=name)
 
     @decorators.idempotent_id('a5e99bfb-8767-4680-9e39-bde767e4b8f8')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_reset_snapshot(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
@@ -232,7 +232,7 @@ class TestProjectMemberTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
             snapshot_id=alt_snapshot['id'])
 
     @decorators.idempotent_id('0dcc1f68-86e2-432e-ad50-51c3cb78b986')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot(self):
         share_client = getattr(self, 'share_member_client', self.client)
         snap = self.create_snapshot(share_client, self.share['id'])
@@ -355,7 +355,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
         super(TestProjectReaderTestsNFS, self).test_get_snapshot()
 
     @decorators.idempotent_id('fef4285a-a489-4fec-97af-763c2e33282e')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_snapshot(self):
         super(TestProjectReaderTestsNFS, self).test_list_snapshot()
 

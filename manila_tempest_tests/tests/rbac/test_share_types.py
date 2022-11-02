@@ -78,7 +78,7 @@ class ProjectAdminTests(ShareRbacShareTypesTests, base.BaseSharesTest):
         cls.share_member_client = project_member.share_v2.SharesV2Client()
 
     @decorators.idempotent_id('b24bf137-352a-4ebd-b736-27518d32c1bd')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_share_type(self):
         share_type = self.do_request(
             'create_share_type', expected_status=200,
