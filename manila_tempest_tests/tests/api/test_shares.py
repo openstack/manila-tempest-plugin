@@ -157,6 +157,13 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             self.assertNotIn('user_id', detailed_elements)
             self.assertNotIn('project_id', detailed_elements)
 
+        # In v2.73 and beyond, we expect metadata key
+        if utils.is_microversion_supported('2.73'):
+            detailed_elements.update({'metadata'})
+            self.assertTrue(detailed_elements.issubset(snap.keys()), msg)
+        else:
+            self.assertNotIn('metadata', detailed_elements)
+
         # delete snapshot
         self.shares_client.delete_snapshot(snap["id"])
         self.shares_client.wait_for_resource_deletion(snapshot_id=snap["id"])

@@ -137,7 +137,8 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
 
     @decorators.idempotent_id('5fb65a19-fb73-4b5a-9210-010f93e0304f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @ddt.data('2.12', '2.16', CONF.share.max_api_microversion)
+    @ddt.data(*utils.deduplicate(['2.12', '2.16', '2.73',
+                                  CONF.share.max_api_microversion]))
     def test_manage_different_versions(self, version):
         """Run snapshot manage test for multiple versions.
 
