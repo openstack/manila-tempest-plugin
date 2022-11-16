@@ -55,9 +55,9 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(AccessesMetadataNegativeTest, cls).resource_setup()
-        cls.protocol = cls.shares_v2_client.share_protocol
         cls.access_type, cls.access_to = (
-            cls._get_access_rule_data_from_config()
+            utils.get_access_rule_data_from_config(
+                cls.shares_v2_client.share_protocol)
         )
         # create share type
         cls.share_type = cls.create_share_type()

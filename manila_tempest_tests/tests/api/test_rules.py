@@ -437,9 +437,9 @@ class ShareRulesTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ShareRulesTest, cls).resource_setup()
-        cls.protocol = cls.shares_v2_client.share_protocol
         cls.access_type, cls.access_to = (
-            cls._get_access_rule_data_from_config()
+            utils.get_access_rule_data_from_config(
+                cls.shares_v2_client.share_protocol)
         )
         cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']

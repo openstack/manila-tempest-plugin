@@ -19,6 +19,7 @@ import re
 
 from netaddr import ip
 from tempest import config
+from tempest.lib.common.utils import data_utils
 import testtools
 
 CONF = config.CONF
@@ -188,6 +189,33 @@ def get_configured_extra_specs(variation=None):
             CONF.share.capability_create_share_from_snapshot_support)
 
     return extra_specs
+
+
+def get_access_rule_data_from_config(protocol):
+    """Get the first available access type/to combination from config.
+
+    This method opportunistically picks the first configured protocol
+    to create the share. Do not use this method in tests where you need
+    to test depth and breadth in the access types and access recipients.
+    """
+
+    if protocol in CONF.share.enable_ip_rules_for_protocols:
+        access_type = "ip"
+        access_to = rand_ip()
+    elif protocol in CONF.share.enable_user_rules_for_protocols:
+        access_type = "user"
+        access_to = CONF.share.username_for_user_rules
+    elif protocol in CONF.share.enable_cert_rules_for_protocols:
+        access_type = "cert"
+        access_to = "client3.com"
+    elif protocol in CONF.share.enable_cephx_rules_for_protocols:
+        access_type = "cephx"
+        access_to = data_utils.rand_name("cephx-id")
+    else:
+        message = "Unrecognized protocol and access rules configuration."
+        raise testtools.TestCase.skipException(message)
+
+    return access_type, access_to
 
 
 def replication_with_multitenancy_support():

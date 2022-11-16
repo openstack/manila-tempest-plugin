@@ -723,35 +723,6 @@ class BaseSharesTest(test.BaseTestCase):
         return replica
 
     @classmethod
-    def _get_access_rule_data_from_config(cls):
-        """Get the first available access type/to combination from config.
-
-        This method opportunistically picks the first configured protocol
-        to create the share. Do not use this method in tests where you need
-        to test depth and breadth in the access types and access recipients.
-        """
-        protocol = cls.shares_v2_client.share_protocol
-
-        if protocol in CONF.share.enable_ip_rules_for_protocols:
-            access_type = "ip"
-            access_to = utils.rand_ip()
-        elif protocol in CONF.share.enable_user_rules_for_protocols:
-            access_type = "user"
-            access_to = CONF.share.username_for_user_rules
-        elif protocol in CONF.share.enable_cert_rules_for_protocols:
-            access_type = "cert"
-            access_to = "client3.com"
-        elif protocol in CONF.share.enable_cephx_rules_for_protocols:
-            access_type = "cephx"
-            access_to = data_utils.rand_name(
-                cls.__class__.__name__ + '-cephx-id')
-        else:
-            message = "Unrecognized protocol and access rules configuration."
-            raise cls.skipException(message)
-
-        return access_type, access_to
-
-    @classmethod
     def create_share_network(cls, client=None,
                              cleanup_in_class=False,
                              add_security_services=True, **kwargs):
@@ -1054,7 +1025,8 @@ class BaseSharesTest(test.BaseTestCase):
                      raise_rule_in_error_state=True, cleanup=True):
 
         client = client or self.shares_v2_client
-        a_type, a_to = self._get_access_rule_data_from_config()
+        a_type, a_to = utils.get_access_rule_data_from_config(
+            client.share_protocol)
         access_type = access_type or a_type
         access_to = access_to or a_to
 

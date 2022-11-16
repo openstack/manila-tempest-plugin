@@ -330,7 +330,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_add_access_rule_create_replica_delete_rule(self):
         # Add access rule to the share
-        access_type, access_to = self._get_access_rule_data_from_config()
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.shares_v2_client.share_protocol)
         self.allow_access(
             self.shares[0]["id"], access_type=access_type, access_to=access_to,
             access_level='ro')
@@ -346,7 +347,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('3af3f19a-1195-464e-870b-1a3918914f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_replica_add_access_rule_delete_replica(self):
-        access_type, access_to = self._get_access_rule_data_from_config()
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.shares_v2_client.share_protocol)
         # Create the replica
         share_replica = self._verify_create_replica()
 
@@ -408,7 +410,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
 
         share = self.create_shares([self.creation_data])[0]
         # Add access rule
-        access_type, access_to = self._get_access_rule_data_from_config()
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.shares_v2_client.share_protocol)
         self.allow_access(
             share["id"], access_type=access_type, access_to=access_to,
             access_level='ro')

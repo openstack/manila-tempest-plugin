@@ -190,7 +190,8 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
     @decorators.idempotent_id('600a13d2-5cf0-482e-97af-9f598b55a407')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_add_access_rule_share_replica_error_status(self):
-        access_type, access_to = self._get_access_rule_data_from_config()
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.shares_v2_client.share_protocol)
         # Create the replica
         share_replica = self.create_share_replica(self.share1["id"],
                                                   self.replica_zone,

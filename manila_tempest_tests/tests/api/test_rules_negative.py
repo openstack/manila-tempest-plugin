@@ -153,7 +153,8 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('d2856c7d-9417-416d-8d08-e68376ee5b2e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_add_access_rule_on_share_with_no_host(self):
-        access_type, access_to = self._get_access_rule_data_from_config()
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.protocol)
         extra_specs = self.add_extra_specs_to_dict(
             {"share_backend_name": 'invalid_backend'})
         share_type = self.create_share_type('invalid_backend',
