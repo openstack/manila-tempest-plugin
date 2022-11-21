@@ -165,6 +165,7 @@
 
 - job:
     name: manila-tempest-plugin-lvm-base
+    nodeset: openstack-single-node-focal
     description: |
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
@@ -352,6 +353,7 @@
 
 - job:
     name: manila-tempest-plugin-cephfs-native-base
+    nodeset: openstack-single-node-focal
     abstract: true
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-base
@@ -397,6 +399,7 @@
 
 - job:
     name: manila-tempest-plugin-cephfs-nfs-base
+    nodeset: openstack-single-node-focal
     abstract: true
     description: Test CephFS NFS (DHSS=False)
     parent: manila-tempest-plugin-base
@@ -578,6 +581,7 @@
     description: |
       Test the GlusterFS driver (DHSS=False) with the native GlusterFS protocol
     parent: manila-tempest-plugin-standalone-base
+    nodeset: openstack-single-node-focal
     required-projects:
       - x/devstack-plugin-glusterfs
     vars:
@@ -610,6 +614,7 @@
     description: |
       Test the GlusterFS driver (DHSS=False) with the native NFS protocol
     parent: manila-tempest-plugin-standalone-base
+    nodeset: openstack-single-node-focal
     required-projects:
       - x/devstack-plugin-glusterfs
     vars:
