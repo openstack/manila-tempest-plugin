@@ -102,6 +102,19 @@ class ShareRbacBaseTests(object):
         return share_network
 
     @classmethod
+    def create_share_type(cls):
+        name = data_utils.rand_name('share-type')
+        extra_specs = {
+            'driver_handles_share_servers': CONF.share.multitenancy_enabled,
+        }
+        share_type = cls.admin_shares_v2_client.create_share_type(
+            name=name, extra_specs=extra_specs)['share_type']
+        cls.addClassResourceCleanup(
+            cls.delete_resource, cls.admin_shares_v2_client,
+            st_id=share_type['id'])
+        return share_type
+
+    @classmethod
     def get_share_type(cls):
         return cls.shares_v2_client.get_default_share_type()['share_type']
 
