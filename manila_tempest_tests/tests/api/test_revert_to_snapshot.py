@@ -122,6 +122,9 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'],
             constants.STATUS_AVAILABLE)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, snapshot['id'], constants.STATUS_AVAILABLE,
+            resource_name='snapshot')
 
     @decorators.idempotent_id('09bd9942-7ef9-4d24-b2dd-f83bdda27b50')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -145,6 +148,9 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'],
             constants.STATUS_AVAILABLE)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, snapshot1['id'], constants.STATUS_AVAILABLE,
+            resource_name='snapshot')
 
     @decorators.idempotent_id('146de138-d351-49dc-a13a-5cdbed40b9ac')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -181,3 +187,6 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
             self.shares_v2_client, share_replica['id'],
             constants.REPLICATION_STATE_IN_SYNC, resource_name='share_replica',
             status_attr='replica_state')
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, snapshot['id'], constants.STATUS_AVAILABLE,
+            resource_name='snapshot')
