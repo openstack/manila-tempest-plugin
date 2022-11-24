@@ -360,6 +360,30 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Delete the replica
         self.delete_share_replica(share_replica["id"])
 
+    @decorators.idempotent_id('600a13d2-5cf0-482e-97af-9f598b55a406')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported("2.74")
+    def test_add_access_rule_share_replica_error_status(self):
+        '''From 2.74, we can add rules even if replicas are in error state.'''
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.shares_v2_client.share_protocol)
+        # Create the replica
+        share_replica = self._verify_create_replica()
+
+        # Reset the replica status to error
+        self.admin_client.reset_share_replica_status(
+            share_replica['id'], constants.STATUS_ERROR)
+
+        # Verify access rule will be added in error state
+        self.shares_v2_client.create_access_rule(
+            self.shares[0]["id"], access_type=access_type, access_to=access_to,
+            access_level='ro')
+
+        # Verify access_rules_status transitions to 'active' state.
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.shares[0]["id"],
+            constants.RULE_STATE_ACTIVE, status_attr='access_rules_status')
+
     @decorators.idempotent_id('a542c179-ea41-4bc0-bd80-e06eaddf5253')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @testtools.skipUnless(CONF.share.run_multiple_share_replicas_tests,

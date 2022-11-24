@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -83,6 +84,7 @@ class ReplicationNegativeBase(base.BaseSharesMixedTest):
         return share, instance_id
 
 
+@ddt.ddt
 class ReplicationNegativeTest(ReplicationNegativeBase):
 
     def _is_replication_type_promotable(self):
@@ -189,7 +191,9 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
 
     @decorators.idempotent_id('600a13d2-5cf0-482e-97af-9f598b55a407')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_add_access_rule_share_replica_error_status(self):
+    @ddt.data('2.11', '2.73')
+    def test_add_access_rule_share_replica_error_status(self, version):
+        '''From 2.74, we can add rules even if replicas are in error state.'''
         access_type, access_to = utils.get_access_rule_data_from_config(
             self.shares_v2_client.share_protocol)
         # Create the replica
@@ -200,10 +204,12 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         self.admin_client.reset_share_replica_status(
             share_replica['id'], constants.STATUS_ERROR)
 
-        # Verify access rule cannot be added
-        self.assertRaises(lib_exc.BadRequest,
-                          self.admin_client.create_access_rule,
-                          self.share1["id"], access_type, access_to, 'ro')
+        if utils.is_microversion_lt(version, '2.74'):
+            # Verify access rule cannot be added
+            self.assertRaises(lib_exc.BadRequest,
+                              self.shares_v2_client.create_access_rule,
+                              self.share1["id"], access_type, access_to, 'ro',
+                              version)
 
     @decorators.idempotent_id('91b93b71-4048-412b-bb42-0fe88edfb987')
     @testtools.skipUnless(CONF.share.run_host_assisted_migration_tests or
