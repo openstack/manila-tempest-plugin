@@ -142,6 +142,42 @@ class ShareGroupTypesTest(base.BaseSharesAdminTest):
 
         self.assertDictMatch(group_specs, sg_type['group_specs'])
 
+    @decorators.idempotent_id('dd620bfd-197b-4675-ace6-e26f809bb26e')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    def test_get_one_share_group_type_extra_spec(self):
+        name = data_utils.rand_name('share-group-type')
+        group_specs = {'key1': 'value1', 'key2': 'value2'}
+
+        sg_type = self.create_share_group_type(
+            name=name,
+            share_types=self.share_type['id'],
+            group_specs=group_specs,
+            cleanup_in_class=False,
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+
+        extra_spec = self.shares_v2_client.get_share_group_type_spec(
+            sg_type['id'], 'key1')
+
+        self.assertEqual({'key1': group_specs['key1']}, extra_spec)
+
+    @decorators.idempotent_id('eef69171-9757-423c-8cd4-487cbd84ca24')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    def test_get_all_share_group_type_extra_specs(self):
+        name = data_utils.rand_name('share-group-type')
+        group_specs = {'key': 'value'}
+
+        sg_type = self.create_share_group_type(
+            name=name,
+            share_types=self.share_type['id'],
+            group_specs=group_specs,
+            cleanup_in_class=False,
+            version=constants.MIN_SHARE_GROUP_MICROVERSION)
+
+        extra_specs = self.shares_v2_client.get_share_group_type_specs(
+            sg_type['id'])
+
+        self.assertDictMatch(group_specs, extra_specs['group_specs'])
+
     @decorators.idempotent_id('15b44580-a34d-4e0d-a77b-0e76b45d6199')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     @ddt.data(

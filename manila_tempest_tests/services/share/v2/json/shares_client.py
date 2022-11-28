@@ -1299,7 +1299,7 @@ class SharesV2Client(shares_client.SharesClient):
 
     def get_share_group_type_spec(self, share_group_type_id, group_spec_key,
                                   version=LATEST_MICROVERSION):
-        uri = "group-types/%s/group_specs/%s" % (
+        uri = "share-group-types/%s/group-specs/%s" % (
             share_group_type_id, group_spec_key)
         headers, extra_headers = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
@@ -1309,9 +1309,9 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_share_group_type_specs(self, share_group_type_id, params=None,
-                                    version=LATEST_MICROVERSION):
-        uri = "share-group-types/%s/group_specs" % share_group_type_id
+    def get_share_group_type_specs(self, share_group_type_id, params=None,
+                                   version=LATEST_MICROVERSION):
+        uri = "share-group-types/%s/group-specs" % share_group_type_id
         headers, extra_headers = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         if params is not None:
