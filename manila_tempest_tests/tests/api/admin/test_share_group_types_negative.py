@@ -44,6 +44,7 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
         cls.share_group_type = cls.create_share_group_type(
             data_utils.rand_name("unique_sgt_name"),
             share_types=[cls.share_type['id']],
+            group_specs={"key": "value"},
             client=cls.admin_shares_v2_client)
 
     @decorators.idempotent_id('1f8e3f98-4df7-4383-94d6-4ad058ef79c1')
@@ -163,3 +164,27 @@ class ShareGroupTypesAdminNegativeTest(base.BaseSharesMixedTest):
             self.admin_shares_v2_client.remove_access_from_share_group_type,
             data_utils.rand_name("fake"),
             self.admin_shares_v2_client.tenant_id)
+
+    @decorators.idempotent_id('3e763f5b-6663-4620-9471-ed3050da6201')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_try_get_share_group_type_extra_specs_with_user(self):
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.shares_v2_client.get_share_group_type_specs,
+            self.share_group_type['id'])
+
+    @decorators.idempotent_id('2264f7eb-3ff0-47e9-8ab0-54694113db3d')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_try_get_extra_specs_from_nonexistent_share_group_type(self):
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.admin_shares_v2_client.get_share_group_type_specs,
+            data_utils.rand_name('fake'))
+
+    @decorators.idempotent_id('2be79455-0ce7-4ca6-818f-40651ba79c6e')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_try_get_extra_spec_with_nonexistent_key(self):
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.admin_shares_v2_client.get_share_group_type_spec,
+            self.share_group_type['id'], 'fake_key')
