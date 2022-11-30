@@ -1343,10 +1343,10 @@ class SharesV2Client(shares_client.SharesClient):
         return self.create_share_group_type_specs(
             share_group_type_id, group_specs_dict, version=version)
 
-    def delete_share_group_type_spec(self, share_type_id, group_spec_key,
+    def delete_share_group_type_spec(self, share_group_type_id, group_spec_key,
                                      version=LATEST_MICROVERSION):
         uri = "share-group-types/%s/group-specs/%s" % (
-            share_type_id, group_spec_key)
+            share_group_type_id, group_spec_key)
         headers, extra_headers = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         resp, body = self.delete(uri, headers=headers,
