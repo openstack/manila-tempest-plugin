@@ -21,6 +21,7 @@ import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -93,7 +94,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_try_update_invalid_keys_sh_server_exists(self):
-        ss_data = self.generate_security_service_data()
+        ss_data = utils.generate_security_service_data()
         ss = self.create_security_service(**ss_data)
 
         sn = self.shares_client.get_share_network(
@@ -129,7 +130,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('288dbf42-ee22-4445-8363-7ebb1c3d89c9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_deleted_security_service(self):
-        data = self.generate_security_service_data()
+        data = utils.generate_security_service_data()
         ss = self.create_security_service(**data)
         self.assertDictContainsSubset(data, ss)
 

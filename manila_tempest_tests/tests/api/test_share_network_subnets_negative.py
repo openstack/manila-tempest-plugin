@@ -55,7 +55,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('d20b6105-22d1-4fc0-8468-45dd019240c0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_share_network_subnet_share_network_not_found(self):
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.create_subnet,
                           'fake_inexistent_id',
@@ -94,7 +94,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_share_network_subnet_missing_parameters(self):
         # Generate subnet data
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         data['availability_zone'] = self.az_name
 
         data.pop('neutron_net_id')
@@ -122,7 +122,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_deleted_subnet(self):
         # Generate subnet data
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         data['share_network_id'] = self.share_network_id
         az = self.shares_v2_client.list_availability_zones(
             )['availability_zones'][0]

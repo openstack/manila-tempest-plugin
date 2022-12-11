@@ -165,7 +165,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
 
-        ss_data = cls.generate_security_service_data()
+        ss_data = utils.generate_security_service_data()
         cls.ss_ldap = cls.create_security_service(**ss_data)
 
         cls.data_sn_with_ldap_ss = {
@@ -219,7 +219,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_delete_share_network(self):
         # generate data for share network
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
 
         # create share network
         created = self.shares_client.create_share_network(
@@ -242,7 +242,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @decorators.idempotent_id('1837fdd3-8068-4e88-bc50-9224498f84c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_share_network(self):
-        update_data = self.generate_share_network_data()
+        update_data = utils.generate_share_network_data()
         updated = self.shares_client.update_share_network(
             self.sn_with_ldap_ss["id"],
             **update_data)['share_network']
@@ -268,7 +268,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_recreate_share_network(self):
         # generate data for share network
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
 
         # create share network
         sn1 = self.shares_client.create_share_network(**data)['share_network']
@@ -288,7 +288,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_two_share_networks_with_same_net_and_subnet(self):
         # generate data for share network
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
 
         # create first share network
         sn1 = self.create_share_network(**data)

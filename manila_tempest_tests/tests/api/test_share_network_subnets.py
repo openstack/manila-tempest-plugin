@@ -61,7 +61,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         az_name = az['name']
 
         # Generate subnet data
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         data['share_network_id'] = share_network['id']
         data['availability_zone'] = az_name
 
@@ -95,7 +95,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         az_name = az['name']
 
         # Generate subnet data
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         data['share_network_id'] = share_network['id']
         data['availability_zone'] = az_name
 

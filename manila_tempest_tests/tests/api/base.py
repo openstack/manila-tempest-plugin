@@ -935,40 +935,6 @@ class BaseSharesTest(test.BaseTestCase):
                                     "cleanup '%s'. Skipping.", res["type"])
                 res["deleted"] = True
 
-    @classmethod
-    def generate_share_network_data(self):
-        data = {
-            "name": data_utils.rand_name("sn-name"),
-            "description": data_utils.rand_name("sn-desc"),
-            "neutron_net_id": data_utils.rand_name("net-id"),
-            "neutron_subnet_id": data_utils.rand_name("subnet-id"),
-        }
-        return data
-
-    @classmethod
-    def generate_subnet_data(self):
-        data = {
-            "neutron_net_id": data_utils.rand_name("net-id"),
-            "neutron_subnet_id": data_utils.rand_name("subnet-id"),
-        }
-        return data
-
-    @classmethod
-    def generate_security_service_data(self, set_ou=False):
-        data = {
-            "name": data_utils.rand_name("ss-name"),
-            "description": data_utils.rand_name("ss-desc"),
-            "dns_ip": utils.rand_ip(),
-            "server": utils.rand_ip(),
-            "domain": data_utils.rand_name("ss-domain"),
-            "user": data_utils.rand_name("ss-user"),
-            "password": data_utils.rand_name("ss-password"),
-        }
-        if set_ou:
-            data["ou"] = data_utils.rand_name("ss-ou")
-
-        return data
-
     # Useful assertions
     def assertDictMatch(self, d1, d2, approx_equal=False, tolerance=0.001):
         """Assert two dicts are equivalent.

@@ -146,7 +146,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_map_two_ss_with_same_type_to_sn(self):
         # create share network
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
 
         sn = self.create_share_network(client=self.cl,
                                        add_security_services=False, **data)
@@ -155,7 +155,7 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         # create security services with same type
         security_services = []
         for i in range(2):
-            data = self.generate_security_service_data()
+            data = utils.generate_security_service_data()
             ss = self.create_security_service(client=self.cl, **data)
             self.assertDictContainsSubset(data, ss)
             security_services.insert(i, ss)
@@ -173,14 +173,14 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_ss_that_assigned_to_sn(self):
         # create share network
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
 
         sn = self.create_share_network(client=self.cl,
                                        add_security_services=False, **data)
         self.assertDictContainsSubset(data, sn)
 
         # create security service
-        data = self.generate_security_service_data()
+        data = utils.generate_security_service_data()
 
         ss = self.create_security_service(client=self.cl, **data)
         self.assertDictContainsSubset(data, ss)
