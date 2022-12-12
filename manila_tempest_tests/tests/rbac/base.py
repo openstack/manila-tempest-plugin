@@ -129,6 +129,20 @@ class ShareRbacBaseTests(object):
         return share_group_type
 
     @classmethod
+    def create_share_group(cls, client, share_group_type_id, share_type_ids):
+        name = data_utils.rand_name('share-group')
+        share_group = client.create_share_group(
+            name=name, share_group_type_id=share_group_type_id,
+            share_type_ids=share_type_ids)['share_group']
+        waiters.wait_for_resource_status(
+            client, share_group['id'], 'available',
+            resource_name='share_group')
+        cls.addClassResourceCleanup(
+            cls.delete_resource, client,
+            share_group_id=share_group['id'])
+        return share_group
+
+    @classmethod
     def get_share_type(cls):
         return cls.shares_v2_client.get_default_share_type()['share_type']
 
