@@ -155,7 +155,7 @@ class ProjectMemberTests(ShareRbacShareTypesTests, base.BaseSharesTest):
 
 class ProjectReaderTests(ShareRbacShareTypesTests, base.BaseSharesTest):
 
-    credentials = ['project_reader', 'project_member']
+    credentials = ['project_reader']
 
     @decorators.idempotent_id('f4c352c4-c12b-4722-9fe7-9a2ec639ee63')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
