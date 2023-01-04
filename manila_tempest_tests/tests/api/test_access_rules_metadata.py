@@ -55,8 +55,8 @@ class AccessRulesMetadataTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(AccessRulesMetadataTest, cls).resource_setup()
-        cls.protocol = cls.shares_v2_client.share_protocol
-        cls.access_type, __ = cls._get_access_rule_data_from_config()
+        cls.access_type, __ = utils.get_access_rule_data_from_config(
+            cls.shares_v2_client.share_protocol)
         int_range = range(20, 50)
         cls.access_to = {
             # list of unique values is required for ability to create lots
