@@ -22,6 +22,8 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 import testtools
 
+from manila_tempest_tests import utils
+
 CONF = config.CONF
 SHARE_NETWORK_SUBNETS_MICROVERSION = '2.51'
 SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
@@ -139,6 +141,40 @@ def rand_ipv6_ip(network=False):
         ip_network = ip.IPNetwork(address)
         return '/'.join((str(ip_network.network), mask_length))
     return address
+
+
+def generate_share_network_data():
+    data = {
+        "name": data_utils.rand_name("sn-name"),
+        "description": data_utils.rand_name("sn-desc"),
+        "neutron_net_id": data_utils.rand_name("net-id"),
+        "neutron_subnet_id": data_utils.rand_name("subnet-id"),
+    }
+    return data
+
+
+def generate_subnet_data():
+    data = {
+        "neutron_net_id": data_utils.rand_name("net-id"),
+        "neutron_subnet_id": data_utils.rand_name("subnet-id"),
+    }
+    return data
+
+
+def generate_security_service_data(set_ou=False):
+    data = {
+        "name": data_utils.rand_name("ss-name"),
+        "description": data_utils.rand_name("ss-desc"),
+        "dns_ip": utils.rand_ip(),
+        "server": utils.rand_ip(),
+        "domain": data_utils.rand_name("ss-domain"),
+        "user": data_utils.rand_name("ss-user"),
+        "password": data_utils.rand_name("ss-password"),
+    }
+    if set_ou:
+        data["ou"] = data_utils.rand_name("ss-ou")
+
+    return data
 
 
 def choose_matching_backend(share, pools, share_type):

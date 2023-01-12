@@ -249,7 +249,7 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
     @utils.skip_if_microversion_not_supported("2.51")
     def test_try_add_replica_nonexistent_subnet(self):
         # Create a new share network only for a specific az
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
         subnet = utils.share_network_get_default_subnet(self.share_network)
         data['neutron_net_id'] = subnet['neutron_net_id']
         data['neutron_subnet_id'] = subnet['neutron_subnet_id']

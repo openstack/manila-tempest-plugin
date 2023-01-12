@@ -17,6 +17,7 @@ from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 class SecurityServicesMappingTest(base.BaseSharesTest):
@@ -30,7 +31,7 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         super(SecurityServicesMappingTest, self).setUp()
 
         # create share network
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
 
         self.sn = self.create_share_network(client=self.cl,
                                             add_security_services=False,
@@ -38,7 +39,7 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         self.assertDictContainsSubset(data, self.sn)
 
         # create security service
-        data = self.generate_security_service_data()
+        data = utils.generate_security_service_data()
 
         self.ss = self.create_security_service(client=self.cl, **data)
         self.assertDictContainsSubset(data, self.ss)

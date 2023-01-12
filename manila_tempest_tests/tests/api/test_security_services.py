@@ -162,7 +162,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     @decorators.idempotent_id('70927e29-4a6a-431a-bbc1-76bc419e0579')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_create_delete_security_service(self):
-        data = self.generate_security_service_data()
+        data = utils.generate_security_service_data()
         self.service_names = ["ldap", "kerberos", "active_directory"]
         for ss_name in self.service_names:
             ss = self.create_security_service(ss_name, **data)
@@ -176,7 +176,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     def test_get_security_service(self, version):
         utils.check_skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
-        data = self.generate_security_service_data(set_ou=with_ou)
+        data = utils.generate_security_service_data(set_ou=with_ou)
 
         if utils.is_microversion_ge(version, '2.0'):
             ss = self.create_security_service(
@@ -196,11 +196,11 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     @decorators.idempotent_id('84d47747-13c8-4ab9-9fc4-a43fbb29ad18')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_update_security_service(self):
-        data = self.generate_security_service_data()
+        data = utils.generate_security_service_data()
         ss = self.create_security_service(**data)
         self.assertDictContainsSubset(data, ss)
 
-        upd_data = self.generate_security_service_data()
+        upd_data = utils.generate_security_service_data()
         updated = self.shares_client.update_security_service(
             ss["id"], **upd_data)['security_service']
 
@@ -211,7 +211,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
 
         if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.44'):
             # update again with ou
-            upd_data_ou = self.generate_security_service_data(set_ou=True)
+            upd_data_ou = utils.generate_security_service_data(set_ou=True)
             updated_ou = self.shares_v2_client.update_security_service(
                 ss["id"], **upd_data_ou)['security_service']
 
@@ -225,7 +225,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_try_update_valid_keys_sh_server_exists(self):
-        ss_data = self.generate_security_service_data()
+        ss_data = utils.generate_security_service_data()
         ss = self.create_security_service(**ss_data)
 
         sn = self.shares_client.get_share_network(
@@ -274,7 +274,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_try_list_security_services_all_tenants_ignored(self):
         alt_security_service = self.create_security_service(
-            **self.generate_security_service_data(),
+            **utils.generate_security_service_data(),
             client=self.alt_shares_v2_client)
         alt_security_service_id = alt_security_service['id']
         sec_service_list = self.shares_client.list_security_services(

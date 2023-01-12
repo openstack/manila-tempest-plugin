@@ -88,7 +88,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('9166b81c-d6ab-4592-bcf7-9410250e30dd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_deleted_share_network(self):
-        data = self.generate_share_network_data()
+        data = utils.generate_share_network_data()
         sn = self.create_share_network(**data)
         self.assertDictContainsSubset(data, sn)
 
@@ -166,7 +166,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
         az_name = az['name']
 
         # Generate subnet data
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         data['share_network_id'] = share_network['id']
         data['availability_zone'] = az_name
 
@@ -200,7 +200,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @decorators.idempotent_id('f6f47c64-6821-4d4a-aa7d-3b0244158197')
     def test_check_add_share_network_subnet_share_network_not_found(self):
-        data = self.generate_subnet_data()
+        data = utils.generate_subnet_data()
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.subnet_create_check,
                           'fake_inexistent_id',

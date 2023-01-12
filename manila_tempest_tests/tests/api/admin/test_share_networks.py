@@ -18,6 +18,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests.tests.api import test_share_networks
+from manila_tempest_tests import utils
 
 
 class ShareNetworkAdminTest(base.BaseSharesMixedTest,
@@ -26,7 +27,7 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
     @classmethod
     def resource_setup(cls):
         super(ShareNetworkAdminTest, cls).resource_setup()
-        ss_data = cls.generate_security_service_data()
+        ss_data = utils.generate_security_service_data()
         cls.ss_ldap = cls.create_security_service(**ss_data)
 
         cls.data_sn_with_ldap_ss = {
