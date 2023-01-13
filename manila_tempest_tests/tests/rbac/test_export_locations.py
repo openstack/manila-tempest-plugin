@@ -77,13 +77,15 @@ class TestProjectAdminTestsNFS(ShareRbacExportLocationsTests,
     @decorators.idempotent_id('c8d75c9f-104b-48a8-9817-17280ce516a8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_export_locations(self):
-        self.do_request(
+        locations = self.do_request(
             'list_share_export_locations', expected_status=200,
-            share_id=self.share['id'])
+            share_id=self.share['id'])['export_locations']
+        self.assertNotEmpty(locations)
 
-        self.do_request(
+        alt_locations = self.do_request(
             'list_share_export_locations', expected_status=200,
-            share_id=self.alt_share['id'])
+            share_id=self.alt_share['id'])['export_locations']
+        self.assertNotEmpty(alt_locations)
 
     @decorators.idempotent_id('01ac6355-fcad-4af8-b0ad-748fc111051d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -122,9 +124,10 @@ class TestProjectMemberTestsNFS(ShareRbacExportLocationsTests,
     @decorators.idempotent_id('b25351bb-102f-437e-a0c1-01d926fa0a7d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_export_locations(self):
-        self.do_request(
+        locations = self.do_request(
             'list_share_export_locations', expected_status=200,
-            share_id=self.share['id'])
+            share_id=self.share['id'])['export_locations']
+        self.assertNotEmpty(locations)
 
         self.do_request(
             'list_share_export_locations', expected_status=lib_exc.Forbidden,
