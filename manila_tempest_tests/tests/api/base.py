@@ -757,7 +757,7 @@ class BaseSharesTest(test.BaseTestCase):
         share_network_subnet = client.create_subnet(
             **kwargs)['share_network_subnet']
         resource = {
-            "type": "share-network-subnet",
+            "type": "share_network_subnet",
             "id": share_network_subnet["id"],
             "extra_params": {
                 "share_network_id": share_network_subnet["share_network_id"]
