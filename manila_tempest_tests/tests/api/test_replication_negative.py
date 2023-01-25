@@ -193,7 +193,8 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data('2.11', '2.73')
     def test_add_access_rule_share_replica_error_status(self, version):
-        '''From 2.74, we can add rules even if replicas are in error state.'''
+        """From 2.74, we can add rules even if replicas are in error state."""
+        utils.check_skip_if_microversion_not_supported(version)
         access_type, access_to = utils.get_access_rule_data_from_config(
             self.shares_v2_client.share_protocol)
         # Create the replica
