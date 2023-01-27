@@ -1,0 +1,131 @@
+# Stable wallaby branch jobs run with a pinned version of manila-tempest-plugin
+
+- job:
+    name: manila-tempest-plugin-generic-scenario-wallaby
+    description: |
+      Test the scenario test cases on the generic driver multibackend
+      (DHSS=True) with NFS and CIFS in the stable/wallaby branch
+    parent: manila-tempest-plugin-generic-scenario-base
+    vars: &manila_tempest_image_pinned_vars
+      devstack_localrc:
+        # NOTE(carloss): Pinning manila service image to a Focal version,
+        # since on Zed we moved to Ubuntu Jammy (22), and it requires more
+        # VM resources.
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
+    required-projects: &manila-tempest-plugin-pinned-version
+      - name: openstack/manila-tempest-plugin
+        override-checkout: 1.8.0
+
+- job:
+    name: manila-tempest-plugin-generic-wallaby
+    description: |
+      Test the generic driver multibackend (DHSS=True) with NFS and CIFS in
+      stable wallaby
+    parent: manila-tempest-plugin-generic-base
+    vars: *manila_tempest_image_pinned_vars
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-lvm-wallaby
+    description: |
+      Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
+      environment with IPv6 control plane endpoints on the stable/wallaby
+      branch
+    parent: manila-tempest-plugin-lvm-base
+    vars: *manila_tempest_image_pinned_vars
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-cephfs-native-wallaby
+    description: Test CephFS Native (DHSS=False) in stable/wallaby
+    parent: manila-tempest-plugin-cephfs-native-base
+    vars:
+      devstack_localrc:
+        # NOTE(gouthamr): The following need to use the latest images, however, there's a bug
+        # with cephfs on Ubuntu 20.04 LTS: https://tracker.ceph.com/issues/47236
+        # the latest image is built as https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-1.3.0-58-g2859569.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-1.3.0-58-g2859569
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-cephfs-nfs-wallaby
+    description: Test CephFS NFS (DHSS=False) in stable/wallaby
+    parent: manila-tempest-plugin-cephfs-nfs-base
+    vars: *manila_tempest_image_pinned_vars
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-zfsonlinux-wallaby
+    description: |
+      Test ZFSOnLinux multibackend (DHSS=False) with postgresql db in
+      stable wallaby
+    parent: manila-tempest-plugin-zfsonlinux-base
+    vars: *manila_tempest_image_pinned_vars
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-dummy-no-dhss-wallaby
+    description: Test the Dummy driver with DHSS=False in stable wallaby
+    parent: manila-tempest-plugin-dummy-no-dhss
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-dummy-dhss-wallaby
+    description: Test the Dummy driver with DHSS=True in stable wallaby
+    parent: manila-tempest-plugin-dummy-dhss
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-container-wallaby
+    description: |
+        Test the container driver multibackend (DHSS=True) with CIFS
+        and postgresql db. API only, in a minimal devstack in stable wallaby
+    parent: manila-tempest-plugin-container
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-glusterfs-native-wallaby
+    description: |
+      Test the GlusterFS driver (DHSS=False) with the native GlusterFS
+      protocol in stable wallaby
+    parent: manila-tempest-plugin-glusterfs-native
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-glusterfs-nfs-wallaby
+    description: |
+      Test the GlusterFS driver (DHSS=False) with the native NFS protocol in
+      stable wallaby
+    parent: manila-tempest-plugin-glusterfs-nfs
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- job:
+    name: manila-tempest-plugin-lvm-fips-wallaby
+    description: |
+      Test the LVM driver (DHSS=False) in a FIPS-enabled environment
+    parent: manila-tempest-plugin-lvm-fips-base
+    required-projects: *manila-tempest-plugin-pinned-version
+
+- project-template:
+    name: manila-tempest-plugin-jobs-using-service-image-wallaby
+    description: |
+      Runs jobs that will also perform scenario tests in the stable/wallaby
+      branches.
+    check:
+      jobs:
+        - manila-tempest-plugin-lvm-wallaby
+        - manila-tempest-plugin-generic-scenario-wallaby:
+            voting: false
+        - manila-tempest-plugin-generic-wallaby:
+            voting: false
+        - manila-tempest-plugin-cephfs-native-wallaby:
+            voting: false
+        - manila-tempest-plugin-cephfs-nfs-wallaby:
+            voting: false
+        - manila-tempest-plugin-zfsonlinux-wallaby:
+            voting: false
+    gate:
+      jobs:
+        - manila-tempest-plugin-lvm-wallaby

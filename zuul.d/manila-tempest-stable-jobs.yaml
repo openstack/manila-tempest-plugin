@@ -1,4 +1,4 @@
-# Stable wallaby / xena / yoga branch jobs to test the trunk version of
+# Stable xena / yoga / zed branch jobs to test the trunk version of
 # manila-tempest-plugin against those released stable branches of manila
 
 - job:
@@ -7,7 +7,7 @@
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-generic-scenario-base
-    branches: &manila_tempest_image_pinned_branches ^(stable/(yoga|xena|wallaby)).*$
+    branches: &manila_tempest_image_pinned_branches ^(stable/(zed|yoga|xena)).*$
     vars: &manila_tempest_image_pinned_vars
       devstack_localrc:
         # NOTE(carloss): Pinning manila service image to a Focal version,
@@ -68,7 +68,7 @@
 - job:
     name: manila-tempest-plugin-lvm-fips-stable
     parent: manila-tempest-plugin-lvm-fips-base
-    branches: ^(stable/(yoga|xena|wallaby)).*$
+    branches: ^(stable/(yoga|xena)).*$
     vars: *manila_tempest_image_pinned_vars
 
 - job:
@@ -83,13 +83,6 @@
     parent: manila-tempest-plugin-lvm-base
     nodeset: openstack-single-node-focal
     override-checkout: stable/xena
-    vars: *manila_tempest_image_pinned_vars
-
-- job:
-    name: manila-tempest-plugin-lvm-wallaby
-    parent: manila-tempest-plugin-lvm-base
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/wallaby
     vars: *manila_tempest_image_pinned_vars
 
 - project-template:
