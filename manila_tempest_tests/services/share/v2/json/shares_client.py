@@ -1159,8 +1159,8 @@ class SharesV2Client(shares_client.SharesClient):
         headers, _junk = utils.get_extra_headers(
             version, constants.SHARE_GROUPS_GRADUATION_VERSION)
         return self.reset_state(
-            share_group_id, status=status, s_type='groups', headers=headers,
-            version=version)
+            share_group_id, status=status, s_type='share-groups',
+            headers=headers, version=version)
 
     def share_group_force_delete(self, share_group_id,
                                  version=LATEST_MICROVERSION):
