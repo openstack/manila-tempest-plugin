@@ -420,7 +420,7 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
-            'reset_state', expected_status=lib_exc.NotFound,
+            'reset_state', expected_status=lib_exc.Forbidden,
             s_id=alt_share['id'], status="error")
 
     @decorators.idempotent_id('56a07567-d0a9-460a-9267-fcd82306a371')
@@ -465,7 +465,7 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
-            'set_metadata', expected_status=lib_exc.Forbidden,
+            'set_metadata', expected_status=lib_exc.NotFound,
             resource_id=alt_share['id'], metadata={'key': 'value'})
 
     @decorators.idempotent_id('a69a2b85-3374-4621-83a9-89937ddb520b')
@@ -482,7 +482,7 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             self.alt_project_share_v2_client, self.share_type['id'],
             metadata=metadata)
         self.do_request(
-            'get_metadata', expected_status=lib_exc.Forbidden,
+            'get_metadata', expected_status=lib_exc.NotFound,
             resource_id=alt_share['id'])
 
     @decorators.idempotent_id('bea5518a-338e-494d-9034-1d03658ed58b')
@@ -498,7 +498,7 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             self.alt_project_share_v2_client, self.share_type['id'],
             metadata={'key': 'value'})
         self.do_request(
-            'delete_metadata', expected_status=lib_exc.Forbidden,
+            'delete_metadata', expected_status=lib_exc.NotFound,
             resource_id=alt_share['id'], key='key')
 
 
@@ -551,7 +551,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
-            'delete_share', expected_status=lib_exc.NotFound,
+            'delete_share', expected_status=lib_exc.Forbidden,
             share_id=alt_share['id'])
 
     @decorators.idempotent_id('cb040955-5897-409f-aea0-84b6ae16b77e')
@@ -596,7 +596,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
             self.alt_project_share_v2_client, self.share_type['id'],
             size=CONF.share.share_size + 1)
         self.do_request(
-            'shrink_share', expected_status=lib_exc.NotFound,
+            'shrink_share', expected_status=lib_exc.Forbidden,
             share_id=alt_share['id'], new_size=CONF.share.share_size)
 
     @decorators.idempotent_id('0b57aedb-6b68-498f-814e-173c47e6c307')
@@ -612,7 +612,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
         alt_share = self.create_share(
             self.alt_project_share_v2_client, self.share_type['id'])
         self.do_request(
-            'extend_share', expected_status=lib_exc.NotFound,
+            'extend_share', expected_status=lib_exc.Forbidden,
             share_id=alt_share['id'], new_size=CONF.share.share_size + 1)
 
     @decorators.idempotent_id('3def3f4e-33fc-4726-8818-6cffbc2cab51')
