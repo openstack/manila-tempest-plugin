@@ -10,7 +10,6 @@
         - manila-tempest-plugin-dummy-dhss
         - manila-tempest-plugin-lvm-yoga
         - manila-tempest-plugin-lvm-xena
-        - manila-tempest-plugin-lvm-wallaby
         - manila-tempest-plugin-dummy-no-dhss-rbac
         - manila-tempest-plugin-container:
             voting: false
