@@ -34,6 +34,8 @@ class ShareRbacManageShareTests(rbac_base.ShareRbacBaseTests,
     @classmethod
     def skip_checks(cls):
         super(ShareRbacManageShareTests, cls).skip_checks()
+        if not CONF.share.run_manage_unmanage_tests:
+            raise cls.skipException('Manage/unmanage tests are disabled.')
         if cls.protocol not in CONF.share.enable_protocols:
             message = "%s tests are disabled" % cls.protocol
             raise cls.skipException(message)
