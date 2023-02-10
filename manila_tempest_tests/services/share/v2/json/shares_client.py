@@ -208,29 +208,33 @@ class SharesV2Client(shares_client.SharesClient):
         """
         if "share_instance_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_instance, kwargs.get("share_instance_id"))
+                self.get_share_instance, kwargs.get("share_instance_id"),
+                "share_instance")
         elif "share_group_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_group, kwargs.get("share_group_id"))
+                self.get_share_group, kwargs.get("share_group_id"),
+                "share_group")
         elif "share_group_snapshot_id" in kwargs:
             return self._is_resource_deleted(
                 self.get_share_group_snapshot,
-                kwargs.get("share_group_snapshot_id"))
+                kwargs.get("share_group_snapshot_id"), "share_group_snapshot")
         elif "share_group_type_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_group_type, kwargs.get("share_group_type_id"))
+                self.get_share_group_type, kwargs.get("share_group_type_id"),
+                "share_group_type")
         elif "replica_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_replica, kwargs.get("replica_id"))
+                self.get_share_replica, kwargs.get("replica_id"),
+                "share_replica")
         elif "message_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_message, kwargs.get("message_id"))
+                self.get_message, kwargs.get("message_id"), "message")
         elif "share_network_subnet_id" in kwargs:
             subnet_kwargs = {
-                "sn_id": kwargs["extra_params"]["share_network_id"]}
+                "share_network_id": kwargs["sn_id"]}
             return self._is_resource_deleted(
                 self.get_subnet, kwargs.get("share_network_subnet_id"),
-                **subnet_kwargs
+                "share_network_subnet", **subnet_kwargs
             )
         else:
             return super(SharesV2Client, self).is_resource_deleted(

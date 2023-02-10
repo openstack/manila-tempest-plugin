@@ -898,69 +898,80 @@ class BaseSharesTest(test.BaseTestCase):
                 res["deleted"] = False
             if "client" not in res.keys():
                 res["client"] = cls.shares_client
-            if not res["deleted"]:
-                res_id = res['id']
-                client = res["client"]
-                with handle_cleanup_exceptions():
-                    if res["type"] == "share":
-                        cls.clear_share_replicas(res_id)
-                        share_group_id = res.get('share_group_id')
-                        if share_group_id:
-                            params = {'share_group_id': share_group_id}
-                            client.delete_share(res_id, params=params)
+            if not (res["deleted"]):
+                try:
+                    res_id = res['id']
+                    client = res["client"]
+                    with handle_cleanup_exceptions():
+                        if res["type"] == "share":
+                            cls.clear_share_replicas(res_id)
+                            share_group_id = res.get('share_group_id')
+                            if share_group_id:
+                                params = {'share_group_id': share_group_id}
+                                client.delete_share(res_id, params=params)
+                            else:
+                                client.delete_share(res_id)
+                            client.wait_for_resource_deletion(share_id=res_id)
+                        elif res["type"] == "snapshot":
+                            client.delete_snapshot(res_id)
+                            client.wait_for_resource_deletion(
+                                snapshot_id=res_id)
+                        elif (res["type"] == "share_network" and
+                                res_id != CONF.share.share_network_id):
+                            client.delete_share_network(res_id)
+                            client.wait_for_resource_deletion(sn_id=res_id)
+                        elif res["type"] == "dissociate_security_service":
+                            sn_id = res["extra_params"]["share_network_id"]
+                            client.remove_sec_service_from_share_network(
+                                sn_id=sn_id, ss_id=res_id
+                            )
+                        elif res["type"] == "security_service":
+                            client.delete_security_service(res_id)
+                            client.wait_for_resource_deletion(ss_id=res_id)
+                        elif res["type"] == "share_type":
+                            client.delete_share_type(res_id)
+                            client.wait_for_resource_deletion(st_id=res_id)
+                        elif res["type"] == "share_group":
+                            client.delete_share_group(res_id)
+                            client.wait_for_resource_deletion(
+                                share_group_id=res_id)
+                        elif res["type"] == "share_group_type":
+                            client.delete_share_group_type(res_id)
+                            client.wait_for_resource_deletion(
+                                share_group_type_id=res_id)
+                        elif res["type"] == "share_group_snapshot":
+                            client.delete_share_group_snapshot(res_id)
+                            client.wait_for_resource_deletion(
+                                share_group_snapshot_id=res_id)
+                        elif res["type"] == "share_replica":
+                            client.delete_share_replica(res_id)
+                            client.wait_for_resource_deletion(
+                                replica_id=res_id)
+                        elif res["type"] == "share_backup":
+                            client.delete_share_backup(res_id)
+                            client.wait_for_resource_deletion(backup_id=res_id)
+                        elif res["type"] == "share_network_subnet":
+                            sn_id = res["extra_params"]["share_network_id"]
+                            client.delete_subnet(sn_id, res_id)
+                            client.wait_for_resource_deletion(
+                                share_network_subnet_id=res_id,
+                                sn_id=sn_id)
+                        elif res["type"] == "quotas":
+                            user_id = res.get('user_id')
+                            client.reset_quotas(res_id, user_id=user_id)
+                        elif res["type"] == "resource_lock":
+                            client.delete_resource_lock(res_id)
                         else:
-                            client.delete_share(res_id)
-                        client.wait_for_resource_deletion(share_id=res_id)
-                    elif res["type"] == "snapshot":
-                        client.delete_snapshot(res_id)
-                        client.wait_for_resource_deletion(snapshot_id=res_id)
-                    elif (res["type"] == "share_network" and
-                            res_id != CONF.share.share_network_id):
-                        client.delete_share_network(res_id)
-                        client.wait_for_resource_deletion(sn_id=res_id)
-                    elif res["type"] == "dissociate_security_service":
-                        sn_id = res["extra_params"]["share_network_id"]
-                        client.remove_sec_service_from_share_network(
-                            sn_id=sn_id, ss_id=res_id
-                        )
-                    elif res["type"] == "security_service":
-                        client.delete_security_service(res_id)
-                        client.wait_for_resource_deletion(ss_id=res_id)
-                    elif res["type"] == "share_type":
-                        client.delete_share_type(res_id)
-                        client.wait_for_resource_deletion(st_id=res_id)
-                    elif res["type"] == "share_group":
-                        client.delete_share_group(res_id)
-                        client.wait_for_resource_deletion(
-                            share_group_id=res_id)
-                    elif res["type"] == "share_group_type":
-                        client.delete_share_group_type(res_id)
-                        client.wait_for_resource_deletion(
-                            share_group_type_id=res_id)
-                    elif res["type"] == "share_group_snapshot":
-                        client.delete_share_group_snapshot(res_id)
-                        client.wait_for_resource_deletion(
-                            share_group_snapshot_id=res_id)
-                    elif res["type"] == "share_replica":
-                        client.delete_share_replica(res_id)
-                        client.wait_for_resource_deletion(replica_id=res_id)
-                    elif res["type"] == "share_backup":
-                        client.delete_share_backup(res_id)
-                        client.wait_for_resource_deletion(backup_id=res_id)
-                    elif res["type"] == "share_network_subnet":
-                        sn_id = res["extra_params"]["share_network_id"]
-                        client.delete_subnet(sn_id, res_id)
-                        client.wait_for_resource_deletion(
-                            share_network_subnet_id=res_id,
-                            sn_id=sn_id)
-                    elif res["type"] == "quotas":
-                        user_id = res.get('user_id')
-                        client.reset_quotas(res_id, user_id=user_id)
-                    elif res["type"] == "resource_lock":
-                        client.delete_resource_lock(res_id)
-                    else:
-                        LOG.warning("Provided unsupported resource type for "
-                                    "cleanup '%s'. Skipping.", res["type"])
+                            LOG.warning("Provided unsupported resource type "
+                                        "for cleanup '%s'. Skipping.",
+                                        res["type"])
+                except share_exceptions.ResourceReleaseFailed as e:
+                    # Resource is on error deleting state, so we remove it from
+                    # the list to delete, since it cannot be deleted anymore.
+                    # It raises because the current cleanup class or method
+                    # must fail.
+                    res["deleted"] = True
+                    raise e
                 res["deleted"] = True
 
     # Useful assertions

@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixed bug #2006792. Now the clear resources function has an error
+    treatment to avoid time out exceptions. Also fix the returned
+    object in the _is_resource_deleted function

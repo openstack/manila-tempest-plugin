@@ -304,37 +304,41 @@ class SharesClient(rest_client.RestClient):
                 return True
             else:
                 return self._is_resource_deleted(
-                    self.get_share, kwargs.get("share_id"))
+                    self.get_share, kwargs.get("share_id"), "share")
         elif "snapshot_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_snapshot, kwargs.get("snapshot_id"))
+                self.get_snapshot, kwargs.get("snapshot_id"), "snapshot")
         elif "sn_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_network, kwargs.get("sn_id"))
+                self.get_share_network, kwargs.get("sn_id"), "share_network")
         elif "ss_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_security_service, kwargs.get("ss_id"))
+                self.get_security_service, kwargs.get("ss_id"),
+                "security_service")
         elif "vt_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_volume_type, kwargs.get("vt_id"))
+                self.get_volume_type, kwargs.get("vt_id"), "volume_type")
         elif "st_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_type, kwargs.get("st_id"))
+                self.get_share_type, kwargs.get("st_id"), "share_type")
         elif "server_id" in kwargs:
             return self._is_resource_deleted(
-                self.show_share_server, kwargs.get("server_id"))
+                self.show_share_server, kwargs.get("server_id"),
+                "share_server")
         elif "backup_id" in kwargs:
             return self._is_resource_deleted(
-                self.get_share_backup, kwargs.get("backup_id"))
+                self.get_share_backup, kwargs.get("backup_id"),
+                "share_backup")
         else:
             raise share_exceptions.InvalidResource(
                 message=str(kwargs))
 
-    def _is_resource_deleted(self, func, res_id, **kwargs):
+    def _is_resource_deleted(self, func, res_id, resource_name, **kwargs):
         try:
-            res = func(res_id, **kwargs)
+            res = func(res_id, **kwargs)[resource_name]
         except exceptions.NotFound:
             return True
+
         if res.get('status') in ['error_deleting', 'error']:
             # Resource has "error_deleting" status and can not be deleted.
             resource_type = func.__name__.split('_', 1)[-1]
