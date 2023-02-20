@@ -49,14 +49,12 @@ class ShareRbacRulesTests(rbac_base.ShareRbacBaseTests, metaclass=abc.ABCMeta):
     def resource_setup(cls):
         super(ShareRbacRulesTests, cls).resource_setup()
         cls.metadata = {u'key': u'value'}
-        cls.access_type, cls.access_to = (
-            utils.get_access_rule_data_from_config(cls.protocol))
 
-    def access(self, share_id, access_level='rw'):
+    def access(self, share_id, access_type, access_to, access_level='rw'):
         access = {}
         access['share_id'] = share_id
-        access['access_type'] = self.access_type
-        access['access_to'] = self.access_to
+        access['access_type'] = access_type
+        access['access_to'] = access_to
         access['access_level'] = access_level
         return access
 
@@ -80,7 +78,6 @@ class ShareRbacRulesTests(rbac_base.ShareRbacBaseTests, metaclass=abc.ABCMeta):
                 client.wait_for_resource_deletion, rule_id=rule['id'],
                 share_id=share_id)
             self.addCleanup(client.delete_access_rule, share_id, rule['id'])
-
         return rule
 
     @abc.abstractmethod
@@ -130,31 +127,35 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('5b6897d1-4b2a-490c-990e-941ea4893f47')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_get_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'get_access_rule', expected_status=200, access_id=access['id'])
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'get_access_rule', expected_status=200, access_id=alt_access['id'])
 
     @decorators.idempotent_id('f8e9a2bb-ccff-4fc5-8d61-2930f87406cd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         access_list = self.do_request(
             'list_access_rules', expected_status=200,
             share_id=self.share['id'])['access_list'][0]['id']
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         alt_access_list = self.do_request(
             'list_access_rules', expected_status=200,
             share_id=self.share['id'])['access_list'][0]['id']
@@ -165,9 +166,11 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('b4d7a91c-a75e-4ad9-93cb-8e5234fea97a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_grant_access_rule(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.do_request(
             'create_access_rule', expected_status=200,
-            **self.access(self.share['id']))['access']
+            **self.access(self.share['id'], access_type, access_to))['access']
         self.addCleanup(
             self.client.wait_for_resource_deletion, rule_id=access['id'],
             share_id=self.share['id'])
@@ -176,7 +179,8 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
 
         alt_access = self.do_request(
             'create_access_rule', expected_status=200,
-            **self.access(self.alt_share['id']))['access']
+            **self.access(
+                self.alt_share['id'], access_type, access_to))['access']
         self.addCleanup(
             self.client.wait_for_resource_deletion, rule_id=alt_access['id'],
             share_id=self.alt_share['id'])
@@ -187,35 +191,43 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('e24d7018-cb49-4306-9947-716b4e4250c5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type,
-            access_to=self.access_to, cleanup=False)
+            access_type=access_type,
+            access_to=access_to, cleanup=False)
         self.do_request(
             'delete_access_rule', expected_status=202,
             share_id=self.share['id'], rule_id=access['id'])
+        self.client.wait_for_resource_deletion(
+            rule_id=access['id'], share_id=self.share['id'])
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to,
+            access_type=access_type, access_to=access_to,
             cleanup=False)
         self.do_request(
             'delete_access_rule', expected_status=202,
             share_id=self.alt_share['id'], rule_id=alt_access['id'])
+        self.client.wait_for_resource_deletion(
+            rule_id=alt_access['id'], share_id=self.alt_share['id'])
 
     @decorators.idempotent_id('ffc07445-d0d1-4bf9-9fbc-4f409d48bccd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_update_access_rule_metadata(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'update_access_metadata', expected_status=200,
             access_id=access['id'], metadata=self.metadata)
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'update_access_metadata', expected_status=200,
             access_id=alt_access['id'], metadata=self.metadata)
@@ -223,9 +235,11 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('fd580d91-1d8d-4dd0-8484-01c412ddb768')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_access_rule_metadata(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to,
+            access_type=access_type, access_to=access_to,
             metadata=self.metadata)
         self.do_request(
             'delete_access_metadata', expected_status=200,
@@ -233,7 +247,7 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to,
+            access_type=access_type, access_to=access_to,
             metadata=self.metadata)
         self.do_request(
             'delete_access_metadata', expected_status=200,
@@ -256,16 +270,18 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('de643909-88a2-470b-8a14-0417696ec451')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.allow_access(
-            share_client, self.share['id'], access_type=self.access_type,
-            access_to=self.access_to)
+            share_client, self.share['id'], access_type=access_type,
+            access_to=access_to)
         self.do_request(
             'get_access_rule', expected_status=200, access_id=access['id'])
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'get_access_rule', expected_status=lib_exc.NotFound,
             access_id=alt_access['id'])
@@ -273,13 +289,15 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('7c6c4262-5095-4cd7-9d9c-8064009a9055')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.allow_access(
-            share_client, self.share['id'], access_type=self.access_type,
-            access_to=self.access_to)
+            share_client, self.share['id'], access_type=access_type,
+            access_to=access_to)
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
 
         access_list = self.do_request(
             'list_access_rules', expected_status=200,
@@ -294,10 +312,12 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('61cf6f6c-5d7c-48d7-9d5a-e6ea288afdbc')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_grant_access_rule(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.do_request(
             'create_access_rule', client=share_client, expected_status=200,
-            **self.access(self.share['id']))['access']
+            **self.access(self.share['id'], access_type, access_to))['access']
         self.addCleanup(
             self.client.wait_for_resource_deletion, rule_id=access['id'],
             share_id=self.share['id'])
@@ -307,22 +327,26 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
         self.do_request(
             'create_access_rule', client=share_client,
             expected_status=lib_exc.NotFound,
-            **self.access(self.alt_share['id']))
+            **self.access(self.alt_share['id'], access_type, access_to))
 
     @decorators.idempotent_id('8665d1b1-de4c-42d4-93ff-8dc6d2b73a2d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.allow_access(
-            share_client, self.share['id'], access_type=self.access_type,
-            access_to=self.access_to, cleanup=False)
+            share_client, self.share['id'], access_type=access_type,
+            access_to=access_to, cleanup=False)
         self.do_request(
             'delete_access_rule', expected_status=202,
             share_id=self.share['id'], rule_id=access['id'])
+        self.client.wait_for_resource_deletion(
+            rule_id=access['id'], share_id=self.share['id'])
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'delete_access_rule', expected_status=lib_exc.NotFound,
             share_id=self.alt_share['id'], rule_id=alt_access['id'])
@@ -330,17 +354,19 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('c5e84362-6075-425b-bfa3-898abfd9d5a0')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_access_rule_metadata(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.allow_access(
-            share_client, self.share['id'], access_type=self.access_type,
-            access_to=self.access_to)
+            share_client, self.share['id'], access_type=access_type,
+            access_to=access_to)
         self.do_request(
             'update_access_metadata', expected_status=200,
             access_id=access['id'], metadata=self.metadata)
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'update_access_metadata', expected_status=lib_exc.NotFound,
             access_id=alt_access['id'], metadata=self.metadata)
@@ -348,17 +374,19 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
     @decorators.idempotent_id('abb17315-6510-4b6e-ae6c-dd99a6088954')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_access_rule_metadata(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.allow_access(
-            share_client, self.share['id'], access_type=self.access_type,
-            access_to=self.access_to, metadata=self.metadata)
+            share_client, self.share['id'], access_type=access_type,
+            access_to=access_to, metadata=self.metadata)
         self.do_request(
             'delete_access_metadata', expected_status=200,
             access_id=access['id'], key='key')
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to,
+            access_type=access_type, access_to=access_to,
             metadata=self.metadata)
         self.do_request(
             'delete_access_metadata', expected_status=lib_exc.NotFound,
@@ -385,14 +413,6 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
             project_id=cls.persona.credentials.project_id)
         cls.share_member_client = project_member.share_v2.SharesV2Client()
 
-    @classmethod
-    def resource_setup(cls):
-        super(TestProjectReaderTestsNFS, cls).resource_setup()
-        share_type = cls.get_share_type()
-        cls.share = cls.create_share(cls.share_member_client, share_type['id'])
-        cls.alt_share = cls.create_share(
-            cls.alt_project_share_v2_client, share_type['id'])
-
     @decorators.idempotent_id('0eec0f05-f2f3-4500-9d9e-1b77ebc476c2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_get_access(self):
@@ -406,27 +426,31 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     @decorators.idempotent_id('ace870f9-af91-4259-8760-dc7d7107b7ff')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_grant_access_rule(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         self.do_request(
             'create_access_rule', expected_status=lib_exc.Forbidden,
-            **self.access(self.share['id']))
+            **self.access(self.share['id'], access_type, access_to))
 
         self.do_request(
             'create_access_rule', expected_status=lib_exc.Forbidden,
-            **self.access(self.alt_share['id']))
+            **self.access(self.alt_share['id'], access_type, access_to))
 
     @decorators.idempotent_id('7a702c74-8d31-49e3-859a-cc8a78d7915e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'delete_access_rule', expected_status=lib_exc.Forbidden,
             share_id=self.share['id'], rule_id=access['id'])
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'delete_access_rule', expected_status=lib_exc.Forbidden,
             share_id=self.alt_share['id'], rule_id=alt_access['id'])
@@ -434,16 +458,18 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     @decorators.idempotent_id('a61d7f06-6f0e-4da3-b11d-1c3a0b5bd416')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_update_access_rule_metadata(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'update_access_metadata', expected_status=lib_exc.Forbidden,
             access_id=access['id'], metadata=self.metadata)
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to)
+            access_type=access_type, access_to=access_to)
         self.do_request(
             'update_access_metadata', expected_status=lib_exc.Forbidden,
             access_id=alt_access['id'], metadata=self.metadata)
@@ -451,9 +477,11 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     @decorators.idempotent_id('5faf0e0b-b246-4392-901d-9e7d628f0d6e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_delete_access_rule_metadata(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
         access = self.allow_access(
             self.share_member_client, self.share['id'],
-            access_type=self.access_type, access_to=self.access_to,
+            access_type=access_type, access_to=access_to,
             metadata=self.metadata)
         self.do_request(
             'delete_access_metadata', expected_status=lib_exc.Forbidden,
@@ -461,7 +489,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
 
         alt_access = self.allow_access(
             self.alt_project_share_v2_client, self.alt_share['id'],
-            access_type=self.access_type, access_to=self.access_to,
+            access_type=access_type, access_to=access_to,
             metadata=self.metadata)
         self.do_request(
             'delete_access_metadata', expected_status=lib_exc.Forbidden,
