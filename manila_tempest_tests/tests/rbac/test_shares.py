@@ -361,9 +361,8 @@ class TestProjectMemberTestsNFS(ShareRbacSharesTests, base.BaseSharesTest):
             **self.share(self.share_type['id']))['share']
         waiters.wait_for_resource_status(self.client,
                                          share['id'], 'available')
-        self.addCleanup(self.client.wait_for_resource_deletion,
+        self.addCleanup(self.delete_resource, self.client,
                         share_id=share['id'])
-        self.addCleanup(self.client.delete_share, share['id'])
 
     @decorators.idempotent_id('6c546ed7-ebfd-4ac5-a626-d333a25a9e66')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
