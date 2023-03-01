@@ -45,7 +45,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
     @classmethod
     def resource_setup(cls):
         super(ShareGroupsTest, cls).resource_setup()
-        # create share type
+        # create share  type
         extra_specs = {}
         if CONF.share.capability_snapshot_support:
             extra_specs.update({'snapshot_support': True})
@@ -207,6 +207,16 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             share_group['share_network_id'],
             new_share_group['share_network_id'],
             msg)
+
+        # Delete the share group snapshot and wait
+        self.shares_v2_client.delete_share_group_snapshot(
+            sg_snapshot["id"], version=constants.MIN_SHARE_GROUP_MICROVERSION)
+        self.shares_v2_client.wait_for_resource_deletion(
+            share_group_snapshot_id=sg_snapshot["id"])
+
+        # Delete share group, so share network subnet deletion does not fail
+        self.shares_v2_client.delete_share_group(
+            share_group['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
 
     @utils.skip_if_microversion_not_supported("2.34")
     @decorators.idempotent_id('14fd6d88-87ff-4af2-ad17-f95dbd8dcd61')
@@ -387,6 +397,11 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             params=params,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
         self.shares_client.wait_for_resource_deletion(share_id=share['id'])
+
+        # Delete share group
+        self.shares_v2_client.delete_share_group(
+            share_group['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
+
         # Delete subnet
         self.shares_v2_client.delete_subnet(
             new_share_network_id, subnet1['id'])
