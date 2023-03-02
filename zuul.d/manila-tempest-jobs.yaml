@@ -408,6 +408,11 @@
       - openstack/neutron-dynamic-routing
     vars:
       tempest_concurrency: 2
+      # turning off some tests due to exhaustion of disk space
+      # https://bugs.launchpad.net/manila/+bug/2009083
+      tempest_exclude_regex: "\
+        (^manila_tempest_tests.tests.scenario.test_share_extend.TestShareExtendNFSIPv6.test_create_extend_and_write)|\
+        (^manila_tempest_tests.tests.scenario.test_share_shrink.TestShareShrinkNFSIPv6.test_create_shrink_and_write)"
       devstack_services: *devstack-with-ovs # LP 1940324
       devstack_plugins:
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
