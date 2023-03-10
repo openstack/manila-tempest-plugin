@@ -2108,7 +2108,8 @@ class SharesV2Client(shares_client.SharesClient):
 
     def create_subnet(
             self, share_network_id, availability_zone=None,
-            neutron_net_id=None, neutron_subnet_id=None):
+            neutron_net_id=None, neutron_subnet_id=None,
+            metadata=None, version=LATEST_MICROVERSION):
         body = {'share_network_id': share_network_id}
 
         if availability_zone:
@@ -2117,6 +2118,9 @@ class SharesV2Client(shares_client.SharesClient):
             body['neutron_net_id'] = neutron_net_id
         if neutron_subnet_id:
             body['neutron_subnet_id'] = neutron_subnet_id
+
+        if utils.is_microversion_ge(version, "2.78") and metadata:
+            body["metadata"] = metadata
         body = json.dumps({"share-network-subnet": body})
         url = '/share-networks/%s/subnets' % share_network_id
         resp, body = self.post(url, body, version=LATEST_MICROVERSION)
@@ -2312,6 +2316,7 @@ class SharesV2Client(shares_client.SharesClient):
         else:
             uri = (f'{parent_resource}/{parent_id}'
                    f'/{resource}s/{resource_id}/metadata')
+
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         body = json.loads(body)
