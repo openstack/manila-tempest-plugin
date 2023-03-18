@@ -75,6 +75,8 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
             "updated_at", "segmentation_id", "availability_zone", "gateway",
             "share_network_id", "mtu"
         ]
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.78'):
+            keys.extend('metadata')
 
         # Default subnet was created during share network creation
         self.assertIsNone(default_subnet['availability_zone'])
