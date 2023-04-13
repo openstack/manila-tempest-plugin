@@ -398,6 +398,23 @@
     branches: *ubuntu_jammy_test_image_branches
 
 - job:
+    name: manila-tempest-plugin-cephfs-native-cephadm
+    description: Test CephFS Native (DHSS=False) deployed with cephadm
+    parent: manila-tempest-plugin-cephfs-native
+    vars:
+      tempest_test_regex: manila_tempest_tests.tests
+      tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*ceph_fuse.*)'
+      devstack_localrc:
+        CONTAINER_IMAGE: 'quay.io/ceph/ceph:v17.2.5'
+        CEPHADM_DEPLOY: true
+        CEPHADM_DEV_OSD: true
+        TARGET_DEV_OSD_DIR: /opt/stack
+        CEPH_LOOPBACK_DISK_SIZE: 40G
+        DISABLE_CEPHADM_POST_DEPLOY: True
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-master
+
+- job:
     name: manila-tempest-plugin-cephfs-nfs-base
     nodeset: openstack-single-node-focal
     abstract: true
@@ -704,7 +721,7 @@
             voting: false
         - manila-tempest-plugin-generic:
             voting: false
-        - manila-tempest-plugin-cephfs-native:
+        - manila-tempest-plugin-cephfs-native-cephadm:
             voting: false
         - manila-tempest-plugin-cephfs-nfs:
             voting: false
