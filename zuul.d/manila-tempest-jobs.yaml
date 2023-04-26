@@ -354,7 +354,6 @@
 
 - job:
     name: manila-tempest-plugin-cephfs-native-base
-    nodeset: openstack-single-node-focal
     abstract: true
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-base
@@ -394,6 +393,7 @@
 
 - job:
     name: manila-tempest-plugin-cephfs-native
+    nodeset: openstack-single-node-focal
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-cephfs-native-base
     branches: *ubuntu_jammy_test_image_branches
@@ -401,11 +401,13 @@
 - job:
     name: manila-tempest-plugin-cephfs-native-cephadm
     description: Test CephFS Native (DHSS=False) deployed with cephadm
-    parent: manila-tempest-plugin-cephfs-native
+    parent: manila-tempest-plugin-cephfs-native-base
     vars:
+      configure_swap_size: 8192
       tempest_test_regex: manila_tempest_tests.tests
       tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*ceph_fuse.*)'
       devstack_localrc:
+        ENABLE_CEPH_NOVA: false
         CONTAINER_IMAGE: 'quay.io/ceph/ceph:v17.2.5'
         CEPHADM_DEPLOY: true
         CEPHADM_DEV_OSD: true
