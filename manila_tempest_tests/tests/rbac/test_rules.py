@@ -171,6 +171,9 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
         access = self.do_request(
             'create_access_rule', expected_status=200,
             **self.access(self.share['id'], access_type, access_to))['access']
+        waiters.wait_for_resource_status(
+            self.client, self.share["id"], "active",
+            resource_name='access_rule', rule_id=access["id"])
         self.addCleanup(
             self.client.wait_for_resource_deletion, rule_id=access['id'],
             share_id=self.share['id'])
@@ -181,6 +184,9 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
             'create_access_rule', expected_status=200,
             **self.access(
                 self.alt_share['id'], access_type, access_to))['access']
+        waiters.wait_for_resource_status(
+            self.client, self.alt_share["id"], "active",
+            resource_name='access_rule', rule_id=alt_access["id"])
         self.addCleanup(
             self.client.wait_for_resource_deletion, rule_id=alt_access['id'],
             share_id=self.alt_share['id'])
@@ -318,6 +324,9 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
         access = self.do_request(
             'create_access_rule', client=share_client, expected_status=200,
             **self.access(self.share['id'], access_type, access_to))['access']
+        waiters.wait_for_resource_status(
+            share_client, self.share["id"], "active",
+            resource_name='access_rule', rule_id=access["id"])
         self.addCleanup(
             self.client.wait_for_resource_deletion, rule_id=access['id'],
             share_id=self.share['id'])
