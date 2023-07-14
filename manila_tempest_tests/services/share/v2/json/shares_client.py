@@ -2149,3 +2149,68 @@ class SharesV2Client(shares_client.SharesClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+#################
+
+    def create_resource_lock(self, resource_id, resource_type,
+                             resource_action='delete', lock_reason=None,
+                             version=LATEST_MICROVERSION):
+        body = {
+            "resource_lock": {
+                'resource_id': resource_id,
+                'resource_type': resource_type,
+                'resource_action': resource_action,
+                'lock_reason': lock_reason,
+            },
+        }
+        body = json.dumps(body)
+        resp, body = self.post("resource-locks", body, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_resource_lock(self, lock_id, version=LATEST_MICROVERSION):
+        resp, body = self.get("resource-locks/%s" % lock_id, version=version)
+
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_resource_locks(self, filters=None, version=LATEST_MICROVERSION):
+        uri = (
+            "resource-locks?%s" % parse.urlencode(filters)
+            if filters else "resource-locks"
+        )
+
+        resp, body = self.get(uri, version=version)
+
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_resource_lock(self,
+                             lock_id,
+                             resource_action=None,
+                             lock_reason=None,
+                             version=LATEST_MICROVERSION):
+        uri = 'resource-locks/%s' % lock_id
+        post_body = {}
+        if resource_action:
+            post_body['resource_action'] = resource_action
+        if lock_reason:
+            post_body['lock_reason'] = lock_reason
+        body = json.dumps({'resource_lock': post_body})
+
+        resp, body = self.put(uri, body, version=version)
+
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_resource_lock(self, lock_id, version=LATEST_MICROVERSION):
+        uri = "resource-locks/%s" % lock_id
+
+        resp, body = self.delete(uri, version=version)
+
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp, body)
