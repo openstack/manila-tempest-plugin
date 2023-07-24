@@ -764,7 +764,8 @@ class SharesV2Client(shares_client.SharesClient):
     def create_access_rule(self, share_id, access_type="ip",
                            access_to="0.0.0.0", access_level=None,
                            version=LATEST_MICROVERSION, metadata=None,
-                           action_name=None):
+                           action_name=None, lock_visibility=False,
+                           lock_deletion=False):
         post_body = {
             self._get_access_action_name(version, 'os-allow_access'): {
                 "access_type": access_type,
@@ -774,6 +775,10 @@ class SharesV2Client(shares_client.SharesClient):
         }
         if metadata is not None:
             post_body['allow_access']['metadata'] = metadata
+        if lock_visibility:
+            post_body['allow_access']['lock_visibility'] = True
+        if lock_deletion:
+            post_body['allow_access']['lock_deletion'] = True
         body = json.dumps(post_body)
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version,
@@ -817,12 +822,15 @@ class SharesV2Client(shares_client.SharesClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_access_rule(self, share_id, rule_id,
-                           version=LATEST_MICROVERSION, action_name=None):
+                           version=LATEST_MICROVERSION, action_name=None,
+                           unrestrict=False):
         post_body = {
             self._get_access_action_name(version, 'os-deny_access'): {
                 "access_id": rule_id,
             }
         }
+        if unrestrict:
+            post_body['deny_access']['unrestrict'] = True
         body = json.dumps(post_body)
         resp, body = self.post(
             "shares/%s/action" % share_id, body, version=version)

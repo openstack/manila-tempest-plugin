@@ -28,6 +28,7 @@ from manila_tempest_tests import utils
 
 CONF = config.CONF
 LATEST_MICROVERSION = CONF.share.max_api_microversion
+RESTRICTED_RULES_VERSION = '2.82'
 
 
 @ddt.ddt
@@ -59,6 +60,11 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         if CONF.share.run_snapshot_tests:
             # create snapshot
             cls.snap = cls.create_snapshot_wait_for_active(cls.share["id"])
+
+        cls.user_project = cls.os_admin.projects_client.show_project(
+            cls.shares_v2_client.project_id)['project']
+        cls.new_user = cls.create_user_and_get_client(
+            project=cls.user_project)
 
     @decorators.idempotent_id('16781b45-d2bb-4891-aa97-c28c0769d5bd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -169,6 +175,93 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_client.create_access_rule,
                           share["id"], access_type, access_to)
+
+    @decorators.idempotent_id('478d3c84-b0ea-41c8-a860-e87f182d991c')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_deny_access_unrestrict_other_user_rule(self):
+        utils.check_skip_if_microversion_not_supported(
+            RESTRICTED_RULES_VERSION)
+
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.protocol)
+
+        # create rule
+        rule = self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=access_type, access_to=access_to,
+            lock_visibility=True, lock_deletion=True)
+
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.new_user.shares_v2_client.delete_access_rule,
+            self.share['id'],
+            rule['id'],
+            unrestrict=True
+        )
+
+    @decorators.idempotent_id('c107b0b7-7a3e-4114-af64-ca8fe6e836c9')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data(True, False)
+    def test_deny_access_without_unrestrict_as_owner_user(self, same_user):
+        utils.check_skip_if_microversion_not_supported(
+            RESTRICTED_RULES_VERSION)
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.protocol)
+
+        # create rule
+        rule = self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=access_type, access_to=access_to,
+            lock_visibility=True, lock_deletion=True)
+
+        client = (
+            self.shares_v2_client
+            if same_user else self.new_user.shares_v2_client
+        )
+        self.assertRaises(
+            lib_exc.Forbidden,
+            client.delete_access_rule,
+            self.share['id'],
+            rule['id'])
+        self.assertRaises(
+            lib_exc.Forbidden,
+            client.delete_access_rule,
+            self.share['id'],
+            rule['id'],
+            version='2.81'
+        )
+
+    @decorators.idempotent_id('f5b9e7c9-7e6b-4918-a1c4-e03c8d82c46a')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_allow_access_multiple_visibility_locks_not_allowed(self):
+        utils.check_skip_if_microversion_not_supported(
+            RESTRICTED_RULES_VERSION)
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.protocol)
+
+        # create rule
+        rule = self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=access_type, access_to=access_to,
+            lock_visibility=True, lock_deletion=True)
+
+        self.assertRaises(
+            lib_exc.Conflict,
+            self.shares_v2_client.create_resource_lock,
+            rule['id'],
+            "access_rule",
+            resource_action="show",
+            lock_reason="locked for testing"
+        )
+
+        self.assertRaises(
+            lib_exc.Conflict,
+            self.new_user.shares_v2_client.create_resource_lock,
+            rule['id'],
+            "access_rule",
+            resource_action="show",
+            lock_reason="locked for testing"
+        )
 
 
 @ddt.ddt

@@ -28,6 +28,7 @@ from manila_tempest_tests import utils
 
 CONF = config.CONF
 LATEST_MICROVERSION = CONF.share.max_api_microversion
+RESTRICTED_RULES_VERSION = '2.82'
 
 
 def _create_delete_ro_access_rule(self, version):
@@ -444,6 +445,10 @@ class ShareRulesTest(base.BaseSharesMixedTest):
         cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
+        cls.user_project = cls.os_admin.projects_client.show_project(
+            cls.shares_v2_client.project_id)['project']
+        cls.new_user = cls.create_user_and_get_client(
+            project=cls.user_project)
 
     @decorators.idempotent_id('c52e95cc-d6ea-4d02-9b52-cd7c1913dfff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -518,6 +523,92 @@ class ShareRulesTest(base.BaseSharesMixedTest):
         gen = [r["id"] for r in rules if r["id"] in rule["id"]]
         msg = "expected id lists %s times in rule list" % (len(gen))
         self.assertEqual(1, len(gen), msg)
+
+    @decorators.idempotent_id('3bca373e-e54f-49e1-8789-99a383cf4df3')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @utils.skip_if_microversion_not_supported(RESTRICTED_RULES_VERSION)
+    @ddt.data(
+        *itertools.product(utils.deduplicate(
+            ["2.81", CONF.share.max_api_microversion]), (True, False))
+    )
+    @ddt.unpack
+    def test_list_restricted_rules_from_other_user(
+            self, older_version, lock_visibility):
+        # create rule
+        self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=self.access_type, access_to=self.access_to,
+            lock_visibility=lock_visibility, lock_deletion=True)
+
+        rule = (
+            self.shares_v2_client.list_access_rules(
+                self.share["id"])["access_list"][0])
+
+        rules = self.new_user.shares_v2_client.list_access_rules(
+            self.share['id'])['access_list']
+        rules_get_lower_version = (
+            self.new_user.shares_v2_client.list_access_rules(
+                self.share['id'], version=older_version)['access_list'])
+        expected_access_to = '******' if lock_visibility else self.access_to
+        expected_access_key = (
+            '******' if lock_visibility else rule['access_key'])
+
+        # verify values
+        rule_latest_rules_api = [r for r in rules if r['id'] == rule['id']][0]
+        rule_lower_version_rules_api = [r for r in rules_get_lower_version
+                                        if r['id'] == rule['id']][0]
+        self.assertEqual(
+            expected_access_to, rule_latest_rules_api["access_to"])
+        self.assertEqual(
+            expected_access_to,
+            rule_lower_version_rules_api['access_to'])
+        if self.access_type == 'cephx':
+            self.assertEqual(expected_access_key,
+                             rule_latest_rules_api['access_key'])
+            self.assertEqual(
+                expected_access_key,
+                rule_lower_version_rules_api['access_key'])
+
+    @decorators.idempotent_id('4829265a-eb32-400d-91a0-be06ce31a2ef')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_admin_listing_restricted_rules(self):
+        utils.check_skip_if_microversion_not_supported(
+            RESTRICTED_RULES_VERSION)
+
+        # create rule
+        self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=self.access_type, access_to=self.access_to,
+            lock_visibility=True)
+
+        rules = self.admin_shares_v2_client.list_access_rules(
+            self.share["id"])['access_list']
+
+        # ensure admin can see rules even if locked
+        self.assertEqual(self.access_to, rules[0]["access_to"])
+        if self.access_type == 'cephx':
+            self.assertIsNotNone(rules[0]['access_key'])
+            self.assertFalse(rules[0]['access_key'] == '******')
+        else:
+            self.assertIsNone(rules[0]['access_key'])
+
+    @decorators.idempotent_id('00202c6c-b4c7-4fa6-933a-562fbffde405')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_admin_delete_restricted_rules(self):
+        utils.check_skip_if_microversion_not_supported(
+            RESTRICTED_RULES_VERSION)
+
+        # create rule
+        rule = self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=self.access_type, access_to=self.access_to,
+            lock_visibility=True, lock_deletion=True, cleanup=False)
+
+        self.admin_shares_v2_client.delete_access_rule(
+            self.share['id'], rule['id'], unrestrict=True)
+
+        self.shares_v2_client.wait_for_resource_deletion(
+            rule_id=rule['id'], share_id=self.share['id'])
 
     @decorators.idempotent_id('b77bcbda-9754-48f0-9be6-79341ad1af64')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)

@@ -1017,7 +1017,8 @@ class BaseSharesTest(test.BaseTestCase):
     def allow_access(self, share_id, client=None, access_type=None,
                      access_level='rw', access_to=None, metadata=None,
                      version=LATEST_MICROVERSION, status='active',
-                     raise_rule_in_error_state=True, cleanup=True):
+                     raise_rule_in_error_state=True, lock_visibility=False,
+                     lock_deletion=False, cleanup=True):
 
         client = client or self.shares_v2_client
         a_type, a_to = utils.get_access_rule_data_from_config(
@@ -1030,8 +1031,15 @@ class BaseSharesTest(test.BaseTestCase):
             'access_to': access_to,
             'access_level': access_level
         }
+        delete_kwargs = (
+            {'unrestrict': True} if lock_deletion else {}
+        )
         if client is self.shares_v2_client:
             kwargs.update({'metadata': metadata, 'version': version})
+        if lock_visibility:
+            kwargs.update({'lock_visibility': True})
+        if lock_deletion:
+            kwargs.update({'lock_deletion': True})
 
         rule = client.create_access_rule(share_id, **kwargs)['access']
         waiters.wait_for_resource_status(
@@ -1042,7 +1050,9 @@ class BaseSharesTest(test.BaseTestCase):
             self.addCleanup(
                 client.wait_for_resource_deletion, rule_id=rule['id'],
                 share_id=share_id, version=version)
-            self.addCleanup(client.delete_access_rule, share_id, rule['id'])
+            self.addCleanup(
+                client.delete_access_rule, share_id, rule['id'],
+                **delete_kwargs)
         return rule
 
 
