@@ -16,7 +16,6 @@
 
 from oslo_log import log
 from oslo_utils import uuidutils
-from tempest.common import image as common_image
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -45,24 +44,16 @@ class ScenarioTest(manager.NetworkScenarioTest):
             'name': name,
             'container_format': fmt,
             'disk_format': disk_format or fmt,
+            'visibility': 'private'
         }
-        if CONF.image_feature_enabled.api_v1:
-            params['is_public'] = 'False'
-            params['properties'] = properties
-            params = {'headers': common_image.image_meta_to_headers(**params)}
-        else:
-            params['visibility'] = 'private'
-            # Additional properties are flattened out in the v2 API.
-            params.update(properties)
+        # Additional properties are flattened out in the v2 API.
+        params.update(properties)
         body = self.image_client.create_image(**params)
         image = body['image'] if 'image' in body else body
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         with open(path, 'rb') as image_file:
-            if CONF.image_feature_enabled.api_v1:
-                self.image_client.update_image(image['id'], data=image_file)
-            else:
-                self.image_client.store_image_file(image['id'], image_file)
+            self.image_client.store_image_file(image['id'], image_file)
         return image['id']
 
     def glance_image_create(self):
