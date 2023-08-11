@@ -53,7 +53,7 @@ class ShareRbacBaseTests(object):
             'sn': 'share_network',
         }
         key, resource_id = list(kwargs.items())[0]
-        key = key.split('_')[0]
+        key = key.rsplit('_', 1)[0]
         resource_name = key_names[key] if key in key_names else key
 
         del_action = getattr(client, 'delete_{}'.format(resource_name))
@@ -114,6 +114,19 @@ class ShareRbacBaseTests(object):
             cls.delete_resource, cls.admin_shares_v2_client,
             st_id=share_type['id'])
         return share_type
+
+    @classmethod
+    def create_share_group_type(cls, share_types, is_public=True,
+                                group_specs=None):
+        name = data_utils.rand_name('share-group-type')
+        share_group_type = (
+            cls.admin_shares_v2_client.create_share_group_type(
+                name=name, share_types=share_types, is_public=is_public,
+                group_specs=group_specs))['share_group_type']
+        cls.addClassResourceCleanup(
+            cls.delete_resource, cls.admin_shares_v2_client,
+            share_group_type_id=share_group_type['id'])
+        return share_group_type
 
     @classmethod
     def get_share_type(cls):
