@@ -5,7 +5,6 @@
 - hosts: tempest
   roles:
     - setup-tempest-run-dir
-    - set-tempest-config
     - setup-tempest-data-dir
     - acl-devstack-files
     - run-tempest
