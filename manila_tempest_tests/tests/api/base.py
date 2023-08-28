@@ -792,6 +792,30 @@ class BaseSharesTest(test.BaseTestCase):
         return security_service
 
     @classmethod
+    def create_resource_lock(cls, resource_id, resource_type='share',
+                             resource_action='delete', lock_reason=None,
+                             client=None, version=LATEST_MICROVERSION,
+                             cleanup_in_class=True):
+        lock_reason = lock_reason or "locked by tempest tests"
+        client = client or cls.shares_v2_client
+
+        lock = client.create_resource_lock(resource_id,
+                                           resource_type,
+                                           resource_action=resource_action,
+                                           lock_reason=lock_reason,
+                                           version=version)['resource_lock']
+        resource = {
+            "type": "resource_lock",
+            "id": lock["id"],
+            "client": client,
+        }
+        if cleanup_in_class:
+            cls.class_resources.insert(0, resource)
+        else:
+            cls.method_resources.insert(0, resource)
+        return lock
+
+    @classmethod
     def update_share_type(cls, share_type_id, name=None,
                           is_public=None, description=None,
                           client=None):
@@ -904,6 +928,8 @@ class BaseSharesTest(test.BaseTestCase):
                     elif res["type"] == "quotas":
                         user_id = res.get('user_id')
                         client.reset_quotas(res_id, user_id=user_id)
+                    elif res["type"] == "resource_lock":
+                        client.delete_resource_lock(res_id)
                     else:
                         LOG.warning("Provided unsupported resource type for "
                                     "cleanup '%s'. Skipping.", res["type"])

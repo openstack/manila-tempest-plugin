@@ -40,7 +40,7 @@ ShareGroup = [
                     "This value is only used to validate the versions "
                     "response from Manila."),
     cfg.StrOpt("max_api_microversion",
-               default="2.74",
+               default="2.81",
                help="The maximum api microversion is configured to be the "
                     "value of the latest microversion supported by Manila."),
     cfg.StrOpt("region",
