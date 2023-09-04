@@ -7,7 +7,7 @@
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-generic-scenario-base
-    branches: &manila_tempest_image_pinned_branches ^(stable/(zed|yoga|xena)).*$
+    branches: &manila_tempest_image_pinned_branches ^(stable/(2023.1|zed|yoga|xena)).*$
     vars: &manila_tempest_image_pinned_vars
       devstack_localrc:
         # NOTE(carloss): Pinning manila service image to a Focal version,
@@ -27,15 +27,12 @@
 
 - job:
     name: manila-tempest-plugin-lvm-stable
-    # NOTE(carloss): we are aware that focal is the current default, but
-    # in order to avoid breakages when devstack-minimal switches to a newer
-    # branch, we are pinning focal here.
-    nodeset: openstack-single-node-focal
     description: |
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
     branches: *manila_tempest_image_pinned_branches
     parent: manila-tempest-plugin-lvm-base
+    nodeset: openstack-single-node-focal
     vars: *manila_tempest_image_pinned_vars
 
 - job:
@@ -74,14 +71,12 @@
 - job:
     name: manila-tempest-plugin-lvm-yoga
     parent: manila-tempest-plugin-lvm-base
-    nodeset: openstack-single-node-focal
     override-checkout: stable/yoga
     vars: *manila_tempest_image_pinned_vars
 
 - job:
     name: manila-tempest-plugin-lvm-xena
     parent: manila-tempest-plugin-lvm-base
-    nodeset: openstack-single-node-focal
     override-checkout: stable/xena
     vars: *manila_tempest_image_pinned_vars
 

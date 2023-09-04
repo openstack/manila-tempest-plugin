@@ -166,7 +166,6 @@
 
 - job:
     name: manila-tempest-plugin-lvm-base
-    nodeset: openstack-single-node-focal
     description: |
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
@@ -176,6 +175,7 @@
       - openstack/neutron-dynamic-routing
     vars:
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
+      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*)"
       devstack_services: &devstack-with-ovs
         # NOTE(gouthamr): LP#1940324 prevents bgp usage with OVN, disable OVN
         br-ex-tcpdump: false
@@ -230,13 +230,23 @@
               multi_backend: true
               image_password: manila
 
+# NOTE(carloss): Nova bumped libvirt to a version available only on Ubuntu
+# Jammy. We are then forced to migrate this job to use Jammy. When LP Bug
+#1998489 is fixed, we will be able to unify the job above with this.
 - job:
     name: manila-tempest-plugin-lvm
     description: |
-      Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
-      environment with IPv6 control plane endpoints.
-    branches: *ubuntu_jammy_test_image_branches
+      Test LVM multibackend (DHSS=False) in a IPv4 environment.
+    branches: ^(?!stable/(2023.1|zed|yoga|xena|wallaby|victoria|ussuri)).*$
     parent: manila-tempest-plugin-lvm-base
+    vars:
+      devstack_localrc:
+        MANILA_SETUP_IPV6: false
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              run_ipv6_tests: false
 
 - job:
     name: manila-tempest-plugin-container
@@ -393,7 +403,6 @@
 
 - job:
     name: manila-tempest-plugin-cephfs-native
-    nodeset: openstack-single-node-focal
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-cephfs-native-base
     branches: *ubuntu_jammy_test_image_branches
@@ -619,7 +628,6 @@
     description: |
       Test the GlusterFS driver (DHSS=False) with the native GlusterFS protocol
     parent: manila-tempest-plugin-standalone-base
-    nodeset: openstack-single-node-focal
     required-projects:
       - x/devstack-plugin-glusterfs
     vars:
@@ -652,7 +660,6 @@
     description: |
       Test the GlusterFS driver (DHSS=False) with the native NFS protocol
     parent: manila-tempest-plugin-standalone-base
-    nodeset: openstack-single-node-focal
     required-projects:
       - x/devstack-plugin-glusterfs
     vars:
