@@ -105,7 +105,7 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
         LOG.debug('Step 6b - writing 640mb')
         self.write_data_to_mounted_share_using_dd(remote_client,
                                                   '/mnt/t1', 1024,
-                                                  2048, '/dev/zero')
+                                                  2048)
         ls_result = remote_client.exec_command("sudo ls -lA /mnt/")
         LOG.debug(ls_result)
 

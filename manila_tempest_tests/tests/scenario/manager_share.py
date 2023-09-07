@@ -229,8 +229,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
     def write_data_to_mounted_share_using_dd(self, remote_client,
                                              output_file,
                                              block_size,
-                                             block_count,
-                                             input_file='/dev/zero'):
+                                             block_count):
         """Writes data to mounted share using dd command
 
         Example Usage for writing 512Mb to a file on /mnt/
@@ -243,13 +242,12 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param block_size: The size of an individual block in bytes
         :param block_count: The number of blocks to write
         :param output_file: Path to the file to be written
-        :param input_file: Path to the file to read from
         """
         block_count = int(block_count)
         remote_client.exec_command(
-            "sudo sh -c \"dd bs={} count={} if={} of={} conv=fsync"
-            " iflag=fullblock\""
-            .format(block_size, block_count, input_file, output_file))
+            "sudo sh -c \"dd bs={} count={} if={} of={} iflag=fullblock\""
+            .format(block_size, block_count, CONF.share.dd_input_file,
+                    output_file))
 
     def read_data_from_mounted_share(self,
                                      remote_client,
