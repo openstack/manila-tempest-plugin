@@ -162,7 +162,9 @@
     name: manila-tempest-plugin-zfsonlinux
     description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
     parent: manila-tempest-plugin-zfsonlinux-base
-    branches: &ubuntu_jammy_test_image_branches ^(?!stable/(yoga|xena|wallaby|victoria|ussuri)).*$
+    branches: &ubuntu_jammy_test_image_branches
+      regex: ^stable/(yoga|xena|wallaby|victoria|ussuri)$
+      negate: true
 
 - job:
     name: manila-tempest-plugin-lvm-base
@@ -237,7 +239,9 @@
     name: manila-tempest-plugin-lvm
     description: |
       Test LVM multibackend (DHSS=False) in a IPv4 environment.
-    branches: ^(?!stable/(2023.1|zed|yoga|xena|wallaby|victoria|ussuri)).*$
+    branches:
+      regex: ^stable/(2023.1|zed|yoga|xena|wallaby|victoria|ussuri)$
+      negate: true
     parent: manila-tempest-plugin-lvm-base
     vars:
       devstack_localrc:
@@ -730,7 +734,9 @@
 - job:
     name: manila-tempest-plugin-lvm-fips
     parent: manila-tempest-plugin-lvm-fips-base
-    branches: ^(?!stable/(yoga|xena|wallaby|victoria|ussuri)).*$
+    branches:
+      regex: ^stable/(yoga|xena|wallaby|victoria|ussuri)$
+      negate: true
 
 - project-template:
     name: manila-tempest-plugin-jobs-using-service-image
