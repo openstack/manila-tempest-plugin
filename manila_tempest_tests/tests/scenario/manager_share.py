@@ -84,7 +84,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         if CONF.share.image_with_share_tools == 'centos':
             self.image_ref = self._create_centos_based_glance_image()
         elif CONF.share.image_with_share_tools:
-            images = self.compute_images_client.list_images()["images"]
+            images = self.image_client.list_images()["images"]
             for img in images:
                 if img["name"] == CONF.share.image_with_share_tools:
                     self.image_id = img['id']
@@ -186,8 +186,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                         storage_net_nic[0]['addr']
                     )
             # Attach a floating IP
-            self.compute_floating_ips_client.associate_floating_ip_to_server(
-                floating_ip['floating_ip_address'], instance['id'])
+            self.associate_floating_ip(floating_ip, instance)
 
         self.assertIsNotNone(server_ip)
         # Check ssh
