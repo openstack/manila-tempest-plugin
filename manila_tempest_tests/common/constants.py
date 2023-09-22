@@ -108,3 +108,6 @@ SERVER_STATE_UNMANAGE_ERROR = 'unmanage_error'
 SERVER_STATE_UNMANAGE_STARTING = 'unmanage_starting'
 STATUS_SERVER_MIGRATING = 'server_migrating'
 STATUS_SERVER_MIGRATING_TO = 'server_migrating_to'
+
+# Share transfer
+SHARE_TRANSFER_VERSION = "2.77"

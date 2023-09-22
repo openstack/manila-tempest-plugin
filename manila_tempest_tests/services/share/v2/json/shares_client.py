@@ -373,6 +373,61 @@ class SharesV2Client(shares_client.SharesClient):
         return rest_client.ResponseBody(resp, body)
 
 ###############
+    def create_share_transfer(self, share_id, name=None,
+                              version=LATEST_MICROVERSION):
+        if name is None:
+            name = data_utils.rand_name("tempest-created-share-transfer")
+        post_body = {
+            "transfer": {
+                "share_id": share_id,
+                "name": name
+            }
+        }
+        body = json.dumps(post_body)
+        resp, body = self.post("share-transfers", body, version=version)
+        self.expected_success(202, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_share_transfer(self, transfer_id, version=LATEST_MICROVERSION):
+        resp, body = self.delete("share-transfers/%s" % transfer_id,
+                                 version=version)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_share_transfers(self, detailed=False, params=None,
+                             version=LATEST_MICROVERSION):
+        """Get list of share transfers w/o filters."""
+        uri = 'share-transfers/detail' if detailed else 'share-transfers'
+        uri += '?%s' % parse.urlencode(params) if params else ''
+        resp, body = self.get(uri, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_share_transfer(self, transfer_id, version=LATEST_MICROVERSION):
+        resp, body = self.get("share-transfers/%s" % transfer_id,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def accept_share_transfer(self, transfer_id, auth_key,
+                              clear_access_rules=False,
+                              version=LATEST_MICROVERSION):
+        post_body = {
+            "accept": {
+                "auth_key": auth_key,
+                "clear_access_rules": clear_access_rules
+            }
+        }
+        body = json.dumps(post_body)
+        resp, body = self.post("share-transfers/%s/accept" % transfer_id,
+                               body, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+###############
 
     def get_instances_of_share(self, share_id, version=LATEST_MICROVERSION):
         resp, body = self.get("shares/%s/instances" % share_id,
