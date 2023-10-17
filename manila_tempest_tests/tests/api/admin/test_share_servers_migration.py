@@ -282,10 +282,11 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             src_server_id, dest_host, preserve_snapshots=preserve_snapshots)
 
         expected_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
+        timeout = CONF.share.share_server_migration_timeout
         waiters.wait_for_resource_status(
             self.shares_v2_client, src_server_id,
             expected_state, resource_name='share_server',
-            status_attr='task_state'
+            status_attr='task_state', timeout=timeout
         )
 
         # Get for the destination share server.
@@ -352,10 +353,11 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             preserve_snapshots=preserve_snapshots)
 
         expected_state = constants.TASK_STATE_MIGRATION_DRIVER_PHASE1_DONE
+        timeout = CONF.share.share_server_migration_timeout
         waiters.wait_for_resource_status(
             self.shares_v2_client, src_server_id,
             expected_state, resource_name='share_server',
-            status_attr='task_state'
+            status_attr='task_state', timeout=timeout
         )
         # Get for the destination share server.
         dest_server_id = self._get_share_server_destination_for_migration(
