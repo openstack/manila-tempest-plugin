@@ -497,7 +497,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
         alt_snap = self.create_snapshot(
             self.alt_project_share_v2_client, self.alt_share['id'])
         self.do_request(
-            'delete_snapshot', expected_status=lib_exc.NotFound,
+            'delete_snapshot', expected_status=lib_exc.Forbidden,
             snap_id=alt_snap['id'])
 
     @decorators.idempotent_id('ed0af390-e3d0-432b-9147-c0d569181b92')
@@ -517,7 +517,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
         alt_snap = self.create_snapshot(
             self.alt_project_share_v2_client, self.alt_share['id'])
         self.do_request(
-            'rename_snapshot', expected_status=lib_exc.NotFound,
+            'rename_snapshot', expected_status=lib_exc.Forbidden,
             snapshot_id=alt_snap['id'], name=name)
 
     @decorators.idempotent_id('b8c9c9a4-3b2a-4b1c-80d8-2ec87d708111')
