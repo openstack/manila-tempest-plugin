@@ -79,7 +79,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         LOG.debug('Step 6 - writing {} * 64MB blocks'.format(blocks))
         self.write_data_to_mounted_share_using_dd(remote_client,
                                                   '/mnt/t1', '64M',
-                                                  blocks, '/dev/urandom')
+                                                  blocks)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
@@ -120,7 +120,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
             self.write_data_to_mounted_share_using_dd,
-            remote_client, '/mnt/t1', '64M', blocks, '/dev/urandom')
+            remote_client, '/mnt/t1', '64M', blocks)
 
         LOG.debug('Step 12 - unmount')
         self.unmount_share(remote_client)

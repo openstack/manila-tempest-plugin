@@ -76,8 +76,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
                   .format(three_quarter_blocks))
         self.write_data_to_mounted_share_using_dd(remote_client,
                                                   '/mnt/t1', '64M',
-                                                  three_quarter_blocks,
-                                                  '/dev/urandom')
+                                                  three_quarter_blocks)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
@@ -86,8 +85,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
             self.write_data_to_mounted_share_using_dd,
-            remote_client, '/mnt/t2', '64M', over_one_quarter_blocks,
-            '/dev/urandom')
+            remote_client, '/mnt/t2', '64M', over_one_quarter_blocks)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
@@ -129,8 +127,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
             self.write_data_to_mounted_share_using_dd(remote_client,
                                                       output_file,
                                                       block_size,
-                                                      block_count,
-                                                      '/dev/urandom')
+                                                      block_count)
         except exceptions.SSHExecCommandFailed as e:
             if 'stale file handle' in str(e).lower():
                 LOG.warning("Client was disconnected during extend process")
@@ -139,8 +136,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
                 self.write_data_to_mounted_share_using_dd(remote_client,
                                                           output_file,
                                                           block_size,
-                                                          block_count,
-                                                          '/dev/urandom')
+                                                          block_count)
             else:
                 raise
 

@@ -336,4 +336,17 @@ ShareGroup = [
                      "attempt to create an IPv6 subnet on the project network "
                      "they create for ping and SSH to the client test VM "
                      "where data path testing is performed."),
+    cfg.StrOpt("dd_input_file",
+               default="/dev/zero",
+               help="The input file (if) in the dd command specifies the "
+                    "source of data that dd will read and process, which can "
+                    "be a device, a regular file, or even standard input "
+                    "(stdin). dd copies, transforms, or performs actions on "
+                    "this data based on provided options and then writes it "
+                    "to an output file or device (of). When using /dev/zero "
+                    "in storage systems with default compression, although "
+                    "it generates highly compressible null bytes (zeros), "
+                    "writing data from /dev/zero might not yield significant "
+                    "space savings as these systems are already optimized for "
+                    "efficient compression."),
 ]

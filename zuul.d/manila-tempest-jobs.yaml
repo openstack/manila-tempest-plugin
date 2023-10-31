@@ -157,6 +157,7 @@
               backend_names: LONDON,PARIS
               multi_backend: true
               image_password: manila
+              dd_input_file: /dev/urandom
 
 - job:
     name: manila-tempest-plugin-zfsonlinux
