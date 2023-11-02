@@ -491,10 +491,7 @@
     vars:
       # TODO(gouthamr): some tests are disabled due to bugs
       # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      # snapshot clone fs sync: https://bugs.launchpad.net/manila/+bug/1989273
-      tempest_exclude_regex: "\
-          (^manila_tempest_tests.tests.scenario.*IPv6.*)|\
-          (^manila_tempest_tests.tests.scenario.test_share_basic_ops.TestShareBasicOpsNFS.test_write_data_to_share_created_from_snapshot)"
+      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
       devstack_localrc:
         MANILA_OPTGROUP_cephfsnfs_cephfs_ganesha_server_ip: "{{ hostvars[inventory_hostname]['nodepool']['private_ipv4'] }}"
         CEPH_RELEASE: "quincy"
@@ -554,10 +551,7 @@
       tempest_concurrency: 2
         # TODO(gouthamr): some tests are disabled due to bugs
         # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-        # snapshot clone fs sync: https://bugs.launchpad.net/manila/+bug/1989273
-      tempest_exclude_regex: "\
-      (^manila_tempest_tests.tests.scenario.*IPv6.*)|\
-      (^manila_tempest_tests.tests.scenario.test_share_basic_ops.TestShareBasicOpsNFS.test_write_data_to_share_created_from_snapshot)"
+      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
       devstack_localrc:
         MYSQL_REDUCE_MEMORY: True
         CEPHADM_DEPLOY: True
