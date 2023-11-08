@@ -418,7 +418,6 @@
       tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*ceph_fuse.*)'
       devstack_localrc:
         ENABLE_CEPH_NOVA: false
-        CONTAINER_IMAGE: 'quay.io/ceph/ceph:v17.2.5'
         CEPHADM_DEPLOY: true
         CEPHADM_DEV_OSD: true
         TARGET_DEV_OSD_DIR: /opt/stack
