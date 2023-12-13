@@ -45,7 +45,8 @@ def wait_for_resource_status(client, resource_id, status,
                              resource_name='share', rule_id=None,
                              status_attr='status',
                              raise_rule_in_error_state=True,
-                             version=LATEST_MICROVERSION):
+                             version=LATEST_MICROVERSION,
+                             timeout=None):
     """Waits for a resource to reach a given status."""
 
     get_resource_action = {
@@ -86,6 +87,9 @@ def wait_for_resource_status(client, resource_id, status,
     start = int(time.time())
 
     exp_status = status if isinstance(status, list) else [status]
+    resource_status_check_time_out = client.build_timeout
+    if timeout is not None:
+        resource_status_check_time_out = timeout
     while resource_status not in exp_status:
         time.sleep(client.build_interval)
         body = resource_action(*method_args, **method_kwargs)[rn]
@@ -102,11 +106,11 @@ def wait_for_resource_status(client, resource_id, status,
             raise_method = _get_name_of_raise_method(resource_name)
             resource_exception = getattr(share_exceptions, raise_method)
             raise resource_exception(resource_id=resource_id)
-        if int(time.time()) - start >= client.build_timeout:
+        if int(time.time()) - start >= resource_status_check_time_out:
             message = ('%s %s failed to reach %s status (current %s) '
                        'within the required time (%s s).' %
                        (resource_name.replace('_', ' '), resource_id, status,
-                        resource_status, client.build_timeout))
+                        resource_status, resource_status_check_time_out))
             raise exceptions.TimeoutException(message)
 
 
