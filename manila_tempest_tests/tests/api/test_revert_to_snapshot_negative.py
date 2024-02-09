@@ -80,8 +80,8 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('21dd8561-8913-42a2-a95c-74b536964c94')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_second_latest_snapshot(self, version):
         snapshot1 = self.create_snapshot_wait_for_active(
@@ -98,8 +98,8 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('7360ee16-ac7d-46ce-9c81-251d64fb7434')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_error_snapshot(self, version):
         snapshot = self.create_snapshot_wait_for_active(self.share['id'],
@@ -118,8 +118,8 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('108a451e-a8e9-450f-8f75-53883d58c6be')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_error_share_to_snapshot(self, version):
         snapshot = self.create_snapshot_wait_for_active(self.share['id'],
@@ -143,8 +143,8 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('29024057-dbbd-4cf6-a796-207dfbd4c3ff')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_missing_snapshot(self, version):
         self.assertRaises(exceptions.BadRequest,
@@ -156,8 +156,8 @@ class RevertToSnapshotNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('ef706fad-5ac4-41dc-af81-5aa0331560cf')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_invalid_snapshot(self, version):
         snapshot = self.create_snapshot_wait_for_active(

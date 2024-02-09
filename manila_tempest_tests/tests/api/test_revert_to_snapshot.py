@@ -109,8 +109,8 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('196f2bc5-e13a-4730-ac51-61e339068a06')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_latest_snapshot(self, version):
         snapshot = self.create_snapshot_wait_for_active(self.share['id'],
@@ -129,8 +129,8 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('09bd9942-7ef9-4d24-b2dd-f83bdda27b50')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_previous_snapshot(self, version):
         snapshot1 = self.create_snapshot_wait_for_active(
@@ -157,8 +157,8 @@ class RevertToSnapshotTest(base.BaseSharesMixedTest):
     @tc.skipUnless(CONF.share.run_replication_tests,
                    'Replication tests are disabled.')
     @ddt.data(
-        *{constants.REVERT_TO_SNAPSHOT_MICROVERSION,
-          CONF.share.max_api_microversion}
+        *utils.deduplicate([constants.REVERT_TO_SNAPSHOT_MICROVERSION,
+                            CONF.share.max_api_microversion])
     )
     def test_revert_to_replicated_snapshot(self, version):
         """Test reverting to a replicated snapshot."""
