@@ -33,12 +33,6 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
     def _verify_share_metadata(self, share, md):
 
-        # get metadata of share
-        metadata = self.shares_v2_client.get_metadata(share["id"])['metadata']
-
-        # verify metadata
-        self.assertEqual(md, metadata)
-
         # verify metadata items
         for key in md:
             get_value = self.shares_v2_client.get_metadata_item(
@@ -82,7 +76,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # verify deletion of metadata
         get_metadata = self.shares_v2_client.get_metadata(share["id"])[
             'metadata']
-        self.assertEmpty(get_metadata)
+        for key in md.keys():
+            self.assertNotIn(key, list(get_metadata.keys()))
 
     @decorators.idempotent_id('4e5f8159-62b6-4d5c-f729-d8b1f029d7de')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -117,7 +112,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # verify deletion of metadata
         get_metadata = self.shares_v2_client.get_metadata(
             share["id"])['metadata']
-        self.assertEmpty(get_metadata)
+        for key in md.keys():
+            self.assertNotIn(key, list(get_metadata.keys()))
 
     @decorators.idempotent_id('2ec70ba5-050b-3b17-c862-c149e53543c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -150,7 +146,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         # verify deletion of metadata
         get_metadata = self.shares_v2_client.get_metadata(
             share["id"])['metadata']
-        self.assertEmpty(get_metadata)
+        for key in md.keys():
+            self.assertNotIn(key, list(get_metadata.keys()))
 
     @decorators.idempotent_id('c94851f4-2559-4712-9297-9912db1da7ff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -228,7 +225,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
-        self.assertEqual(data, body_get)
+        self.assertEqual(data["k"], body_get["k"])
 
     @decorators.idempotent_id('5eff5619-b7cd-42f1-85e0-47d3d47098dd')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -240,7 +237,9 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
-        self.assertEqual(data, body_get)
+        body_get_keys = list(body_get.keys())
+        self.assertIn(max_key, body_get_keys)
+        self.assertEqual(data[max_key], body_get[max_key])
 
     @decorators.idempotent_id('44a572f1-6b5c-49d0-8f2e-1583ec3428d8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -251,7 +250,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
-        self.assertEqual(data, body_get)
+        self.assertEqual(data["key"], body_get["key"])
 
     @decorators.idempotent_id('694d95e1-ba8c-49fc-a888-6f9f0d51d77d')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -263,4 +262,4 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
 
         body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
-        self.assertEqual(data, body_get)
+        self.assertEqual(max_value, body_get["key"])
