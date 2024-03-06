@@ -60,6 +60,7 @@ def wait_for_resource_status(client, resource_id, status,
         'share_group': 'get_share_group',
         'share_group_snapshot': 'get_share_group_snapshot',
         'share_replica': 'get_share_replica',
+        'share_backup': 'get_share_backup'
     }
 
     action_name = get_resource_action[resource_name]
