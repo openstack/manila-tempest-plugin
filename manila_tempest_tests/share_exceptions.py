@@ -88,5 +88,5 @@ class ShareServerMigrationException(exceptions.TempestException):
                "status")
 
 
-class ShareBackupException(exceptions.TempestException):
+class ShareBackupBuildErrorException(exceptions.TempestException):
     message = ("Share backup %(backup_id)s failed and is in ERROR status")
