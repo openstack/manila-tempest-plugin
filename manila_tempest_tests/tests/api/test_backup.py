@@ -54,11 +54,14 @@ class ShareBackupTest(base.BaseSharesMixedTest):
     def test_create_share_backup(self):
         backup = self.create_backup_wait_for_active(self.share_id)
 
-        # Verify backup create API response
+        # Verify backup create API response, we use the configured max API
+        # version to make this call
         expected_keys = ["id", "share_id", "status",
                          "availability_zone", "created_at", "updated_at",
                          "size", "progress", "restore_progress",
                          "name", "description"]
+        if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.85'):
+            expected_keys.append("backup_type")
 
         # Strict key check
         actual_backup = self.shares_v2_client.get_share_backup(
