@@ -486,12 +486,17 @@
     description: Test CephFS NFS (DHSS=False)
     parent: manila-tempest-plugin-cephfs-nfs-base
     branches: *ubuntu_jammy_test_image_branches
-    nodeset: devstack-single-node-centos-9-stream
     vars:
       # TODO(gouthamr): some tests are disabled due to bugs
       # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
       tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
       devstack_localrc:
+        CEPHADM_DEPLOY: True
+        CEPHADM_DEV_OSD: True
+        CEPH_LOOPBACK_DISK_SIZE: 40GB
+        CEPHADM_DEPLOY_NFS: False
+        TARGET_DEV_OSD_DIR: /opt/stack
+        ENABLED_SHARE_PROTOCOLS: NFS
         MANILA_OPTGROUP_cephfsnfs_cephfs_ganesha_server_ip: "{{ hostvars[inventory_hostname]['nodepool']['private_ipv4'] }}"
         CEPH_RELEASE: "quincy"
         MANILA_SETUP_IPV6: false
