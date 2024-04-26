@@ -69,6 +69,19 @@
     vars: *manila_tempest_image_pinned_vars
 
 - job:
+    name: manila-tempest-plugin-lvm-caracal
+    parent: manila-tempest-plugin-lvm-base
+    override-checkout: stable/2024.1
+    vars:
+      # TODO(gouthamr): some tests are disabled due to bugs
+      # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
+      # drop these overrides once we address that bug.
+      tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*IPv6.*)'
+      devstack_localrc:
+        MANILA_SETUP_IPV6: false
+        NEUTRON_CREATE_INITIAL_NETWORKS: true
+
+- job:
     name: manila-tempest-plugin-lvm-bobcat
     parent: manila-tempest-plugin-lvm-base
     override-checkout: stable/2023.2
@@ -98,12 +111,6 @@
         # VM resources.
         MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
         MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
-
-- job:
-    name: manila-tempest-plugin-lvm-zed
-    parent: manila-tempest-plugin-lvm-base
-    override-checkout: stable/zed
-    vars: *manila_tempest_image_pinned_vars
 
 - project-template:
     name: manila-tempest-plugin-jobs-using-service-image-stable
