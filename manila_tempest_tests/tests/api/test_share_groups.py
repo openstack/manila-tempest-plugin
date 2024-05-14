@@ -401,6 +401,8 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
         # Delete share group
         self.shares_v2_client.delete_share_group(
             share_group['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
+        self.shares_v2_client.wait_for_resource_deletion(
+            share_group_id=share_group['id'])
 
         # Delete subnet
         self.shares_v2_client.delete_subnet(
