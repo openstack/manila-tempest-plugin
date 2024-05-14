@@ -194,6 +194,7 @@
         q-l3: true
         q-meta: true
         q-metering: true
+        openstack-cli-server: true
       devstack_localrc:
         # NOTE(gouthamr): LP#1940324 prevents bgp usage with OVN, use OVS
         Q_AGENT: openvswitch
