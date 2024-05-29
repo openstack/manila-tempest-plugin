@@ -498,7 +498,7 @@
         TARGET_DEV_OSD_DIR: /opt/stack
         ENABLED_SHARE_PROTOCOLS: NFS
         MANILA_OPTGROUP_cephfsnfs_cephfs_ganesha_server_ip: "{{ hostvars[inventory_hostname]['nodepool']['private_ipv4'] }}"
-        CEPH_RELEASE: "quincy"
+        CEPH_RELEASE: "reef"
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
         IP_VERSION: 4
