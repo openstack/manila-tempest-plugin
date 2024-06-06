@@ -334,6 +334,18 @@ ShareGroup = [
     cfg.IntOpt("share_size",
                default=1,
                help="Default size in GB for shares created by share tests."),
+    cfg.IntOpt("additional_overflow_blocks",
+               default=0,
+               help="Additional blocks to be written "
+                    "to share in scenario tests."),
+    cfg.IntOpt("share_resize_sync_delay",
+               default=0,
+               help="Time to wait before the changes to the share size"
+                    " are propagated to the storage system."),
+    cfg.IntOpt("share_growth_size",
+               default=1,
+               help="The default increase in size sought by tests"
+                    " when validating share resizing within scenario tests."),
     cfg.BoolOpt("run_ipv6_tests",
                 default=False,
                 help="Enable or disable running IPv6 NFS scenario tests. "

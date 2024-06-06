@@ -80,6 +80,7 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         self.write_data_to_mounted_share_using_dd(remote_client,
                                                   '/mnt/t1', '64M',
                                                   blocks)
+        time.sleep(CONF.share.share_resize_sync_delay)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
@@ -117,10 +118,11 @@ class ShareShrinkBase(manager.ShareScenarioTest):
         self.assertEqual(default_share_size, int(share["size"]))
 
         LOG.debug('Step 11 - write more data than allocated, should fail')
+        overflow_blocks = blocks + CONF.share.additional_overflow_blocks
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
             self.write_data_to_mounted_share_using_dd,
-            remote_client, '/mnt/t1', '64M', blocks)
+            remote_client, '/mnt/t1', '64M', overflow_blocks)
 
         LOG.debug('Step 12 - unmount')
         self.unmount_share(remote_client)
