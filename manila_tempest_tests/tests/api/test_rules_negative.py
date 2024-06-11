@@ -522,12 +522,13 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_can_apply_new_cephx_rules_when_one_is_in_error_state(self):
         # Create share on "primary" tenant
-        share_primary = self.create_share()
+        share_primary = self.create_share(share_type_id=self.share_type_id)
         # Add access rule to "Joe" by "primary" user
         self.allow_access(share_primary['id'], access_to='Joe')
 
         # Create share on "alt" tenant
-        share_alt = self.create_share(client=self.alt_shares_v2_client)
+        share_alt = self.create_share(
+            client=self.alt_shares_v2_client, share_type_id=self.share_type_id)
         # Add access rule to "Joe" by "alt" user.
         # Rule must be set to "error" status.
         rule1 = self.allow_access(share_alt['id'],
