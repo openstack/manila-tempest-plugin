@@ -13,10 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.lib import decorators
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+
+CONF = config.CONF
 
 
 class SharesMetadataTest(base.BaseSharesMixedTest):
@@ -263,3 +266,35 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         body_get = self.shares_v2_client.get_metadata(
             self.share["id"])['metadata']
         self.assertEqual(max_value, body_get["key"])
+
+
+class SharesMetadataCEPHFSTest(base.BaseSharesMixedTest):
+
+    protocol = "cephfs"
+
+    @classmethod
+    def resource_setup(cls):
+        super(SharesMetadataCEPHFSTest, cls).resource_setup()
+        # create share type
+        cls.share_type = cls.create_share_type()
+        cls.share_type_id = cls.share_type['id']
+        # create share
+        cls.share = cls.create_share(share_type_id=cls.share_type_id)
+
+    @classmethod
+    def skip_checks(cls):
+        super(SharesMetadataCEPHFSTest, cls).skip_checks()
+        if not (cls.protocol in CONF.share.enable_protocols):
+            msg = (
+                "CEPHFS filesystem metadata tests are disabled "
+                "for the %s protocol." % cls.protocol)
+            raise cls.skipException(msg)
+
+    @decorators.idempotent_id('58edc9c8-8b85-49aa-80aa-209fc8f40a13')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_cephfs_share_contains_mount_option(self):
+        body_get = self.shares_v2_client.get_metadata(
+            self.share["id"])['metadata']
+
+        self.assertIn("__mount_options", body_get)
+        self.assertIn("fs", body_get["__mount_options"])
