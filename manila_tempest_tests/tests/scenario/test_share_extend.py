@@ -9,6 +9,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import time
 
 import ddt
 from oslo_log import log as logging
@@ -50,6 +51,8 @@ class ShareExtendBase(manager.ShareScenarioTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_extend_and_write(self):
         default_share_size = CONF.share.share_size
+        additional_overflow_blocks = CONF.share.additional_overflow_blocks
+        share_growth_size = CONF.share.share_growth_size
 
         LOG.debug('Step 1 - create instance')
         instance = self.boot_instance(wait_until="BUILD")
@@ -77,30 +80,36 @@ class ShareExtendBase(manager.ShareScenarioTest):
         self.write_data_to_mounted_share_using_dd(remote_client,
                                                   '/mnt/t1', '64M',
                                                   three_quarter_blocks)
+        time.sleep(CONF.share.share_resize_sync_delay)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
-        over_one_quarter_blocks = total_blocks - three_quarter_blocks + 5
+        # Additional blocks that exceed the share capacity, defaulting to 5.
+        overflow_blocks = (
+            total_blocks - three_quarter_blocks +
+            additional_overflow_blocks or 5)
         LOG.debug('Step 6b - Write more data, should fail')
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
             self.write_data_to_mounted_share_using_dd,
-            remote_client, '/mnt/t2', '64M', over_one_quarter_blocks)
+            remote_client, '/mnt/t2', '64M', overflow_blocks)
+        time.sleep(CONF.share.share_resize_sync_delay)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
         LOG.debug('Step 7 - extend and wait')
-        extended_share_size = default_share_size + 1
+        extended_share_size = default_share_size + share_growth_size
         self.shares_v2_client.extend_share(share["id"],
                                            new_size=extended_share_size)
         waiters.wait_for_resource_status(
             self.shares_v2_client, share["id"], constants.STATUS_AVAILABLE)
         share = self.shares_v2_client.get_share(share["id"])['share']
         self.assertEqual(extended_share_size, int(share["size"]))
+        time.sleep(CONF.share.share_resize_sync_delay)
 
         LOG.debug('Step 8 - writing more data, should succeed')
         self.write_data_with_remount(location, remote_client, '/mnt/t3',
-                                     '64M', over_one_quarter_blocks)
+                                     '64M', overflow_blocks)
         ls_result = remote_client.exec_command("sudo ls -lAh /mnt/")
         LOG.debug(ls_result)
 
