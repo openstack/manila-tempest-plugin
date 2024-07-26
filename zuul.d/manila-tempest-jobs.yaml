@@ -494,7 +494,7 @@
       # TODO(gouthamr): some tests are disabled due to bugs
       # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
       tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
-      tempest_test_regex: '(^manila_tempest_tests.tests.scenario)(?=.*\[.*\bbackend\b.*\])'
+      tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
       devstack_localrc:
         CEPHADM_DEPLOY: True
         CEPHADM_DEV_OSD: True
