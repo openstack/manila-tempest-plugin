@@ -416,7 +416,12 @@
     vars:
       configure_swap_size: 8192
       tempest_test_regex: manila_tempest_tests.tests
-      tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*ceph_fuse.*)'
+      # NOTE(gouthamr): Avoiding ceph fuse tests to conserve resources;
+      # we're hoping we'd get sufficient coverage through kernel tests.
+      # test_extend_share: https://bugs.launchpad.net/manila/+bug/2075981
+      tempest_exclude_regex: "\
+        (^manila_tempest_tests.tests.scenario.*ceph_fuse.*)|\
+        (^manila_tempest_tests.tests.scenario.test_share_extend.*)"
       devstack_localrc:
         ENABLE_CEPH_NOVA: false
         CEPHADM_DEPLOY: true
@@ -493,7 +498,10 @@
       tempest_concurrency: 1
       # TODO(gouthamr): some tests are disabled due to bugs
       # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+      # test_share_extend: https://bugs.launchpad.net/manila/+bug/2075981
+      tempest_exclude_regex: "\
+        (^manila_tempest_tests.tests.scenario.*IPv6.*)|\
+        (^manila_tempest_tests.tests.scenario.test_share_extend.*)"
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
       devstack_localrc:
         CEPHADM_DEPLOY: True
@@ -560,7 +568,10 @@
       tempest_concurrency: 2
         # TODO(gouthamr): some tests are disabled due to bugs
         # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+        # test_share_extend: https://bugs.launchpad.net/manila/+bug/2075981
+      tempest_exclude_regex: "\
+        (^manila_tempest_tests.tests.scenario.*IPv6.*)|\
+        (^manila_tempest_tests.tests.scenario.test_share_extend.*)"
       devstack_localrc:
         MYSQL_REDUCE_MEMORY: True
         CEPHADM_DEPLOY: True
