@@ -421,6 +421,13 @@
         DISABLE_CEPHADM_POST_DEPLOY: True
         MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
         MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-master
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              run_manage_unmanage_tests: true
+              run_manage_unmanage_snapshot_tests: true
+              manage_with_share_or_snapshot_id: true
 
 - job:
     name: manila-tempest-plugin-cephfs-nfs-base
@@ -594,6 +601,9 @@
               image_password: manila
               multitenancy_enabled: false
               run_share_group_tests: false
+              run_manage_unmanage_tests: true
+              run_manage_unmanage_snapshot_tests: true
+              manage_with_share_or_snapshot_id: true
     group-vars:
       subnode:
         devstack_plugins:

@@ -91,6 +91,11 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
 
         return valid_params
 
+    def _update_manage_export_path(self, manage_params, share):
+        if CONF.share.manage_with_share_or_snapshot_id:
+            manage_params['export_path'] = share['instances'][0]['id']
+        return manage_params
+
     @decorators.idempotent_id('8267161e-4f55-44eb-9af5-30d1a3fb2606')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_manage_invalid_param_raises_exception(self):
@@ -104,6 +109,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         share = self._create_share_for_manage()
 
         valid_params = self._get_manage_params_from_share(share)
+        valid_params = self._update_manage_export_path(valid_params, share)
         self._unmanage_share_and_wait(share)
 
         test_set = [
@@ -152,6 +158,13 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         # tests that manage operation with a proper share type works.
         share = self._create_share_for_manage()
 
+        instance_id_for_managing = None
+        # NOTE(carloss): We can't reuse the _update_manage_export_path method
+        # here, as valid params is being copied and the values are changing,
+        # so we save the share instance ID to reuse in the end of the test.
+        if CONF.share.manage_with_share_or_snapshot_id:
+            instance_id_for_managing = share['instances'][0]['id']
+
         valid_params = self._get_manage_params_from_share(share)
         self._unmanage_share_and_wait(share)
 
@@ -178,6 +191,9 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
             self._unmanage_share_and_wait(invalid_share)
 
         # manage it properly and cleanup
+        if instance_id_for_managing:
+            valid_params['export_path'] = instance_id_for_managing
+
         managed_share = self._manage_share_and_wait(valid_params)
         self._delete_share_and_wait(managed_share)
 
@@ -195,6 +211,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         share = self._create_share_for_manage()
 
         manage_params = self._get_manage_params_from_share(share)
+        manage_params = self._update_manage_export_path(manage_params, share)
         self._unmanage_share_and_wait(share)
 
         # manage the share for the first time
@@ -270,6 +287,7 @@ class ManageNFSShareNegativeTest(base.BaseSharesAdminTest):
         waiters.wait_for_resource_status(
             self.shares_v2_client, invalid_share['id'],
             constants.STATUS_MANAGE_ERROR)
+        valid_params = self._update_manage_export_path(valid_params, share)
         self._unmanage_share_and_wait(share)
 
         # the attempt to delete a share in manage_error should raise an

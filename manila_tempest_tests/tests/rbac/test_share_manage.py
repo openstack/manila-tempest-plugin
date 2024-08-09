@@ -62,10 +62,17 @@ class ShareRbacManageShareTests(rbac_base.ShareRbacBaseTests,
         protocol = share_info['share_proto']
         service_host = share_info['host']
 
+        if CONF.share.manage_with_share_or_snapshot_id:
+            share_instances = (
+                self.admin_shares_v2_client.get_instances_of_share(
+                    share_info["id"])['share_instances'])
+            export_path = share_instances[0]['id']
+
         if unmanage:
             self.admin_shares_v2_client.unmanage_share(share_id)
             self.admin_shares_v2_client.wait_for_resource_deletion(
                 share_id=share_id)
+
         return {
             'export_path': export_path,
             'protocol': protocol,

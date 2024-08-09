@@ -394,4 +394,9 @@ ShareGroup = [
     cfg.BoolOpt("run_encryption_tests",
                 default=False,
                 help="Enable or disable share encryption tests."),
+    cfg.BoolOpt("manage_with_share_or_snapshot_id",
+                default=False,
+                help="When True, manage tests will use the share instance ID "
+                     "or snapshot ID as the export path/provider location "
+                     "instead of the actual values."),
 ]

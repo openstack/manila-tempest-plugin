@@ -1179,6 +1179,12 @@ class BaseSharesAdminTest(BaseSharesTest):
                 share["id"])['export_locations']
             share["export_locations"] = el
 
+        if CONF.share.manage_with_share_or_snapshot_id:
+            share_instances = (
+                self.shares_v2_client.get_instances_of_share(share['id'])
+            )['share_instances']
+            share['instances'] = share_instances
+
         return share
 
     def _unmanage_share_and_wait(self, share):
