@@ -612,6 +612,7 @@
           devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
         devstack_localrc:
           REMOTE_CEPH: True
+          ENABLE_CEPH_NOVA: False
       tempest:
         devstack_plugins:
           devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
