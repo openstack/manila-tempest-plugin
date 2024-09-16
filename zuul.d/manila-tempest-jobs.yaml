@@ -515,6 +515,7 @@
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
         IP_VERSION: 4
+        CEPH_INGRESS_IP: "{{hostvars['controller'].ansible_default_ipv6.address}}"
 
 - job:
     name: manila-tempest-plugin-multinode-base
