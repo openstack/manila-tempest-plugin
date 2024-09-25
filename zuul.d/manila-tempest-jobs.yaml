@@ -528,7 +528,6 @@
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
         IP_VERSION: 4
-        CEPH_INGRESS_IP: "{{hostvars['controller'].ansible_default_ipv6.address}}"
 
 - job:
     name: manila-tempest-plugin-multinode-base
@@ -608,7 +607,7 @@
         MANILA_SETUP_IPV6: false
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         TARGET_DEV_OSD_DIR: /opt/stack
-        CEPH_INGRESS_IP: "{{hostvars['controller'].ansible_default_ipv6.address}}"
+        CEPH_INGRESS_IP: "{{ hostvars['controller']['nodepool']['private_ipv4'] }}"
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
