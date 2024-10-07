@@ -196,6 +196,9 @@ class ReplicationExportLocationsTest(base.BaseSharesMixedTest):
         """Validates exports from the replica export locations APIs"""
         el_summary_keys = ['id', 'path', 'replica_state',
                            'availability_zone', 'preferred']
+        if utils.is_microversion_ge(LATEST_MICROVERSION, '2.87'):
+            el_summary_keys += ['metadata']
+
         el_detail_keys = el_summary_keys + ['created_at', 'updated_at']
         share, replica, expected_primary_exports, expected_replica_exports = (
             self._create_share_and_replica_get_exports()

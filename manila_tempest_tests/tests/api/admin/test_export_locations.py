@@ -58,6 +58,8 @@ class ExportLocationsTest(base.BaseSharesMixedTest):
         summary_keys = ['id', 'path']
         if utils.is_microversion_ge(version, '2.14'):
             summary_keys += ['preferred']
+        if utils.is_microversion_ge(version, '2.87'):
+            summary_keys += ['metadata']
 
         admin_summary_keys = summary_keys + [
             'share_instance_id', 'is_admin_only']
