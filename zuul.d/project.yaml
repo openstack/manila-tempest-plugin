@@ -8,9 +8,10 @@
       jobs:
         - manila-tempest-plugin-dummy-no-dhss
         - manila-tempest-plugin-dummy-dhss
-        - manila-tempest-plugin-lvm-caracal
-        - manila-tempest-plugin-lvm-bobcat
-        - manila-tempest-plugin-lvm-antelope
+        - manila-tempest-plugin-lvm-2024.2
+        - manila-tempest-plugin-lvm-2024.1
+        - manila-tempest-plugin-lvm-2023.2
+        - manila-tempest-plugin-lvm-2023.1
         - manila-tempest-plugin-dummy-no-dhss-rbac
         - manila-tempest-plugin-container:
             voting: false
