@@ -131,7 +131,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         subnet = self.create_share_network_subnet(**data)
 
         # Make sure that the created subnet contains the data
-        self.assertDictContainsSubset(data, subnet)
+        self.assertLessEqual(data.items(), subnet.items())
 
         # Delete the given subnet
         self.shares_v2_client.delete_subnet(self.share_network_id,

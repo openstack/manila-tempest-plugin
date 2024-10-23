@@ -164,8 +164,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         # verify response
         self.assertGreater(len(shares), 0)
         for share in shares:
-            self.assertDictContainsSubset(
-                filters['metadata'], share['metadata'])
+            self.assertLessEqual(filters['metadata'].items(),
+                                 share['metadata'].items())
         if CONF.share.capability_create_share_from_snapshot_support:
             self.assertFalse(self.shares[1]['id'] in [s['id'] for s in shares])
 
@@ -203,7 +203,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
                 )
             extra_specs = self.shares_client.get_share_type_extra_specs(
                 st_id)['extra_specs']
-            self.assertDictContainsSubset(filters["extra_specs"], extra_specs)
+            self.assertLessEqual(filters["extra_specs"].items(),
+                                 extra_specs.items())
 
     @decorators.idempotent_id('76fbe8ba-f1d3-4446-b9b8-55617762a2c7')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)

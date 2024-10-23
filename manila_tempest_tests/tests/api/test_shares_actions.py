@@ -310,8 +310,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         # verify response
         self.assertGreater(len(shares), 0)
         for share in shares:
-            self.assertDictContainsSubset(
-                filters['metadata'], share['metadata'])
+            self.assertLessEqual(filters['metadata'].items(),
+                                 share['metadata'].items())
         if CONF.share.capability_create_share_from_snapshot_support:
             self.assertFalse(self.shares[1]['id'] in [s['id'] for s in shares])
 

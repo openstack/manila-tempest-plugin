@@ -150,14 +150,14 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
 
         sn = self.create_share_network(client=self.cl,
                                        add_security_services=False, **data)
-        self.assertDictContainsSubset(data, sn)
+        self.assertLessEqual(data.items(), sn.items())
 
         # create security services with same type
         security_services = []
         for i in range(2):
             data = utils.generate_security_service_data()
             ss = self.create_security_service(client=self.cl, **data)
-            self.assertDictContainsSubset(data, ss)
+            self.assertLessEqual(data.items(), ss.items())
             security_services.insert(i, ss)
 
         # Add security service to share network
@@ -177,13 +177,13 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
 
         sn = self.create_share_network(client=self.cl,
                                        add_security_services=False, **data)
-        self.assertDictContainsSubset(data, sn)
+        self.assertLessEqual(data.items(), sn.items())
 
         # create security service
         data = utils.generate_security_service_data()
 
         ss = self.create_security_service(client=self.cl, **data)
-        self.assertDictContainsSubset(data, ss)
+        self.assertLessEqual(data.items(), ss.items())
 
         # Add security service to share network
         self.cl.add_sec_service_to_share_network(sn["id"], ss["id"])
