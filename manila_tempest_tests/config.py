@@ -308,6 +308,7 @@ ShareGroup = [
                default="manila",
                help="Image username."),
     cfg.StrOpt("image_password",
+               secret=True,
                help="Image password. Should be used for "
                     "'image_with_share_tools' without Nova Metadata support."),
     cfg.StrOpt("client_vm_flavor_ref",
