@@ -322,7 +322,7 @@ ShareGroup = [
                help="Time to wait for share backup before "
                     "timing out (seconds)."),
     cfg.IntOpt("share_server_migration_timeout",
-               default="1500",
+               default=1500,
                help="Time to wait for share server migration before "
                     "timing out (seconds)."),
     cfg.StrOpt("default_share_type_name",
