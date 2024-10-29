@@ -90,7 +90,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     def test_try_get_deleted_share_network(self):
         data = utils.generate_share_network_data()
         sn = self.create_share_network(**data)
-        self.assertDictContainsSubset(data, sn)
+        self.assertLessEqual(data.items(), sn.items())
 
         self.shares_client.delete_share_network(sn["id"])
 

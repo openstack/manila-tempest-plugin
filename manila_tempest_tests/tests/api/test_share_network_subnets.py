@@ -81,7 +81,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # Default subnet was created during share network creation
         self.assertIsNone(default_subnet['availability_zone'])
         # Match new subnet content
-        self.assertDictContainsSubset(data, created)
+        self.assertLessEqual(data.items(), created.items())
 
         self.assertEqual(sorted(keys), sorted(list(created.keys())))
 
@@ -109,7 +109,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
             created['id'], share_network['id'])['share_network_subnet']
 
         # Asserts
-        self.assertDictContainsSubset(data, shown)
+        self.assertLessEqual(data.items(), shown.items())
 
         # Deletes the created subnet
         self.shares_v2_client.delete_subnet(share_network['id'],

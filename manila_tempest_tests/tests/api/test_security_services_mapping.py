@@ -36,13 +36,13 @@ class SecurityServicesMappingTest(base.BaseSharesTest):
         self.sn = self.create_share_network(client=self.cl,
                                             add_security_services=False,
                                             **data)
-        self.assertDictContainsSubset(data, self.sn)
+        self.assertLessEqual(data.items(), self.sn.items())
 
         # create security service
         data = utils.generate_security_service_data()
 
         self.ss = self.create_security_service(client=self.cl, **data)
-        self.assertDictContainsSubset(data, self.ss)
+        self.assertLessEqual(data.items(), self.ss.items())
 
         # Add security service to share network
         self.cl.add_sec_service_to_share_network(self.sn["id"], self.ss["id"])

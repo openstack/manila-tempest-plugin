@@ -132,7 +132,7 @@ class SecurityServicesNegativeTest(base.BaseSharesMixedTest):
     def test_get_deleted_security_service(self):
         data = utils.generate_security_service_data()
         ss = self.create_security_service(**data)
-        self.assertDictContainsSubset(data, ss)
+        self.assertLessEqual(data.items(), ss.items())
 
         self.shares_client.delete_security_service(ss["id"])
 

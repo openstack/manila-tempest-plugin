@@ -224,7 +224,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         # create share network
         created = self.shares_client.create_share_network(
             **data)['share_network']
-        self.assertDictContainsSubset(data, created)
+        self.assertLessEqual(data.items(), created.items())
 
         # Delete share_network
         self.shares_client.delete_share_network(created["id"])
@@ -237,7 +237,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         self.assertEqual('2002-02-02T00:00:00.000000', get['created_at'])
         data = self.data_sn_with_ldap_ss.copy()
         del data['created_at']
-        self.assertDictContainsSubset(data, get)
+        self.assertLessEqual(data.items(), get.items())
 
     @decorators.idempotent_id('1837fdd3-8068-4e88-bc50-9224498f84c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -246,7 +246,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         updated = self.shares_client.update_share_network(
             self.sn_with_ldap_ss["id"],
             **update_data)['share_network']
-        self.assertDictContainsSubset(update_data, updated)
+        self.assertLessEqual(update_data.items(), updated.items())
 
     @decorators.idempotent_id('198a5c08-3aaf-4623-9720-95d33ebe3376')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -262,7 +262,7 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         updated = self.shares_client.update_share_network(
             self.shares_client.share_network_id,
             **update_dict)['share_network']
-        self.assertDictContainsSubset(update_dict, updated)
+        self.assertLessEqual(update_dict.items(), updated.items())
 
     @decorators.idempotent_id('7595a844-a28e-476c-89f1-4d3193ce9d5b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -272,14 +272,14 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
 
         # create share network
         sn1 = self.shares_client.create_share_network(**data)['share_network']
-        self.assertDictContainsSubset(data, sn1)
+        self.assertLessEqual(data.items(), sn1.items())
 
         # Delete first share network
         self.shares_client.delete_share_network(sn1["id"])
 
         # create second share network with same data
         sn2 = self.shares_client.create_share_network(**data)['share_network']
-        self.assertDictContainsSubset(data, sn2)
+        self.assertLessEqual(data.items(), sn2.items())
 
         # Delete second share network
         self.shares_client.delete_share_network(sn2["id"])
@@ -292,11 +292,11 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
 
         # create first share network
         sn1 = self.create_share_network(**data)
-        self.assertDictContainsSubset(data, sn1)
+        self.assertLessEqual(data.items(), sn1.items())
 
         # create second share network
         sn2 = self.create_share_network(**data)
-        self.assertDictContainsSubset(data, sn2)
+        self.assertLessEqual(data.items(), sn2.items())
 
     @decorators.idempotent_id('2dbf91da-04ae-4f9f-a7b9-0299c6b2e02c')
     @testtools.skipUnless(CONF.share.create_networks_when_multitenancy_enabled,

@@ -166,7 +166,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         self.service_names = ["ldap", "kerberos", "active_directory"]
         for ss_name in self.service_names:
             ss = self.create_security_service(ss_name, **data)
-            self.assertDictContainsSubset(data, ss)
+            self.assertLessEqual(data.items(), ss.items())
             self.assertEqual(ss_name, ss["type"])
             self.shares_client.delete_security_service(ss["id"])
 
@@ -188,9 +188,9 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             get = self.shares_client.get_security_service(
                 ss["id"])['security_service']
 
-        self.assertDictContainsSubset(data, ss)
+        self.assertLessEqual(data.items(), ss.items())
         self.assertEqual(with_ou, 'ou' in ss)
-        self.assertDictContainsSubset(data, get)
+        self.assertLessEqual(data.items(), get.items())
         self.assertEqual(with_ou, 'ou' in get)
 
     @decorators.idempotent_id('84d47747-13c8-4ab9-9fc4-a43fbb29ad18')
@@ -198,7 +198,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
     def test_update_security_service(self):
         data = utils.generate_security_service_data()
         ss = self.create_security_service(**data)
-        self.assertDictContainsSubset(data, ss)
+        self.assertLessEqual(data.items(), ss.items())
 
         upd_data = utils.generate_security_service_data()
         updated = self.shares_client.update_security_service(
@@ -206,8 +206,8 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
 
         get = self.shares_client.get_security_service(
             ss["id"])['security_service']
-        self.assertDictContainsSubset(upd_data, updated)
-        self.assertDictContainsSubset(upd_data, get)
+        self.assertLessEqual(upd_data.items(), updated.items())
+        self.assertLessEqual(upd_data.items(), get.items())
 
         if utils.is_microversion_ge(CONF.share.max_api_microversion, '2.44'):
             # update again with ou
@@ -217,8 +217,8 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
 
             get_ou = self.shares_v2_client.get_security_service(
                 ss["id"])['security_service']
-            self.assertDictContainsSubset(upd_data_ou, updated_ou)
-            self.assertDictContainsSubset(upd_data_ou, get_ou)
+            self.assertLessEqual(upd_data_ou.items(), updated_ou.items())
+            self.assertLessEqual(upd_data_ou.items(), get_ou.items())
 
     @decorators.idempotent_id('c3c04992-da11-4677-9098-eff3f4231a4b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -259,7 +259,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         }
         updated = self.shares_client.update_security_service(
             ss["id"], **update_data)['security_service']
-        self.assertDictContainsSubset(update_data, updated)
+        self.assertLessEqual(update_data.items(), updated.items())
 
     @decorators.idempotent_id('8d9af272-df89-470d-9ff8-92ba774c9fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
