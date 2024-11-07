@@ -175,7 +175,7 @@ class ShareNetworkSubnetsTest(base.BaseSharesMixedTest):
         # Default subnet was created during share network creation
         self.assertIsNone(default_subnet['availability_zone'])
         # Match new subnet content
-        self.assertDictContainsSubset(data, subnet)
+        self.assertLessEqual(data.items(), subnet.items())
         # Match share server subnet
         if check_multiple_subnet:
             self.assertIn(subnet['id'],
