@@ -108,6 +108,12 @@ ShareGroup = [
     cfg.ListOpt("enable_ro_access_level_for_protocols",
                 default=["nfs", ],
                 help="List of protocols to run tests with ro access level."),
+    cfg.ListOpt("nfs_versions",
+                default=["4", ],
+                help="Specifies the NFS protocol version to use when mounting "
+                     "an NFS share. Set to '3' for NFSv3, and '4' or '4.1' "
+                     "for NFSv4. Leave it blank to use the default version."),
+
 
     # Capabilities
     cfg.StrOpt("capability_storage_protocol",

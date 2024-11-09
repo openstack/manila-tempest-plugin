@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    A new configuration option, nfs_version, has been added to control
+    the NFS protocol version used for mounting NFS shares during testing.
+    This option allows users to specify which version of NFS should be used,
+    supporting environments where compatibility with specific versions is
+    required.

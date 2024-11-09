@@ -417,9 +417,16 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
             "sudo touch %s/file3" % snapshot_dir)
 
 
+@ddt.ddt
 class TestShareBasicOpsNFS(manager.BaseShareScenarioNFSTest,
                            ShareBasicOpsBase):
-    pass
+
+    @decorators.idempotent_id('4bad2073-a19b-4851-8cbe-75b20ade5cdb')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @ddt.data(*utils.deduplicate(CONF.share.nfs_versions))
+    def test_mount_share_one_vm(self, nfs_version):
+        self.nfs_version = nfs_version
+        super(TestShareBasicOpsNFS, self).test_mount_share_one_vm()
 
 
 class TestShareBasicOpsCIFS(manager.BaseShareScenarioCIFSTest,
