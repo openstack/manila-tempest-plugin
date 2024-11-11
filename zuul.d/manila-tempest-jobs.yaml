@@ -626,9 +626,15 @@
     vars:
       devstack_localrc:
         SHARE_DRIVER: manila.tests.share.drivers.dummy.DummyDriver
-        MANILA_CONFIGURE_GROUPS: alpha,beta,gamma,membernet
+        MANILA_CONFIGURE_GROUPS: alpha,beta,gamma,membernet,netapp_active_iq
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True revert_to_snapshot_support=True mount_snapshot_support=True'
         MANILA_ENABLED_BACKENDS: alpha,beta,gamma
+        MANILA_OPTGROUP_DEFAULT_scheduler_default_weighers: NetAppAIQWeigher,CapacityWeigher,GoodnessWeigher,HostAffinityWeigher,PoolWeigher
+        MANILA_OPTGROUP_netapp_active_iq_aiq_transport_type: https
+        MANILA_OPTGROUP_netapp_active_iq_aiq_ssl_verify: False
+        MANILA_OPTGROUP_netapp_active_iq_aiq_username: admin
+        MANILA_OPTGROUP_netapp_active_iq_aiq_password: 123
+        MANILA_OPTGROUP_netapp_active_iq_aiq_hostname: localhost
         MANILA_OPTGROUP_alpha_driver_handles_share_servers: false
         MANILA_OPTGROUP_alpha_replication_domain: DUMMY_DOMAIN
         MANILA_OPTGROUP_alpha_share_backend_name: ALPHA
@@ -684,10 +690,16 @@
     vars:
       devstack_localrc:
         SHARE_DRIVER: manila.tests.share.drivers.dummy.DummyDriver
-        MANILA_CONFIGURE_GROUPS: alpha,beta,gamma,membernet,adminnet
+        MANILA_CONFIGURE_GROUPS: alpha,beta,gamma,membernet,adminnet,netapp_active_iq
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True revert_to_snapshot_support=True mount_snapshot_support=True'
         MANILA_ENABLED_BACKENDS: alpha,beta
         MANILA_OPTGROUP_DEFAULT_quota_share_networks: 50
+        MANILA_OPTGROUP_DEFAULT_scheduler_default_weighers: NetAppAIQWeigher,CapacityWeigher,GoodnessWeigher,HostAffinityWeigher,PoolWeigher
+        MANILA_OPTGROUP_netapp_active_iq_aiq_transport_type: https
+        MANILA_OPTGROUP_netapp_active_iq_aiq_ssl_verify: False
+        MANILA_OPTGROUP_netapp_active_iq_aiq_username: admin
+        MANILA_OPTGROUP_netapp_active_iq_aiq_password: 123
+        MANILA_OPTGROUP_netapp_active_iq_aiq_hostname: localhost
         MANILA_OPTGROUP_adminnet_network_api_class: manila.network.standalone_network_plugin.StandaloneNetworkPlugin
         MANILA_OPTGROUP_adminnet_network_plugin_ipv4_enabled: true
         MANILA_OPTGROUP_adminnet_standalone_network_plugin_allowed_ip_ranges: 11.0.0.10-11.0.0.19,11.0.0.30-11.0.0.39,11.0.0.50-11.0.0.199
