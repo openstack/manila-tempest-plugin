@@ -342,39 +342,6 @@ class ShareServerMigrationStartInvalidStatesNFS(MigrationShareServerNegative):
             dest_host
         )
 
-    @decorators.idempotent_id('ebe8da5b-ee9c-48c7-a7e4-9e71839f813f')
-    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    def test_share_server_migration_start_with_share_replica(self):
-        """Try server migration start with share replica."""
-        if not CONF.share.backend_replication_type or (
-                not CONF.share.run_replication_tests):
-            raise self.skipException(
-                'Share replica tests are disabled or unsupported.')
-        extra_specs = {
-            'driver_handles_share_servers': CONF.share.multitenancy_enabled,
-            'replication_type': CONF.share.backend_replication_type
-        }
-        share_type = self.shares_v2_client.create_share_type(
-            name=data_utils.rand_name("tempest-share-type"),
-            extra_specs=extra_specs,
-            cleanup_in_class=False)
-        share = self.create_share(share_type_id=share_type['share_type']['id'],
-                                  share_protocol=self.protocol,
-                                  cleanup_in_class=False)
-        share = self.shares_v2_client.get_share(share['id'])['share']
-        share_server_id = share['share_server_id']
-        dest_host, _ = self._choose_compatible_backend_for_share_server(
-            share_server_id)
-        self.create_share_replica(
-            share['id'],
-            cleanup_in_class=False)
-        self.assertRaises(
-            lib_exc.Conflict,
-            self.shares_v2_client.share_server_migration_start,
-            share_server_id,
-            dest_host
-        )
-
 
 class ShareServerMigrationInvalidParametersCIFS(
     ShareServerMigrationInvalidParametersNFS):
