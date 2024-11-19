@@ -898,7 +898,7 @@ class BaseSharesTest(test.BaseTestCase):
                 res["deleted"] = False
             if "client" not in res.keys():
                 res["client"] = cls.shares_client
-            if not(res["deleted"]):
+            if not res["deleted"]:
                 res_id = res['id']
                 client = res["client"]
                 with handle_cleanup_exceptions():
