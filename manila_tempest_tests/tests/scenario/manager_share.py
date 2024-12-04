@@ -752,8 +752,11 @@ class BaseShareScenarioNFSTest(ShareScenarioTest):
         self.validate_ping_to_export_location(location, ssh_client)
 
         target_dir = target_dir or "/mnt"
+        nfs_version = getattr(self, 'nfs_version', None)
+        version_option = f"-o vers={nfs_version}" if nfs_version else ""
         ssh_client.exec_command(
-            "sudo mount -vt nfs \"%s\" %s" % (location, target_dir)
+            "sudo mount -vt nfs %s \"%s\" %s" % (
+                version_option, location, target_dir)
         )
 
 
