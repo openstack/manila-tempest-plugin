@@ -164,6 +164,8 @@
     name: manila-tempest-plugin-zfsonlinux
     description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
     parent: manila-tempest-plugin-zfsonlinux-base
+    # https://bugs.launchpad.net/manila/+bug/2087192
+    nodeset: openstack-single-node-jammy
     branches: &ubuntu_jammy_test_image_branches
       regex: ^stable/(yoga|xena|wallaby|victoria|ussuri)$
       negate: true
@@ -249,6 +251,16 @@
       devstack_localrc:
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
+
+
+# TODO(gmann): As per the 2025.1 testing runtime, we need to run at least
+# one job on jammy. This job can be removed as per the future testing
+# runtime (whenever we start testing Ubuntu 26.04 as default version).
+- job:
+    name: manila-tempest-plugin-lvm-jammy
+    description: This is integrated job testing on Ubuntu jammy(22.04)
+    parent: manila-tempest-plugin-lvm
+    nodeset: openstack-single-node-jammy
 
 - job:
     name: manila-tempest-plugin-container
@@ -875,6 +887,7 @@
     check:
       jobs:
         - manila-tempest-plugin-lvm
+        - manila-tempest-plugin-lvm-jammy
         - manila-tempest-plugin-generic-scenario:
             voting: false
         - manila-tempest-plugin-generic:
@@ -888,3 +901,4 @@
     gate:
       jobs:
         - manila-tempest-plugin-lvm
+        - manila-tempest-plugin-lvm-jammy
