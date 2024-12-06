@@ -22,6 +22,7 @@ from tempest.lib import exceptions as lib_exc
 import testtools
 from testtools import testcase as tc
 
+from manila_tempest_tests.common import waiters
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -62,6 +63,7 @@ def _create_delete_ro_access_rule(self, version):
             self.share['id'])['access_list']
         rule = [r for r in rules if r['id'] == rule['id']][0]
         self.assertEqual("active", rule['state'])
+    return rule
 
 
 @ddt.ddt
@@ -162,8 +164,22 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
         "RO access rule tests are disabled for NFS protocol.")
     @ddt.data(*utils.deduplicate(['1.0', '2.9', '2.27', '2.28',
                                  LATEST_MICROVERSION]))
-    def test_create_delete_ro_access_rule(self, client_name):
-        _create_delete_ro_access_rule(self, client_name)
+    def test_create_delete_ro_access_rule(self, version):
+        _create_delete_ro_access_rule(self, version)
+
+    @decorators.idempotent_id('01940881-6f95-77f8-b47d-0941c4e6bafb')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipIf(
+        "nfs" not in CONF.share.enable_ro_access_level_for_protocols,
+        "RO access rule tests are disabled for NFS protocol.")
+    def test_update_access_rule(self):
+        rule = _create_delete_ro_access_rule(self, LATEST_MICROVERSION)
+        rule = self.shares_v2_client.update_access_rule(
+            access_id=rule['id'], access_level='rw')['access']
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, self.share['id'], status='active',
+            resource_name='access_rule', rule_id=rule['id'])
+        self.assertEqual(rule['access_level'], 'rw')
 
 
 @ddt.ddt
@@ -179,6 +195,17 @@ class ShareIpRulesForCIFSTest(ShareIpRulesForNFSTest):
                                  LATEST_MICROVERSION]))
     def test_create_delete_ro_access_rule(self, version):
         _create_delete_ro_access_rule(self, version)
+
+    @decorators.idempotent_id('02940881-6f95-77f8-b47d-0941c4e6bafb')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @testtools.skipIf(
+        "cifs" not in CONF.share.enable_ro_access_level_for_protocols,
+        "RO access rule tests are disabled for CIFS protocol.")
+    def test_update_access_rule(self):
+        super(
+            ShareIpRulesForCIFSTest,
+            self
+        ).test_update_access_rule()
 
 
 @ddt.ddt
