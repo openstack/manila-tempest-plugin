@@ -186,7 +186,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                         storage_net_nic[0]['addr']
                     )
             # Attach a floating IP
-            self.associate_floating_ip(floating_ip, instance)
+            self.associate_floating_ip(floating_ip, instance, ip_addr=ip_addr)
 
         self.assertIsNotNone(server_ip)
         # Check ssh
