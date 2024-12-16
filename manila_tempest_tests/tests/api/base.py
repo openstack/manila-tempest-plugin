@@ -169,7 +169,7 @@ class BaseSharesTest(test.BaseTestCase):
                     "CONF.share.create_networks_when_multitenancy_enabled "
                     "is set to True")
             share_network_id = cls.provide_share_network(
-                cls.shares_client, cls.networks_client)
+                cls.shares_v2_client, cls.networks_client)
             cls.shares_client.share_network_id = share_network_id
             cls.shares_v2_client.share_network_id = share_network_id
 
