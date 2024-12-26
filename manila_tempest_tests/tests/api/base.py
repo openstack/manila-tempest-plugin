@@ -1283,12 +1283,18 @@ class BaseSharesMixedTest(BaseSharesAdminTest):
         cls.admin_project = cls.os_admin.auth_provider.auth_data[1]['project']
         identity_clients = getattr(
             cls.os_admin, 'identity_%s' % CONF.identity.auth_version)
-        cls.os_admin.identity_client = identity_clients.IdentityClient()
-        cls.os_admin.projects_client = identity_clients.ProjectsClient()
-        cls.os_admin.users_client = identity_clients.UsersClient()
-        cls.os_admin.roles_client = identity_clients.RolesClient()
+        endpoint_type = CONF.share.endpoint_type
+        cls.os_admin.identity_client = identity_clients.IdentityClient(
+            endpoint_type=endpoint_type)
+        cls.os_admin.projects_client = identity_clients.ProjectsClient(
+            endpoint_type=endpoint_type)
+        cls.os_admin.users_client = identity_clients.UsersClient(
+            endpoint_type=endpoint_type)
+        cls.os_admin.roles_client = identity_clients.RolesClient(
+            endpoint_type=endpoint_type)
         cls.os_admin.domains_client = (
-            cls.os_admin.identity_v3.DomainsClient() if
+            cls.os_admin.identity_v3.DomainsClient(
+                endpoint_type=endpoint_type) if
             CONF.identity.auth_version == 'v3' else None)
         cls.admin_project_member_client = cls.create_user_and_get_client(
             project=cls.admin_project, add_member_role=True)
