@@ -899,6 +899,15 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
+    def update_access_rule(self, access_id, access_level,
+                           version=LATEST_MICROVERSION):
+        url = 'share-access-rules/%s' % access_id
+        body = {'update_access': {"access_level": access_level}}
+        resp, body = self.put(url, json.dumps(body), version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
     def update_access_metadata(self, access_id, metadata,
                                version=LATEST_MICROVERSION):
         url = 'share-access-rules/%s/metadata' % access_id

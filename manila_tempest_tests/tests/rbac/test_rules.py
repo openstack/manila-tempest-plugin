@@ -93,6 +93,10 @@ class ShareRbacRulesTests(rbac_base.ShareRbacBaseTests, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def test_update_access(self):
+        pass
+
+    @abc.abstractmethod
     def test_delete_access(self):
         pass
 
@@ -154,6 +158,32 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
 
         self.assertIn(access['id'], access_list)
         self.assertNotIn(alt_access['id'], alt_access_list)
+
+    @decorators.idempotent_id('01939b69-ef9b-75cf-abf7-5171fec7c397')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_update_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
+        if access_type != 'ip':
+            message = "Currently support update for only access_type 'ip'."
+            raise self.skipException(message)
+
+        access = self.allow_access(self.share_member_client, self.share['id'])
+        rule = self.do_request(
+            'update_access_rule', expected_status=200,
+            access_id=access['id'], access_level='ro')['access']
+        waiters.wait_for_resource_status(
+            self.share_member_client, self.share['id'], status='active',
+            resource_name='access_rule', rule_id=rule['id'])
+
+        alt_access = self.allow_access(
+            self.alt_project_share_v2_client, self.alt_share['id'])
+        rule = self.do_request(
+            'update_access_rule', expected_status=200,
+            access_id=alt_access['id'], access_level='ro')['access']
+        waiters.wait_for_resource_status(
+            self.alt_project_share_v2_client, self.alt_share['id'],
+            status='active', resource_name='access_rule', rule_id=rule['id'])
 
     @decorators.idempotent_id('b4d7a91c-a75e-4ad9-93cb-8e5234fea97a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -285,6 +315,30 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
         self.assertIn(access['id'], access_id_list)
         self.assertNotIn(alt_access['id'], access_id_list)
 
+    @decorators.idempotent_id('02939b69-ef9b-75cf-abf7-5171fec7c397')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_update_access(self):
+        access_type, access_to = (
+            utils.get_access_rule_data_from_config(self.protocol))
+        if access_type != 'ip':
+            message = "Currently support update for only access_type 'ip'."
+            raise self.skipException(message)
+
+        share_client = getattr(self, 'share_member_client', self.client)
+        access = self.allow_access(share_client, self.share['id'])
+        rule = self.do_request(
+            'update_access_rule', client=share_client, expected_status=200,
+            access_id=access['id'], access_level='ro')['access']
+        waiters.wait_for_resource_status(
+            share_client, self.share['id'], status='active',
+            resource_name='access_rule', rule_id=rule['id'])
+
+        alt_access = self.allow_access(
+            self.alt_project_share_v2_client, self.alt_share['id'])
+        self.do_request(
+            'update_access_rule', expected_status=lib_exc.NotFound,
+            access_id=alt_access['id'], access_level='ro')
+
     @decorators.idempotent_id('61cf6f6c-5d7c-48d7-9d5a-e6ea288afdbc')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_grant_access_rule(self):
@@ -390,6 +444,20 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_access(self):
         super(TestProjectReaderTestsNFS, self).test_list_access()
+
+    @decorators.idempotent_id('03939b69-ef9b-75cf-abf7-5171fec7c397')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_update_access(self):
+        access = self.allow_access(self.share_member_client, self.share['id'])
+        self.do_request(
+            'update_access_rule', expected_status=lib_exc.Forbidden,
+            access_id=access['id'], access_level='ro')
+
+        alt_access = self.allow_access(
+            self.alt_project_share_v2_client, self.alt_share['id'])
+        self.do_request(
+            'update_access_rule', expected_status=lib_exc.Forbidden,
+            access_id=alt_access['id'], access_level='ro')
 
     @decorators.idempotent_id('ace870f9-af91-4259-8760-dc7d7107b7ff')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)

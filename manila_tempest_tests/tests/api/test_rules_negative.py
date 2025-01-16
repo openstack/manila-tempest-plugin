@@ -368,6 +368,26 @@ class ShareUserRulesForNFSNegativeTest(base.BaseSharesMixedTest):
                           CONF.share.username_for_user_rules,
                           'su')
 
+    @decorators.idempotent_id('d5b1e7c9-7e6b-4918-a1c4-e03c8d82c46a')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_update_access_rule_with_worng_level(self):
+        access_type, access_to = utils.get_access_rule_data_from_config(
+            self.protocol)
+        if access_type != 'ip':
+            msg = "Currently support update for only access_type 'ip'."
+            raise self.skipException(msg)
+
+        rule = self.allow_access(
+            self.share["id"], client=self.shares_v2_client,
+            access_type=access_type, access_to=access_to)
+
+        self.assertRaises(
+            lib_exc.BadRequest,
+            self.shares_v2_client.update_access_rule,
+            rule['id'],
+            access_level='fake_level'
+        )
+
 
 @ddt.ddt
 class ShareUserRulesForCIFSNegativeTest(ShareUserRulesForNFSNegativeTest):

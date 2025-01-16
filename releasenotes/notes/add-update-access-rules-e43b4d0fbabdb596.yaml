@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Added tests to verify share access rule update operation. Update is
+    allowed only for admin and project member. Also supported microversion is
+    increased to 2.88.
