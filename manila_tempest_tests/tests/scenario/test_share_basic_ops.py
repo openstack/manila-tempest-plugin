@@ -432,24 +432,26 @@ class TestShareBasicOpsNFS(manager.BaseShareScenarioNFSTest,
 class TestShareBasicOpsCIFS(manager.BaseShareScenarioCIFSTest,
                             ShareBasicOpsBase):
 
+    @testtools.skipIf(
+        "cifs" not in CONF.share.enable_ro_access_level_for_protocols,
+        "RO access rule tests are disabled for CIFS protocol.")
     @decorators.idempotent_id('4344a47a-d316-496b-97a4-12a59297950a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_BACKEND)
     def test_write_with_ro_access(self):
-        msg = ("Skipped for CIFS protocol because RO access is not "
-               "supported for shares by IP.")
-        raise self.skipException(msg)
+        super(TestShareBasicOpsCIFS, self).test_write_with_ro_access()
 
+    @decorators.skip_because(bug='1649573')
     @decorators.idempotent_id('a691332b-dd7a-4041-9bbd-3893e168aefa')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_read_mountable_snapshot(self):
-        msg = "Skipped for CIFS protocol because of bug/1649573"
-        raise self.skipException(msg)
+        super(TestShareBasicOpsCIFS, self).test_read_mountable_snapshot()
 
+    @decorators.skip_because(bug='1649573')
     @decorators.idempotent_id('8c936c3e-4793-49d2-8409-4038f03e7012')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_write_data_to_share_created_from_snapshot(self):
-        msg = "Skipped for CIFS protocol because of bug/1649573"
-        raise self.skipException(msg)
+        super(TestShareBasicOpsCIFS,
+              self).test_write_data_to_share_created_from_snapshot()
 
 
 class TestBaseShareBasicOpsScenarioCEPHFS(manager.BaseShareScenarioCEPHFSTest,
