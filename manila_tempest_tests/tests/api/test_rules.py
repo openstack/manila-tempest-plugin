@@ -167,6 +167,7 @@ class ShareIpRulesForNFSTest(base.BaseSharesMixedTest):
     def test_create_delete_ro_access_rule(self, version):
         _create_delete_ro_access_rule(self, version)
 
+    @utils.skip_if_microversion_not_supported('2.88')
     @decorators.idempotent_id('01940881-6f95-77f8-b47d-0941c4e6bafb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
@@ -196,6 +197,7 @@ class ShareIpRulesForCIFSTest(ShareIpRulesForNFSTest):
     def test_create_delete_ro_access_rule(self, version):
         _create_delete_ro_access_rule(self, version)
 
+    @utils.skip_if_microversion_not_supported('2.88')
     @decorators.idempotent_id('02940881-6f95-77f8-b47d-0941c4e6bafb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(

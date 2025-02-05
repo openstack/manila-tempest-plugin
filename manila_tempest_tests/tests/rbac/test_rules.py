@@ -159,14 +159,15 @@ class TestProjectAdminTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
         self.assertIn(access['id'], access_list)
         self.assertNotIn(alt_access['id'], alt_access_list)
 
+    @utils.skip_if_microversion_not_supported('2.88')
     @decorators.idempotent_id('01939b69-ef9b-75cf-abf7-5171fec7c397')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_update_access(self):
         access_type, access_to = (
             utils.get_access_rule_data_from_config(self.protocol))
         if access_type != 'ip':
-            message = "Currently support update for only access_type 'ip'."
-            raise self.skipException(message)
+            msg = "Access rule updates supported only for 'ip' access."
+            raise self.skipException(msg)
 
         access = self.allow_access(self.share_member_client, self.share['id'])
         rule = self.do_request(
@@ -315,14 +316,15 @@ class TestProjectMemberTestsNFS(ShareRbacRulesTests, base.BaseSharesTest):
         self.assertIn(access['id'], access_id_list)
         self.assertNotIn(alt_access['id'], access_id_list)
 
+    @utils.skip_if_microversion_not_supported('2.88')
     @decorators.idempotent_id('02939b69-ef9b-75cf-abf7-5171fec7c397')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_update_access(self):
         access_type, access_to = (
             utils.get_access_rule_data_from_config(self.protocol))
         if access_type != 'ip':
-            message = "Currently support update for only access_type 'ip'."
-            raise self.skipException(message)
+            msg = "Access rule updates supported only for 'ip' access."
+            raise self.skipException(msg)
 
         share_client = getattr(self, 'share_member_client', self.client)
         access = self.allow_access(share_client, self.share['id'])
