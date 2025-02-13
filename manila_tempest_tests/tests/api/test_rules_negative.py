@@ -520,22 +520,24 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('4ffed391-d7cc-481b-bb74-9f3406ddd75f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_different_tenants_cannot_use_same_cephx_id(self):
+        scheduler_hint = {"same_host": "%s" % self.share["id"]}
+
         # Grant access to the share
         self.allow_access(self.share['id'], access_to=self.access_to)
-
         # Create second share by the new user
-        share2 = self.create_share(client=self.alt_shares_v2_client,
+        share2 = self.create_share(client=self.admin_shares_v2_client,
                                    share_protocol=self.protocol,
-                                   share_type_id=self.share_type_id)
+                                   share_type_id=self.share_type_id,
+                                   scheduler_hints=scheduler_hint)
 
         # Try grant access to the second share using the same cephx id as used
         # on the first share.
         # Rule must be set to "error" status.
-        self.allow_access(share2['id'], client=self.alt_shares_v2_client,
+        self.allow_access(share2['id'], client=self.admin_shares_v2_client,
                           access_to=self.access_to, status='error',
                           raise_rule_in_error_state=False)
 
-        share_alt_updated = self.alt_shares_v2_client.get_share(
+        share_alt_updated = self.admin_shares_v2_client.get_share(
             share2['id'])['share']
         self.assertEqual('error', share_alt_updated['access_rules_status'])
 
@@ -543,35 +545,39 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     def test_can_apply_new_cephx_rules_when_one_is_in_error_state(self):
         # Create share on "primary" tenant
-        share_primary = self.create_share(share_type_id=self.share_type_id)
+        share_primary = self.create_share(
+            share_type_id=self.share_type_id)
         # Add access rule to "Joe" by "primary" user
         self.allow_access(share_primary['id'], access_to='Joe')
 
-        # Create share on "alt" tenant
-        share_alt = self.create_share(
-            client=self.alt_shares_v2_client, share_type_id=self.share_type_id)
-        # Add access rule to "Joe" by "alt" user.
+        scheduler_hint = {"same_host": "%s" % share_primary["id"]}
+        # Create share on "admin" tenant
+        share_adm = self.create_share(
+            client=self.admin_shares_v2_client,
+            share_type_id=self.share_type_id,
+            scheduler_hints=scheduler_hint)
+        # Add access rule to "Joe" by "admin" user.
         # Rule must be set to "error" status.
-        rule1 = self.allow_access(share_alt['id'],
-                                  client=self.alt_shares_v2_client,
+        rule1 = self.allow_access(share_adm['id'],
+                                  client=self.admin_shares_v2_client,
                                   access_to='Joe',
                                   status='error',
                                   raise_rule_in_error_state=False,
                                   cleanup=False)
 
         # Share's "access_rules_status" must be in "error" status
-        share_alt_updated = self.alt_shares_v2_client.get_share(
-            share_alt['id'])['share']
-        self.assertEqual('error', share_alt_updated['access_rules_status'])
+        share_adm_updated = self.admin_shares_v2_client.get_share(
+            share_adm['id'])['share']
+        self.assertEqual('error', share_adm_updated['access_rules_status'])
 
-        # Add second access rule to different client by "alt" user.
-        self.allow_access(share_alt['id'], client=self.alt_shares_v2_client)
+        # Add second access rule to different client by "admin" user.
+        self.allow_access(share_adm['id'], client=self.admin_shares_v2_client)
 
         # Check share's access_rules_status has transitioned to "active" status
-        self.alt_shares_v2_client.delete_access_rule(
-            share_alt['id'], rule1['id'])
+        self.admin_shares_v2_client.delete_access_rule(
+            share_adm['id'], rule1['id'])
         waiters.wait_for_resource_status(
-            self.alt_shares_v2_client, share_alt['id'], 'active',
+            self.admin_shares_v2_client, share_adm['id'], 'active',
             status_attr='access_rules_status')
 
 
