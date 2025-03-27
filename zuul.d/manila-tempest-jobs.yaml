@@ -588,6 +588,7 @@
       devstack_localrc:
         MYSQL_REDUCE_MEMORY: True
         CEPHADM_DEPLOY: True
+        ENABLE_INGRESS: False
         CEPHADM_DEV_OSD: true
         CEPH_LOOPBACK_DISK_SIZE: 40GB
         ENABLED_SHARE_PROTOCOLS: NFS
@@ -607,7 +608,6 @@
         MANILA_SETUP_IPV6: false
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         TARGET_DEV_OSD_DIR: /opt/stack
-        CEPH_INGRESS_IP: "{{ hostvars['controller']['nodepool']['private_ipv4'] }}"
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
