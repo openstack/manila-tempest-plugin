@@ -389,6 +389,10 @@
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
       tempest_test_regex: manila_tempest_tests.tests
       devstack_localrc:
+        # TODO (gouthamr): update to squid after
+        # https://bugs.launchpad.net/manila/+bug/2105833
+        CEPH_RELEASE: 'reef'
+        CONTAINER_IMAGE: 'quay.io/ceph/ceph:v18.2'
         VOLUME_BACKING_FILE_SIZE: 60GB
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnative
