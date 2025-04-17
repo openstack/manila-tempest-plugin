@@ -261,6 +261,8 @@
     description: This is integrated job testing on Ubuntu jammy(22.04)
     parent: manila-tempest-plugin-lvm
     nodeset: openstack-single-node-jammy
+    branches:
+      - stable/2025.1
 
 - job:
     name: manila-tempest-plugin-container
