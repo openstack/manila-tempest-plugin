@@ -107,19 +107,6 @@
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
 
-- job:
-    name: manila-tempest-plugin-lvm-2023.2
-    parent: manila-tempest-plugin-lvm-base
-    override-checkout: stable/2023.2
-    vars:
-      # TODO(gouthamr): some tests are disabled due to bugs
-      # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      # drop these overrides once we address that bug.
-      tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*IPv6.*)'
-      devstack_localrc:
-        MANILA_SETUP_IPV6: false
-        NEUTRON_CREATE_INITIAL_NETWORKS: true
-
 - project-template:
     name: manila-tempest-plugin-jobs-using-service-image-stable
     description: |
