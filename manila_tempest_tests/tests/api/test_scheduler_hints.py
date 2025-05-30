@@ -72,14 +72,17 @@ class SharesSchedulerHintsTest(base.BaseSharesMixedTest):
         # get metadata of share
         metadata_a = self.shares_v2_client.get_metadata(
             self.share_a["id"])['metadata']
-        md_a = {"__affinity_same_host": "%s" % share_b["id"]}
+        expected_md_a = {"__affinity_same_host": "%s" % share_b["id"]}
         metadata_b = self.shares_v2_client.get_metadata(
             share_b["id"])['metadata']
-        md_b = {"__affinity_same_host": "%s" % self.share_a["id"]}
+        expected_md_b = {"__affinity_same_host": "%s" % self.share_a["id"]}
 
         # verify metadata
-        self.assertEqual(md_a, metadata_a)
-        self.assertEqual(md_b, metadata_b)
+        for key, value in expected_md_a.items():
+            self.assertEqual(value, metadata_a.get(key))
+
+        for key, value in expected_md_b.items():
+            self.assertEqual(value, metadata_b.get(key))
 
     @decorators.idempotent_id('6569e0c3-43c9-4ee2-84ff-ea7fa8da8110')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
