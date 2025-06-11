@@ -27,6 +27,7 @@ from manila_tempest_tests import utils
 CONF = config.CONF
 SHARE_NETWORK_SUBNETS_MICROVERSION = '2.51'
 SHARE_REPLICA_QUOTAS_MICROVERSION = "2.53"
+ENCRYPTION_KEYS_QUOTA_MICROVERSION = "2.90"
 EXPERIMENTAL = {'X-OpenStack-Manila-API-Experimental': 'True'}
 
 
@@ -274,6 +275,10 @@ def share_network_subnets_are_supported():
 
 def share_replica_quotas_are_supported():
     return is_microversion_supported(SHARE_REPLICA_QUOTAS_MICROVERSION)
+
+
+def encryption_keys_quota_supported():
+    return is_microversion_supported(ENCRYPTION_KEYS_QUOTA_MICROVERSION)
 
 
 def share_network_get_default_subnet(share_network):

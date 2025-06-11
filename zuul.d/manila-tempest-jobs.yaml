@@ -691,6 +691,7 @@
     parent: manila-tempest-plugin-standalone-base
     required-projects:
       - openstack/barbican
+      - openstack/barbican-tempest-plugin
     vars:
       devstack_plugins:
         barbican: https://opendev.org/openstack/barbican
@@ -761,6 +762,8 @@
               run_share_server_migration_tests: true
               run_share_server_multiple_subnet_tests: true
               run_network_allocation_update_tests: true
+              run_encryption_tests: true
+              capability_encryption_support: share_server
 
 - job:
     name: manila-tempest-plugin-glusterfs-native

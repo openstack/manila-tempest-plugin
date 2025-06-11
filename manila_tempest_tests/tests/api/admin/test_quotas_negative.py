@@ -80,6 +80,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         {"gigabytes": -2},
         {"snapshot_gigabytes": -2},
         {"share_networks": -2},
+        {"encryption_keys": -2},
     )
     @decorators.idempotent_id('07d3e69a-7cda-4ca7-9fea-c32f6830fdd3')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)

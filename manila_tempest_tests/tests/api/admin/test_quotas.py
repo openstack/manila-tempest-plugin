@@ -66,6 +66,8 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
         if utils.share_replica_quotas_are_supported():
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
+        if utils.encryption_keys_quota_supported():
+            self.assertGreater(int(quotas["encryption_keys"]), -2)
 
     @decorators.idempotent_id('1ff57cfa-cd8d-495f-86eb-9fead307428e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -82,6 +84,8 @@ class SharesAdminQuotasTest(base.BaseSharesAdminTest):
         if utils.share_replica_quotas_are_supported():
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
+        if utils.encryption_keys_quota_supported():
+            self.assertGreater(int(quotas["encryption_keys"]), -2)
 
     @decorators.idempotent_id('9b96dd45-7c0d-41ee-88e4-600185f61358')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
@@ -471,6 +475,19 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
 
         self.assertEqual(new_quota, int(updated["share_networks"]))
 
+    @decorators.idempotent_id('78957d97-afad-4371-a21e-79641fff83f7')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    @utils.skip_if_microversion_not_supported("2.90")
+    def test_update_tenant_quota_encryption_keys(self):
+        # get current quotas
+        quotas = self.client.show_quotas(self.tenant_id)['quota_set']
+        new_quota = int(quotas["encryption_keys"]) + 2
+
+        # set new quota for encryption keys
+        updated = self.update_quotas(self.tenant_id, encryption_keys=new_quota)
+
+        self.assertEqual(new_quota, int(updated["encryption_keys"]))
+
     @decorators.idempotent_id('84e24c32-ee78-461e-ac1f-f9e4d99f88e2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_reset_tenant_quotas(self):
@@ -496,6 +513,8 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
         if utils.share_replica_quotas_are_supported():
             data["share_replicas"] = int(custom["share_replicas"]) + 2
             data["replica_gigabytes"] = int(custom["replica_gigabytes"]) + 2
+        if utils.encryption_keys_quota_supported():
+            data["encryption_keys"] = int(custom["encryption_keys"]) + 2
 
         # set new quota, turn off cleanup - we'll do it right below
         updated = self.update_quotas(self.tenant_id, cleanup=False, **data)
@@ -518,6 +537,9 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
                 data["share_replicas"], int(updated["share_replicas"]))
             self.assertEqual(
                 data["replica_gigabytes"], int(updated["replica_gigabytes"]))
+        if utils.encryption_keys_quota_supported():
+            self.assertEqual(
+                data["encryption_keys"], int(updated["encryption_keys"]))
 
         # Reset customized quotas
         self.client.reset_quotas(self.tenant_id)
@@ -545,6 +567,10 @@ class SharesAdminQuotasUpdateTest(base.BaseSharesAdminTest):
             self.assertEqual(
                 int(default["replica_gigabytes"]),
                 int(reseted["replica_gigabytes"]))
+        if utils.encryption_keys_quota_supported():
+            self.assertEqual(
+                int(default["encryption_keys"]),
+                int(reseted["encryption_keys"]))
 
     def _get_new_replica_quota_values(self, default_quotas, value_to_set):
         new_values = {
