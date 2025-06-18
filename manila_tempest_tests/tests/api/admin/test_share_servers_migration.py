@@ -21,6 +21,7 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import waiters
+from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -57,7 +58,15 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
             raise cls.skipException(msg)
 
         # create share type (generic)
-        extra_specs = {}
+        replication_type = CONF.share.backend_replication_type
+        if replication_type not in constants.REPLICATION_TYPE_CHOICES:
+            raise share_exceptions.ShareReplicationTypeException(
+                replication_type=replication_type
+            )
+        extra_specs = {
+            "replication_type": replication_type,
+            "driver_handles_share_servers": CONF.share.multitenancy_enabled,
+        }
         if CONF.share.capability_snapshot_support:
             extra_specs.update({'snapshot_support': True})
         cls.share_type = cls.create_share_type(extra_specs=extra_specs)
@@ -318,8 +327,14 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
 
     @decorators.idempotent_id('99e439a8-a716-4205-bf5b-af50128cb908')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @ddt.data(False, True)
-    def test_share_server_migration_complete(self, new_share_network):
+    @ddt.data(
+        (False, False),
+        (True, False),
+        (True, True)
+    )
+    @ddt.unpack
+    def test_share_server_migration_complete(self, new_share_network,
+                                             check_with_replica):
         """Test the share server migration complete."""
         share_network_id = self.provide_share_network(
             self.shares_v2_client, self.networks_client)
@@ -345,6 +360,12 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
             share)
 
         preserve_snapshots = True if snapshot_id else False
+
+        replica = {}
+        if check_with_replica:
+            replica = self.create_share_replica(
+                share['id'],
+                cleanup_in_class=False)
 
         # Start share server migration.
         self.shares_v2_client.share_server_migration_start(
@@ -392,6 +413,12 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
         if utils.is_microversion_gt(CONF.share.max_api_microversion, "2.63"):
             self.admin_shares_client.wait_for_resource_deletion(
                 server_id=src_server_id)
+
+        if check_with_replica:
+            replica = self.shares_v2_client.get_share_replica(
+                replica["id"])['share_replica']
+            self.assertEqual(constants.REPLICATION_STATE_IN_SYNC,
+                             replica["replica_state"])
 
     @decorators.idempotent_id('52e154eb-2d39-45af-b5c1-49ea569ab804')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
