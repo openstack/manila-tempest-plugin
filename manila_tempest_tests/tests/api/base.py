@@ -779,11 +779,12 @@ class BaseSharesTest(test.BaseTestCase):
     def create_share_network_subnet(cls,
                                     client=None,
                                     cleanup_in_class=False,
+                                    metadata=None,
                                     **kwargs):
         if client is None:
             client = cls.shares_v2_client
         share_network_subnet = client.create_subnet(
-            **kwargs)['share_network_subnet']
+            metadata=metadata, **kwargs)['share_network_subnet']
         resource = {
             "type": "share_network_subnet",
             "id": share_network_subnet["id"],
