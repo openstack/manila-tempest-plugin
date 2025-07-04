@@ -75,7 +75,7 @@ class ShareNetworkSubnetMetadataTest(base.BaseSharesMixedTest):
         data['share_network_id'] = share_network['id']
         data['availability_zone'] = az_name
 
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
 
         # create network subnet with metadata
         subnet = self.create_share_network_subnet(metadata=md,
@@ -91,7 +91,7 @@ class ShareNetworkSubnetMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('ec5c02e9-fcee-4890-87bc-7937a247afe9')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_set_get_delete_metadata(self):
-        md = {u"key3": u"value3", u"key4": u"value4", u"key.5.1": u"value.5"}
+        md = {"key3": "value3", "key4": "value4", "key.5.1": "value.5"}
 
         # create subnet
         subnet = self.create_share_network_subnet(**self.data)
@@ -126,8 +126,8 @@ class ShareNetworkSubnetMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('9ff9c3b4-9bd0-4e8a-a317-726cab640a67')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_set_metadata_not_delete_pre_metadata(self):
-        md1 = {u"key9": u"value9", u"key10": u"value10", }
-        md2 = {u"key11": u"value11", u"key12": u"value12", }
+        md1 = {"key9": "value9", "key10": "value10", }
+        md2 = {"key11": "value11", "key12": "value12", }
 
         # create subnet
         subnet = self.create_share_network_subnet(**self.data)
@@ -174,8 +174,8 @@ class ShareNetworkSubnetMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('1973bcb0-93a5-49a5-84fb-a03f6f6ff43b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_set_metadata_key_already_exist(self):
-        md1 = {u"key9": u"value9", u"key10": u"value10", }
-        md2 = {u"key9": u"value13", u"key11": u"value11", }
+        md1 = {"key9": "value9", "key10": "value10", }
+        md2 = {"key9": "value13", "key11": "value11", }
 
         # create subnet
         subnet = self.create_share_network_subnet(**self.data)
@@ -220,8 +220,8 @@ class ShareNetworkSubnetMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('d37ea163-7215-4c35-996a-1bc165e554de')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_set_and_update_metadata_by_key(self):
-        md1 = {u"key5": u"value5", u"key6": u"value6", }
-        md2 = {u"key7": u"value7", u"key8": u"value8", }
+        md1 = {"key5": "value5", "key6": "value6", }
+        md2 = {"key7": "value7", "key8": "value8", }
 
         # create subnet
         subnet = self.create_share_network_subnet(**self.data)

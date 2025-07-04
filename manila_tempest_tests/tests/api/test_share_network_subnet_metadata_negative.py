@@ -48,7 +48,7 @@ class ShareNetworkSubnetMetadataNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_metadata_to_unexisting_subnet(self):
         share_network = self.create_share_network()
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.set_metadata,
                           "wrong_subnet_id", md, resource="subnet",
@@ -59,7 +59,7 @@ class ShareNetworkSubnetMetadataNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_all_metadata_to_unexisting_subnet(self):
         share_network = self.create_share_network()
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.update_all_metadata,
                           "wrong_subnet_id", md, resource="subnet",

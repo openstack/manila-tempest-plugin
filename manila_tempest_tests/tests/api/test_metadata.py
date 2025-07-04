@@ -46,7 +46,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_in_share_creation(self):
 
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
 
         # create share with metadata
         share = self.create_share(share_type_id=self.share_type_id,
@@ -60,7 +60,7 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_get_delete_metadata(self):
 
-        md = {u"key3": u"value3", u"key4": u"value4", u"key.5.1": u"value.5"}
+        md = {"key3": "value3", "key4": "value4", "key.5.1": "value.5"}
 
         # create share
         share = self.create_share(share_type_id=self.share_type_id,
@@ -85,8 +85,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('4e5f8159-62b6-4d5c-f729-d8b1f029d7de')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_not_delete_pre_metadata(self):
-        md1 = {u"key9": u"value9", u"key10": u"value10", }
-        md2 = {u"key11": u"value11", u"key12": u"value12", }
+        md1 = {"key9": "value9", "key10": "value10", }
+        md2 = {"key11": "value11", "key12": "value12", }
 
         # create share
         share = self.create_share(share_type_id=self.share_type_id,
@@ -121,8 +121,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('2ec70ba5-050b-3b17-c862-c149e53543c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_key_already_exist(self):
-        md1 = {u"key9": u"value9", u"key10": u"value10", }
-        md2 = {u"key9": u"value13", u"key11": u"value11", }
+        md1 = {"key9": "value9", "key10": "value10", }
+        md2 = {"key9": "value13", "key11": "value11", }
 
         # create share
         share = self.create_share(share_type_id=self.share_type_id,
@@ -138,8 +138,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
         self.shares_v2_client.set_metadata(share["id"], md2)
 
         # verify metadata
-        md = {u"key9": u"value13", u"key10": u"value10",
-              u"key11": u"value11"}
+        md = {"key9": "value13", "key10": "value10",
+              "key11": "value11"}
         self._verify_share_metadata(share, md)
 
         # delete metadata
@@ -156,8 +156,8 @@ class SharesMetadataTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_and_update_metadata_by_key(self):
 
-        md1 = {u"key5": u"value5", u"key6": u"value6", }
-        md2 = {u"key7": u"value7", u"key8": u"value8", }
+        md1 = {"key5": "value5", "key6": "value6", }
+        md2 = {"key7": "value7", "key8": "value8", }
 
         # create share
         share = self.create_share(share_type_id=self.share_type_id,

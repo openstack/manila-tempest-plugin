@@ -28,7 +28,7 @@ class SharesMetadataAPIOnlyNegativeTest(base.BaseSharesTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(True, False)
     def test_try_set_metadata_to_unexisting_share(self, is_v2_client):
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
         client = self.shares_v2_client if is_v2_client else self.shares_client
         self.assertRaises(lib_exc.NotFound,
                           client.set_metadata,
@@ -38,7 +38,7 @@ class SharesMetadataAPIOnlyNegativeTest(base.BaseSharesTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     @ddt.data(True, False)
     def test_try_update_all_metadata_for_unexisting_share(self, is_v2_client):
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
         client = self.shares_v2_client if is_v2_client else self.shares_client
         self.assertRaises(lib_exc.NotFound,
                           client.update_all_metadata,
