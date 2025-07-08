@@ -38,7 +38,6 @@
         horizon: false
         tls-proxy: true
       devstack_localrc:
-        USE_PYTHON3: true
         MYSQL_REDUCE_MEMORY: True
         MANILA_USE_DOWNGRADE_MIGRATIONS: true
         MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
@@ -102,7 +101,6 @@
         yaml: true
         yml: true
       devstack_localrc:
-        USE_PYTHON3: true
         MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_SERVICE_IMAGE_ENABLED: false
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
