@@ -492,7 +492,7 @@ class ShareCephxRulesForCephFSNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('7b33c073-353e-4952-97dc-c3948a3cd037')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('jane.doe', u"bj\u00F6rn")
+    @ddt.data('jane.doe', "bj\u00F6rn")
     def test_create_access_rule_cephx_with_invalid_cephx_id(self, access_to):
         self.assertRaises(lib_exc.BadRequest,
                           self.shares_v2_client.create_access_rule,

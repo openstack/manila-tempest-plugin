@@ -71,7 +71,7 @@ class ShareSnapshotMetadataNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('8be4773b-6af9-413f-97e2-8acdb6149e7a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_set_metadata_to_unexisting_snapshot(self):
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.set_metadata,
                           "wrong_snapshot_id", md, resource="snapshot")
@@ -79,7 +79,7 @@ class ShareSnapshotMetadataNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('03a7f6e9-de8b-4669-87e1-b179308b477d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_all_metadata_to_unexisting_snapshot(self):
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.update_all_metadata,
                           "wrong_snapshot_id", md, resource="snapshot")

@@ -79,7 +79,7 @@ class ShareSnapshotMetadataTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_in_snapshot_creation(self):
 
-        md = {u"key1": u"value1", u"key2": u"value2", }
+        md = {"key1": "value1", "key2": "value2", }
 
         # create snapshot with metadata
         snapshot = self.create_snapshot_wait_for_active(
@@ -93,7 +93,7 @@ class ShareSnapshotMetadataTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_get_delete_metadata(self):
 
-        md = {u"key3": u"value3", u"key4": u"value4", u"key.5.1": u"value.5"}
+        md = {"key3": "value3", "key4": "value4", "key.5.1": "value.5"}
 
         # create snapshot
         snapshot = self.create_snapshot_wait_for_active(
@@ -120,8 +120,8 @@ class ShareSnapshotMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('23ec837d-1b50-499c-bbb9-a7bde843c9e8')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_not_delete_pre_metadata(self):
-        md1 = {u"key9": u"value9", u"key10": u"value10", }
-        md2 = {u"key11": u"value11", u"key12": u"value12", }
+        md1 = {"key9": "value9", "key10": "value10", }
+        md2 = {"key11": "value11", "key12": "value12", }
 
         # create snapshot
         snapshot = self.create_snapshot_wait_for_active(
@@ -159,8 +159,8 @@ class ShareSnapshotMetadataTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('b7a00be5-3dd1-4d25-8723-c662581c923f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_metadata_key_already_exist(self):
-        md1 = {u"key9": u"value9", u"key10": u"value10", }
-        md2 = {u"key9": u"value13", u"key11": u"value11", }
+        md1 = {"key9": "value9", "key10": "value10", }
+        md2 = {"key9": "value13", "key11": "value11", }
 
         # create snapshot
         snapshot = self.create_snapshot_wait_for_active(
@@ -196,8 +196,8 @@ class ShareSnapshotMetadataTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_set_and_update_metadata_by_key(self):
 
-        md1 = {u"key5": u"value5", u"key6": u"value6", }
-        md2 = {u"key7": u"value7", u"key8": u"value8", }
+        md1 = {"key5": "value5", "key6": "value6", }
+        md2 = {"key7": "value7", "key8": "value8", }
 
         # create snapshot
         snapshot = self.create_snapshot_wait_for_active(

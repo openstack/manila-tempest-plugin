@@ -67,7 +67,7 @@ class AccessesMetadataNegativeTest(base.BaseSharesMixedTest):
         cls.share = cls.create_share(share_type_id=cls.share_type_id)
         cls.access = cls.shares_v2_client.create_access_rule(
             cls.share["id"], cls.access_type, cls.access_to,
-            'rw', metadata={u"key1": u"value1"})['access']
+            'rw', metadata={"key1": "value1"})['access']
         waiters.wait_for_resource_status(
             cls.shares_v2_client, cls.share["id"], "active",
             resource_name='access_rule', rule_id=cls.access["id"])
