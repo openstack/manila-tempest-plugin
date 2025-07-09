@@ -63,7 +63,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
         self.assertIn(self.share['id'], share_ids, msg)
 
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('2.3', '2.9', '2.10', '2.30')
+    @ddt.data('2.3', '2.9', '2.10', '2.30', '2.54', '2.71')
     def test_get_share_instance(self, version):
         """Test that we get the proper keys back for the instance."""
         share_instances = self.shares_v2_client.get_instances_of_share(
@@ -75,7 +75,7 @@ class ShareInstancesTest(base.BaseSharesAdminTest):
 
         expected_keys = [
             'host', 'share_id', 'id', 'share_network_id', 'status',
-            'availability_zone', 'share_server_id', 'created_at', 'updated_at',
+            'availability_zone', 'share_server_id', 'created_at',
         ]
         if utils.is_microversion_lt(version, '2.9'):
             expected_keys.extend(["export_location", "export_locations"])
