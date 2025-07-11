@@ -17,6 +17,7 @@ import copy
 import inspect
 import os
 import re
+import time
 import traceback
 
 from oslo_concurrency import lockutils
@@ -1276,9 +1277,18 @@ class BaseSharesAdminTest(BaseSharesTest):
         return managed_share_server
 
     def _delete_share_server_and_wait(self, share_server_id):
-        self.shares_v2_client.delete_share_server(
-            share_server_id
-        )
+        for attempt in range(10):
+            try:
+                self.shares_v2_client.delete_share_server(
+                    share_server_id
+                )
+            except exceptions.Conflict as e:
+                if attempt < 10:
+                    time.sleep(5)
+                    continue
+                raise e
+            else:
+                break
         self.shares_v2_client.wait_for_resource_deletion(
             server_id=share_server_id)
 

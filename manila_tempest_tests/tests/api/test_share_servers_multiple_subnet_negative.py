@@ -47,7 +47,7 @@ class ShareServerMultipleSubNegativeTest(base.BaseSharesMixedTest):
             'driver_handles_share_servers': CONF.share.multitenancy_enabled,
             'share_server_multiple_subnet_support': False
         }
-        share_type = self.create_share_type(extra_specs=extra_specs)
+        share_type = self._create_share_type(specs=extra_specs)
         pools = self.get_pools_matching_share_type(
             share_type, client=self.admin_shares_v2_client)
         zones = self.get_availability_zones_matching_share_type(

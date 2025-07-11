@@ -219,15 +219,12 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
             neutron_net_id=share_net_info['neutron_net_id'],
             neutron_subnet_id=share_net_info['neutron_subnet_id'],
         )
-        share_network = self.shares_v2_client.get_share_network(
-            self.shares_v2_client.share_network_id
-        )
         share_network_id = share_network['id']
         subnet = utils.share_network_get_default_subnet(share_network)
 
         # Generate subnet data
-        data = {'neutron_net_id': subnet['neutron_net_id'],
-                'neutron_subnet_id': subnet['neutron_subnet_id'],
+        data = {'neutron_net_id': share_net_info['neutron_net_id'],
+                'neutron_subnet_id': share_net_info['neutron_subnet_id'],
                 'share_network_id': share_network_id,
                 'availability_zone': az}
 
