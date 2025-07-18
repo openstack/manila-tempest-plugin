@@ -106,6 +106,9 @@
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
         MANILA_SERVER_MIGRATION_PERIOD_TASK_INTERVAL: 10
         MANILA_REPLICA_STATE_UPDATE_INTERVAL: 10
+        # NOTE(pulluri): Adding below because not all services that utilize
+        # tls-proxy necessarily involve enabling HTTPS endpoints.
+        SERVICE_PROTOCOL: https
       devstack_services:
         tls-proxy: true
         key: true
@@ -702,7 +705,11 @@
     name: manila-tempest-plugin-dummy-dhss
     description: Test the Dummy driver with DHSS=True
     parent: manila-tempest-plugin-standalone-base
+    required-projects:
+      - openstack/barbican
     vars:
+      devstack_plugins:
+        barbican: https://opendev.org/openstack/barbican
       devstack_localrc:
         SHARE_DRIVER: manila.tests.share.drivers.dummy.DummyDriver
         MANILA_CONFIGURE_GROUPS: alpha,beta,gamma,membernet,adminnet,netapp_active_iq
