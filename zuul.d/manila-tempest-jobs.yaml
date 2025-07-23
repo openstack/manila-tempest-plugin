@@ -884,6 +884,13 @@
       regex: ^stable/(yoga|xena|wallaby|victoria|ussuri)$
       negate: true
 
+- job:
+    name: manila-tempest-plugin-lvm-fips-py311
+    parent: manila-tempest-plugin-lvm-fips
+    vars:
+      devstack_localrc:
+        PYTHON3_VERSION: 3.11
+
 - project-template:
     name: manila-tempest-plugin-jobs-using-service-image
     description: |
