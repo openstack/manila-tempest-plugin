@@ -130,6 +130,7 @@ class SharesAdminQuotasNegativeTest(base.BaseSharesAdminTest):
         # try schedule share with size, bigger than gigabytes quota
         self.assertRaises(lib_exc.OverLimit,
                           self.create_share,
+                          share_type_id=self.share_type_id,
                           size=overquota)
 
     @decorators.idempotent_id('37dd40a8-375e-454b-8b80-229cb0eecb01')
