@@ -51,8 +51,8 @@ class ShareRbacShareGroupTypesTests(rbac_base.ShareRbacBaseTests,
     @classmethod
     def resource_setup(cls):
         super(ShareRbacShareGroupTypesTests, cls).resource_setup()
-        cls.group_specs1 = {u'key1': u'value1'}
-        cls.group_specs2 = {u'key2': u'value2'}
+        cls.group_specs1 = {'key1': 'value1'}
+        cls.group_specs2 = {'key2': 'value2'}
         cls.share_type = cls.create_share_type()
         cls.share_group_type = cls.create_share_group_type(
             cls.share_type['id'], group_specs=cls.group_specs1)

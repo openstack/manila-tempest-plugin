@@ -48,7 +48,7 @@ class ShareRbacRulesTests(rbac_base.ShareRbacBaseTests, metaclass=abc.ABCMeta):
     @classmethod
     def resource_setup(cls):
         super(ShareRbacRulesTests, cls).resource_setup()
-        cls.metadata = {u'key': u'value'}
+        cls.metadata = {'key': 'value'}
 
     def access(self, share_id, access_type, access_to, access_level='rw'):
         access = {}

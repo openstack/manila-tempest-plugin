@@ -221,7 +221,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
     def test_set_snapshot_metadata(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         self.do_request(
             'set_metadata', expected_status=200,
             resource_id=snap['id'], resource='snapshot', metadata=metadata)
@@ -236,7 +236,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported("2.73")
     def test_get_snapshot_metadata(self):
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'],
             metadata=metadata)
@@ -255,7 +255,7 @@ class TestProjectAdminTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported("2.73")
     def test_delete_snapshot_metadata(self):
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'], metadata=metadata)
         self.do_request(
@@ -392,7 +392,7 @@ class TestProjectMemberTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
     @utils.skip_if_microversion_not_supported("2.73")
     def test_set_snapshot_metadata(self):
         snap = self.create_snapshot(self.client, self.share['id'])
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         self.do_request(
             'set_metadata', expected_status=200,
             resource_id=snap['id'], resource='snapshot', metadata=metadata)
@@ -407,7 +407,7 @@ class TestProjectMemberTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported("2.73")
     def test_get_snapshot_metadata(self):
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         share_client = getattr(self, 'share_member_client', self.client)
         snap = self.create_snapshot(
             share_client, self.share['id'], metadata=metadata)
@@ -426,7 +426,7 @@ class TestProjectMemberTestsNFS(ShareRbacSnapshotsTests, base.BaseSharesTest):
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported("2.73")
     def test_delete_snapshot_metadata(self):
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         snap = self.create_snapshot(
             self.client, self.share['id'], metadata=metadata)
         self.do_request(
@@ -531,7 +531,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     def test_set_snapshot_metadata(self):
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'])
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         self.do_request(
             'set_metadata', expected_status=lib_exc.Forbidden,
             resource_id=snap['id'], resource='snapshot', metadata=metadata)
@@ -552,7 +552,7 @@ class TestProjectReaderTestsNFS(TestProjectMemberTestsNFS):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported("2.73")
     def test_delete_snapshot_metadata(self):
-        metadata = {u'key': u'value'}
+        metadata = {'key': 'value'}
         snap = self.create_snapshot(
             self.share_member_client, self.share['id'], metadata=metadata)
         self.do_request(

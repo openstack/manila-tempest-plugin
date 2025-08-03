@@ -40,7 +40,7 @@ class ShareRbacExtraSpecsTests(rbac_base.ShareRbacBaseTests,
     @classmethod
     def resource_setup(cls):
         super(ShareRbacExtraSpecsTests, cls).resource_setup()
-        cls.extra_specs = {u'key': u'value'}
+        cls.extra_specs = {'key': 'value'}
         cls.share_type = cls.create_share_type()
 
     @abc.abstractmethod
