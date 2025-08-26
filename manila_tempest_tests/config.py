@@ -287,6 +287,14 @@ ShareGroup = [
     cfg.BoolOpt("run_mount_snapshot_tests",
                 default=False,
                 help="Enable or disable mountable snapshot tests."),
+    cfg.BoolOpt("run_negative_migration_replica_tests",
+                default=False,
+                help="Enable or disable negative migration with replica "
+                     "tests."),
+    cfg.BoolOpt("run_positive_migration_replica_tests",
+                default=True,
+                help="Enable or disable positive migration with replica tests."
+                ),
     cfg.BoolOpt("run_create_share_from_snapshot_in_another_pool_or_az_tests",
                 default=False,
                 help="Defines whether to run tests that create share from "
