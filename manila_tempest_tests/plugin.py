@@ -61,18 +61,11 @@ class ManilaTempestPlugin(plugins.TempestPlugin):
 
     def get_service_clients(self):
         shares_config = config.service_client_config('share')
-        v1_params = {
-            'name': 'share_v1',
-            'service_version': 'share.v1',
-            'module_path': 'manila_tempest_tests.services.share.json',
-            'client_names': ['SharesClient'],
-        }
         v2_params = {
             'name': 'share_v2',
             'service_version': 'share.v2',
             'module_path': 'manila_tempest_tests.services.share.v2',
             'client_names': ['SharesV2Client'],
         }
-        v1_params.update(shares_config)
         v2_params.update(shares_config)
-        return [v1_params, v2_params]
+        return [v2_params]

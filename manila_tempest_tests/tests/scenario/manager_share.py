@@ -52,9 +52,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         cls.compute_floating_ips_client = (
             cls.os_primary.compute_floating_ips_client)
         # Manila clients
-        cls.shares_client = cls.os_primary.share_v1.SharesClient()
         cls.shares_v2_client = cls.os_primary.share_v2.SharesV2Client()
-        cls.shares_admin_client = cls.os_admin.share_v1.SharesClient()
         cls.shares_admin_v2_client = cls.os_admin.share_v2.SharesV2Client()
 
     @classmethod
@@ -554,7 +552,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param sn_id: shared network id
         :param client: client object
         """
-        client = client or self.shares_admin_client
+        client = client or self.shares_admin_v2_client
         servers = client.list_share_servers(
             search_opts={"share_network": sn_id})['share_servers']
         for server in servers:

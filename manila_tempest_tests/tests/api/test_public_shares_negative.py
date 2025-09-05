@@ -50,7 +50,7 @@ class PublicSharesNegativeTest(base.BaseSharesMixedTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.alt_shares_v2_client.update_share,
                           self.share["id"],
-                          name="new_name")
+                          display_name="new_name")
 
     @decorators.idempotent_id('68d1f1bc-16e4-4086-8982-7e44ca6bdc4d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)

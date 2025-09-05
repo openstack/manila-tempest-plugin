@@ -149,8 +149,7 @@ class BaseSharesTest(test.BaseTestCase):
     def setup_clients(cls):
         super(BaseSharesTest, cls).setup_clients()
         os = getattr(cls, 'os_%s' % cls.credentials[0])
-        # Initialise share clients for test credentials
-        cls.shares_client = os.share_v1.SharesClient()
+        # Initialise share client for test credentials
         cls.shares_v2_client = os.share_v2.SharesV2Client()
         # Initialise network clients for test credentials
         cls.networks_client = None
@@ -170,7 +169,6 @@ class BaseSharesTest(test.BaseTestCase):
                     "is set to True")
             share_network_id = cls.provide_share_network(
                 cls.shares_v2_client, cls.networks_client)
-            cls.shares_client.share_network_id = share_network_id
             cls.shares_v2_client.share_network_id = share_network_id
 
     def setUp(self):
@@ -1124,7 +1122,6 @@ class BaseSharesAdminTest(BaseSharesTest):
     def setup_clients(cls):
         super(BaseSharesAdminTest, cls).setup_clients()
         # Initialise share clients
-        cls.admin_shares_client = cls.os_admin.share_v1.SharesClient()
         cls.admin_shares_v2_client = cls.os_admin.share_v2.SharesV2Client()
 
     @staticmethod
@@ -1277,10 +1274,10 @@ class BaseSharesAdminTest(BaseSharesTest):
 class BaseSharesMixedTest(BaseSharesAdminTest):
     """Base test case class for all Shares API tests with all user roles.
 
-       Tests deriving from this class can use the primary project's clients
-       (self.shares_client, self.shares_v2_client) and the alt project user's
-       clients (self.alt_shares_client, self.alt_shares_v2_client) to perform
-       API calls and validations. Although admin clients are available for use,
+       Tests deriving from this class can use the primary project's client
+       (self.shares_v2_client) and the alt project user's client
+       (self.alt_shares_v2_client) to perform API calls and validations.
+       Although admin clients are available for use,
        their use should be limited to performing bootstrapping (e.g., creating
        a share type, or resetting state of a resource, etc.). No API validation
        must be performed against admin APIs. Use BaseAdminTest as a base class
@@ -1306,7 +1303,6 @@ class BaseSharesMixedTest(BaseSharesAdminTest):
     @classmethod
     def setup_clients(cls):
         super(BaseSharesMixedTest, cls).setup_clients()
-        cls.alt_shares_client = cls.os_alt.share_v1.SharesClient()
         cls.alt_shares_v2_client = cls.os_alt.share_v2.SharesV2Client()
         # Initialise network clients
         cls.os_admin.networks_client = cls.os_admin.network.NetworksClient()
@@ -1334,13 +1330,11 @@ class BaseSharesMixedTest(BaseSharesAdminTest):
         if CONF.share.multitenancy_enabled:
             admin_share_network_id = cls.provide_share_network(
                 cls.admin_shares_v2_client, cls.os_admin.networks_client)
-            cls.admin_shares_client.share_network_id = admin_share_network_id
             cls.admin_shares_v2_client.share_network_id = (
                 admin_share_network_id)
 
             alt_share_network_id = cls.provide_share_network(
                 cls.alt_shares_v2_client, cls.os_alt.networks_client)
-            cls.alt_shares_client.share_network_id = alt_share_network_id
             cls.alt_shares_v2_client.share_network_id = alt_share_network_id
 
     @classmethod
@@ -1379,6 +1373,5 @@ class BaseSharesMixedTest(BaseSharesAdminTest):
         user_creds = cls.os_admin.creds_client.get_credentials(
             user, project, password)
         os = clients.Clients(user_creds)
-        os.shares_v1_client = os.share_v1.SharesClient()
         os.shares_v2_client = os.share_v2.SharesV2Client()
         return os

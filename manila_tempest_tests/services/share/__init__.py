@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from manila_tempest_tests.services.share import json as v1
 from manila_tempest_tests.services.share.v2 import json as v2
 
-__all__ = ['v1', 'v2']
+__all__ = ['v2']

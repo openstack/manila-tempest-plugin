@@ -21,9 +21,9 @@ from urllib import parse
 from tempest import config
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
 
 from manila_tempest_tests.common import constants
-from manila_tempest_tests.services.share.json import shares_client
 from manila_tempest_tests import share_exceptions
 from manila_tempest_tests import utils
 
@@ -32,7 +32,7 @@ LATEST_MICROVERSION = CONF.share.max_api_microversion
 EXPERIMENTAL = {'X-OpenStack-Manila-API-Experimental': 'True'}
 
 
-class SharesV2Client(shares_client.SharesClient):
+class SharesV2Client(rest_client.RestClient):
     """Tempest REST client for Manila.
 
     It handles shares and access to it in OpenStack.
@@ -42,6 +42,11 @@ class SharesV2Client(shares_client.SharesClient):
     def __init__(self, auth_provider, **kwargs):
         super(SharesV2Client, self).__init__(auth_provider, **kwargs)
         self.API_MICROVERSIONS_HEADER = 'x-openstack-manila-api-version'
+        self.share_protocol = None
+        if CONF.share.enable_protocols:
+            self.share_protocol = CONF.share.enable_protocols[0]
+        self.share_network_id = CONF.share.share_network_id
+        self.share_size = CONF.share.share_size
 
     def inject_microversion_header(self, headers, version,
                                    extra_headers=False):
@@ -199,6 +204,165 @@ class SharesV2Client(shares_client.SharesClient):
         resp_body = json.loads(resp_body)
         return resp, resp_body
 
+    def _parse_resp(self, body, top_key_to_verify=None):
+        return super(SharesV2Client, self)._parse_resp(
+            body, top_key_to_verify=top_key_to_verify)
+
+    def _is_resource_deleted(self, func, res_id, resource_name, **kwargs):
+        try:
+            res = func(res_id, **kwargs)[resource_name]
+        except exceptions.NotFound:
+            return True
+
+        if res.get('status') in ['error_deleting', 'error']:
+            # Resource has "error_deleting" status and can not be deleted.
+            resource_type = func.__name__.split('_', 1)[-1]
+            raise share_exceptions.ResourceReleaseFailed(
+                res_type=resource_type, res_id=res_id)
+        return False
+
+    def wait_for_resource_deletion(self, *args, **kwargs):
+        """Waits for a resource to be deleted."""
+        start_time = int(time.time())
+        while True:
+            if self.is_resource_deleted(*args, **kwargs):
+                return
+            if int(time.time()) - start_time >= self.build_timeout:
+                raise exceptions.TimeoutException
+            time.sleep(self.build_interval)
+
+    def update_share(self, share_id, version=LATEST_MICROVERSION, **kwargs):
+        body = json.dumps({'share': kwargs})
+        resp, body = self.put("shares/%s" % share_id, body, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def rename_snapshot(self, snapshot_id, name, desc=None,
+                        version=LATEST_MICROVERSION):
+        body = {"snapshot": {"display_name": name}}
+        if desc is not None:
+            body["snapshot"].update({"display_description": desc})
+        body = json.dumps(body)
+        resp, body = self.put("snapshots/%s" % snapshot_id, body,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def _map_security_service_and_share_network(self, sn_id, ss_id,
+                                                action="add",
+                                                version=LATEST_MICROVERSION):
+        # sn_id: id of share_network_entity
+        # ss_id: id of security service entity
+        # action: add, remove
+        data = {
+            "%s_security_service" % action: {
+                "security_service_id": ss_id,
+            }
+        }
+        body = json.dumps(data)
+        resp, body = self.post("share-networks/%s/action" % sn_id, body,
+                               version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def add_sec_service_to_share_network(self, sn_id, ss_id,
+                                         version=LATEST_MICROVERSION):
+        return self._map_security_service_and_share_network(
+            sn_id, ss_id, version=version)
+
+    def remove_sec_service_from_share_network(
+            self, sn_id, ss_id, version=LATEST_MICROVERSION):
+        return self._map_security_service_and_share_network(
+            sn_id, ss_id, "remove", version=version)
+
+    def list_sec_services_for_share_network(
+            self, sn_id, version=LATEST_MICROVERSION):
+        resp, body = self.get("security-services?share_network_id=%s" % sn_id,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def add_access_to_share_type(
+            self, share_type_id, project_id, version=LATEST_MICROVERSION):
+        uri = 'types/%s/action' % share_type_id
+        post_body = {'project': project_id}
+        post_body = json.dumps({'addProjectAccess': post_body})
+        resp, body = self.post(uri, post_body, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def remove_access_from_share_type(
+            self, share_type_id, project_id, version=LATEST_MICROVERSION):
+        uri = 'types/%s/action' % share_type_id
+        post_body = {'project': project_id}
+        post_body = json.dumps({'removeProjectAccess': post_body})
+        resp, body = self.post(uri, post_body, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_default_share_type(self, version=LATEST_MICROVERSION):
+        resp, body = self.get("types/default", version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_limits(self, version=LATEST_MICROVERSION):
+        resp, body = self.get("limits", version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_extensions(self, version=LATEST_MICROVERSION):
+        resp, body = self.get("extensions", version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_pools(self, detail=False, search_opts=None,
+                   version=LATEST_MICROVERSION):
+        """Get list of scheduler pools."""
+        uri = 'scheduler-stats/pools'
+        if detail:
+            uri += '/detail'
+        if search_opts:
+            uri += "?%s" % parse.urlencode(search_opts)
+        resp, body = self.get(uri, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_share_servers(self, search_opts=None,
+                           version=LATEST_MICROVERSION):
+        """Get list of share servers."""
+        uri = "share-servers"
+        if search_opts:
+            uri += "?%s" % parse.urlencode(search_opts)
+        resp, body = self.get(uri, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_share_server(self, share_server_id,
+                            version=LATEST_MICROVERSION):
+        """Delete share server by its ID."""
+        uri = "share-servers/%s" % share_server_id
+        resp, body = self.delete(uri, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_share_server_details(
+            self, share_server_id, version=LATEST_MICROVERSION):
+        """Get share server details only."""
+        uri = "share-servers/%s/details" % share_server_id
+        resp, body = self.get(uri, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
     def is_resource_deleted(self, *args, **kwargs):
         """Verifies whether provided resource deleted or not.
 
@@ -236,9 +400,45 @@ class SharesV2Client(shares_client.SharesClient):
                 self.get_subnet, kwargs.get("share_network_subnet_id"),
                 "share_network_subnet", **subnet_kwargs
             )
+        elif "share_id" in kwargs:
+            if "rule_id" in kwargs:
+                rule_id = kwargs.get("rule_id")
+                share_id = kwargs.get("share_id")
+                rules = self.list_access_rules(share_id)['access_list']
+                for rule in rules:
+                    if rule["id"] == rule_id:
+                        return False
+                return True
+            else:
+                return self._is_resource_deleted(
+                    self.get_share, kwargs.get("share_id"), "share")
+        elif "snapshot_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_snapshot, kwargs.get("snapshot_id"), "snapshot")
+        elif "sn_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_share_network, kwargs.get("sn_id"), "share_network")
+        elif "ss_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_security_service, kwargs.get("ss_id"),
+                "security_service")
+        elif "vt_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_volume_type, kwargs.get("vt_id"), "volume_type")
+        elif "st_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_share_type, kwargs.get("st_id"), "share_type")
+        elif "server_id" in kwargs:
+            return self._is_resource_deleted(
+                self.show_share_server, kwargs.get("server_id"),
+                "share_server")
+        elif "backup_id" in kwargs:
+            return self._is_resource_deleted(
+                self.get_share_backup, kwargs.get("backup_id"),
+                "share_backup")
         else:
-            return super(SharesV2Client, self).is_resource_deleted(
-                *args, **kwargs)
+            raise share_exceptions.InvalidResource(
+                message=str(kwargs))
 
 ###############
 
@@ -2148,6 +2348,12 @@ class SharesV2Client(shares_client.SharesClient):
         resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_security_service(self, ss_id, version=LATEST_MICROVERSION):
+        resp, body = self.delete("security-services/%s" % ss_id,
+                                 version=version)
+        self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
 ###############

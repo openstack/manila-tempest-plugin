@@ -1,0 +1,12 @@
+---
+prelude: >
+    This test plugin no longer supports or tests the V1 API of the OpenStack
+    Shared File Systems Service ("manila"). All tests are ported to use the
+    v2 API which is a superset of the v1 API with micro-versions.
+    The micro-version 2.0 is equivalent to the v1 API, and it has been used
+    in tests that were modified in place of the v1 API.
+upgrade:
+  - |
+    Manila's v1 API client ("shares_client") is no longer available. The
+    v2 API client ("shares_v2_client") can be used with "version='2.0'"
+    to test the same behavior as the v1 client.

@@ -95,7 +95,11 @@ class PublicSharesTest(base.BaseSharesMixedTest):
         new_name = data_utils.rand_name('tempest-new-share-name')
         new_desc = 'share is now updated'
         updated = self.admin_shares_v2_client.update_share(
-            share['id'], name=new_name, desc=new_desc, is_public=True)['share']
+            share['id'],
+            display_name=new_name,
+            display_description=new_desc,
+            is_public=True
+        )['share']
         self.assertEqual(new_name, updated['name'])
         self.assertEqual(new_desc, updated['description'])
         self.assertTrue(updated['is_public'])

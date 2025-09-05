@@ -779,7 +779,10 @@ class SharesRenameTest(base.BaseSharesMixedTest):
         new_name = data_utils.rand_name("tempest-new-name")
         new_desc = data_utils.rand_name("tempest-new-description")
         updated = self.shares_v2_client.update_share(
-            share["id"], name=new_name, desc=new_desc)['share']
+            share["id"],
+            display_name=new_name,
+            display_description=new_desc
+        )['share']
         self.assertEqual(new_name, updated["name"])
         self.assertEqual(new_desc, updated["description"])
 
