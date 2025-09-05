@@ -81,17 +81,15 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
               '2001:DB8:2de:0:0:0:0:e13:200a',
               )
     def test_create_access_rule_ip_with_wrong_target(self, ip_address):
-        for client_name in ['shares_client', 'shares_v2_client']:
-            self.assertRaises(lib_exc.BadRequest,
-                              getattr(self, client_name).create_access_rule,
-                              self.share["id"], "ip", ip_address)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.create_access_rule,
+                          self.share["id"], "ip", ip_address)
 
     @decorators.idempotent_id('e891deff-23d9-4872-911c-bd9b43dc797f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_with_wrong_level(self, client_name):
+    def test_create_access_rule_with_wrong_level(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"],
                           'ip',
                           '2.2.2.2',
@@ -99,32 +97,23 @@ class ShareIpRulesForNFSNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('efd594aa-dd24-427e-acdf-10d124afb572')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('1.0', '2.9', LATEST_MICROVERSION)
+    @ddt.data('2.9', LATEST_MICROVERSION)
     def test_create_duplicate_of_ip_rule(self, version):
         # test data
         access_type = "ip"
         access_to = "1.2.3.4"
 
-        if utils.is_microversion_eq(version, '1.0'):
-            client = self.shares_client
-        else:
-            client = self.shares_v2_client
+        client = self.shares_v2_client
 
         # create rule
         self.allow_access(
             self.share["id"], client=client, access_type=access_type,
             access_to=access_to, version=version)
 
-        # try create duplicate of rule
-        if utils.is_microversion_eq(version, '1.0'):
-            self.assertRaises(lib_exc.BadRequest,
-                              self.shares_client.create_access_rule,
-                              self.share["id"], access_type, access_to)
-        else:
-            self.assertRaises(lib_exc.BadRequest,
-                              self.shares_v2_client.create_access_rule,
-                              self.share["id"], access_type, access_to,
-                              version=version)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.shares_v2_client.create_access_rule,
+                          self.share["id"], access_type, access_to,
+                          version=version)
 
     @decorators.idempotent_id('63932d1d-a60a-4af7-ba3b-7cf6c68aaee9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -295,74 +284,66 @@ class ShareUserRulesForNFSNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('d6148911-3a0c-4e1f-afdb-fcf203fe4a5b')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_user_with_wrong_input_2(self, client_name):
+    def test_create_access_rule_user_with_wrong_input_2(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "user",
                           "try+")
 
     @decorators.idempotent_id('a4d8358d-dec0-4c2a-a544-182816a0ba6f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_user_with_empty_key(self, client_name):
+    def test_create_access_rule_user_with_empty_key(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "user", "")
 
     @decorators.idempotent_id('f5252e86-4767-48ad-8be5-43e12c93df79')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_user_with_too_little_key(self, client_name):
+    def test_create_access_rule_user_with_too_little_key(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "user", "abc")
 
     @decorators.idempotent_id('f8f4d3ee-82b8-4d37-917d-a0cd72073df4')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_user_with_too_big_key(self, client_name):
+    def test_create_access_rule_user_with_too_big_key(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "user", "a" * 256)
 
     @decorators.idempotent_id('21724a99-0790-49d5-a069-d1df43782965')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_user_with_wrong_input_1(self, client_name):
+    def test_create_access_rule_user_with_wrong_input_1(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "user",
                           "try+")
 
     @decorators.idempotent_id('bc62ce96-36fe-4c9b-b6b9-4d5a661c8035')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
-    def test_create_access_rule_user_to_snapshot(self, client_name):
+    def test_create_access_rule_user_to_snapshot(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.snap["id"],
                           access_type="user",
                           access_to="fakeuser")
 
     @decorators.idempotent_id('04d5b25f-b335-4574-82b0-f607c8b3bf25')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_user_with_wrong_share_id(self, client_name):
+    def test_create_access_rule_user_with_wrong_share_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           "wrong_share_id",
                           access_type="user",
                           access_to="fakeuser")
 
     @decorators.idempotent_id('301bdbd5-4398-4320-b334-7370995369e9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_with_wrong_level(self, client_name):
+    def test_create_access_rule_with_wrong_level(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"],
                           'user',
                           CONF.share.username_for_user_rules,
@@ -421,49 +402,44 @@ class ShareCertRulesForGLUSTERFSNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('a16d53d5-50d4-4015-912f-2850c5d62690')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_cert_with_empty_common_name(self, client_name):
+    def test_create_access_rule_cert_with_empty_common_name(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "cert", "")
 
     @decorators.idempotent_id('7b5383d8-5bcd-47aa-955b-ed3757a5bdb4')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
     def test_create_access_rule_cert_with_whitespace_common_name(self,
                                                                  client_name):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "cert", " ")
 
     @decorators.idempotent_id('1c25c134-92b4-4875-a061-88d394e28bcc')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
     def test_create_access_rule_cert_with_too_big_common_name(self,
                                                               client_name):
         # common name cannot be more than 64 characters long
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "cert", "a" * 65)
 
     @decorators.idempotent_id('dd85d5cd-aa83-4f44-8572-bd7e68a84fb2')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_cert_to_snapshot(self, client_name):
+    def test_create_access_rule_cert_to_snapshot(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.snap["id"],
                           access_type="cert",
                           access_to="fakeclient1.com")
 
     @decorators.idempotent_id('eb47a511-7688-4689-a2ad-54ba85b39b07')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_cert_with_wrong_share_id(self, client_name):
+    def test_create_access_rule_cert_with_wrong_share_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           "wrong_share_id",
                           access_type="cert",
                           access_to="fakeclient2.com")
@@ -616,28 +592,25 @@ class ShareRulesNegativeTest(base.BaseSharesMixedTest):
 
     @decorators.idempotent_id('84da9231-5c4b-4615-8500-8fc6d30ff7ea')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_delete_access_rule_with_wrong_id(self, client_name):
+    def test_delete_access_rule_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).delete_access_rule,
+                          self.shares_v2_client.delete_access_rule,
                           self.share["id"], "wrong_rule_id")
 
     @decorators.idempotent_id('13f9329f-12db-467d-9268-a9cca75997d9')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_ip_with_wrong_type(self, client_name):
+    def test_create_access_rule_ip_with_wrong_type(self):
         self.assertRaises(lib_exc.BadRequest,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.share["id"], "wrong_type", "1.2.3.4")
 
     @decorators.idempotent_id('fd6ede10-97d6-4ee8-a661-c516b7421c91')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
-    @ddt.data('shares_client', 'shares_v2_client')
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           "Snapshot tests are disabled.")
-    def test_create_access_rule_ip_to_snapshot(self, client_name):
+    def test_create_access_rule_ip_to_snapshot(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           self.snap["id"])
 
 
@@ -646,8 +619,7 @@ class ShareRulesAPIOnlyNegativeTest(base.BaseSharesTest):
 
     @decorators.idempotent_id('01279461-3ccc-49b2-a615-d7984dd0db8c')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_create_access_rule_ip_with_wrong_share_id(self, client_name):
+    def test_create_access_rule_ip_with_wrong_share_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          getattr(self, client_name).create_access_rule,
+                          self.shares_v2_client.create_access_rule,
                           "wrong_share_id")

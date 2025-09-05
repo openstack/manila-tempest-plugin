@@ -165,10 +165,11 @@ class SharesNFSTest(base.BaseSharesMixedTest):
             self.assertNotIn('metadata', detailed_elements)
 
         # delete snapshot
-        self.shares_client.delete_snapshot(snap["id"])
-        self.shares_client.wait_for_resource_deletion(snapshot_id=snap["id"])
+        self.shares_v2_client.delete_snapshot(snap["id"])
+        self.shares_v2_client.wait_for_resource_deletion(
+            snapshot_id=snap["id"])
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.get_snapshot, snap['id'])
+                          self.shares_v2_client.get_snapshot, snap['id'])
 
     @decorators.idempotent_id('8a14831d-ad1f-447f-b5de-2b8a233b24c0')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
@@ -206,7 +207,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         self.assertIn(s2['status'], ('creating', 'available'))
 
         # verify share, created from snapshot
-        get = self.shares_client.get_share(s2["id"])['share']
+        get = self.shares_v2_client.get_share(s2["id"])['share']
         msg = ("Expected snapshot_id %s as "
                "source of share %s" % (snap["id"], get["snapshot_id"]))
         self.assertEqual(get["snapshot_id"], snap["id"], msg)
@@ -236,7 +237,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # get parent share
-        parent = self.shares_client.get_share(share["id"])['share']
+        parent = self.shares_v2_client.get_share(share["id"])['share']
 
         # create snapshot
         snap = self.create_snapshot_wait_for_active(share["id"],
@@ -254,7 +255,7 @@ class SharesNFSTest(base.BaseSharesMixedTest):
         self.assertIn(child['status'], ('creating', 'available'))
 
         # verify share, created from snapshot
-        get = self.shares_client.get_share(child["id"])['share']
+        get = self.shares_v2_client.get_share(child["id"])['share']
         keys = {
             "share": share["id"],
             "actual_sn": get["share_network_id"],

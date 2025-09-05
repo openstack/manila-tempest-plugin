@@ -58,7 +58,7 @@ class ShareTransferTest(base.BaseSharesMixedTest):
         transfer = self.shares_v2_client.create_share_transfer(
             share['id'], name='tempest_share_transfer')['transfer']
         waiters.wait_for_resource_status(
-            self.shares_client, share['id'], 'awaiting_transfer')
+            self.shares_v2_client, share['id'], 'awaiting_transfer')
 
         # check transfer exists and show transfer
         transfer_show = self.shares_v2_client.get_share_transfer(
@@ -68,7 +68,7 @@ class ShareTransferTest(base.BaseSharesMixedTest):
         # delete share transfer
         self.shares_v2_client.delete_share_transfer(transfer['id'])
         waiters.wait_for_resource_status(
-            self.shares_client, share['id'], 'available')
+            self.shares_v2_client, share['id'], 'available')
 
         # check transfer not in transfer list
         transfers = self.shares_v2_client.list_share_transfers()['transfers']
@@ -87,13 +87,13 @@ class ShareTransferTest(base.BaseSharesMixedTest):
         transfer = self.shares_v2_client.create_share_transfer(
             share['id'])['transfer']
         waiters.wait_for_resource_status(
-            self.shares_client, share['id'], 'awaiting_transfer')
+            self.shares_v2_client, share['id'], 'awaiting_transfer')
 
         # accept share transfer by alt project
         self.alt_shares_v2_client.accept_share_transfer(transfer['id'],
                                                         transfer['auth_key'])
         waiters.wait_for_resource_status(
-            self.alt_shares_client, share['id'], 'available')
+            self.alt_shares_v2_client, share['id'], 'available')
 
         # check share in alt project
         shares = self.alt_shares_v2_client.list_shares(

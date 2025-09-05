@@ -345,7 +345,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param share_id: id of the share
         :param access_rule_id: id of the rule that will be deleted
         """
-        client = client or self.shares_client
+        client = client or self.shares_v2_client
         client.delete_access_rule(share_id, access_rule_id)
         share_waiters.wait_for_resource_status(
             self.shares_v2_client, share_id, "active",
@@ -453,7 +453,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
     def get_share_type(self, extra_specs=None):
         if CONF.share.default_share_type_name:
-            return self.shares_client.get_default_share_type()['share_type']
+            return self.shares_v2_client.get_default_share_type()['share_type']
         extra_specs_dict = {
             'driver_handles_share_servers': CONF.share.multitenancy_enabled
         }
@@ -507,7 +507,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param cleanup: default: True
         :returns: a created share
         """
-        client = client or self.shares_client
+        client = client or self.shares_v2_client
         description = description or "Tempest's share"
         if not name:
             name = data_utils.rand_name("manila-scenario")
@@ -526,7 +526,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             'share_network_id': share_network_id,
             'share_type_id': share_type_id,
         }
-        share = self.shares_client.create_share(**kwargs)['share']
+        share = self.shares_v2_client.create_share(**kwargs)['share']
 
         if cleanup:
             self.addCleanup(client.wait_for_resource_deletion,
@@ -569,7 +569,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :returns: a created share network
         """
 
-        client = client or self.shares_client
+        client = client or self.shares_v2_client
         sn = client.create_share_network(**kwargs)['share_network']
 
         self.addCleanup(client.wait_for_resource_deletion,

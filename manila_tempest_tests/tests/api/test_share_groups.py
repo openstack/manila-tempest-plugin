@@ -90,7 +90,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             share['id'],
             params=params,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
-        self.shares_client.wait_for_resource_deletion(share_id=share['id'])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
         self.shares_v2_client.delete_share_group(
             share_group['id'], version=constants.MIN_SHARE_GROUP_MICROVERSION)
         self.shares_v2_client.wait_for_resource_deletion(
@@ -101,7 +101,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             lib_exc.NotFound,
             self.shares_v2_client.get_share_group, share_group['id'])
         self.assertRaises(
-            lib_exc.NotFound, self.shares_client.get_share, share['id'])
+            lib_exc.NotFound, self.shares_v2_client.get_share, share['id'])
 
     @decorators.idempotent_id('cf7984af-1e1d-4eaf-bf9a-d8ddf5cebd01')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
@@ -396,7 +396,7 @@ class ShareGroupsTest(base.BaseSharesMixedTest):
             share['id'],
             params=params,
             version=constants.MIN_SHARE_GROUP_MICROVERSION)
-        self.shares_client.wait_for_resource_deletion(share_id=share['id'])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share['id'])
 
         # Delete share group
         self.shares_v2_client.delete_share_group(

@@ -432,7 +432,7 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
 
         # Source share server is only deleted after Wallaby release (2.63).
         if utils.is_microversion_gt(CONF.share.max_api_microversion, "2.63"):
-            self.admin_shares_client.wait_for_resource_deletion(
+            self.admin_shares_v2_client.wait_for_resource_deletion(
                 server_id=src_server_id)
 
         if check_with_replica:

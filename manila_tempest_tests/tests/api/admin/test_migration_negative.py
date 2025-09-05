@@ -50,7 +50,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
                 CONF.share.run_driver_assisted_migration_tests):
             raise cls.skipException("Share migration tests are disabled.")
 
-        pools = cls.shares_client.list_pools(detail=True)['pools']
+        pools = cls.shares_v2_client.list_pools(detail=True)['pools']
 
         if len(pools) < 2:
             raise cls.skipException("At least two different pool entries "
@@ -68,7 +68,7 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
         cls.share = cls.create_share(cls.protocol,
                                      size=CONF.share.share_size + 1,
                                      share_type_id=cls.share_type_id)
-        cls.share = cls.shares_client.get_share(cls.share['id'])['share']
+        cls.share = cls.shares_v2_client.get_share(cls.share['id'])['share']
 
         dest_pool = utils.choose_matching_backend(
             cls.share, pools, cls.share_type)
@@ -231,15 +231,15 @@ class MigrationNegativeTest(base.BaseSharesAdminTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @utils.skip_if_microversion_not_supported("2.29")
     def test_migrate_share_not_available(self):
-        self.shares_client.reset_state(self.share['id'],
-                                       constants.STATUS_ERROR)
+        self.shares_v2_client.reset_state(
+            self.share['id'], constants.STATUS_ERROR)
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'], constants.STATUS_ERROR)
         self.assertRaises(
             lib_exc.BadRequest, self.shares_v2_client.migrate_share,
             self.share['id'], self.dest_pool)
-        self.shares_client.reset_state(self.share['id'],
-                                       constants.STATUS_AVAILABLE)
+        self.shares_v2_client.reset_state(
+            self.share['id'], constants.STATUS_AVAILABLE)
         waiters.wait_for_resource_status(
             self.shares_v2_client, self.share['id'],
             constants.STATUS_AVAILABLE)

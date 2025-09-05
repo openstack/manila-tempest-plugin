@@ -91,7 +91,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_get_share(self):
 
         # get share
-        share = self.shares_client.get_share(self.shares[0]['id'])['share']
+        share = self.shares_v2_client.get_share(self.shares[0]['id'],
+                                                version='2.0')['share']
 
         # verify keys
         expected_keys = ["status", "description", "links", "availability_zone",
@@ -119,7 +120,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_shares(self):
 
         # list shares
-        shares = self.shares_client.list_shares()['shares']
+        shares = self.shares_v2_client.list_shares()['shares']
 
         # verify keys
         keys = ["name", "id", "links"]
@@ -136,7 +137,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_shares_with_detail(self):
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail()['shares']
+        shares = self.shares_v2_client.list_shares_with_detail(
+            version='2.0')['shares']
 
         # verify keys
         keys = [
@@ -158,7 +160,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         filters = {'metadata': self.metadata}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
@@ -177,10 +179,11 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
                 "storage_protocol": CONF.share.capability_storage_protocol,
             }
         }
-        share_type_list = self.shares_client.list_share_types()["share_types"]
+        share_type_list = self.shares_v2_client.list_share_types()[
+            "share_types"]
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
@@ -201,7 +204,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
                     "nonexistent share type '%(st)s'." % {
                         "s_id": share["id"], "st": share["share_type"]}
                 )
-            extra_specs = self.shares_client.get_share_type_extra_specs(
+            extra_specs = self.shares_v2_client.get_share_type_extra_specs(
                 st_id)['extra_specs']
             self.assertLessEqual(filters["extra_specs"].items(),
                                  extra_specs.items())
@@ -212,13 +215,13 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         filters = {'share_type_id': self.share_type_id}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
         self.assertGreater(len(shares), 0)
         for share in shares:
-            st_list = self.shares_client.list_share_types()
+            st_list = self.shares_v2_client.list_share_types()
             # find its name or id, get id
             sts = st_list["share_types"]
             st_id = None
@@ -241,12 +244,12 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     @decorators.idempotent_id('04afc330-78ee-494f-a660-7670c877a440')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_list_shares_with_detail_filter_by_host(self):
-        base_share = self.shares_client.get_share(
+        base_share = self.shares_v2_client.get_share(
             self.shares[0]['id'])['share']
         filters = {'host': base_share['host']}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
@@ -287,12 +290,12 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_list_shares_with_detail_filter_by_share_network_id(self):
-        base_share = self.shares_client.get_share(
+        base_share = self.shares_v2_client.get_share(
             self.shares[0]['id'])['share']
         filters = {'share_network_id': base_share['share_network_id']}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
@@ -310,7 +313,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         filters = {'snapshot_id': self.snap['id']}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
@@ -325,7 +328,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
         filters = {'sort_key': 'created_at', 'sort_dir': 'asc'}
 
         # list shares
-        shares = self.shares_client.list_shares_with_detail(
+        shares = self.shares_v2_client.list_shares_with_detail(
             params=filters)['shares']
 
         # verify response
@@ -338,7 +341,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_shares_with_detail_filter_by_existed_name(self):
         # list shares by name, at least one share is expected
         params = {"name": self.share_name}
-        shares = self.shares_client.list_shares_with_detail(params)['shares']
+        shares = self.shares_v2_client.list_shares_with_detail(params)[
+            'shares']
         self.assertEqual(self.share_name, shares[0]["name"])
 
     @decorators.idempotent_id('d0dae9e5-a826-48e4-b7b7-24b08ad5a7cb')
@@ -346,7 +350,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_shares_with_detail_filter_by_fake_name(self):
         # list shares by fake name, no shares are expected
         params = {"name": data_utils.rand_name("fake-nonexistent-name")}
-        shares = self.shares_client.list_shares_with_detail(params)['shares']
+        shares = self.shares_v2_client.list_shares_with_detail(params)[
+            'shares']
         self.assertEqual(0, len(shares))
 
     @decorators.idempotent_id('8eac9b63-666f-4c52-8c5f-58b1fdf201e2')
@@ -354,7 +359,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_shares_with_detail_filter_by_active_status(self):
         # list shares by active status, at least one share is expected
         params = {"status": "available"}
-        shares = self.shares_client.list_shares_with_detail(params)['shares']
+        shares = self.shares_v2_client.list_shares_with_detail(
+            params)['shares']
         self.assertGreater(len(shares), 0)
         for share in shares:
             self.assertEqual(params["status"], share["status"])
@@ -364,7 +370,8 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_shares_with_detail_filter_by_fake_status(self):
         # list shares by fake status, no shares are expected
         params = {"status": 'fake'}
-        shares = self.shares_client.list_shares_with_detail(params)['shares']
+        shares = self.shares_v2_client.list_shares_with_detail(
+            params)['shares']
         self.assertEqual(0, len(shares))
 
     @decorators.idempotent_id('d24a438e-4622-48ac-993e-a30d04746745')
@@ -374,7 +381,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_get_snapshot(self):
 
         # get snapshot
-        get = self.shares_client.get_snapshot(self.snap["id"])['snapshot']
+        get = self.shares_v2_client.get_snapshot(self.snap["id"])['snapshot']
 
         # verify keys
         expected_keys = ["status", "links", "share_id", "name",
@@ -405,7 +412,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_snapshots(self):
 
         # list share snapshots
-        snaps = self.shares_client.list_snapshots()['snapshots']
+        snaps = self.shares_v2_client.list_snapshots()['snapshots']
 
         # verify keys
         keys = ["id", "name", "links"]
@@ -423,7 +430,7 @@ class SharesActionsAdminTest(base.BaseSharesAdminTest):
     def test_list_snapshots_with_detail(self):
 
         # list share snapshots
-        snaps = self.shares_client.list_snapshots_with_detail()['snapshots']
+        snaps = self.shares_v2_client.list_snapshots_with_detail()['snapshots']
 
         # verify keys
         keys = ["status", "links", "share_id", "name",

@@ -214,7 +214,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
         waiters.wait_for_resource_status(
             self.shares_v2_client, managed_share['id'],
             constants.STATUS_AVAILABLE)
-        self.shares_client.delete_share(managed_share['id'])
+        self.shares_v2_client.delete_share(managed_share['id'])
         self.shares_v2_client.wait_for_resource_deletion(
             share_id=managed_share["id"])
         self._delete_share_server_and_wait(share['share_server_id'])
@@ -290,7 +290,7 @@ class ShareNetworkSubnetsNegativeTest(base.BaseSharesAdminTest):
                           self.shares_v2_client.delete_share_network,
                           share_network_id)
         # Cleanups
-        self.shares_client.delete_share(share['id'])
+        self.shares_v2_client.delete_share(share['id'])
         self.shares_v2_client.wait_for_resource_deletion(share_id=share["id"])
         self._delete_share_server_and_wait(share['share_server_id'])
         self.shares_v2_client.delete_subnet(share_network_id,

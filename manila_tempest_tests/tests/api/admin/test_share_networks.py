@@ -47,7 +47,7 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
             add_security_services=False,
             **cls.data_sn_with_ldap_ss)
 
-        cls.shares_client.add_sec_service_to_share_network(
+        cls.shares_v2_client.add_sec_service_to_share_network(
             cls.sn_with_ldap_ss["id"],
             cls.ss_ldap["id"])
 

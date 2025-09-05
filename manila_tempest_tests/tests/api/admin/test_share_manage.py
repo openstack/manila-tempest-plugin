@@ -107,7 +107,7 @@ class ManageNFSShareTest(base.BaseSharesAdminTest):
         # Add managed share to cleanup queue
         self.method_resources.insert(
             0, {'type': 'share', 'id': managed_share['id'],
-                'client': self.shares_client})
+                'client': self.shares_v2_client})
 
         # Wait for success
         waiters.wait_for_resource_status(self.shares_v2_client,

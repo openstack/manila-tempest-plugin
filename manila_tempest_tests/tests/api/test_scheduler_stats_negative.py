@@ -26,11 +26,11 @@ class SchedulerStatsNegativeTest(base.BaseSharesTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_list_pools_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.list_pools)
+                          self.shares_v2_client.list_pools)
 
     @decorators.idempotent_id('f89136cf-34a1-475b-8514-3114f9f159a5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_list_pools_detailed_with_user(self):
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.list_pools,
+                          self.shares_v2_client.list_pools,
                           detail=True)

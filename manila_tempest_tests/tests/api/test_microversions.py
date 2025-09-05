@@ -44,56 +44,14 @@ class MicroversionsTest(base.BaseSharesTest):
 
         version_list = resp_body['versions']
         ids = [v['id'] for v in version_list]
-        self.assertEqual({'v1.0', 'v2.0'}, set(ids))
+        self.assertIn('v2.0', set(ids))
 
         self.assertNotIn(API_MICROVERSIONS_HEADER_LOWER, resp)
         self.assertNotIn('vary', resp)
 
-        v1 = [v for v in version_list if v['id'] == 'v1.0'][0]
-        self.assertEqual('', v1.get('min_version'))
-        self.assertEqual('', v1.get('version'))
-
         v2 = [v for v in version_list if v['id'] == 'v2.0'][0]
         self.assertEqual(_MIN_API_VERSION, v2.get('min_version'))
         self.assertNotIn(v2.get('version'), [None, ''])
-
-    @decorators.idempotent_id('6ccaae5f-2382-45a5-a844-6d31837beba8')
-    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_microversions_v1_no_version(self):
-
-        resp, resp_body = self.shares_v2_client.send_microversion_request(
-            script_name='v1')
-
-        self.assertEqual(200, resp.status)
-
-        version_list = resp_body['versions']
-        ids = [v['id'] for v in version_list]
-        self.assertEqual({'v1.0'}, set(ids))
-
-        self.assertEqual('1.0', resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertIn(API_MICROVERSIONS_HEADER,
-                      resp.get('vary', '').split(','))
-        self.assertEqual('', version_list[0].get('min_version'))
-        self.assertEqual('', version_list[0].get('version'))
-
-    @decorators.idempotent_id('7b7e4ddf-08bb-4764-a94f-5f377da3b2cb')
-    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    def test_microversions_v1_with_version(self):
-
-        resp, resp_body = self.shares_v2_client.send_microversion_request(
-            script_name='v1', version='5.0')
-
-        self.assertEqual(200, resp.status)
-
-        version_list = resp_body['versions']
-        ids = [v['id'] for v in version_list]
-        self.assertEqual({'v1.0'}, set(ids))
-
-        self.assertEqual('1.0', resp.get(API_MICROVERSIONS_HEADER_LOWER))
-        self.assertIn(API_MICROVERSIONS_HEADER,
-                      resp.get('vary', '').split(','))
-        self.assertEqual('', version_list[0].get('min_version'))
-        self.assertEqual('', version_list[0].get('version'))
 
     @decorators.idempotent_id('9a8bd7fd-f9d0-4fc6-8e1c-0178d87ec7c1')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)

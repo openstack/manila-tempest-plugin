@@ -112,7 +112,7 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
 
         # Unmanage snapshot
         self.shares_v2_client.unmanage_snapshot(snap['id'])
-        self.shares_client.wait_for_resource_deletion(
+        self.shares_v2_client.wait_for_resource_deletion(
             snapshot_id=snap['id']
         )
 

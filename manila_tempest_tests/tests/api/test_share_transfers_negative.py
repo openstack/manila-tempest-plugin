@@ -51,8 +51,9 @@ class ShareTransferNegativeTest(base.BaseSharesMixedTest):
         transfer = self.shares_v2_client.create_share_transfer(
             share['id'])['transfer']
         waiters.wait_for_resource_status(
-            self.shares_client, share['id'], 'awaiting_transfer')
-        self.addCleanup(waiters.wait_for_resource_status, self.shares_client,
+            self.shares_v2_client, share['id'], 'awaiting_transfer')
+        self.addCleanup(waiters.wait_for_resource_status,
+                        self.shares_v2_client,
                         share['id'], 'available')
         self.addCleanup(self.shares_v2_client.delete_share_transfer,
                         transfer['id'])

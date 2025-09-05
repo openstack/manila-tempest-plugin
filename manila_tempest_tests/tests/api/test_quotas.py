@@ -47,49 +47,43 @@ class SharesQuotasTest(base.BaseSharesTest):
 
     @decorators.idempotent_id('a4649f11-41d0-4e73-ab5a-1466f2339b2f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_default_quotas(self, client_name):
-        quotas = getattr(self, client_name).default_quotas(
+    def test_default_quotas(self):
+        quotas = self.shares_v2_client.default_quotas(
             self.tenant_id)['quota_set']
-        uses_v2_client = client_name == 'shares_v2_client'
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
         self.assertGreater(int(quotas["shares"]), -2)
         self.assertGreater(int(quotas["snapshots"]), -2)
         self.assertGreater(int(quotas["share_networks"]), -2)
-        if utils.share_replica_quotas_are_supported() and uses_v2_client:
+        if utils.share_replica_quotas_are_supported():
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 
     @decorators.idempotent_id('19525293-2b32-48c3-a7cd-cab279ac4631')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_show_quotas(self, client_name):
-        quotas = getattr(self, client_name).show_quotas(
+    def test_show_quotas(self):
+        quotas = self.shares_v2_client.show_quotas(
             self.tenant_id)['quota_set']
-        uses_v2_client = client_name == 'shares_v2_client'
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
         self.assertGreater(int(quotas["shares"]), -2)
         self.assertGreater(int(quotas["snapshots"]), -2)
         self.assertGreater(int(quotas["share_networks"]), -2)
-        if utils.share_replica_quotas_are_supported() and uses_v2_client:
+        if utils.share_replica_quotas_are_supported():
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 
     @decorators.idempotent_id('1e670af7-9734-42a8-97b7-3080526f3aca')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data('shares_client', 'shares_v2_client')
-    def test_show_quotas_for_user(self, client_name):
-        quotas = getattr(self, client_name).show_quotas(
+    def test_show_quotas_for_user(self):
+        quotas = self.shares_v2_client.show_quotas(
             self.tenant_id, self.user_id)['quota_set']
-        uses_v2_client = client_name == 'shares_v2_client'
         self.assertGreater(int(quotas["gigabytes"]), -2)
         self.assertGreater(int(quotas["snapshot_gigabytes"]), -2)
         self.assertGreater(int(quotas["shares"]), -2)
         self.assertGreater(int(quotas["snapshots"]), -2)
         self.assertGreater(int(quotas["share_networks"]), -2)
-        if utils.share_replica_quotas_are_supported() and uses_v2_client:
+        if utils.share_replica_quotas_are_supported():
             self.assertGreater(int(quotas["share_replicas"]), -2)
             self.assertGreater(int(quotas["replica_gigabytes"]), -2)
 

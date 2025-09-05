@@ -1861,6 +1861,48 @@ class SharesV2Client(shares_client.SharesClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
+    def create_share_network(self, version=LATEST_MICROVERSION, **kwargs):
+        """Create a share network.
+
+        :param version: API microversion to use (default: LATEST_MICROVERSION)
+        :param kwargs: Share network parameters (name, description,
+            neutron_net_id, neutron_subnet_id, etc.)
+        :return: ResponseBody containing the created share_network
+        """
+        body = json.dumps({"share_network": kwargs})
+        resp, body = self.post("share-networks", body, version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_share_network(self, sn_id, version=LATEST_MICROVERSION,
+                             **kwargs):
+        """Update a share network.
+
+        :param sn_id: Share network ID to update
+        :param version: API microversion to use (default: LATEST_MICROVERSION)
+        :param kwargs: Share network parameters to update (name,
+            description, etc.)
+        :return: ResponseBody containing the updated share_network
+        """
+        body = json.dumps({"share_network": kwargs})
+        resp, body = self.put("share-networks/%s" % sn_id, body,
+                              version=version)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_share_network(self, sn_id, version=LATEST_MICROVERSION):
+        """Delete a share network.
+
+        :param sn_id: Share network ID to delete
+        :param version: API microversion to use (default: LATEST_MICROVERSION)
+        :return: ResponseBody
+        """
+        resp, body = self.delete("share-networks/%s" % sn_id, version=version)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
 ###############
 
     def get_share_backup(self, backup_id, version=LATEST_MICROVERSION):

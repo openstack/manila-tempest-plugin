@@ -52,7 +52,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
     def test_pool_list(self):
 
         # List pools
-        pool_response = self.shares_client.list_pools()
+        pool_response = self.shares_v2_client.list_pools()
         pool_list = pool_response.get('pools')
         self.assertIsNotNone(pool_list, 'No pools returned from pools API')
         self.assertNotEmpty(pool_list)
@@ -66,7 +66,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
     def test_pool_list_with_filters(self):
 
         # List pools
-        pool_response = self.shares_client.list_pools()
+        pool_response = self.shares_v2_client.list_pools()
         pool_list = pool_response.get('pools')
 
         # Ensure we got at least one pool
@@ -80,7 +80,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
             'backend': self._wrap_regex_for_exact_match(pool.get('backend')),
             'pool': self._wrap_regex_for_exact_match(pool.get('pool')),
         }
-        pool_response = self.shares_client.list_pools(
+        pool_response = self.shares_v2_client.list_pools(
             search_opts=search_opts)
         filtered_pool_list = pool_response.get('pools')
 
@@ -101,7 +101,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
             'backend': 'bar',
             'pool': 'shark',
         }
-        pool_response = self.shares_client.list_pools(
+        pool_response = self.shares_v2_client.list_pools(
             search_opts=search_opts)
         pool_list = pool_response.get('pools')
 
@@ -113,7 +113,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
     def test_pool_list_detail(self):
 
         # List pools
-        pool_response = self.shares_client.list_pools(detail=True)
+        pool_response = self.shares_v2_client.list_pools(detail=True)
         pool_list = pool_response.get('pools')
         self.assertIsNotNone(pool_list, 'No pools returned from pools API')
         self.assertNotEmpty(pool_list)
@@ -127,7 +127,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
     def test_pool_list_detail_with_filters(self):
 
         # List pools
-        pool_response = self.shares_client.list_pools(detail=True)
+        pool_response = self.shares_v2_client.list_pools(detail=True)
         pool_list = pool_response.get('pools')
 
         # Ensure we got at least one pool
@@ -141,7 +141,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
             'backend': self._wrap_regex_for_exact_match(pool.get('backend')),
             'pool': self._wrap_regex_for_exact_match(pool.get('pool')),
         }
-        pool_response = self.shares_client.list_pools(
+        pool_response = self.shares_v2_client.list_pools(
             detail=True, search_opts=search_opts)
         filtered_pool_list = pool_response.get('pools')
 
@@ -162,7 +162,7 @@ class SchedulerStatsAdminTest(base.BaseSharesAdminTest):
             'backend': 'bar',
             'pool': 'shark',
         }
-        pool_response = self.shares_client.list_pools(
+        pool_response = self.shares_v2_client.list_pools(
             detail=True, search_opts=search_opts)
         pool_list = pool_response.get('pools')
 

@@ -26,7 +26,7 @@ class ExtensionsTest(base.BaseSharesTest):
     def test_extensions(self):
 
         # get extensions
-        extensions = self.shares_client.list_extensions()['extensions']
+        extensions = self.shares_v2_client.list_extensions()['extensions']
 
         # verify response
         keys = ["alias", "updated", "name", "description"]

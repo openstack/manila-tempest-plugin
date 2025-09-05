@@ -26,22 +26,18 @@ class SharesMetadataAPIOnlyNegativeTest(base.BaseSharesTest):
 
     @decorators.idempotent_id('22aecf50-0d98-4b97-82b8-599559f7692f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @ddt.data(True, False)
-    def test_try_set_metadata_to_unexisting_share(self, is_v2_client):
+    def test_try_set_metadata_to_unexisting_share(self):
         md = {"key1": "value1", "key2": "value2", }
-        client = self.shares_v2_client if is_v2_client else self.shares_client
         self.assertRaises(lib_exc.NotFound,
-                          client.set_metadata,
+                          self.shares_v2_client.set_metadata,
                           "wrong_share_id", md)
 
     @decorators.idempotent_id('7df0acd7-03f8-45c4-8c72-eb6932af70b1')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
-    @ddt.data(True, False)
-    def test_try_update_all_metadata_for_unexisting_share(self, is_v2_client):
+    def test_try_update_all_metadata_for_unexisting_share(self):
         md = {"key1": "value1", "key2": "value2", }
-        client = self.shares_v2_client if is_v2_client else self.shares_client
         self.assertRaises(lib_exc.NotFound,
-                          client.update_all_metadata,
+                          self.shares_v2_client.update_all_metadata,
                           "wrong_share_id", md)
 
 

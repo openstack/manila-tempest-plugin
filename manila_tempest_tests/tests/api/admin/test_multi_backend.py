@@ -20,7 +20,6 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
 
-
 CONF = config.CONF
 
 
@@ -86,7 +85,7 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
     def test_share_backend_name_reporting(self):
         # Share's 'host' should be like "hostname@backend_name"
         for share in self.shares:
-            get = self.shares_client.get_share(share['id'])['share']
+            get = self.shares_v2_client.get_share(share['id'])['share']
             self.assertEqual(2, len(get["host"].split("@")))
 
     @decorators.idempotent_id('691fbcef-6d8d-4ad9-b493-501bbb3dcf3c')
@@ -116,6 +115,6 @@ class ShareMultiBackendTest(base.BaseSharesAdminTest):
         if CONF.share.backend_names[0] == CONF.share.backend_names[1]:
             raise self.skipException("Share backends "
                                      "configured with same name. Skipping.")
-        get1 = self.shares_client.get_share(self.shares[0]['id'])['share']
-        get2 = self.shares_client.get_share(self.shares[1]['id'])['share']
+        get1 = self.shares_v2_client.get_share(self.shares[0]['id'])['share']
+        get2 = self.shares_v2_client.get_share(self.shares[1]['id'])['share']
         self.assertNotEqual(get1["host"], get2["host"])

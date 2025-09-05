@@ -200,7 +200,7 @@ class AdminActionsTest(base.BaseSharesAdminTest):
         self.admin_shares_v2_client.extend_share(share['id'], new_size,
                                                  force=force_flag)
         waiters.wait_for_resource_status(
-            self.shares_client, share['id'], 'available')
+            self.shares_v2_client, share['id'], 'available')
 
         # check new size
         share_get = self.shares_v2_client.get_share(share['id'])['share']

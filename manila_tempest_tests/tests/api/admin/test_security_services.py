@@ -50,7 +50,7 @@ class SecurityServiceAdminTest(
     @decorators.idempotent_id('6f843a0a-21da-4a83-ae3b-3831f99b3678')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_all_tenants(self):
-        listed = self.shares_client.list_security_services(
+        listed = self.shares_v2_client.list_security_services(
             params={'all_tenants': 1})['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
@@ -62,6 +62,6 @@ class SecurityServiceAdminTest(
     @decorators.idempotent_id('fe515fa7-0275-4190-adc7-5321e1047dad')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_security_services_invalid_filters(self):
-        listed = self.shares_client.list_security_services(
+        listed = self.shares_v2_client.list_security_services(
             params={'fake_opt': 'some_value'})['security_services']
         self.assertEqual(0, len(listed))

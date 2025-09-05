@@ -38,7 +38,6 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
             utils.share_network_get_default_subnet(cls.sn)
             if utils.share_network_subnets_are_supported() else cls.sn)
         cls.ss = cls.create_security_service(cleanup_in_class=True)
-        cls.cl = cls.shares_client
         # create share type
         cls.share_type = cls.create_share_type()
         cls.share_type_id = cls.share_type['id']
@@ -46,80 +45,92 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
     @decorators.idempotent_id('e3d17444-8ed4-445e-bc65-c748dbc5d21f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_sec_service_twice_to_share_network(self):
-        self.cl.add_sec_service_to_share_network(self.sn["id"], self.ss["id"])
-        self.assertRaises(lib_exc.Conflict,
-                          self.cl.add_sec_service_to_share_network,
-                          self.sn["id"], self.ss["id"])
+        self.shares_v2_client.add_sec_service_to_share_network(
+            self.sn["id"], self.ss["id"])
+        self.assertRaises(
+            lib_exc.Conflict,
+            self.shares_v2_client.add_sec_service_to_share_network,
+            self.sn["id"], self.ss["id"])
 
     @decorators.idempotent_id('3f7af51f-3afa-495c-94b7-e9d29f06cf1d')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_nonexistant_sec_service_to_share_network(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.add_sec_service_to_share_network,
-                          self.sn["id"], "wrong_ss_id")
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.add_sec_service_to_share_network,
+            self.sn["id"], "wrong_ss_id")
 
     @decorators.idempotent_id('85dd5693-a89c-4d05-9416-0e11fbba23f5')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_empty_sec_service_id_to_share_network(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.add_sec_service_to_share_network,
-                          self.sn["id"], "")
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.add_sec_service_to_share_network,
+            self.sn["id"], "")
 
     @decorators.idempotent_id('d9af5086-ace9-4be3-8119-e765699c0c91')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_sec_service_to_nonexistant_share_network(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.add_sec_service_to_share_network,
-                          "wrong_sn_id", self.ss["id"])
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.add_sec_service_to_share_network,
+            "wrong_sn_id", self.ss["id"])
 
     @decorators.idempotent_id('7272426d-ab58-4efb-a490-0c78c07fa7fe')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_add_sec_service_to_share_network_with_empty_id(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.add_sec_service_to_share_network,
-                          "", self.ss["id"])
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.add_sec_service_to_share_network,
+            "", self.ss["id"])
 
     @decorators.idempotent_id('f87aefa6-9681-477d-a118-603883849f4f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_sec_services_for_nonexistant_share_network(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.list_sec_services_for_share_network,
-                          "wrong_id")
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.list_sec_services_for_share_network,
+            "wrong_id")
 
     @decorators.idempotent_id('7f8d7527-2d62-478a-ab19-213156777612')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_nonexistant_sec_service_from_share_network(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.remove_sec_service_from_share_network,
-                          self.sn["id"], "wrong_id")
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.remove_sec_service_from_share_network,
+            self.sn["id"], "wrong_id")
 
     @decorators.idempotent_id('be1c9c79-efa1-471e-920b-da4733ad383e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_sec_service_from_nonexistant_share_network(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.remove_sec_service_from_share_network,
-                          "wrong_id", self.ss["id"])
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.remove_sec_service_from_share_network,
+            "wrong_id", self.ss["id"])
 
     @decorators.idempotent_id('c7c2f66f-81f8-4984-b807-2b9520105a33')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_nonexistant_ss_from_nonexistant_sn(self):
-        self.assertRaises(lib_exc.NotFound,
-                          self.cl.remove_sec_service_from_share_network,
-                          "wrong_id", "wrong_id")
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.shares_v2_client.remove_sec_service_from_share_network,
+            "wrong_id", "wrong_id")
 
     @decorators.idempotent_id('eb66a8f7-b549-4cf1-8719-30844fb151b6')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_delete_ss_from_sn_used_by_share_server(self):
-        sn = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)['share_network']
+        sn = self.shares_v2_client.get_share_network(
+            self.shares_v2_client.share_network_id,
+            version='2.0'
+        )['share_network']
         fresh_sn = self.create_share_network(
             add_security_services=False,
             neutron_net_id=sn["neutron_net_id"],
             neutron_subnet_id=sn["neutron_subnet_id"])
 
-        self.shares_client.add_sec_service_to_share_network(
+        self.shares_v2_client.add_sec_service_to_share_network(
             fresh_sn["id"], self.ss["id"])
 
         # Security service with fake data is used, so if we use backend driver
@@ -137,10 +148,11 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
                         "that leads to share-server creation error. "
                         "%s", str(e))
 
-        self.assertRaises(lib_exc.Forbidden,
-                          self.cl.remove_sec_service_from_share_network,
-                          fresh_sn["id"],
-                          self.ss["id"])
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.shares_v2_client.remove_sec_service_from_share_network,
+            fresh_sn["id"],
+            self.ss["id"])
 
     @decorators.idempotent_id('6a15c8ff-eba3-40e5-8fa1-6eab52338672')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
@@ -148,26 +160,30 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         # create share network
         data = utils.generate_share_network_data()
 
-        sn = self.create_share_network(client=self.cl,
-                                       add_security_services=False, **data)
+        sn = self.create_share_network(client=self.shares_v2_client,
+                                       version='2.0',
+                                       add_security_services=False,
+                                       **data)
         self.assertLessEqual(data.items(), sn.items())
 
         # create security services with same type
         security_services = []
         for i in range(2):
             data = utils.generate_security_service_data()
-            ss = self.create_security_service(client=self.cl, **data)
+            ss = self.create_security_service(
+                client=self.shares_v2_client, **data)
             self.assertLessEqual(data.items(), ss.items())
             security_services.insert(i, ss)
 
         # Add security service to share network
-        self.cl.add_sec_service_to_share_network(
+        self.shares_v2_client.add_sec_service_to_share_network(
             sn["id"], security_services[0]["id"])
 
         # Try to add security service with same type
-        self.assertRaises(lib_exc.Conflict,
-                          self.cl.add_sec_service_to_share_network,
-                          sn["id"], security_services[1]["id"])
+        self.assertRaises(
+            lib_exc.Conflict,
+            self.shares_v2_client.add_sec_service_to_share_network,
+            sn["id"], security_services[1]["id"])
 
     @decorators.idempotent_id('d422a15a-1f4c-4531-a092-9216b90c4179')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
@@ -175,23 +191,27 @@ class SecServicesMappingNegativeTest(base.BaseSharesMixedTest):
         # create share network
         data = utils.generate_share_network_data()
 
-        sn = self.create_share_network(client=self.cl,
-                                       add_security_services=False, **data)
+        sn = self.create_share_network(client=self.shares_v2_client,
+                                       version='2.0',
+                                       add_security_services=False,
+                                       **data)
         self.assertLessEqual(data.items(), sn.items())
 
         # create security service
         data = utils.generate_security_service_data()
 
-        ss = self.create_security_service(client=self.cl, **data)
+        ss = self.create_security_service(client=self.shares_v2_client, **data)
         self.assertLessEqual(data.items(), ss.items())
 
         # Add security service to share network
-        self.cl.add_sec_service_to_share_network(sn["id"], ss["id"])
+        self.shares_v2_client.add_sec_service_to_share_network(
+            sn["id"], ss["id"])
 
         # Try delete ss, that has been assigned to some sn
         self.assertRaises(lib_exc.Forbidden,
-                          self.cl.delete_security_service,
+                          self.shares_v2_client.delete_security_service,
                           ss["id"], )
 
         # remove seurity service from share-network
-        self.cl.remove_sec_service_from_share_network(sn["id"], ss["id"])
+        self.shares_v2_client.remove_sec_service_from_share_network(
+            sn["id"], ss["id"])

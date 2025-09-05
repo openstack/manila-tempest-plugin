@@ -55,7 +55,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
 
         # try delete share
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.delete_share, share["id"])
+                          self.shares_v2_client.delete_share, share["id"])
 
     @decorators.idempotent_id('3df8e2d8-9b79-428d-9d8b-30bc66b5b40e')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -95,7 +95,7 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                       "Only for multitenancy.")
     def test_create_share_with_nonexistant_share_network(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.create_share,
+                          self.shares_v2_client.create_share,
                           share_type_id=self.share_type_id,
                           share_network_id="wrong_sn_id")
 
@@ -117,9 +117,11 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                                   cleanup_in_class=False)
 
         # get parent's share network
-        parent_share = self.shares_client.get_share(share["id"])['share']
-        parent_sn = self.shares_client.get_share_network(
-            parent_share["share_network_id"])['share_network']
+        parent_share = self.shares_v2_client.get_share(share["id"])['share']
+        parent_sn = self.shares_v2_client.get_share_network(
+            parent_share["share_network_id"],
+            version='2.0'
+        )['share_network']
 
         # create new share-network - net duplicate of parent's share
         new_duplicated_sn = self.create_share_network(
@@ -163,14 +165,14 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_unmanage_share_by_user(self):
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.unmanage_share,
+                          self.shares_v2_client.unmanage_share,
                           'fake-id')
 
     @decorators.idempotent_id('97a4dd2f-7c90-4eb7-bf74-d698c3060833')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_manage_share_by_user(self):
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.manage_share,
+                          self.shares_v2_client.manage_share,
                           'fake-host', 'nfs', '/export/path',
                           'fake-type')
 
@@ -185,7 +187,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_by_share_server_by_user(self):
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.list_shares,
+                          self.shares_v2_client.list_shares,
                           params={'share_server_id': 12345})
 
     @decorators.idempotent_id('2f0df934-b2fb-4ebd-96f7-183cb699dcdd')
@@ -200,7 +202,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_zero_size(self):
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.create_share,
+                          self.shares_v2_client.create_share,
                           share_type_id=self.share_type_id,
                           size=0)
 
@@ -208,7 +210,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_invalid_size(self):
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.create_share,
+                          self.shares_v2_client.create_share,
                           share_type_id=self.share_type_id,
                           size="#$%")
 
@@ -216,7 +218,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_out_passing_size(self):
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.create_share,
+                          self.shares_v2_client.create_share,
                           share_type_id=self.share_type_id,
                           size="")
 
@@ -226,7 +228,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           "Snapshot tests are disabled.")
     def test_delete_snapshot_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.delete_snapshot,
+                          self.shares_v2_client.delete_snapshot,
                           "wrong_share_id")
 
     @decorators.idempotent_id('08e5a9c7-45cb-414c-b375-28c335f20ff1')
@@ -235,14 +237,14 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
                           "Snapshot tests are disabled.")
     def test_create_snapshot_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.create_snapshot,
+                          self.shares_v2_client.create_snapshot,
                           "wrong_share_id")
 
     @decorators.idempotent_id('78e5e327-c68e-4910-82b2-27f5f4d150ac')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_invalid_protocol(self):
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.create_share,
+                          self.shares_v2_client.create_share,
                           share_type_id=self.share_type_id,
                           share_protocol="nonexistent_protocol")
 
@@ -250,14 +252,14 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_create_share_with_wrong_public_value(self):
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.create_share,
+                          self.shares_v2_client.create_share,
                           share_type_id=self.share_type_id,
                           is_public='truebar')
 
     @decorators.idempotent_id('f82d1667-ae39-43bb-b5aa-bfc9b2ec7292')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_get_share_with_wrong_id(self):
-        self.assertRaises(lib_exc.NotFound, self.shares_client.get_share,
+        self.assertRaises(lib_exc.NotFound, self.shares_v2_client.get_share,
                           "wrong_share_id")
 
     @decorators.idempotent_id('d03cf44e-6e69-415f-be36-25defb86df56')
@@ -265,20 +267,20 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     def test_get_share_without_passing_share_id(self):
         # Should not be able to get share when empty ID is passed
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.get_share, '')
+                          self.shares_v2_client.get_share, '')
 
     @decorators.idempotent_id('a9487254-606b-444f-ba6a-2f461bcaf474')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_list_shares_nonadmin_with_nonexistent_share_server_filter(self):
         # filtering by share server allowed only for admins by default
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.list_shares_with_detail,
+                          self.shares_v2_client.list_shares_with_detail,
                           {'share_server_id': 'fake_share_server_id'})
 
     @decorators.idempotent_id('9698d1a3-8ee8-46fa-a46b-1084d98e7149')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_delete_share_with_wrong_id(self):
-        self.assertRaises(lib_exc.NotFound, self.shares_client.delete_share,
+        self.assertRaises(lib_exc.NotFound, self.shares_v2_client.delete_share,
                           "wrong_share_id")
 
     @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fd24')
@@ -286,7 +288,7 @@ class SharesAPIOnlyNegativeTest(base.BaseSharesMixedTest):
     def test_delete_share_without_passing_share_id(self):
         # Should not be able to delete share when empty ID is passed
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.delete_share, '')
+                          self.shares_v2_client.delete_share, '')
 
     @utils.skip_if_microversion_not_supported("2.61")
     @decorators.idempotent_id('b8097d56-067e-4d7c-8401-31bc7021fe86')

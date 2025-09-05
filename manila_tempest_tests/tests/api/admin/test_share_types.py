@@ -247,7 +247,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
             name=share_name, share_type_id=st_create["id"])
         self.assertEqual(share["name"], share_name)
         waiters.wait_for_resource_status(
-            self.shares_client, share["id"], "available")
+            self.shares_v2_client, share["id"], "available")
 
         # Verify share info
         get = self.shares_v2_client.get_share(
@@ -266,7 +266,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
     def test_private_share_type_access(self):
         name = data_utils.rand_name("tempest-manila")
         extra_specs = self.add_extra_specs_to_dict({"key": "value", })
-        project_id = self.shares_client.tenant_id
+        project_id = self.shares_v2_client.tenant_id
 
         # Create private share type
         st_create = self.create_share_type(
@@ -289,7 +289,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
             st_id, project_id)
 
         # Now it should be listed
-        st_list = self.shares_client.list_share_types()
+        st_list = self.shares_v2_client.list_share_types()
         sts = st_list["share_types"]
         self.assertTrue(any(st_id in st["id"] for st in sts))
 
@@ -304,7 +304,7 @@ class ShareTypesAdminTest(base.BaseSharesAdminTest):
             st_id, project_id)
 
         # It should not be listed without access
-        st_list = self.shares_client.list_share_types()
+        st_list = self.shares_v2_client.list_share_types()
         sts = st_list["share_types"]
         self.assertFalse(any(st_id in st["id"] for st in sts))
 

@@ -185,7 +185,8 @@ class BaseSharesTest(test.BaseTestCase):
 
     @classmethod
     def provide_and_associate_security_services(
-            cls, shares_client, share_network_id, cleanup_in_class=True):
+        cls, shares_client, share_network_id, cleanup_in_class=True
+    ):
         """Creates a security service and associates to a share network.
 
         This method creates security services based on the Multiopt
@@ -756,7 +757,7 @@ class BaseSharesTest(test.BaseTestCase):
                              add_security_services=True, **kwargs):
 
         if client is None:
-            client = cls.shares_client
+            client = cls.shares_v2_client
         share_network = client.create_share_network(**kwargs)['share_network']
         resource = {
             "type": "share_network",
@@ -803,7 +804,7 @@ class BaseSharesTest(test.BaseTestCase):
     def create_security_service(cls, ss_type="ldap", client=None,
                                 cleanup_in_class=False, **kwargs):
         if client is None:
-            client = cls.shares_client
+            client = cls.shares_v2_client
         security_service = client.create_security_service(
             ss_type, **kwargs)['security_service']
         resource = {
@@ -898,7 +899,7 @@ class BaseSharesTest(test.BaseTestCase):
             if "deleted" not in res.keys():
                 res["deleted"] = False
             if "client" not in res.keys():
-                res["client"] = cls.shares_client
+                res["client"] = cls.shares_v2_client
             if not (res["deleted"]):
                 try:
                     res_id = res['id']

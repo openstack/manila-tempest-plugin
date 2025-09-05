@@ -38,38 +38,40 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_share_network_without_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.get_share_network, "")
+                          self.shares_v2_client.get_share_network, "")
 
     @decorators.idempotent_id('80397850-2f64-48b3-b19b-79c4ac0bd58f')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_share_network_with_wrong_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.get_share_network, "wrong_id")
+                          self.shares_v2_client.get_share_network,
+                          "wrong_id")
 
     @decorators.idempotent_id('fe6ac194-5003-404c-b372-7515a58ff969')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_share_network_without_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.delete_share_network, "")
+                          self.shares_v2_client.delete_share_network, "")
 
     @decorators.idempotent_id('7e22e8b9-a1ce-480c-89b3-b4edd807285a')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_delete_share_network_with_wrong_type(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.delete_share_network, "wrong_id")
+                          self.shares_v2_client.delete_share_network,
+                          "wrong_id")
 
     @decorators.idempotent_id('a7c55dbe-c23e-403f-b8aa-4aa1128f32a4')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_nonexistant_share_network(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.update_share_network,
+                          self.shares_v2_client.update_share_network,
                           "wrong_id", name="name")
 
     @decorators.idempotent_id('984349ca-df7d-4f85-a45f-948189debb65')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_update_share_network_with_empty_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.update_share_network,
+                          self.shares_v2_client.update_share_network,
                           "", name="name")
 
     @decorators.idempotent_id('211b64b4-4c2b-4b6b-b011-725f40a37b03')
@@ -81,22 +83,22 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
                           cleanup_in_class=False)
 
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.update_share_network,
-                          self.shares_client.share_network_id,
+                          self.shares_v2_client.update_share_network,
+                          self.shares_v2_client.share_network_id,
                           neutron_net_id="new_net_id")
 
     @decorators.idempotent_id('9166b81c-d6ab-4592-bcf7-9410250e30dd')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
     def test_try_get_deleted_share_network(self):
         data = utils.generate_share_network_data()
-        sn = self.create_share_network(**data)
+        sn = self.create_share_network(version='2.0', **data)
         self.assertLessEqual(data.items(), sn.items())
 
-        self.shares_client.delete_share_network(sn["id"])
+        self.shares_v2_client.delete_share_network(sn["id"])
 
         # try get deleted share network entity
         self.assertRaises(lib_exc.NotFound,
-                          self.shares_client.get_security_service,
+                          self.shares_v2_client.get_security_service,
                           sn["id"])
 
     @decorators.idempotent_id('0d104b72-aab5-48b5-87f8-847d2155faa9')
@@ -104,7 +106,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     def test_try_list_share_networks_wrong_created_since_value(self):
         self.assertRaises(
             lib_exc.BadRequest,
-            self.shares_client.list_share_networks_with_detail,
+            self.shares_v2_client.list_share_networks_with_detail,
             params={'created_since': '2014-10-23T08:31:58.000000'})
 
     @decorators.idempotent_id('c96dacaf-4cea-4fe9-bbd7-c9b1001f5495')
@@ -112,7 +114,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
     def test_try_list_share_networks_wrong_created_before_value(self):
         self.assertRaises(
             lib_exc.BadRequest,
-            self.shares_client.list_share_networks_with_detail,
+            self.shares_v2_client.list_share_networks_with_detail,
             params={'created_before': '2014-10-23T08:31:58.000000'})
 
     @decorators.idempotent_id('6e4912fd-ae85-4a43-81e8-e5b340099b64')
@@ -125,8 +127,10 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
                       "share_network.")
     def test_try_delete_share_network_with_existing_shares(self):
         # Get valid network data for successful share creation
-        share_network = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)['share_network']
+        share_network = self.shares_v2_client.get_share_network(
+            self.shares_v2_client.share_network_id,
+            version='2.0'
+        )['share_network']
         new_sn = self.create_share_network(
             neutron_net_id=share_network['neutron_net_id'],
             neutron_subnet_id=share_network['neutron_subnet_id'],
@@ -140,7 +144,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
         # Try delete share network
         self.assertRaises(
             lib_exc.Conflict,
-            self.shares_client.delete_share_network, new_sn['id'])
+            self.shares_v2_client.delete_share_network, new_sn['id'])
 
     @decorators.idempotent_id('4e71de31-1064-40da-948d-a72063fbd647')
     @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
@@ -176,7 +180,7 @@ class ShareNetworksNegativeTest(base.BaseSharesMixedTest):
         # Try to delete the share network
         self.assertRaises(
             lib_exc.Conflict,
-            self.shares_client.delete_share_network,
+            self.shares_v2_client.delete_share_network,
             share_network['id']
         )
 

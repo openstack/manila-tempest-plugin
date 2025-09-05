@@ -65,13 +65,13 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
         CONF.share.run_quota_tests,
         "Quota tests are disabled.")
     def test_share_extend_over_quota(self):
-        tenant_quotas = self.shares_client.show_quotas(
-            self.shares_client.tenant_id)['quota_set']
+        tenant_quotas = self.shares_v2_client.show_quotas(
+            self.shares_v2_client.tenant_id)['quota_set']
         new_size = int(tenant_quotas["gigabytes"]) + 1
 
         # extend share with over quota and check result
         self.assertRaises(lib_exc.Forbidden,
-                          self.shares_client.extend_share,
+                          self.shares_v2_client.extend_share,
                           self.share['id'],
                           new_size)
 
@@ -85,7 +85,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         # extend share with invalid size and check result
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.extend_share,
+                          self.shares_v2_client.extend_share,
                           self.share['id'],
                           new_size)
 
@@ -99,7 +99,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         # extend share with invalid size and check result
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.extend_share,
+                          self.shares_v2_client.extend_share,
                           self.share['id'],
                           new_size)
 
@@ -118,7 +118,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         # run extend operation on same share and check result
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.extend_share,
+                          self.shares_v2_client.extend_share,
                           share['id'],
                           new_size)
 
@@ -146,7 +146,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         # shrink share with invalid size and check result
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.shrink_share,
+                          self.shares_v2_client.shrink_share,
                           self.share['id'],
                           new_size)
 
@@ -160,7 +160,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         # shrink share with invalid size and check result
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.shrink_share,
+                          self.shares_v2_client.shrink_share,
                           self.share['id'],
                           new_size)
 
@@ -181,7 +181,7 @@ class SharesActionsNegativeTest(base.BaseSharesMixedTest):
 
         # run shrink operation on same share and check result
         self.assertRaises(lib_exc.BadRequest,
-                          self.shares_client.shrink_share,
+                          self.shares_v2_client.shrink_share,
                           share['id'],
                           new_size)
 

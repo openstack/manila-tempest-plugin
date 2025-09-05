@@ -129,7 +129,7 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
 
         # Delete snapshot
         self.shares_v2_client.delete_snapshot(get_snapshot['id'])
-        self.shares_client.wait_for_resource_deletion(
+        self.shares_v2_client.wait_for_resource_deletion(
             snapshot_id=get_snapshot['id'])
         self.assertRaises(lib_exc.NotFound,
                           self.shares_v2_client.get_snapshot,
@@ -159,9 +159,9 @@ class ManageNFSSnapshotTest(base.BaseSharesAdminTest):
         snapshot = self.shares_v2_client.get_snapshot(
             snapshot['id'])['snapshot']
         # Unmanage snapshot
-        self.shares_v2_client.unmanage_snapshot(snapshot['id'],
-                                                version=version)
-        self.shares_client.wait_for_resource_deletion(
+        self.shares_v2_client.unmanage_snapshot(
+            snapshot['id'], version=version)
+        self.shares_v2_client.wait_for_resource_deletion(
             snapshot_id=snapshot['id'])
 
         # Manage snapshot

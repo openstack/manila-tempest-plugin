@@ -34,7 +34,7 @@ class SecurityServiceListMixin(object):
     @decorators.idempotent_id('f6f5657c-a93c-49ed-86e3-b351a92734d5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services(self):
-        listed = self.shares_client.list_security_services(
+        listed = self.shares_v2_client.list_security_services(
             )['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
@@ -46,16 +46,12 @@ class SecurityServiceListMixin(object):
 
     @decorators.idempotent_id('22b22937-7436-458c-ac22-8ff19feab253')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*utils.deduplicate(['1.0', '2.42', '2.44', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['2.42', '2.44', LATEST_MICROVERSION]))
     def test_list_security_services_with_detail(self, version):
         utils.check_skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
-        if utils.is_microversion_ge(version, '2.0'):
-            listed = self.shares_v2_client.list_security_services(
-                detailed=True, version=version)['security_services']
-        else:
-            listed = self.shares_client.list_security_services(
-                detailed=True)['security_services']
+        listed = self.shares_v2_client.list_security_services(
+            detailed=True, version=version)['security_services']
 
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
@@ -77,22 +73,26 @@ class SecurityServiceListMixin(object):
     @testtools.skipIf(
         not CONF.share.multitenancy_enabled, "Only for multitenancy.")
     def test_list_security_services_filter_by_share_network(self):
-        sn = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)['share_network']
+        sn = self.shares_v2_client.get_share_network(
+            self.shares_v2_client.share_network_id,
+            version='2.0'
+        )['share_network']
         fresh_sn = []
         for i in range(2):
             sn = self.create_share_network(
                 add_security_services=False,
                 neutron_net_id=sn["neutron_net_id"],
-                neutron_subnet_id=sn["neutron_subnet_id"])
+                neutron_subnet_id=sn["neutron_subnet_id"],
+                version='2.0'
+            )
             fresh_sn.append(sn)
 
-        self.shares_client.add_sec_service_to_share_network(
+        self.shares_v2_client.add_sec_service_to_share_network(
             fresh_sn[0]["id"], self.ss_ldap["id"])
-        self.shares_client.add_sec_service_to_share_network(
+        self.shares_v2_client.add_sec_service_to_share_network(
             fresh_sn[1]["id"], self.ss_kerberos["id"])
 
-        listed = self.shares_client.list_security_services(
+        listed = self.shares_v2_client.list_security_services(
             params={
                 'share_network_id': fresh_sn[0]['id']
             })['security_services']
@@ -113,7 +113,7 @@ class SecurityServiceListMixin(object):
             'dns_ip': '1.1.1.1',
             'domain': 'fake_domain_1',
         }
-        listed = self.shares_client.list_security_services(
+        listed = self.shares_v2_client.list_security_services(
             detailed=True,
             params=search_opts)['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
@@ -168,11 +168,11 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             ss = self.create_security_service(ss_name, **data)
             self.assertLessEqual(data.items(), ss.items())
             self.assertEqual(ss_name, ss["type"])
-            self.shares_client.delete_security_service(ss["id"])
+            self.shares_v2_client.delete_security_service(ss["id"])
 
     @decorators.idempotent_id('bb052be4-0176-4613-b7d5-e12bef391ddb')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
-    @ddt.data(*utils.deduplicate(['1.0', '2.43', '2.44', LATEST_MICROVERSION]))
+    @ddt.data(*utils.deduplicate(['2.43', '2.44', LATEST_MICROVERSION]))
     def test_get_security_service(self, version):
         utils.check_skip_if_microversion_not_supported(version)
         with_ou = True if utils.is_microversion_ge(version, '2.44') else False
@@ -185,7 +185,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
                 ss["id"], version=version)['security_service']
         else:
             ss = self.create_security_service(**data)
-            get = self.shares_client.get_security_service(
+            get = self.shares_v2_client.get_security_service(
                 ss["id"])['security_service']
 
         self.assertLessEqual(data.items(), ss.items())
@@ -201,10 +201,10 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         self.assertLessEqual(data.items(), ss.items())
 
         upd_data = utils.generate_security_service_data()
-        updated = self.shares_client.update_security_service(
+        updated = self.shares_v2_client.update_security_service(
             ss["id"], **upd_data)['security_service']
 
-        get = self.shares_client.get_security_service(
+        get = self.shares_v2_client.get_security_service(
             ss["id"])['security_service']
         self.assertLessEqual(upd_data.items(), updated.items())
         self.assertLessEqual(upd_data.items(), get.items())
@@ -228,14 +228,16 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
         ss_data = utils.generate_security_service_data()
         ss = self.create_security_service(**ss_data)
 
-        sn = self.shares_client.get_share_network(
-            self.shares_client.share_network_id)['share_network']
+        sn = self.shares_v2_client.get_share_network(
+            self.shares_v2_client.share_network_id,
+            version='2.0'
+        )['share_network']
         fresh_sn = self.create_share_network(
             add_security_services=False,
             neutron_net_id=sn["neutron_net_id"],
             neutron_subnet_id=sn["neutron_subnet_id"])
 
-        self.shares_client.add_sec_service_to_share_network(
+        self.shares_v2_client.add_sec_service_to_share_network(
             fresh_sn["id"], ss["id"])
 
         # Security service with fake data is used, so if we use backend driver
@@ -257,14 +259,14 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             "name": "name",
             "description": "new_description",
         }
-        updated = self.shares_client.update_security_service(
+        updated = self.shares_v2_client.update_security_service(
             ss["id"], **update_data)['security_service']
         self.assertLessEqual(update_data.items(), updated.items())
 
     @decorators.idempotent_id('8d9af272-df89-470d-9ff8-92ba774c9fff')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_security_services_filter_by_invalid_opt(self):
-        listed = self.shares_client.list_security_services(
+        listed = self.shares_v2_client.list_security_services(
             params={'fake_opt': 'some_value'})['security_services']
         self.assertTrue(any(self.ss_ldap['id'] == ss['id'] for ss in listed))
         self.assertTrue(any(self.ss_kerberos['id'] == ss['id']
@@ -277,7 +279,7 @@ class SecurityServicesTest(base.BaseSharesMixedTest,
             **utils.generate_security_service_data(),
             client=self.alt_shares_v2_client)
         alt_security_service_id = alt_security_service['id']
-        sec_service_list = self.shares_client.list_security_services(
+        sec_service_list = self.shares_v2_client.list_security_services(
             params={'all_tenants': 1})['security_services']
         sec_service_ids = [ss['id'] for ss in sec_service_list]
         self.assertTrue(

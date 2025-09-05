@@ -93,8 +93,8 @@ class ManageShareServersTest(base.BaseSharesAdminTest):
                 self.share_type)[0]
             az_subnet = self.shares_v2_client.create_subnet(
                 share_network['id'],
-                neutron_net_id=share_network['neutron_net_id'],
-                neutron_subnet_id=share_network['neutron_subnet_id'],
+                neutron_net_id=share_net_info['neutron_net_id'],
+                neutron_subnet_id=share_net_info['neutron_subnet_id'],
                 availability_zone=az
             )['share_network_subnet']
             params = {network_subnet: az_subnet['id']}
