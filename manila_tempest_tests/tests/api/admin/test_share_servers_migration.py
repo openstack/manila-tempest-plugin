@@ -17,6 +17,7 @@ import ddt
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
+import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -330,11 +331,31 @@ class ShareServerMigrationBasicNFS(MigrationShareServerBase):
     @ddt.data(
         (False, False),
         (True, False),
+    )
+    @ddt.unpack
+    def test_share_server_migration_complete(
+        self, new_share_network, check_with_replica
+    ):
+        self._test_share_server_migration_complete(
+            new_share_network, check_with_replica)
+
+    @decorators.idempotent_id('ae0e9e6c-3a77-4c4b-907b-8a793f88c734')
+    @testtools.skipUnless(CONF.share.run_positive_migration_replica_tests,
+                          'Share server migration with replica test '
+                          'is disabled.')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @ddt.data(
         (True, True)
     )
     @ddt.unpack
-    def test_share_server_migration_complete(self, new_share_network,
-                                             check_with_replica):
+    def test_share_server_migration_complete_allow_replica(
+        self, new_share_network, check_with_replica
+    ):
+        self._test_share_server_migration_complete(
+            new_share_network, check_with_replica)
+
+    def _test_share_server_migration_complete(self, new_share_network,
+                                              check_with_replica):
         """Test the share server migration complete."""
         share_network_id = self.provide_share_network(
             self.shares_v2_client, self.networks_client)
