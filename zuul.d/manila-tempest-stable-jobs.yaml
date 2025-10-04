@@ -57,7 +57,7 @@
 
 - job:
     name: manila-tempest-plugin-zfsonlinux-stable
-    description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
+    description: Test ZFSOnLinux multibackend (DHSS=False)
     parent: manila-tempest-plugin-zfsonlinux-base
     branches: *manila_tempest_image_pinned_branches
     vars: *manila_tempest_image_pinned_vars
