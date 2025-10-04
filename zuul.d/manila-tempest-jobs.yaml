@@ -164,9 +164,6 @@
     parent: manila-tempest-plugin-zfsonlinux-base
     # https://bugs.launchpad.net/manila/+bug/2087192
     nodeset: openstack-single-node-jammy
-    branches: &ubuntu_jammy_test_image_branches
-      regex: ^stable/(yoga|xena|wallaby|victoria|ussuri)$
-      negate: true
 
 - job:
     name: manila-tempest-plugin-lvm-base
@@ -239,7 +236,6 @@
     description: |
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
-    branches: *ubuntu_jammy_test_image_branches
     parent: manila-tempest-plugin-lvm-base
     vars:
       # TODO(gouthamr): some tests are disabled due to bugs
@@ -353,7 +349,6 @@
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-generic-base
-    branches: *ubuntu_jammy_test_image_branches
 
 - job:
     name: manila-tempest-plugin-generic-scenario-base
@@ -375,7 +370,6 @@
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-generic-scenario-base
-    branches: *ubuntu_jammy_test_image_branches
 
 - job:
     name: manila-tempest-plugin-cephfs-native-base
@@ -420,7 +414,6 @@
     name: manila-tempest-plugin-cephfs-native
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-cephfs-native-base
-    branches: *ubuntu_jammy_test_image_branches
 
 - job:
     name: manila-tempest-plugin-cephfs-native-cephadm
@@ -506,7 +499,6 @@
     name: manila-tempest-plugin-cephfs-nfs
     description: Test CephFS NFS (DHSS=False)
     parent: manila-tempest-plugin-cephfs-nfs-base
-    branches: *ubuntu_jammy_test_image_branches
     vars:
       tempest_concurrency: 1
       # TODO(gouthamr): some tests are disabled due to bugs
@@ -873,9 +865,6 @@
 - job:
     name: manila-tempest-plugin-lvm-fips
     parent: manila-tempest-plugin-lvm-fips-base
-    branches:
-      regex: ^stable/(yoga|xena|wallaby|victoria|ussuri)$
-      negate: true
 
 - job:
     name: manila-tempest-plugin-lvm-fips-py311
