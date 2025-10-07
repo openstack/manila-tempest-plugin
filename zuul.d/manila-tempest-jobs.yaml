@@ -254,17 +254,6 @@
         NEUTRON_CREATE_INITIAL_NETWORKS: true
 
 
-# TODO(gmann): As per the 2025.1 testing runtime, we need to run at least
-# one job on jammy. This job can be removed as per the future testing
-# runtime (whenever we start testing Ubuntu 26.04 as default version).
-- job:
-    name: manila-tempest-plugin-lvm-jammy
-    description: This is integrated job testing on Ubuntu jammy(22.04)
-    parent: manila-tempest-plugin-lvm
-    nodeset: openstack-single-node-jammy
-    branches:
-      - stable/2025.1
-
 - job:
     name: manila-tempest-plugin-container
     description: |
@@ -899,7 +888,6 @@
     check:
       jobs:
         - manila-tempest-plugin-lvm
-        - manila-tempest-plugin-lvm-jammy
         - manila-tempest-plugin-generic-scenario:
             voting: false
         - manila-tempest-plugin-generic:
@@ -913,4 +901,3 @@
     gate:
       jobs:
         - manila-tempest-plugin-lvm
-        - manila-tempest-plugin-lvm-jammy
