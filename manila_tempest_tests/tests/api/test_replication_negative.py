@@ -261,8 +261,9 @@ class ReplicationNegativeTest(ReplicationNegativeBase):
         data['neutron_net_id'] = subnet['neutron_net_id']
         data['neutron_subnet_id'] = subnet['neutron_subnet_id']
         data['availability_zone'] = self.share_zone
-        share_net = self.shares_v2_client.create_share_network(
-            **data)['share_network']
+        share_net = self.create_share_network(cleanup_in_class=True,
+                                              client=self.shares_v2_client,
+                                              **data)
         share, instance_id = self._create_share_get_instance(
             share_network_id=share_net['id'])
 
