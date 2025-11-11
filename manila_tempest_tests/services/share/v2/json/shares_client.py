@@ -248,7 +248,7 @@ class SharesV2Client(shares_client.SharesClient):
                      share_type_id=None, is_public=False,
                      share_group_id=None, availability_zone=None,
                      version=LATEST_MICROVERSION, experimental=False,
-                     scheduler_hints=None):
+                     scheduler_hints=None, encryption_key_ref=None):
         headers = EXPERIMENTAL if experimental else None
         metadata = metadata or {}
         scheduler_hints = scheduler_hints or {}
@@ -283,6 +283,8 @@ class SharesV2Client(shares_client.SharesClient):
             post_body["share"]["share_group_id"] = share_group_id
         if scheduler_hints:
             post_body["share"]["scheduler_hints"] = scheduler_hints
+        if encryption_key_ref:
+            post_body["share"]["encryption_key_ref"] = encryption_key_ref
 
         body = json.dumps(post_body)
         resp, body = self.post("shares", body, headers=headers,
@@ -1102,7 +1104,7 @@ class SharesV2Client(shares_client.SharesClient):
                       share_networks=None,
                       share_groups=None, share_group_snapshots=None,
                       force=True, share_type=None, share_replicas=None,
-                      replica_gigabytes=None, url=None,
+                      replica_gigabytes=None, encryption_keys=None, url=None,
                       version=LATEST_MICROVERSION):
         if url is None:
             url = self._get_quotas_url(version)
@@ -1130,6 +1132,8 @@ class SharesV2Client(shares_client.SharesClient):
             put_body["share_replicas"] = share_replicas
         if replica_gigabytes is not None:
             put_body["replica_gigabytes"] = replica_gigabytes
+        if encryption_keys is not None:
+            put_body["encryption_keys"] = encryption_keys
         put_body = json.dumps({"quota_set": put_body})
 
         resp, body = self.put(url, put_body, version=version)

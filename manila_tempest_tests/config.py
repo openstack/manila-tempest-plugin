@@ -40,7 +40,7 @@ ShareGroup = [
                     "This value is only used to validate the versions "
                     "response from Manila."),
     cfg.StrOpt("max_api_microversion",
-               default="2.88",
+               default="2.90",
                help="The maximum api microversion is configured to be the "
                     "value of the latest microversion supported by Manila."),
     cfg.StrOpt("region",
@@ -220,6 +220,11 @@ ShareGroup = [
                       "ss_type:<ldap, kerberos or active_directory>, "
                       "ss_dns_ip:value, ss_user:value, ss_password=value, "
                       "ss_domain:value, ss_server:value"),
+    cfg.ListOpt("capability_encryption_support",
+                default=[],
+                help="Encryption support capability. Possible values are "
+                     "share_server, share etc. "),
+
 
     # Switching ON/OFF test suites filtered by features
     cfg.BoolOpt("run_quota_tests",
@@ -386,4 +391,7 @@ ShareGroup = [
     cfg.DictOpt("driver_assisted_backup_test_driver_options",
                 default={'dummy': True},
                 help="Share backup driver options specified as dict."),
+    cfg.BoolOpt("run_encryption_tests",
+                default=False,
+                help="Enable or disable share encryption tests."),
 ]
