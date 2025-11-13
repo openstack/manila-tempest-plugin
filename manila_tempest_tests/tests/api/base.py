@@ -930,6 +930,25 @@ class BaseSharesTest(test.BaseTestCase):
                             client.delete_security_service(res_id)
                             client.wait_for_resource_deletion(ss_id=res_id)
                         elif res["type"] == "share_type":
+                            # Check if there are still shares using this
+                            # share type before attempting deletion to avoid
+                            # cascading cleanup issues
+                            shares_using_type = []
+                            try:
+                                shares_using_type = client.list_shares(
+                                    params={'share_type_id': res_id}
+                                )['shares']
+                            except Exception:
+                                pass
+                            if shares_using_type:
+                                # Skip deletion if any shares exist
+                                LOG.warning("Skipping share type deletion "
+                                            "for %s , still has %d shares "
+                                            "using it.",
+                                            res_id,
+                                            len(shares_using_type))
+                                res["deleted"] = True
+                                continue
                             client.delete_share_type(res_id)
                             client.wait_for_resource_deletion(st_id=res_id)
                         elif res["type"] == "share_group":
