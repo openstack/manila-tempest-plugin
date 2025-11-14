@@ -8,6 +8,7 @@
       jobs:
         - manila-tempest-plugin-dummy-no-dhss
         - manila-tempest-plugin-dummy-dhss
+        - manila-tempest-plugin-lvm-2025.2
         - manila-tempest-plugin-lvm-2025.1
         - manila-tempest-plugin-lvm-2024.2
         - manila-tempest-plugin-lvm-2024.1
