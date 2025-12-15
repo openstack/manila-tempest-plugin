@@ -7,7 +7,7 @@
       Test the scenario test cases on the generic driver multibackend
       (DHSS=True) with NFS and CIFS
     parent: manila-tempest-plugin-generic-scenario-base
-    branches: &manila_tempest_image_pinned_branches ^stable/(2023.1|zed|yoga|xena)$
+    branches: &manila_tempest_image_pinned_branches ^(stable|unmaintained)/(zed/2023.1)$
     vars: &manila_tempest_image_pinned_vars
       devstack_localrc:
         # NOTE(carloss): Pinning manila service image to a Focal version,
