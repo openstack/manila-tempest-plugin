@@ -117,7 +117,7 @@
 - job:
     name: manila-tempest-plugin-zfsonlinux-base
     abstract: true
-    description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
+    description: Test ZFSOnLinux multibackend (DHSS=False)
     parent: manila-tempest-plugin-base
     vars:
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
@@ -135,9 +135,6 @@
         MANILA_ZFSONLINUX_SERVICE_IP: 127.0.0.1
         MANILA_ZFSONLINUX_USE_SSH: true
         MANILA_USE_SCHEDULER_CREATING_SHARE_FROM_SNAPSHOT: true
-      devstack_services:
-        mysql: false
-        postgresql: true
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
@@ -163,7 +160,7 @@
 
 - job:
     name: manila-tempest-plugin-zfsonlinux
-    description: Test ZFSOnLinux multibackend (DHSS=False) with postgresql db
+    description: Test ZFSOnLinux multibackend (DHSS=False)
     parent: manila-tempest-plugin-zfsonlinux-base
     # https://bugs.launchpad.net/manila/+bug/2087192
     nodeset: openstack-single-node-jammy
@@ -253,8 +250,8 @@
 - job:
     name: manila-tempest-plugin-container
     description: |
-      Test the container driver multibackend (DHSS=True) with CIFS
-      and postgresql db. API only, in a minimal devstack
+      Test the container driver multibackend (DHSS=True) with CIFS.
+      API only, in a minimal devstack
     parent: manila-tempest-plugin-base
     vars:
       tempest_test_regex: manila_tempest_tests.tests.api
@@ -272,9 +269,6 @@
         MANILA_CONFIGURE_DEFAULT_TYPES: false
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=false'
         TEMPEST_USE_TEST_ACCOUNTS: false
-      devstack_services:
-        mysql: false
-        postgresql: true
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
