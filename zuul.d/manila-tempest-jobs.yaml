@@ -162,8 +162,6 @@
     name: manila-tempest-plugin-zfsonlinux
     description: Test ZFSOnLinux multibackend (DHSS=False)
     parent: manila-tempest-plugin-zfsonlinux-base
-    # https://bugs.launchpad.net/manila/+bug/2087192
-    nodeset: openstack-single-node-jammy
 
 - job:
     name: manila-tempest-plugin-lvm-base
