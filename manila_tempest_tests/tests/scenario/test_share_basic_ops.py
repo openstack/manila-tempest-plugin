@@ -45,9 +45,7 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
      * Terminate the instance
     """
 
-    @decorators.idempotent_id('825be71c-cf14-4884-a0ad-cf47d511df9a')
-    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    def test_mount_share_one_vm(self):
+    def _test_mount_share_one_vm(self):
         instance = self.boot_instance(wait_until="BUILD")
         share = self.create_share()
         locations = self.get_user_export_locations(share)
@@ -426,7 +424,7 @@ class TestShareBasicOpsNFS(manager.BaseShareScenarioNFSTest,
     @ddt.data(*utils.deduplicate(CONF.share.nfs_versions))
     def test_mount_share_one_vm(self, nfs_version):
         self.nfs_version = nfs_version
-        super(TestShareBasicOpsNFS, self).test_mount_share_one_vm()
+        self._test_mount_share_one_vm()
 
 
 class TestShareBasicOpsCIFS(manager.BaseShareScenarioCIFSTest,
@@ -460,8 +458,7 @@ class TestBaseShareBasicOpsScenarioCEPHFS(manager.BaseShareScenarioCEPHFSTest,
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_mount_share_one_vm_with_ceph_fuse_client(self):
         self.mount_client = 'fuse'
-        super(TestBaseShareBasicOpsScenarioCEPHFS,
-              self).test_mount_share_one_vm()
+        self._test_mount_share_one_vm()
 
     @decorators.idempotent_id('a2a70b94-f5fc-438a-9dfa-53aa60ee3949')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
