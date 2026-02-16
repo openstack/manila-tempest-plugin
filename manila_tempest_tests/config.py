@@ -50,7 +50,7 @@ ShareGroup = [
                     "is found in the service catalog, the first found one is "
                     "used."),
     cfg.StrOpt("catalog_type",
-               default="share",
+               default="shared-file-system",
                help="Catalog type of the Share service."),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
