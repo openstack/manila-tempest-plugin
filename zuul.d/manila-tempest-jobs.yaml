@@ -371,7 +371,7 @@
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnative
         ENABLED_SHARE_PROTOCOLS: CEPHFS
-        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True'
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
         MANILA_OPTGROUP_cephfsnative_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_OPTGROUP_cephfsnative_driver_handles_share_servers: false
         MANILA_OPTGROUP_cephfsnative_cephfs_conf_path: /etc/ceph/ceph.conf
@@ -452,7 +452,7 @@
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_ENABLED_BACKENDS: cephfsnfs
         ENABLED_SHARE_PROTOCOLS: NFS
-        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True'
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
         MANILA_SERVICE_IMAGE_ENABLED: true
         MANILA_OPTGROUP_cephfsnfs_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_OPTGROUP_cephfsnfs_driver_handles_share_servers: false
