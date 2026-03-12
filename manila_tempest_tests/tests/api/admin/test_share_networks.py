@@ -89,6 +89,41 @@ class ShareNetworkAdminTest(base.BaseSharesMixedTest,
         self.assertTrue(any(self.sn_with_kerberos_ss['id'] == sn['id']
                             for sn in listed))
 
+    @decorators.idempotent_id('b3b412ea-9b82-4a40-ad88-e5ed4d2b4a48')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    def test_get_share_network(self):
+        get = self.admin_shares_v2_client.get_share_network(
+            self.sn_with_ldap_ss["id"],
+            version='2.0')['share_network']
+        self.assertEqual('2002-02-02T00:00:00.000000', get['created_at'])
+        data = self.data_sn_with_ldap_ss.copy()
+        del data['created_at']
+        self.assertLessEqual(data.items(), get.items())
+
+    @decorators.idempotent_id('e2e5a055-1a0b-4c3f-87e2-a7301c60596c')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API)
+    def test_list_share_networks_filter_by_network_detail_opts(self):
+        valid_filter_opts = {
+            'created_before': '2002-10-10',
+            'created_since': '2001-01-01',
+            'network_type': 'vlan',
+            'segmentation_id': 1000,
+            'name': 'sn_with_ldap_ss',
+        }
+
+        listed = self.admin_shares_v2_client.list_share_networks_with_detail(
+            {'all_tenants': 1, **valid_filter_opts}, version='2.0'
+        )['share_networks']
+        self.assertTrue(any(self.sn_with_ldap_ss['id'] == sn['id']
+                            for sn in listed))
+        created_before = valid_filter_opts.pop('created_before')
+        created_since = valid_filter_opts.pop('created_since')
+        for sn in listed:
+            self.assertTrue(all(sn[key] == value for key, value in
+                                valid_filter_opts.items()))
+            self.assertLessEqual(sn['created_at'], created_before)
+            self.assertGreaterEqual(sn['created_at'], created_since)
+
     @decorators.idempotent_id('36c26b6b-8984-4255-959b-74f6ef46c37b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API)
     def test_list_share_networks_filter_by_project_id(self):

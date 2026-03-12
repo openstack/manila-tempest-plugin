@@ -136,8 +136,6 @@ class ShareNetworkListMixin(object):
             'created_since': '2001-01-01',
             'neutron_net_id': '1111',
             'neutron_subnet_id': '2222',
-            'network_type': 'vlan',
-            'segmentation_id': 1000,
             'cidr': '10.0.0.0/24',
             'ip_version': 4,
             'name': 'sn_with_ldap_ss'
@@ -242,6 +240,12 @@ class ShareNetworksTest(base.BaseSharesMixedTest, ShareNetworkListMixin):
         self.assertEqual('2002-02-02T00:00:00.000000', get['created_at'])
         data = self.data_sn_with_ldap_ss.copy()
         del data['created_at']
+        # network_type and segmentation_id are privileged fields that
+        # may be redacted for non-admin users (bug #1824442). Only
+        # verify their presence here; the admin test asserts values.
+        for field in ('network_type', 'segmentation_id'):
+            self.assertIn(field, get)
+            del data[field]
         self.assertLessEqual(data.items(), get.items())
 
     @decorators.idempotent_id('1837fdd3-8068-4e88-bc50-9224498f84c0')
