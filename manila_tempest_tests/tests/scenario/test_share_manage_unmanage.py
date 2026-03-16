@@ -112,6 +112,16 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
         LOG.debug('Step 7 - unmount share')
         self.unmount_share(remote_client)
 
+        # Some drivers might use the share instance ID to manage the share
+        # instead of their export path, so we need to save that prior to the
+        # next manage operation.
+        export_path = locations[0]
+        if CONF.share.manage_with_share_or_snapshot_id:
+            share_instances = (
+                self.shares_admin_v2_client.get_instances_of_share(
+                    share["id"])['share_instances'])
+            export_path = share_instances[0]['id']
+
         LOG.debug('Step 8a - unmanage share')
         self.shares_admin_v2_client.unmanage_share(share['id'])
 
@@ -126,11 +136,12 @@ class ShareManageUnmanageBase(manager.ShareScenarioTest):
             share['id'])
 
         LOG.debug('Step 10 - manage share')
+
         share_type = self.get_share_type()
         managed_share = self.shares_admin_v2_client.manage_share(
             share['host'],
             share['share_proto'],
-            locations[0],
+            export_path,
             share_type['id'])['share']
         waiters.wait_for_resource_status(
             self.shares_admin_v2_client, managed_share['id'], 'available')

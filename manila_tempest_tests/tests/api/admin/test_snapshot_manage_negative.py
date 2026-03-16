@@ -130,9 +130,15 @@ class ManageNFSSnapshotNegativeTest(base.BaseSharesAdminTest):
         self.shares_v2_client.unmanage_snapshot(invalid_snap['id'])
 
         # Manage it properly and delete
+        provider_location = (
+            snap['id']
+            if CONF.share.manage_with_share_or_snapshot_id
+            else snap['provider_location']
+        )
+
         managed_snap = self.shares_v2_client.manage_snapshot(
             self.share['id'],
-            snap['provider_location']
+            provider_location
         )['snapshot']
         waiters.wait_for_resource_status(
             self.shares_v2_client, managed_snap['id'],
@@ -172,3 +178,7 @@ class ManageHDFSSnapshotNegativeTest(ManageNFSSnapshotNegativeTest):
 
 class ManageMapRFSSnapshotNegativeTest(ManageNFSSnapshotNegativeTest):
     protocol = 'maprfs'
+
+
+class ManageCephFSSnapshotNegativeTest(ManageNFSSnapshotNegativeTest):
+    protocol = 'cephfs'
