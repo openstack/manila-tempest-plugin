@@ -300,7 +300,9 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             'pkey': kwargs.get('private_key'),
         }
 
-        linux_client = remote_client.RemoteClient(ip, **client_params)
+        linux_client = remote_client.RemoteClient(
+            ip, server=kwargs.get('server'),
+            servers_client=self.servers_client, **client_params)
         try:
             linux_client.validate_authentication()
         except Exception:
