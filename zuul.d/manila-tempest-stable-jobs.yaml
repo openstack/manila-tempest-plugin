@@ -2,9 +2,9 @@
 # against those released stable branches of manila
 
 - job:
-    name: manila-tempest-plugin-lvm-2025.2
+    name: manila-tempest-plugin-lvm-2026.1
     parent: manila-tempest-plugin-lvm-base
-    override-checkout: stable/2025.2
+    override-checkout: stable/2026.1
     vars: &manila_tempest_plugin_lvm_stable_vars
       # TODO(gouthamr): some tests are disabled due to bugs
       # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
@@ -13,6 +13,12 @@
       devstack_localrc:
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
+
+- job:
+    name: manila-tempest-plugin-lvm-2025.2
+    parent: manila-tempest-plugin-lvm-base
+    override-checkout: stable/2025.2
+    vars: *manila_tempest_plugin_lvm_stable_vars
 
 - job:
     name: manila-tempest-plugin-lvm-2025.1
