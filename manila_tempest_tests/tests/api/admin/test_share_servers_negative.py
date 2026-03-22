@@ -19,6 +19,7 @@ from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
+from manila_tempest_tests import utils
 
 
 class ShareServersNegativeAdminTest(base.BaseSharesMixedTest):
@@ -108,6 +109,17 @@ class ShareServersNegativeAdminTest(base.BaseSharesMixedTest):
     def test_list_share_servers_with_fake_share_network(self):
         search_opts = {
             "share_network": data_utils.rand_name("fake_share_network"),
+        }
+        servers = self.admin_client.list_share_servers(
+            search_opts)['share_servers']
+        self.assertEqual(0, len(servers))
+
+    @decorators.idempotent_id('ab1b212f-68f1-4648-9f39-16e6f49fc352')
+    @utils.skip_if_microversion_not_supported("2.51")
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API)
+    def test_list_share_servers_with_fake_share_network_subnet_id(self):
+        search_opts = {
+            "share_network_subnet_id": data_utils.rand_name("fake_subnet_id"),
         }
         servers = self.admin_client.list_share_servers(
             search_opts)['share_servers']
