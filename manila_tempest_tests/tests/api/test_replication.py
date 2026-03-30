@@ -32,6 +32,9 @@ _MIN_SUPPORTED_MICROVERSION = '2.11'
 SUMMARY_KEYS = ['share_id', 'id', 'replica_state', 'status']
 DETAIL_KEYS = SUMMARY_KEYS + ['availability_zone', 'updated_at',
                               'share_network_id', 'created_at']
+REPLICA_METADATA_MICROVERSION = "2.95"
+if utils.is_microversion_supported(REPLICA_METADATA_MICROVERSION):
+    DETAIL_KEYS += ['metadata']
 
 
 @ddt.ddt
