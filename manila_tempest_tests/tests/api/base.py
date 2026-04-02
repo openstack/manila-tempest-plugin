@@ -678,13 +678,13 @@ class BaseSharesTest(test.BaseTestCase):
                              scheduler_hints=None,
                              share_network_id=None,
                              client=None, cleanup_in_class=False,
-                             cleanup=True,
+                             cleanup=True, metadata=None,
                              version=CONF.share.max_api_microversion):
         client = client or cls.shares_v2_client
         replica = client.create_share_replica(
             share_id, availability_zone=availability_zone,
             scheduler_hints=scheduler_hints,
-            share_network_id=share_network_id,
+            share_network_id=share_network_id, metadata=metadata,
             version=version)['share_replica']
         resource = {
             "type": "share_replica",

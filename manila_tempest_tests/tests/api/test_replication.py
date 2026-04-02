@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
+
 import ddt
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -686,3 +688,332 @@ class ReplicationActionsTest(base.BaseSharesMixedTest):
 
         # Verify keys
         self._validate_replica_list(replica_list, detail=False)
+
+
+@ddt.ddt
+class ReplicationWithMetadataTest(base.BaseSharesMixedTest):
+    """Tests for share replica replication_policy metadata (microversion 2.95).
+
+    Parametrised tests run over CONF.share.share_replica_backend_metadata.
+    """
+
+    try:
+        _REPLICA_METADATA_LIST = json.loads(
+            CONF.share.share_replica_backend_metadata.strip("'"))
+    except (json.JSONDecodeError, ValueError):
+        _REPLICA_METADATA_LIST = []
+
+    @classmethod
+    def skip_checks(cls):
+        super(ReplicationWithMetadataTest, cls).skip_checks()
+        if not CONF.share.run_replication_tests:
+            raise cls.skipException("Replication tests are disabled.")
+        if not CONF.share.backend_replication_type:
+            raise cls.skipException(
+                "CONF.share.backend_replication_type is not set or empty.")
+        if not cls._REPLICA_METADATA_LIST:
+            raise cls.skipException(
+                "share_replica_backend_metadata is not configured")
+        utils.check_skip_if_microversion_not_supported(
+            REPLICA_METADATA_MICROVERSION)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ReplicationWithMetadataTest, cls).resource_setup()
+        cls.admin_client = cls.admin_shares_v2_client
+        cls.replication_type = CONF.share.backend_replication_type
+        cls.multitenancy_enabled = (
+            utils.replication_with_multitenancy_support())
+
+        if cls.replication_type not in constants.REPLICATION_TYPE_CHOICES:
+            raise share_exceptions.ShareReplicationTypeException(
+                replication_type=cls.replication_type)
+
+        cls.extra_specs = cls.add_extra_specs_to_dict(
+            {"replication_type": cls.replication_type})
+        cls.share_type = cls.create_share_type(
+            data_utils.rand_name(constants.TEMPEST_MANILA_PREFIX),
+            extra_specs=cls.extra_specs,
+            client=cls.admin_client)
+
+        cls.zones = cls.get_availability_zones_matching_share_type(
+            cls.share_type, client=cls.admin_client)
+        cls.share_zone = cls.zones[0]
+        cls.replica_zone = cls.zones[-1]
+
+        cls.sn_id = None
+        if cls.multitenancy_enabled:
+            cls.share_network = cls.shares_v2_client.get_share_network(
+                cls.shares_v2_client.share_network_id)["share_network"]
+            cls.sn_id = cls.share_network["id"]
+
+    def _check_skip_promotion_tests(self):
+        """Skip if the replication type does not support promotion."""
+        if self.replication_type not in (
+                constants.REPLICATION_PROMOTION_CHOICES):
+            raise self.skipException(
+                "backend_replication_type '%s' does not support "
+                "replica promotion; skipping." % self.replication_type)
+
+    @decorators.idempotent_id("b5e2d5e3-5ae8-4d9f-bc0d-93d1b2c5aef7")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data(*_REPLICA_METADATA_LIST)
+    def test_replica_lifecycle_with_replication_policy_metadata(self, policy):
+        """Full lifecycle: create/replicate share with replication_policy.
+
+        Creates replica with metadata inline, waits for in_sync, resyncs,
+        promotes and verifies active state.
+        Cleanup: delete demoted original replica, then delete share.
+        """
+        self._check_skip_promotion_tests()
+
+        # Step 1: Create share
+        share = self.create_share(
+            share_type_id=self.share_type["id"],
+            availability_zone=self.share_zone,
+            share_network_id=self.sn_id,
+            cleanup_in_class=False)
+
+        original_replica = self.shares_v2_client.list_share_replicas(
+            share_id=share["id"])["share_replicas"][0]
+
+        # Step 2: Create secondary replica with replication_policy metadata
+        replica = self.create_share_replica(
+            share["id"], self.replica_zone,
+            metadata=policy,
+            version=REPLICA_METADATA_MICROVERSION,
+            cleanup=False)
+
+        # Step 3: Wait for in_sync
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state")
+
+        # Step 4: Resync (admin-only)
+        self.admin_client.resync_share_replica(
+            replica["id"], version=REPLICA_METADATA_MICROVERSION)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state")
+
+        # Step 5: Promote secondary replica to active
+        self.promote_share_replica(replica["id"])
+
+        # Step 6: Verify promoted replica is now active
+        promoted = self.shares_v2_client.get_share_replica(
+            replica["id"])["share_replica"]
+        self.assertEqual(
+            constants.REPLICATION_STATE_ACTIVE,
+            promoted["replica_state"],
+            "Replica %s should be active after promotion" % replica["id"])
+
+        # Cleanup: delete the demoted original replica, then the share
+        self.delete_share_replica(original_replica["id"])
+        self.shares_v2_client.delete_share(share["id"])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share["id"])
+
+    @decorators.idempotent_id("c7f3a1b2-8d94-4e61-a2f5-1b0c3e9d7a82")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data(*_REPLICA_METADATA_LIST)
+    def test_promote_and_promote_back_with_policy_metadata(self, policy):
+        """Promote secondary replica (site B) to active, then back.
+
+        Promotes the original replica (site A) back to active.
+        """
+        self._check_skip_promotion_tests()
+
+        # Create share and record the original active replica
+        share = self.create_share(
+            share_type_id=self.share_type["id"],
+            availability_zone=self.share_zone,
+            share_network_id=self.sn_id,
+            cleanup_in_class=False)
+
+        original_replica = self.shares_v2_client.list_share_replicas(
+            share_id=share["id"])["share_replicas"][0]
+
+        # Create secondary replica with replication_policy metadata inline
+        replica = self.create_share_replica(
+            share["id"], self.replica_zone,
+            metadata=policy,
+            version=REPLICA_METADATA_MICROVERSION,
+            cleanup=False)
+
+        # Wait for secondary to reach in_sync before promoting
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state")
+
+        # Promote secondary (site B) to active
+        self.promote_share_replica(replica["id"])
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, original_replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state")
+
+        # Verify site B is now active
+        site_b = self.shares_v2_client.get_share_replica(
+            replica["id"])["share_replica"]
+        self.assertEqual(
+            constants.REPLICATION_STATE_ACTIVE,
+            site_b["replica_state"],
+            "Secondary replica should be active after first promote")
+
+        # Promote original (site A) back to active.
+        self.shares_v2_client.promote_share_replica(
+            original_replica["id"],
+            version=REPLICA_METADATA_MICROVERSION)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, original_replica["id"],
+            constants.REPLICATION_STATE_ACTIVE,
+            resource_name="share_replica",
+            status_attr="replica_state",
+            timeout=CONF.share.build_timeout * 2)
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state",
+            timeout=CONF.share.build_timeout * 2)
+
+        # Verify site A is active again
+        site_a = self.shares_v2_client.get_share_replica(
+            original_replica["id"])["share_replica"]
+        self.assertEqual(
+            constants.REPLICATION_STATE_ACTIVE,
+            site_a["replica_state"],
+            "Original replica should be active after promote back")
+
+        # Cleanup
+        self.delete_share_replica(replica["id"])
+        self.shares_v2_client.delete_share(share["id"])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share["id"])
+
+    @decorators.idempotent_id("d8b4e2f1-3c97-4a15-b8e6-2a7f0c4d9e53")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data(*_REPLICA_METADATA_LIST)
+    def test_create_replica_with_policy_metadata_readable_via_api(
+            self, policy):
+        """Create a share replica with replication_policy metadata.
+
+        Metadata is passed inline at creation time; verify it is readable
+        via both the dedicated metadata API and the replica detail endpoint.
+        """
+        share = self.create_share(
+            share_type_id=self.share_type["id"],
+            availability_zone=self.share_zone,
+            share_network_id=self.sn_id,
+            cleanup_in_class=False)
+
+        # Create replica with replication_policy metadata inline
+        replica = self.create_share_replica(
+            share["id"], self.replica_zone,
+            metadata=policy,
+            version=REPLICA_METADATA_MICROVERSION,
+            cleanup=False)
+
+        # Verify via the metadata API endpoint
+        body = self.shares_v2_client.get_metadata(
+            replica["id"],
+            resource="share-replica",
+            version=REPLICA_METADATA_MICROVERSION)
+        for key, val in policy.items():
+            self.assertEqual(
+                val, body["metadata"].get(key),
+                "Expected metadata key '%s'='%s' via metadata API" % (
+                    key, val))
+
+        # Verify via the replica detail endpoint
+        replica_detail = self.shares_v2_client.get_share_replica(
+            replica["id"],
+            version=REPLICA_METADATA_MICROVERSION)["share_replica"]
+        for key, val in policy.items():
+            self.assertEqual(
+                val, replica_detail["metadata"].get(key),
+                "Expected metadata key '%s'='%s' in replica detail" % (
+                    key, val))
+
+        # Cleanup
+        self.delete_share_replica(replica["id"])
+        self.shares_v2_client.delete_share(share["id"])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share["id"])
+
+    @decorators.idempotent_id("b2c3d4e5-f6a7-4b8c-9d0e-f1a2b3c4d5e6")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    @ddt.data(*_REPLICA_METADATA_LIST)
+    def test_resync_replica_preserves_replication_policy_metadata(
+            self, policy):
+        extra_specs = self.add_extra_specs_to_dict({
+            "replication_type": self.replication_type,
+            "snapshot_support": "True",
+            "create_share_from_snapshot_support": "True",
+        })
+        share_type = self.create_share_type(
+            data_utils.rand_name(constants.TEMPEST_MANILA_PREFIX),
+            extra_specs=extra_specs,
+            client=self.admin_client)
+
+        share = self.create_share(
+            share_type_id=share_type["id"],
+            availability_zone=self.share_zone,
+            share_network_id=self.sn_id,
+            cleanup_in_class=False)
+
+        # Create replica with replication_policy metadata inline
+        replica = self.create_share_replica(
+            share["id"], self.replica_zone,
+            metadata=policy,
+            version=REPLICA_METADATA_MICROVERSION,
+            cleanup=False)
+
+        # Wait for replica to reach in_sync before issuing resync
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state")
+
+        # Trigger explicit resync (admin-only action)
+        self.admin_client.resync_share_replica(
+            replica["id"], version=REPLICA_METADATA_MICROVERSION)
+
+        # Wait for replica to return to in_sync after resync
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, replica["id"],
+            constants.REPLICATION_STATE_IN_SYNC,
+            resource_name="share_replica",
+            status_attr="replica_state")
+
+        # Verify metadata key is unchanged after resync via replica detail
+        replica_detail = self.shares_v2_client.get_share_replica(
+            replica["id"],
+            version=REPLICA_METADATA_MICROVERSION)["share_replica"]
+        for key, val in policy.items():
+            self.assertEqual(
+                val, replica_detail["metadata"].get(key),
+                "Metadata key '%s' should be '%s' after resync, "
+                "but was '%s'" % (
+                    key, val, replica_detail["metadata"].get(key)))
+
+        # Also verify via the dedicated metadata API endpoint
+        meta_body = self.shares_v2_client.get_metadata(
+            replica["id"],
+            resource="share-replica",
+            version=REPLICA_METADATA_MICROVERSION)
+        for key, val in policy.items():
+            self.assertEqual(
+                val, meta_body["metadata"].get(key),
+                "Metadata key '%s' should be '%s' via metadata API after "
+                "resync" % (key, val))
+
+        # Cleanup
+        self.delete_share_replica(replica["id"])
+        self.shares_v2_client.delete_share(share["id"])
+        self.shares_v2_client.wait_for_resource_deletion(share_id=share["id"])

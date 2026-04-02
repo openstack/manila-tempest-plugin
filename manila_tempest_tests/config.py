@@ -113,6 +113,10 @@ ShareGroup = [
                 help="Specifies the NFS protocol version to use when mounting "
                      "an NFS share. Set to '3' for NFSv3, and '4' or '4.1' "
                      "for NFSv4. Leave it blank to use the default version."),
+    cfg.StrOpt("share_replica_backend_metadata",
+               default="[]",
+               help="JSON list of metadata dicts to pass when creating "
+                    "share replicas (microversion 2.95)"),
 
 
     # Capabilities
