@@ -177,6 +177,19 @@ class ShareServersAdminTest(base.BaseSharesAdminTest):
             self.assertIn(server["share_network_name"],
                           self.sn_name_and_id)
 
+    @decorators.idempotent_id('e8bb64f8-9a4f-4d93-b68e-1f7c8d9df7e9')
+    @utils.skip_if_microversion_not_supported("2.51")
+    @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
+    def test_list_share_servers_with_share_network_subnet_id_filter(self):
+        search_opts = {"share_network_subnet_id": self.share_net_info["id"]}
+        servers = self.shares_v2_client.list_share_servers(
+            search_opts)['share_servers']
+        # Should exist, at least, one share server, used by this test suite.
+        self.assertGreater(len(servers), 0)
+        for server in servers:
+            self.assertIn(server["share_network_name"],
+                          self.sn_name_and_id)
+
     @decorators.idempotent_id('e1af24f4-bf63-467d-a857-3a402fa9b65b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_share_server(self):
