@@ -170,8 +170,8 @@
       environment with IPv6 control plane endpoints.
     parent: manila-tempest-plugin-ipv6-base
     abstract: true
-    # TODO(carloss): enable neutron-dynamic-routing setup when LP #1998489
-    # is fixed.
+    required-projects:
+      - openstack/neutron-dynamic-routing
     vars:
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
       devstack_services: &devstack-with-ovs
@@ -210,8 +210,8 @@
         MANILA_SETUP_IPV6: true
         NEUTRON_CREATE_INITIAL_NETWORKS: false
         MANILA_RESTORE_IPV6_DEFAULT_ROUTE: false
-      # TODO(carloss): enable neutron-dynamic-routing setup when LP #1998489
-      # is fixed.
+      devstack_plugins:
+        neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
@@ -235,14 +235,6 @@
       Test LVM multibackend (DHSS=False) in a 4+6 (dual-stack) devstack
       environment with IPv6 control plane endpoints.
     parent: manila-tempest-plugin-lvm-base
-    vars:
-      # TODO(gouthamr): some tests are disabled due to bugs
-      # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      # drop these overrides once we address that bug.
-      tempest_exclude_regex: '(^manila_tempest_tests.tests.scenario.*IPv6.*)'
-      devstack_localrc:
-        MANILA_SETUP_IPV6: false
-        NEUTRON_CREATE_INITIAL_NETWORKS: true
 
 
 - job:
@@ -434,8 +426,7 @@
     parent: manila-tempest-plugin-base
     required-projects:
       - openstack/devstack-plugin-ceph
-      # TODO(carloss): enable neutron-dynamic-routing setup when LP #1998489
-      # is fixed.
+      - openstack/neutron-dynamic-routing
     vars:
       tempest_concurrency: 2
       # turning off some tests due to exhaustion of disk space
@@ -446,8 +437,7 @@
       devstack_services: *devstack-with-ovs # LP 1940324
       devstack_plugins:
         devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
-        # TODO(carloss): enable neutron-dynamic-routing setup when LP #1998489
-        # is fixed.
+        neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
       devstack_localrc:
         # NOTE(gouthamr): LP#1940324 prevents bgp usage with OVN, use OVS
         Q_AGENT: openvswitch
@@ -490,9 +480,6 @@
     parent: manila-tempest-plugin-cephfs-nfs-base
     vars:
       tempest_concurrency: 1
-      # TODO(gouthamr): some tests are disabled due to bugs
-      # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
       tempest_test_regex: '(^manila_tempest_tests.tests)(?=.*\[.*\bbackend\b.*\])'
       devstack_localrc:
         CEPHADM_DEPLOY: True
@@ -502,9 +489,6 @@
         TARGET_DEV_OSD_DIR: /opt/stack
         ENABLED_SHARE_PROTOCOLS: NFS
         MANILA_OPTGROUP_cephfsnfs_cephfs_ganesha_server_ip: "{{ hostvars[inventory_hostname]['nodepool']['private_ipv4'] }}"
-        MANILA_SETUP_IPV6: false
-        NEUTRON_CREATE_INITIAL_NETWORKS: true
-        IP_VERSION: 4
 
 - job:
     name: manila-tempest-plugin-multinode-base
@@ -553,13 +537,15 @@
     parent: manila-tempest-plugin-multinode-base
     required-projects:
       - openstack/devstack-plugin-ceph
+      - openstack/neutron-dynamic-routing
     vars:
       configure_swap_size: 8192
       tempest_concurrency: 2
-        # TODO(gouthamr): some tests are disabled due to bugs
-        # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
-      tempest_exclude_regex: "(^manila_tempest_tests.tests.scenario.*IPv6.*)"
+      devstack_services: *devstack-with-ovs
       devstack_localrc:
+        Q_AGENT: openvswitch
+        Q_ML2_TENANT_NETWORK_TYPE: vxlan
+        Q_ML2_PLUGIN_MECHANISM_DRIVERS: openvswitch
         MYSQL_REDUCE_MEMORY: True
         CEPHADM_DEPLOY: True
         ENABLE_INGRESS: False
@@ -579,7 +565,8 @@
         MANILA_OPTGROUP_cephfsnfs_driver_handles_share_servers: false
         MANILA_OPTGROUP_cephfsnfs_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_SERVICE_IMAGE_ENABLED: True
-        MANILA_SETUP_IPV6: false
+        MANILA_SETUP_IPV6: true
+        NEUTRON_CREATE_INITIAL_NETWORKS: false
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
         TARGET_DEV_OSD_DIR: /opt/stack
       devstack_local_conf:
@@ -592,6 +579,7 @@
               enable_protocols: nfs
               image_password: manila
               multitenancy_enabled: false
+              run_ipv6_tests: true
               run_share_group_tests: false
               run_manage_unmanage_tests: true
               run_manage_unmanage_snapshot_tests: true
@@ -606,6 +594,7 @@
       tempest:
         devstack_plugins:
           devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
+          neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
 
 - job:
     name: manila-tempest-plugin-dummy-no-dhss
