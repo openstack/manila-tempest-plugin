@@ -10,8 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import sys
-
 from oslo_log import log
 from tempest import config
 from tempest.lib.common import ssh
@@ -30,7 +28,6 @@ def debug_ssh(function):
             return function(self, *args, **kwargs)
         except exceptions.SSHTimeout:
             try:
-                original_exception = sys.exc_info()
                 caller = test_utils.find_test_caller() or "not found"
                 if self.server:
                     msg = 'Caller: %s. Timeout trying to ssh to server %s'
@@ -45,12 +42,10 @@ def debug_ssh(function):
                         except Exception:
                             msg = 'Could not get console_log for server %s'
                             LOG.debug(msg, self.server['id'])
-                # re-raise the original ssh timeout exception
-                raise original_exception
-            finally:
-                # Delete the traceback to avoid circular references
-                _, _, trace = original_exception
-                del trace
+            except Exception:
+                LOG.debug('Failed to collect debug info for SSH failure')
+            # re-raise the original ssh timeout exception
+            raise
     return wrapper
 
 
