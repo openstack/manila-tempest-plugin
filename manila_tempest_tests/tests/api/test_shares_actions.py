@@ -457,6 +457,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         expected_keys = ["status", "links", "share_id", "name",
                          "share_proto", "created_at",
                          "description", "id", "share_size", "size"]
+        if version and utils.is_microversion_ge(version, '2.12'):
+            expected_keys.append("provider_location")
         if version and utils.is_microversion_ge(version, '2.17'):
             expected_keys.extend(["user_id", "project_id"])
         actual_keys = snapshot.keys()
@@ -532,6 +534,8 @@ class SharesActionsTest(base.BaseSharesMixedTest):
         expected_keys = ["status", "links", "share_id", "name",
                          "share_proto", "created_at", "description", "id",
                          "share_size", "size"]
+        if version and utils.is_microversion_ge(version, '2.12'):
+            expected_keys.append("provider_location")
         if version and utils.is_microversion_ge(version, '2.17'):
             expected_keys.extend(["user_id", "project_id"])
 
