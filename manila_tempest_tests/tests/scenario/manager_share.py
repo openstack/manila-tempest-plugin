@@ -185,6 +185,11 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
                     )
             # Attach a floating IP
             self.associate_floating_ip(floating_ip, instance, ip_addr=ip_addr)
+            # Wait for the floating IP to be reflected in the server's
+            # addresses before attempting SSH. On busy CI nodes, the
+            # Neutron L3 agent may take time to program NAT rules.
+            waiters.wait_for_server_floating_ip(
+                self.servers_client, instance, floating_ip)
 
         self.assertIsNotNone(server_ip)
         # Check ssh
