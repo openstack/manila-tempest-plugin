@@ -13,6 +13,10 @@
       devstack_localrc:
         MANILA_SETUP_IPV6: false
         NEUTRON_CREATE_INITIAL_NETWORKS: true
+      # NOTE(tkajinam): ovn-metadata-agent was replaced by ovn-agent.
+      # See https://review.opendev.org/c/openstack/devstack/+/953406
+      devstack_services:
+        q-ovn-metadata-agent: false
 
 - job:
     name: manila-tempest-plugin-lvm-2025.2
