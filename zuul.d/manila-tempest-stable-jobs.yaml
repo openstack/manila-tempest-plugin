@@ -25,9 +25,3 @@
     parent: manila-tempest-plugin-lvm-base
     override-checkout: stable/2025.1
     vars: *manila_tempest_plugin_lvm_stable_vars
-
-- job:
-    name: manila-tempest-plugin-lvm-2024.2
-    parent: manila-tempest-plugin-lvm-base
-    override-checkout: stable/2024.2
-    vars: *manila_tempest_plugin_lvm_stable_vars
