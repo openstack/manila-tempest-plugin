@@ -56,9 +56,9 @@ project = 'manila-tempest-plugin Release Notes'
 copyright = '2017, OpenStack Developers'
 
 # openstackdocstheme options
-repository_name = 'openstack/manila-tempest-plugin'
-bug_project = 'manila-tempest-plugin'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/manila-tempest-plugin'
+openstackdocs_bug_project = 'manila-tempest-plugin'
+openstackdocs_bug_tag = ''
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

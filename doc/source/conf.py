@@ -41,9 +41,9 @@ project = 'openstack'
 copyright = '2017, OpenStack Developers'
 
 # openstackdocstheme options
-repository_name = 'openstack/manila-tempest-plugin'
-bug_project = 'manila-tempest-plugin'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/manila-tempest-plugin'
+openstackdocs_bug_project = 'manila-tempest-plugin'
+openstackdocs_bug_tag = ''
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
