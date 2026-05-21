@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    Tests for share migration APIs now exercise the graduated, non-experimental
+    API at microversion ``2.96``. The Manila tempest plugin no longer sends
+    the ``X-OpenStack-Manila-API-Experimental`` header for ``migration_start``,
+    ``migration_complete``, ``migration_cancel``, ``migration_get_progress``
+    and ``reset_task_state`` requests.

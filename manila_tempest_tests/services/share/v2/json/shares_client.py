@@ -1788,9 +1788,12 @@ class SharesV2Client(rest_client.RestClient):
             }
         }
 
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_MIGRATION_GRADUATION_VERSION)
         body = json.dumps(body)
         resp, body = self.post('shares/%s/action' % share_id, body,
-                               headers=EXPERIMENTAL, extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         return rest_client.ResponseBody(resp, body)
 
@@ -1799,9 +1802,12 @@ class SharesV2Client(rest_client.RestClient):
         post_body = {
             action_name: None,
         }
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_MIGRATION_GRADUATION_VERSION)
         body = json.dumps(post_body)
         resp, body = self.post('shares/%s/action' % share_id, body,
-                               headers=EXPERIMENTAL, extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         return rest_client.ResponseBody(resp, body)
 
@@ -1810,9 +1816,12 @@ class SharesV2Client(rest_client.RestClient):
         post_body = {
             action_name: None,
         }
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_MIGRATION_GRADUATION_VERSION)
         body = json.dumps(post_body)
         resp, body = self.post('shares/%s/action' % share_id, body,
-                               headers=EXPERIMENTAL, extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         return rest_client.ResponseBody(resp, body)
 
@@ -1821,9 +1830,12 @@ class SharesV2Client(rest_client.RestClient):
         post_body = {
             action_name: None,
         }
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_MIGRATION_GRADUATION_VERSION)
         body = json.dumps(post_body)
         resp, body = self.post('shares/%s/action' % share_id, body,
-                               headers=EXPERIMENTAL, extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
@@ -1836,9 +1848,12 @@ class SharesV2Client(rest_client.RestClient):
                 'task_state': task_state,
             }
         }
+        headers, extra_headers = utils.get_extra_headers(
+            version, constants.SHARE_MIGRATION_GRADUATION_VERSION)
         body = json.dumps(post_body)
         resp, body = self.post('shares/%s/action' % share_id, body,
-                               headers=EXPERIMENTAL, extra_headers=True,
+                               headers=headers,
+                               extra_headers=extra_headers,
                                version=version)
         return rest_client.ResponseBody(resp, body)
 

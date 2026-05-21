@@ -373,7 +373,8 @@ class MigrationCancelNFSTest(MigrationBase):
 
     @decorators.idempotent_id('d39dfa1b-6e91-4efc-84f1-76f878b51f2a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @ddt.data(True, False)
     def test_migration_cancel(self, force_host_assisted):
         self._check_migration_enabled(force_host_assisted)
@@ -411,7 +412,8 @@ class MigrationCancelNFSTest(MigrationBase):
 
     @decorators.idempotent_id('640dce56-2084-488d-8dea-456840ff397e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @testtools.skipUnless(
         CONF.share.run_snapshot_tests, 'Snapshot tests are disabled.')
     @testtools.skipUnless(
@@ -447,7 +449,8 @@ class MigrationOppositeDriverModesNFSTest(MigrationBase):
 
     @decorators.idempotent_id('d8cce50d-e8da-4fbc-8f94-0827bf277b6c')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @ddt.data(True, False)
     def test_migration_opposite_driver_modes(self, force_host_assisted):
         self._check_migration_enabled(force_host_assisted)
@@ -515,7 +518,8 @@ class MigrationTwoPhaseNFSTest(MigrationBase):
 
     @decorators.idempotent_id('e6cf0e4d-bdf3-49c1-b6ba-56d1ad6c81d2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @ddt.data(True, False)
     def test_migration_2phase(self, force_host_assisted):
         self._check_migration_enabled(force_host_assisted)
@@ -567,7 +571,8 @@ class MigrationWithShareExtendingNFSTest(MigrationBase):
 
     @decorators.idempotent_id('0e3d75e0-385a-4f7a-889f-2a3db79db8c2')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @testtools.skipUnless(
         CONF.share.run_extend_tests, 'Extend share tests are disabled.')
     @ddt.data(True, False)
@@ -581,7 +586,8 @@ class MigrationWithShareShrinkingNFSTest(MigrationBase):
 
     @decorators.idempotent_id('58c72e51-d217-48bc-8155-5a010912312e')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @testtools.skipUnless(
         CONF.share.run_shrink_tests, 'Shrink share tests are disabled.')
     @ddt.data(True, False)
@@ -595,7 +601,8 @@ class MigrationOfShareWithSnapshotNFSTest(MigrationBase):
 
     @decorators.idempotent_id('a95eb701-626a-4175-967b-4880d3716857')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @testtools.skipUnless(
         CONF.share.run_snapshot_tests, 'Snapshot tests are disabled.')
     @testtools.skipUnless(
@@ -637,7 +644,8 @@ class MigrationWithDifferentSnapshotSupportNFSTest(MigrationBase):
 
     @decorators.idempotent_id('a18b3637-2070-4a1b-acd9-c392eb7963b5')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           'Snapshot tests are disabled.')
     @ddt.data(True, False)
@@ -650,7 +658,8 @@ class MigrationWithDifferentSnapshotSupportNFSTest(MigrationBase):
 
     @decorators.idempotent_id('59313673-6576-4163-ab96-41bafcdad63a')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
-    @utils.skip_if_microversion_not_supported("2.29")
+    @utils.skip_if_microversion_not_supported(
+        constants.SHARE_MIGRATION_GRADUATION_VERSION)
     @testtools.skipUnless(CONF.share.run_snapshot_tests,
                           'Snapshot tests are disabled.')
     @ddt.data(True, False)
