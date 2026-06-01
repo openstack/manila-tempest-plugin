@@ -299,6 +299,8 @@
       # function properly in a small single node devstack VM.
       tempest_concurrency: 2
       devstack_localrc:
+        CINDER_QUOTA_VOLUMES: 50
+        CINDER_QUOTA_SNAPSHOTS: 50
         VOLUME_BACKING_FILE_SIZE: 24G
         SHARE_DRIVER: manila.share.drivers.generic.GenericShareDriver
         MANILA_ENABLED_BACKENDS: london,paris
