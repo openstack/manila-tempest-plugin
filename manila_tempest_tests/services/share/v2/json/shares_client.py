@@ -1859,7 +1859,7 @@ class SharesV2Client(rest_client.RestClient):
 
     def create_share_replica(self, share_id, availability_zone=None,
                              scheduler_hints=None, share_network_id=None,
-                             version=LATEST_MICROVERSION):
+                             metadata=None, version=LATEST_MICROVERSION):
         """Add a share replica of an existing share."""
         uri = "share-replicas"
         post_body = {
@@ -1871,6 +1871,9 @@ class SharesV2Client(rest_client.RestClient):
             post_body["scheduler_hints"] = scheduler_hints
         if share_network_id:
             post_body['share_network_id'] = share_network_id
+
+        if utils.is_microversion_ge(version, "2.95") and metadata:
+            post_body["metadata"] = metadata
 
         headers, extra_headers = utils.get_extra_headers(
             version, constants.SHARE_REPLICA_GRADUATION_VERSION)
@@ -2532,7 +2535,8 @@ class SharesV2Client(rest_client.RestClient):
 #################
 
     def _update_metadata(self, resource, resource_id, metadata=None,
-                         method="post", parent_resource=None, parent_id=None):
+                         method="post", parent_resource=None, parent_id=None,
+                         version=LATEST_MICROVERSION):
         if parent_resource is None:
             uri = f'{resource}s/{resource_id}/metadata'
         else:
@@ -2543,60 +2547,65 @@ class SharesV2Client(rest_client.RestClient):
         post_body = {"metadata": metadata}
         body = json.dumps(post_body)
         if method == "post":
-            resp, body = self.post(uri, body)
+            resp, body = self.post(uri, body, version=version)
         if method == "put":
-            resp, body = self.put(uri, body)
+            resp, body = self.put(uri, body, version=version)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def set_metadata(self, resource_id, metadata=None, resource='share',
-                     parent_resource=None, parent_id=None):
+                     parent_resource=None, parent_id=None,
+                     version=LATEST_MICROVERSION):
         return self._update_metadata(resource, resource_id, metadata,
                                      method="post",
                                      parent_resource=parent_resource,
-                                     parent_id=parent_id)
+                                     parent_id=parent_id,
+                                     version=version)
 
     def update_all_metadata(self, resource_id, metadata=None,
                             resource='share', parent_resource=None,
-                            parent_id=None):
+                            parent_id=None, version=LATEST_MICROVERSION):
         return self._update_metadata(resource, resource_id, metadata,
                                      method="put",
                                      parent_resource=parent_resource,
-                                     parent_id=parent_id)
+                                     parent_id=parent_id,
+                                     version=version)
 
     def delete_metadata(self, resource_id, key, resource='share',
-                        parent_resource=None, parent_id=None):
+                        parent_resource=None, parent_id=None,
+                        version=LATEST_MICROVERSION):
         if parent_resource is None:
             uri = f'{resource}s/{resource_id}/metadata/{key}'
         else:
             uri = (f'{parent_resource}/{parent_id}'
                    f'/{resource}s/{resource_id}/metadata/{key}')
-        resp, body = self.delete(uri)
+        resp, body = self.delete(uri, version=version)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def get_metadata(self, resource_id, resource='share',
-                     parent_resource=None, parent_id=None):
+                     parent_resource=None, parent_id=None,
+                     version=LATEST_MICROVERSION):
         if parent_resource is None:
             uri = f'{resource}s/{resource_id}/metadata'
         else:
             uri = (f'{parent_resource}/{parent_id}'
                    f'/{resource}s/{resource_id}/metadata')
-
-        resp, body = self.get(uri)
+        resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
     def get_metadata_item(self, resource_id, key, resource='share',
-                          parent_resource=None, parent_id=None):
+                          parent_resource=None, parent_id=None,
+                          version=LATEST_MICROVERSION):
         if parent_resource is None:
             uri = f'{resource}s/{resource_id}/metadata/{key}'
         else:
             uri = (f'{parent_resource}/{parent_id}'
                    f'/{resource}s/{resource_id}/metadata/{key}')
-        resp, body = self.get(uri)
+        resp, body = self.get(uri, version=version)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
