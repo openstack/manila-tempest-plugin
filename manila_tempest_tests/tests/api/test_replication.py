@@ -356,9 +356,10 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Add access rule to the share
         access_type, access_to = utils.get_access_rule_data_from_config(
             self.shares_v2_client.share_protocol)
+        access_level = 'ro'
         self.allow_access(
             self.shares[0]["id"], access_type=access_type, access_to=access_to,
-            access_level='ro')
+            access_level=access_level)
 
         # Create the replica
         self._verify_create_replica()
@@ -368,18 +369,39 @@ class ReplicationTest(base.BaseSharesMixedTest):
             self.shares_v2_client, self.shares[0]["id"],
             constants.RULE_STATE_ACTIVE, status_attr='access_rules_status')
 
+        # verify rule's values
+        rules_list = self.shares_v2_client.list_access_rules(
+            self.shares[0]["id"])['access_list']
+        self.assertEqual(1, len(rules_list))
+        self.assertEqual(access_type, rules_list[0]["access_type"])
+        self.assertEqual(access_to, rules_list[0]["access_to"])
+        self.assertEqual(access_level, rules_list[0]["access_level"])
+        self.assertEqual(constants.RULE_STATE_ACTIVE, rules_list[0]["state"])
+
     @decorators.idempotent_id('3af3f19a-1195-464e-870b-1a3918914f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
     def test_create_replica_add_access_rule_delete_replica(self):
         access_type, access_to = utils.get_access_rule_data_from_config(
             self.shares_v2_client.share_protocol)
+        access_level = 'ro'
         # Create the replica
         share_replica = self._verify_create_replica()
 
-        # Add access rule
+        # Add access rule.
+        # Share must be different from
+        # test_add_access_rule_create_replica_delete_rule() to avoid races
         self.allow_access(
-            self.shares[0]["id"], access_type=access_type, access_to=access_to,
-            access_level='ro')
+            self.shares[1]["id"], access_type=access_type, access_to=access_to,
+            access_level=access_level)
+
+        # verify rule's values
+        rules_list = self.shares_v2_client.list_access_rules(
+            self.shares[1]["id"])['access_list']
+        self.assertEqual(1, len(rules_list))
+        self.assertEqual(access_type, rules_list[0]["access_type"])
+        self.assertEqual(access_to, rules_list[0]["access_to"])
+        self.assertEqual(access_level, rules_list[0]["access_level"])
+        self.assertEqual(constants.RULE_STATE_ACTIVE, rules_list[0]["state"])
 
         # Delete the replica
         self.delete_share_replica(share_replica["id"])
@@ -460,9 +482,10 @@ class ReplicationTest(base.BaseSharesMixedTest):
         # Add access rule
         access_type, access_to = utils.get_access_rule_data_from_config(
             self.shares_v2_client.share_protocol)
+        access_level = 'ro'
         self.allow_access(
             share["id"], access_type=access_type, access_to=access_to,
-            access_level='ro')
+            access_level=access_level)
 
         original_replica = self.shares_v2_client.list_share_replicas(
             share["id"])['share_replicas'][0]
@@ -474,7 +497,8 @@ class ReplicationTest(base.BaseSharesMixedTest):
         self.assertEqual(1, len(rules_list))
         self.assertEqual(access_type, rules_list[0]["access_type"])
         self.assertEqual(access_to, rules_list[0]["access_to"])
-        self.assertEqual('ro', rules_list[0]["access_level"])
+        self.assertEqual(access_level, rules_list[0]["access_level"])
+        self.assertEqual(constants.RULE_STATE_ACTIVE, rules_list[0]["state"])
 
     @decorators.idempotent_id('7904e3c7-e6d0-472d-b9c9-c0772b4f9f1b')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
