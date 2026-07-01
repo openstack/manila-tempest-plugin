@@ -74,13 +74,13 @@ class SharesNegativeTest(base.BaseSharesMixedTest):
                                       share_type_id=self.share_type_id,
                                       cleanup_in_class=False)
         except share_exceptions.ShareBuildErrorException:
-            self.skip(skip_msg)
+            self.skipTest(skip_msg)
 
         try:  # create snapshot
             snap = self.create_snapshot_wait_for_active(
                 share["id"], cleanup_in_class=False)
         except share_exceptions.SnapshotBuildErrorException:
-            self.skip(skip_msg)
+            self.skipTest(skip_msg)
 
         # try create share from snapshot with less size
         self.assertRaises(lib_exc.BadRequest,
