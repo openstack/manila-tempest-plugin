@@ -87,7 +87,7 @@ class ShareExtendBase(manager.ShareScenarioTest):
         # Additional blocks that exceed the share capacity, defaulting to 5.
         overflow_blocks = (
             total_blocks - three_quarter_blocks +
-            additional_overflow_blocks or 5)
+            (additional_overflow_blocks or 5))
         LOG.debug('Step 6b - Write more data, should fail')
         self.assertRaises(
             exceptions.SSHExecCommandFailed,
