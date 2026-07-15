@@ -22,7 +22,6 @@ from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
 from manila_tempest_tests.common import waiters
-from manila_tempest_tests import share_exceptions
 from manila_tempest_tests.tests.api import base
 from manila_tempest_tests import utils
 
@@ -61,8 +60,9 @@ class MigrationShareServerBase(base.BaseSharesAdminTest):
         # create share type (generic)
         replication_type = CONF.share.backend_replication_type
         if replication_type not in constants.REPLICATION_TYPE_CHOICES:
-            raise share_exceptions.ShareReplicationTypeException(
-                replication_type=replication_type
+            raise cls.skipException(
+                'Backend replication type %r is not supported.'
+                % replication_type
             )
         extra_specs = {
             "replication_type": replication_type,
