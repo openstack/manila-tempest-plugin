@@ -18,23 +18,19 @@ import secrets
 from oslo_log import log as logging
 from tempest import config
 from tempest.lib.services import clients
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class BarbicanClientManager(test.BaseTestCase):
+class BarbicanClientManager:
     """Class for interacting with the barbican service.
 
     This class is an abstraction for interacting with the barbican service.
     """
 
-    credentials = ['primary',]
-
     @classmethod
     def setup_clients(cls, tempest_client_mgr):
-        super(BarbicanClientManager, cls).setup_clients()
         if CONF.identity.auth_version == 'v3':
             auth_uri = CONF.identity.uri_v3
         else:
