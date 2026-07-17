@@ -313,7 +313,6 @@
         MANILA_USE_SERVICE_INSTANCE_PASSWORD: true
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
         TEMPEST_USE_TEST_ACCOUNTS: true
-        GLANCE_ENFORCE_SCOPE: false
       devstack_services:
         cinder: true
       devstack_local_conf:
@@ -817,6 +816,10 @@
               # read-only access rules not supported
               enable_ro_access_level_for_protocols: ""
 
+# NOTE(gmaan): This job tests the RBAC new defaults which are enabled
+# by default since 2026.2. But we need this job for stable jobs to
+# continue testing the old as well as new defaults. Once 2026.2 is not
+# supported in manila-tempest-plugin then we can remove this job.
 - job:
     name: manila-tempest-plugin-dummy-no-dhss-rbac
     parent: manila-tempest-plugin-dummy-no-dhss
@@ -832,6 +835,27 @@
           "$TEMPEST_CONFIG":
             share:
               default_share_type_name: default
+
+- job:
+    name: manila-tempest-plugin-dummy-no-dhss-old-rbac
+    parent: manila-tempest-plugin-dummy-no-dhss
+    description: |
+      This job runs the devstack with RBAC old defaults,
+      on the Dummy driver with DHSS=False.
+      This can be removed once Manila drop the old defaults.
+    vars:
+      tempest_test_regex: 'manila_tempest_tests.tests.rbac'
+      devstack_localrc:
+        MANILA_ENFORCE_NEW_DEFAULTS: false
+      devstack_local_conf:
+        test-config:
+          "$TEMPEST_CONFIG":
+            share:
+              default_share_type_name: default
+            # NOTE: This is to enable the RBAC tests in Tempest run
+            # and does not control any setting on oslo.policy side.
+            enforce_scope:
+              manila: True
 
 - job:
     name: manila-tempest-plugin-lvm-fips-base

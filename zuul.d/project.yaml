@@ -11,7 +11,7 @@
         - manila-tempest-plugin-lvm-2026.1
         - manila-tempest-plugin-lvm-2025.2
         - manila-tempest-plugin-lvm-2025.1
-        - manila-tempest-plugin-dummy-no-dhss-rbac
+        - manila-tempest-plugin-dummy-no-dhss-old-rbac
         - manila-tempest-plugin-container:
             voting: false
     gate:
