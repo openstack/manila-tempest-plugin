@@ -454,7 +454,7 @@
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-base
     pre-run:
-      - playbooks/install-virtiofsd.yaml
+      - playbooks/install-virtiofs-prereqs.yaml
     required-projects:
       - openstack/devstack-plugin-ceph
     vars:
@@ -645,6 +645,9 @@
         devstack_services:
           cinder: false
           c-bak: false
+          # nova-compute needs [manila] auth in nova.conf for
+          # allow_share/deny_share RPCs to call the Manila API
+          manila: true
 
 - job:
     name: manila-tempest-plugin-multinode-cephfs-nfs-cephadm
@@ -709,6 +712,96 @@
         devstack_plugins:
           devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
           neutron-dynamic-routing: https://opendev.org/openstack/neutron-dynamic-routing
+
+- job:
+    name: manila-tempest-plugin-multinode-virtiofs-lvm
+    description: |
+      Test virtiofs share attachment cold migration and resize with
+      the LVM driver (DHSS=False) in a multinode devstack environment.
+    parent: manila-tempest-plugin-multinode-base
+    pre-run:
+      - playbooks/install-virtiofs-prereqs.yaml
+    required-projects:
+      - openstack/nova
+    vars:
+      tempest_test_regex: '(^manila_tempest_tests.tests.scenario.test_share_attachment)'
+      devstack_services: *devstack-with-ovs
+      devstack_localrc:
+        Q_AGENT: openvswitch
+        Q_ML2_TENANT_NETWORK_TYPE: vxlan
+        Q_ML2_PLUGIN_MECHANISM_DRIVERS: openvswitch
+        SHARE_DRIVER: manila.share.drivers.lvm.LVMShareDriver
+        MANILA_ENABLED_BACKENDS: london
+        MANILA_BACKEND1_CONFIG_GROUP_NAME: london
+        MANILA_SHARE_BACKEND1_NAME: LONDON
+        MANILA_OPTGROUP_london_driver_handles_share_servers: false
+        SHARE_BACKING_FILE_SIZE: 16000M
+        MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
+        MANILA_CONFIGURE_DEFAULT_TYPES: true
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-test-image/images/manila-test-image-client.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-test-image-client
+      devstack_local_conf:
+        post-config:
+          $NOVA_CONF:
+            DEFAULT:
+              reserved_host_memory_mb: 0
+              ram_allocation_ratio: 1.0
+            libvirt:
+              file_backed_memory: 4096
+              mem_stats_period_s: 0
+          $Q_DHCP_CONF_FILE:
+            DEFAULT:
+              enable_isolated_metadata: true
+        test-config:
+          $TEMPEST_CONFIG:
+            share:
+              default_share_type_name: default
+              enable_ip_rules_for_protocols: nfs
+              enable_protocols: nfs
+              capability_storage_protocol: NFS
+              multitenancy_enabled: false
+              backend_names: LONDON
+              image_with_share_tools: manila-test-image-client
+              image_username: root
+              image_password: root
+            compute:
+              # Share attachments require compute API microversion 2.97.
+              # The scenario base propagates this to the servers client.
+              min_microversion: '2.97'
+            compute-feature-enabled:
+              share_attachments: true
+              cold_migration: true
+              resize: true
+    group-vars:
+      subnode:
+        devstack_services:
+          <<: *devstack-with-ovs
+          q-l3: false
+        devstack_localrc:
+          Q_AGENT: openvswitch
+          Q_ML2_TENANT_NETWORK_TYPE: vxlan
+          Q_ML2_PLUGIN_MECHANISM_DRIVERS: openvswitch
+        devstack_local_conf:
+          post-config:
+            $NOVA_CONF:
+              DEFAULT:
+                reserved_host_memory_mb: 0
+                ram_allocation_ratio: 1.0
+              libvirt:
+                file_backed_memory: 4096
+                mem_stats_period_s: 0
+              manila:
+                auth_type: password
+                interface: public
+                auth_url: $KEYSTONE_SERVICE_URI
+                username: nova
+                password: $SERVICE_PASSWORD
+                user_domain_name: $SERVICE_DOMAIN_NAME
+                project_name: $SERVICE_PROJECT_NAME
+                project_domain_name: $SERVICE_DOMAIN_NAME
+            $Q_DHCP_CONF_FILE:
+              DEFAULT:
+                enable_isolated_metadata: true
 
 - job:
     name: manila-tempest-plugin-dummy-no-dhss
