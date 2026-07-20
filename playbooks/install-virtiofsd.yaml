@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install virtiofsd for virtiofs share support
+      ansible.builtin.package:
+        name: virtiofsd
+        state: present

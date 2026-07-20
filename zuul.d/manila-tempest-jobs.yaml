@@ -361,6 +361,8 @@
     abstract: true
     description: Test CephFS Native (DHSS=False)
     parent: manila-tempest-plugin-base
+    pre-run:
+      - playbooks/install-virtiofsd.yaml
     required-projects:
       - openstack/devstack-plugin-ceph
     vars:
@@ -383,6 +385,14 @@
         MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-1.3.0-58-g2859569.qcow2
         MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-1.3.0-58-g2859569
       devstack_local_conf:
+        post-config:
+          $NOVA_CONF:
+            DEFAULT:
+              reserved_host_memory_mb: 0
+              ram_allocation_ratio: 1.0
+            libvirt:
+              file_backed_memory: 4096
+              mem_stats_period_s: 0
         test-config:
           $TEMPEST_CONFIG:
             share:
@@ -394,6 +404,9 @@
               capability_storage_protocol: CEPHFS
               enable_protocols: cephfs
               image_password: manila
+            compute-feature-enabled:
+              share_attachments: true
+              cold_migration: false
 
 - job:
     name: manila-tempest-plugin-cephfs-native
