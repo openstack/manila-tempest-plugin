@@ -231,7 +231,8 @@ class ShareBasicOpsBase(manager.ShareScenarioTest):
 
         self.mount_share(new_exports[0], remote_client)
 
-        output = remote_client.exec_command("ls -lRA --ignore=lost+found /mnt")
+        output = remote_client.exec_command(
+            "ls -lRA /mnt | grep -v lost+found")
 
         self.unmount_share(remote_client)
 
