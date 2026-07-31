@@ -407,7 +407,7 @@
         CEPHADM_DEPLOY: true
         CEPHADM_DEV_OSD: true
         TARGET_DEV_OSD_DIR: /opt/stack
-        CEPH_LOOPBACK_DISK_SIZE: 40G
+        CEPH_LOOPBACK_DISK_SIZE: 80G
         DISABLE_CEPHADM_POST_DEPLOY: True
         MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-cephfs-master.qcow2
         MANILA_SERVICE_IMAGE_NAME: manila-service-image-cephfs-master
