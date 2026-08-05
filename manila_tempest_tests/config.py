@@ -16,6 +16,14 @@
 from oslo_config import cfg
 from oslo_config import types
 
+compute_feature_opts = [
+    cfg.BoolOpt("share_attachments",
+                default=False,
+                help="Does the compute service support share attachments "
+                     "via virtiofs? Requires file_backed_memory and "
+                     "virtiofsd on compute hosts (Epoxy release or later)."),
+]
+
 service_option = cfg.BoolOpt("manila",
                              default=True,
                              help="Whether or not manila is expected to be "

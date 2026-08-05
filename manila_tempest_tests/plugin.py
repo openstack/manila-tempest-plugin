@@ -37,6 +37,8 @@ class ManilaTempestPlugin(plugins.TempestPlugin):
                           group='enforce_scope')
         conf.register_group(config_share.share_group)
         conf.register_opts(config_share.ShareGroup, group='share')
+        conf.register_opts(config_share.compute_feature_opts,
+                           group='compute-feature-enabled')
 
         # NOTE(vponomaryov): Set options 'capability_snapshot_support' and
         # 'capability_create_share_from_snapshot_support' to opt
@@ -57,7 +59,9 @@ class ManilaTempestPlugin(plugins.TempestPlugin):
     def get_opt_lists(self):
         return [(config_share.share_group.name, config_share.ShareGroup),
                 ('service_available', [config_share.service_option]),
-                ('enforce_scope', [config_share.manila_scope_enforcement])]
+                ('enforce_scope', [config_share.manila_scope_enforcement]),
+                ('compute-feature-enabled',
+                 config_share.compute_feature_opts)]
 
     def get_service_clients(self):
         shares_config = config.service_client_config('share')

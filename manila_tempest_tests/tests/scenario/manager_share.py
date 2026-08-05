@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempfile import mkstemp
+import time
 from urllib.request import urlopen
 
 from oslo_log import log
@@ -51,6 +52,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
         cls.compute_floating_ips_client = (
             cls.os_primary.compute_floating_ips_client)
+        # Servers client with microversion 2.97 for share attachment support
+        cls.servers_client = cls.os_primary.servers_client
         # Manila clients
         cls.shares_v2_client = cls.os_primary.share_v2.SharesV2Client()
         cls.shares_admin_v2_client = cls.os_admin.share_v2.SharesV2Client()
@@ -452,7 +455,8 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
 
     def wait_for_active_instance(self, instance_id):
         waiters.wait_for_server_status(
-            self.os_primary.servers_client, instance_id, "ACTIVE")
+            self.os_primary.servers_client, instance_id,
+            constants.INSTANCE_STATUS_ACTIVE)
         return self.os_primary.servers_client.show_server(
             instance_id)["server"]
 
@@ -732,6 +736,157 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             message = ("Protocol %s is not supported" % self.protocol)
             raise self.skipException(message)
         return ip, version
+
+    def attach_share_to_server(self, server_id, share_id, tag=None,
+                               cleanup=True):
+        """Attach a Manila share to a Nova instance via virtiofs
+
+        :param server_id: ID of the server/instance
+        :param share_id: ID of the Manila share
+        :param tag: Optional tag for the share attachment
+        :param cleanup: Whether to add cleanup for the attachment
+        :returns: Share attachment response
+        """
+        tag = tag or data_utils.rand_name('share-tag')
+        response = self.servers_client.attach_share(
+            server_id, share_id=share_id, tag=tag)
+        attachment = response['share']
+
+        if cleanup:
+            # Use cleanup helper that stops server if needed before detaching
+            # This ensures locks are removed even if test fails
+            self.addCleanup(self.cleanup_share_attachment, server_id, share_id)
+
+        return attachment
+
+    def detach_share_from_server(self, server_id, share_id):
+        """Detach a Manila share from a Nova instance
+
+        :param server_id: ID of the server/instance
+        :param share_id: ID of the Manila share
+        """
+        return self.servers_client.detach_share(server_id, share_id)
+
+    def list_server_share_attachments(self, server_id):
+        """List all share attachments for a server
+
+        :param server_id: ID of the server/instance
+        :returns: List of share attachments
+        """
+        response = self.servers_client.list_share_attachments(server_id)
+        return response['shares']
+
+    def show_server_share_attachment(self, server_id, share_id):
+        """Show details of a specific share attachment
+
+        :param server_id: ID of the server/instance
+        :param share_id: ID of the Manila share
+        :returns: Share attachment details
+        """
+
+        response = self.servers_client.show_share_attachment(
+            server_id, share_id)
+        return response['share']
+
+    def wait_for_share_attachment_status(self, server_id, share_id,
+                                         expected_status, timeout=60):
+        """Wait for a share attachment to reach a specific status
+
+        :param server_id: ID of the server/instance
+        :param share_id: ID of the Manila share
+        :param expected_status: Expected status (e.g., 'inactive', 'active')
+        :param timeout: Maximum time to wait in seconds
+        """
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            attachment = self.show_server_share_attachment(server_id, share_id)
+            current_status = attachment.get('status')
+            if current_status == expected_status:
+                return attachment
+            if current_status == 'error':
+                raise exceptions.InvalidConfiguration(
+                    "Share attachment entered error state")
+            time.sleep(2)
+        raise exceptions.TimeoutException(
+            "Timed out waiting for share attachment %s to reach status %s" %
+            (share_id, expected_status))
+
+    def wait_for_share_detachment(self, server_id, share_id, timeout=60):
+        """Wait for a share attachment to be fully removed
+
+        Polls the share attachment endpoint until it returns 404,
+        indicating that the detach operation has completed on the
+        compute node and the mapping has been deleted from the database.
+
+        :param server_id: ID of the server/instance
+        :param share_id: ID of the Manila share
+        :param timeout: Maximum time to wait in seconds
+        """
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                self.show_server_share_attachment(server_id, share_id)
+            except exceptions.NotFound:
+                return
+            time.sleep(2)
+        raise exceptions.TimeoutException(
+            "Timed out waiting for share %s to detach from server %s" %
+            (share_id, server_id))
+
+    def mount_share_via_virtiofs(self, remote_client, tag, target_dir=None):
+        """Mount a share inside an instance using virtiofs
+
+        :param remote_client: SSH client connection to the instance
+        :param tag: The tag of the share attachment
+        :param target_dir: Target directory for mounting (default: /mnt)
+        """
+        target_dir = target_dir or "/mnt"
+        remote_client.exec_command(
+            "sudo mount -t virtiofs %s %s" % (tag, target_dir))
+
+    def unmount_share_via_virtiofs(self, remote_client, target_dir=None):
+        """Unmount a virtiofs share from an instance
+
+        :param remote_client: SSH client connection to the instance
+        :param target_dir: Target directory to unmount (default: /mnt)
+        """
+        target_dir = target_dir or "/mnt"
+        remote_client.exec_command("sudo umount %s" % target_dir)
+
+    def cleanup_share_attachment(self, server_id, share_id):
+        """Cleanup helper to safely detach a share from a server
+
+        This method ensures the share is detached even if the server is
+        running, which is necessary to remove resource locks before share
+        deletion.
+
+        :param server_id: ID of the server/instance
+        :param share_id: ID of the Manila share
+        """
+        try:
+            # Check if server exists and get its status
+            server = self.servers_client.show_server(server_id)['server']
+            server_status = server['status']
+
+            # If server is running, stop it first
+            if server_status == constants.INSTANCE_STATUS_ACTIVE:
+                self.servers_client.stop_server(server_id)
+                waiters.wait_for_server_status(
+                    self.servers_client, server_id,
+                    constants.INSTANCE_STATUS_SHUTOFF)
+
+            # Detach the share and wait for completion
+            self.detach_share_from_server(server_id, share_id)
+            self.wait_for_share_detachment(server_id, share_id)
+
+        except exceptions.NotFound:
+            # Server or share attachment already deleted
+            pass
+        except Exception as e:
+            # Log but don't fail cleanup
+            LOG.exception(
+                "Error during share attachment cleanup for "
+                "server %s, share %s: %s", server_id, share_id, e)
 
 
 class BaseShareScenarioNFSTest(ShareScenarioTest):
