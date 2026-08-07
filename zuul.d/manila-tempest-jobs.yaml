@@ -206,6 +206,10 @@
         MANILA_OPTGROUP_paris_driver_handles_share_servers: false
         SHARE_BACKING_FILE_SIZE: 32000M
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
+        # NOTE(carloss): Pin it temporarily until we can merge the enhancements
+        # for the manila-service-image: https://review.opendev.org/c/openstack/manila-tempest-plugin/+/996973
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True revert_to_snapshot_support=True mount_snapshot_support=True'
         MANILA_SETUP_IPV6: true
         NEUTRON_CREATE_INITIAL_NETWORKS: false
@@ -462,6 +466,10 @@
         ENABLED_SHARE_PROTOCOLS: NFS
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
         MANILA_SERVICE_IMAGE_ENABLED: true
+        # NOTE(carloss): Pin it temporarily until we can merge the enhancements
+        # for the manila-service-image: https://review.opendev.org/c/openstack/manila-tempest-plugin/+/996973
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
         MANILA_OPTGROUP_cephfsnfs_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_OPTGROUP_cephfsnfs_driver_handles_share_servers: false
         MANILA_OPTGROUP_cephfsnfs_cephfs_protocol_helper_type: NFS
@@ -578,6 +586,10 @@
         MANILA_OPTGROUP_cephfsnfs_driver_handles_share_servers: false
         MANILA_OPTGROUP_cephfsnfs_share_driver: manila.share.drivers.cephfs.driver.CephFSDriver
         MANILA_SERVICE_IMAGE_ENABLED: True
+        # NOTE(carloss): Pin it temporarily until we can merge the enhancements
+        # for the manila-service-image: https://review.opendev.org/c/openstack/manila-tempest-plugin/+/996973
+        MANILA_SERVICE_IMAGE_URL: https://tarballs.opendev.org/openstack/manila-image-elements/images/manila-service-image-1.3.0-76-ga216835.qcow2
+        MANILA_SERVICE_IMAGE_NAME: manila-service-image-1.3.0-76-ga216835
         MANILA_SETUP_IPV6: true
         NEUTRON_CREATE_INITIAL_NETWORKS: false
         SHARE_DRIVER: manila.share.drivers.cephfs.driver.CephFSDriver
