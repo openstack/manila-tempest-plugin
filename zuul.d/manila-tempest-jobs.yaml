@@ -10,7 +10,9 @@
       - openstack/python-manilaclient
       - openstack/tempest
     irrelevant-files: &irrelevant-files
-      - ^(test-|)requirements.txt$
+      - ^\.gitignore$
+      - ^\.gitreview$
+      - ^test-requirements.txt$
       - ^.*\.rst$
       - ^api-ref/.*$
       - ^doc/.*$
