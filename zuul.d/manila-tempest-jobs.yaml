@@ -42,7 +42,6 @@
       devstack_localrc:
         MYSQL_REDUCE_MEMORY: True
         MANILA_USE_DOWNGRADE_MIGRATIONS: true
-        MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_ALLOW_NAS_SERVER_PORTS_ON_HOST: true
         MANILA_DEFAULT_SHARE_TYPE_EXTRA_SPECS: 'snapshot_support=True create_share_from_snapshot_support=True'
         MANILA_CONFIGURE_DEFAULT_TYPES: true
@@ -113,7 +112,6 @@
         yaml: true
         yml: true
       devstack_localrc:
-        MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_SERVICE_IMAGE_ENABLED: false
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
         MANILA_SERVER_MIGRATION_PERIOD_TASK_INTERVAL: 10
@@ -624,7 +622,6 @@
         tls-proxy: true
       devstack_localrc:
         MANILA_USE_DOWNGRADE_MIGRATIONS: false
-        MANILA_INSTALL_TEMPEST_PLUGIN_SYSTEMWIDE: false
         MANILA_ALLOW_NAS_SERVER_PORTS_ON_HOST: true
         MANILA_SHARE_MIGRATION_PERIOD_TASK_INTERVAL: 1
         MANILA_SERVER_MIGRATION_PERIOD_TASK_INTERVAL: 10
