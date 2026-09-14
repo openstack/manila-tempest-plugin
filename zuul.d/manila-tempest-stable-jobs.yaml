@@ -2,9 +2,9 @@
 # against those released stable branches of manila
 
 - job:
-    name: manila-tempest-plugin-lvm-2026.1
+    name: manila-tempest-plugin-lvm-2026.2
     parent: manila-tempest-plugin-lvm-base
-    override-checkout: stable/2026.1
+    override-checkout: stable/2026.2
     vars: &manila_tempest_plugin_lvm_stable_vars
       # TODO(gouthamr): some tests are disabled due to bugs
       # IPv6 Tests: https://bugs.launchpad.net/manila/+bug/1998489
@@ -17,6 +17,12 @@
       # See https://review.opendev.org/c/openstack/devstack/+/953406
       devstack_services:
         q-ovn-metadata-agent: false
+
+- job:
+    name: manila-tempest-plugin-lvm-2026.1
+    parent: manila-tempest-plugin-lvm-base
+    override-checkout: stable/2026.1
+    vars: *manila_tempest_plugin_lvm_stable_vars
 
 - job:
     name: manila-tempest-plugin-lvm-2025.2
