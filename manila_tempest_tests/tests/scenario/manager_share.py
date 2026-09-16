@@ -173,26 +173,27 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         if self.ipv6_enabled:
             server_ip = self._get_server_ip(instance, ip_version=6)
         if not server_ip:
-            ip_addr = self._get_server_ip(instance)
-            # Obtain a floating IP
-            floating_ip = self.create_floating_ip(instance, ip_addr=ip_addr)
-            self.floating_ips[instance['id']] = floating_ip
-            server_ip = floating_ip['floating_ip_address']
+            if instance['id'] in self.floating_ips:
+                server_ip = (
+                    self.floating_ips[instance['id']]['floating_ip_address'])
+            else:
+                ip_addr = self._get_server_ip(instance)
+                floating_ip = self.create_floating_ip(
+                    instance, ip_addr=ip_addr)
+                self.floating_ips[instance['id']] = floating_ip
+                server_ip = floating_ip['floating_ip_address']
 
-            if self.storage_network:
-                storage_net_nic = instance['addresses'].get(
-                    self.storage_network_name)
-                if storage_net_nic:
-                    self.storage_network_nic_ips[instance['id']] = (
-                        storage_net_nic[0]['addr']
-                    )
-            # Attach a floating IP
-            self.associate_floating_ip(floating_ip, instance, ip_addr=ip_addr)
-            # Wait for the floating IP to be reflected in the server's
-            # addresses before attempting SSH. On busy CI nodes, the
-            # Neutron L3 agent may take time to program NAT rules.
-            waiters.wait_for_server_floating_ip(
-                self.servers_client, instance, floating_ip)
+                if self.storage_network:
+                    storage_net_nic = instance['addresses'].get(
+                        self.storage_network_name)
+                    if storage_net_nic:
+                        self.storage_network_nic_ips[instance['id']] = (
+                            storage_net_nic[0]['addr']
+                        )
+                self.associate_floating_ip(
+                    floating_ip, instance, ip_addr=ip_addr)
+                waiters.wait_for_server_floating_ip(
+                    self.servers_client, instance, floating_ip)
 
         self.assertIsNotNone(server_ip)
         # Check ssh
@@ -806,7 +807,7 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
             current_status = attachment.get('status')
             if current_status == expected_status:
                 return attachment
-            if current_status == 'error':
+            if current_status == constants.INSTANCE_ATTACHMENT_STATUS_ERROR:
                 raise exceptions.InvalidConfiguration(
                     "Share attachment entered error state")
             time.sleep(2)
@@ -867,26 +868,28 @@ class ShareScenarioTest(manager.NetworkScenarioTest):
         :param share_id: ID of the Manila share
         """
         try:
-            # Check if server exists and get its status
             server = self.servers_client.show_server(server_id)['server']
             server_status = server['status']
 
-            # If server is running, stop it first
+            if server_status == constants.INSTANCE_STATUS_VERIFY_RESIZE:
+                self.servers_client.confirm_resize_server(server_id)
+                waiters.wait_for_server_status(
+                    self.servers_client, server_id,
+                    constants.INSTANCE_STATUS_ACTIVE)
+                server_status = constants.INSTANCE_STATUS_ACTIVE
+
             if server_status == constants.INSTANCE_STATUS_ACTIVE:
                 self.servers_client.stop_server(server_id)
                 waiters.wait_for_server_status(
                     self.servers_client, server_id,
                     constants.INSTANCE_STATUS_SHUTOFF)
 
-            # Detach the share and wait for completion
             self.detach_share_from_server(server_id, share_id)
             self.wait_for_share_detachment(server_id, share_id)
 
         except exceptions.NotFound:
-            # Server or share attachment already deleted
             pass
         except Exception as e:
-            # Log but don't fail cleanup
             LOG.exception(
                 "Error during share attachment cleanup for "
                 "server %s, share %s: %s", server_id, share_id, e)

@@ -16,8 +16,10 @@
 from oslo_log import log as logging
 from tempest.common import waiters as tempest_waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
+import testtools
 from testtools import testcase as tc
 
 from manila_tempest_tests.common import constants
@@ -39,16 +41,11 @@ class ShareAttachmentBase(manager.ShareScenarioTest):
 
     protocol = "nfs"
     credentials = ('admin', 'primary', 'alt')
-    # Minimum compute API microversion required for share attachments
-    compute_min_microversion = '2.97'
 
     @classmethod
     def setup_clients(cls):
         super(ShareAttachmentBase, cls).setup_clients()
-        # Set up clients for non-admin (alt) user
         cls.shares_v2_client_alt = cls.os_alt.share_v2.SharesV2Client()
-        # Set compute API microversion 2.97 for share attachment support
-        cls.servers_client.api_microversion = '2.97'
 
     @classmethod
     def skip_checks(cls):
@@ -79,7 +76,7 @@ class ShareAttachmentBase(manager.ShareScenarioTest):
         attachment = self.attach_share_to_server(
             server_id, share_id, tag=tag, cleanup=cleanup)
         self.wait_for_share_attachment_status(
-            server_id, share_id, constants.SERVER_ATTACHMENT_STATUS_INACTIVE)
+            server_id, share_id, constants.INSTANCE_ATTACHMENT_STATUS_INACTIVE)
 
         # Wait for access rules to become active before powering on
         # Nova needs the access rule active to mount the NFS share
@@ -91,7 +88,7 @@ class ShareAttachmentBase(manager.ShareScenarioTest):
         self.servers_client.start_server(server_id)
         instance = self.wait_for_active_instance(server_id)
         self.wait_for_share_attachment_status(
-            server_id, share_id, constants.SERVER_ATTACHMENT_STATUS_ACTIVE)
+            server_id, share_id, constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
 
         return attachment, instance
 
@@ -234,7 +231,8 @@ class ShareAttachmentBase(manager.ShareScenarioTest):
         share_tag = "share-virtiofs"
 
         # Step 1: Create user VM (UVM) and add a cleanup
-        instance = self.boot_instance(wait_until="ACTIVE")
+        instance = self.boot_instance(
+            wait_until=constants.INSTANCE_STATUS_ACTIVE)
         self.addCleanup(self.servers_client.delete_server, instance['id'])
 
         # Step 2: Create share (S)
@@ -403,6 +401,308 @@ class ShareAttachmentBase(manager.ShareScenarioTest):
             instance2['id'], share['id'], remote_client=remote_client_vm2)
 
         # Steps 25a-25b: Verify resource locks are removed
+        self.verify_share_and_access_locks_removed(share['id'])
+
+    def cold_migrate_server(self, server_id):
+        """Cold migrate a server and wait for VERIFY_RESIZE."""
+        self.os_admin.servers_client.migrate_server(server_id)
+        tempest_waiters.wait_for_server_status(
+            self.servers_client, server_id,
+            constants.INSTANCE_STATUS_VERIFY_RESIZE)
+
+    def resize_server(self, server_id, flavor_ref):
+        """Resize a server and wait for VERIFY_RESIZE."""
+        self.servers_client.resize_server(server_id, flavor_ref)
+        tempest_waiters.wait_for_server_status(
+            self.servers_client, server_id,
+            constants.INSTANCE_STATUS_VERIFY_RESIZE)
+
+    def confirm_resize_server(self, server_id):
+        """Confirm a resize/migration and wait for ACTIVE."""
+        self.servers_client.confirm_resize_server(server_id)
+        tempest_waiters.wait_for_server_status(
+            self.servers_client, server_id,
+            constants.INSTANCE_STATUS_ACTIVE)
+
+    def revert_resize_server(self, server_id):
+        """Revert a resize/migration and wait for ACTIVE."""
+        self.servers_client.revert_resize_server(server_id)
+        tempest_waiters.wait_for_server_status(
+            self.servers_client, server_id,
+            constants.INSTANCE_STATUS_ACTIVE)
+
+    @decorators.idempotent_id('c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89012')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.cold_migration,
+        "Cold migration is not available.")
+    def test_cold_migrate_with_share_via_virtiofs(self):
+        """Cold migration preserves virtiofs share attachments."""
+        test_data = "Data written before cold migration"
+        test_file = "/mnt/migration_test.txt"
+        share_tag = "share-migrate"
+
+        instance = self.boot_instance(
+            wait_until=constants.INSTANCE_STATUS_ACTIVE)
+        self.addCleanup(self.servers_client.delete_server, instance['id'])
+
+        share = self.create_share()
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
+
+        attachment, instance = self.attach_share_to_running_server(
+            instance['id'], share['id'], share_tag)
+
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        self.write_data_to_mounted_share(
+            test_data, remote_client, test_file)
+
+        self.cold_migrate_server(instance['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+        self.unmount_share_via_virtiofs(remote_client)
+
+        self.confirm_resize_server(instance['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+
+        self.verify_share_and_access_locks_exist(share['id'])
+
+        instance = self.detach_share_from_running_server(
+            instance['id'], share['id'], remote_client=remote_client)
+
+        self.verify_share_and_access_locks_removed(share['id'])
+
+    @decorators.idempotent_id('d4e5f6a7-b8c9-0123-d4e5-f6a7b8c90123')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.cold_migration,
+        "Cold migration is not available.")
+    def test_cold_migrate_revert_with_share_via_virtiofs(self):
+        """Reverting a cold migration preserves virtiofs share attachments."""
+        test_data = "Data written before cold migration revert"
+        test_file = "/mnt/migration_revert_test.txt"
+        share_tag = "share-migrate-revert"
+
+        instance = self.boot_instance(
+            wait_until=constants.INSTANCE_STATUS_ACTIVE)
+        self.addCleanup(self.servers_client.delete_server, instance['id'])
+
+        share = self.create_share()
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
+
+        attachment, instance = self.attach_share_to_running_server(
+            instance['id'], share['id'], share_tag)
+
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        self.write_data_to_mounted_share(
+            test_data, remote_client, test_file)
+
+        self.cold_migrate_server(instance['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+        self.unmount_share_via_virtiofs(remote_client)
+
+        self.revert_resize_server(instance['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+
+        self.verify_share_and_access_locks_exist(share['id'])
+
+        instance = self.detach_share_from_running_server(
+            instance['id'], share['id'], remote_client=remote_client)
+
+        self.verify_share_and_access_locks_removed(share['id'])
+
+    @decorators.idempotent_id('e5f6a7b8-c9d0-1234-e5f6-a7b8c9d01234')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.cold_migration,
+        "Cold migration is not available.")
+    def test_resize_with_share_via_virtiofs(self):
+        """Resize (flavor change) preserves virtiofs share attachments."""
+        test_data = "Data written before resize"
+        test_file = "/mnt/resize_test.txt"
+        share_tag = "share-resize"
+
+        instance = self.boot_instance(
+            wait_until=constants.INSTANCE_STATUS_ACTIVE)
+        self.addCleanup(self.servers_client.delete_server, instance['id'])
+
+        share = self.create_share()
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
+
+        attachment, instance = self.attach_share_to_running_server(
+            instance['id'], share['id'], share_tag)
+
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        self.write_data_to_mounted_share(
+            test_data, remote_client, test_file)
+
+        current_flavor = self.os_admin.flavors_client.show_flavor(
+            self.flavor_ref)['flavor']
+        resize_flavor = self.os_admin.flavors_client.create_flavor(
+            name=data_utils.rand_name('resize'),
+            ram=current_flavor['ram'],
+            vcpus=current_flavor['vcpus'] + 1,
+            disk=current_flavor['disk'],
+        )['flavor']
+        self.addCleanup(self.os_admin.flavors_client.delete_flavor,
+                        resize_flavor['id'])
+
+        self.resize_server(instance['id'], resize_flavor['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+        self.unmount_share_via_virtiofs(remote_client)
+
+        self.confirm_resize_server(instance['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+
+        self.verify_share_and_access_locks_exist(share['id'])
+
+        instance = self.detach_share_from_running_server(
+            instance['id'], share['id'], remote_client=remote_client)
+
+        self.verify_share_and_access_locks_removed(share['id'])
+
+    @decorators.idempotent_id('f6a7b8c9-d0e1-2345-f6a7-b8c9d0e12345')
+    @tc.attr(base.TAG_POSITIVE, base.TAG_BACKEND)
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.cold_migration,
+        "Cold migration is not available.")
+    def test_resize_revert_with_share_via_virtiofs(self):
+        """Reverting a resize preserves virtiofs share attachments."""
+        test_data = "Data written before resize revert"
+        test_file = "/mnt/resize_revert_test.txt"
+        share_tag = "share-resize-revert"
+
+        instance = self.boot_instance(
+            wait_until=constants.INSTANCE_STATUS_ACTIVE)
+        self.addCleanup(self.servers_client.delete_server, instance['id'])
+
+        share = self.create_share()
+        waiters.wait_for_resource_status(
+            self.shares_v2_client, share['id'], constants.STATUS_AVAILABLE)
+
+        attachment, instance = self.attach_share_to_running_server(
+            instance['id'], share['id'], share_tag)
+
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        self.write_data_to_mounted_share(
+            test_data, remote_client, test_file)
+
+        current_flavor = self.os_admin.flavors_client.show_flavor(
+            self.flavor_ref)['flavor']
+        resize_flavor = self.os_admin.flavors_client.create_flavor(
+            name=data_utils.rand_name('resize'),
+            ram=current_flavor['ram'],
+            vcpus=current_flavor['vcpus'] + 1,
+            disk=current_flavor['disk'],
+        )['flavor']
+        self.addCleanup(self.os_admin.flavors_client.delete_flavor,
+                        resize_flavor['id'])
+
+        self.resize_server(instance['id'], resize_flavor['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+        self.unmount_share_via_virtiofs(remote_client)
+
+        self.revert_resize_server(instance['id'])
+
+        self.wait_for_share_attachment_status(
+            instance['id'], share['id'],
+            constants.INSTANCE_ATTACHMENT_STATUS_ACTIVE)
+
+        instance = self.servers_client.show_server(
+            instance['id'])['server']
+        remote_client = self.init_remote_client(instance)
+        self.mount_share_via_virtiofs(remote_client, share_tag)
+        read_data = self.read_data_from_mounted_share(
+            remote_client, test_file)
+        self.assertEqual(test_data, read_data)
+
+        self.verify_share_and_access_locks_exist(share['id'])
+
+        instance = self.detach_share_from_running_server(
+            instance['id'], share['id'], remote_client=remote_client)
+
         self.verify_share_and_access_locks_removed(share['id'])
 
 

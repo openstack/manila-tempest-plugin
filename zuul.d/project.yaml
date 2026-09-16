@@ -14,6 +14,7 @@
         - manila-tempest-plugin-dummy-no-dhss-old-rbac
         - manila-tempest-plugin-container:
             voting: false
+        - manila-tempest-plugin-multinode-virtiofs-lvm
     gate:
       jobs:
         - manila-tempest-plugin-dummy-no-dhss

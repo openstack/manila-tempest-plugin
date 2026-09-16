@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install virtiofsd and NFS client for virtiofs share support
+      ansible.builtin.package:
+        name:
+          - virtiofsd
+          - nfs-common
+        state: present
