@@ -246,7 +246,11 @@ ShareGroup = [
                       "security_service = "
                       "ss_type:<ldap, kerberos or active_directory>, "
                       "ss_dns_ip:value, ss_user:value, ss_password=value, "
-                      "ss_domain:value, ss_server:value"),
+                      "ss_domain:value, ss_server:value, ss_ou:value. "
+                      "ss_ou is optional and maps to the security service "
+                      "organizational unit (API microversion 2.44+). "
+                      "oslo.config Dict values are comma-separated, so use "
+                      "semicolons in ss_ou."),
     cfg.ListOpt("capability_encryption_support",
                 default=[],
                 help="Encryption support capability. Possible values are "

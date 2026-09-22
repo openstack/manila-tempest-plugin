@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add optional ``ss_ou`` to ``[share] security_service``.

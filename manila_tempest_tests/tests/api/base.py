@@ -219,6 +219,11 @@ class BaseSharesTest(test.BaseTestCase):
                 "user": ss_config.get("ss_user"),
                 "password": ss_config.get("ss_password")
             }
+            # OU is optional. oslo.config Dict() splits on commas, so a
+            # multi-component DN must use semicolons in tempest.conf.
+            ss_ou = ss_config.get("ss_ou")
+            if ss_ou and utils.is_microversion_supported("2.44"):
+                ss_params["ou"] = ss_ou.replace(";", ",")
             ss_type = ss_config.get("ss_type")
             security_service = cls.create_security_service(
                 ss_type,
