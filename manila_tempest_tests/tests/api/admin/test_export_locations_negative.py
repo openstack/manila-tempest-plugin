@@ -93,6 +93,27 @@ class ExportLocationsNegativeTest(base.BaseSharesMixedTest):
                                    get_share_instance_export_location),
                                   share_instance['id'], el['id'])
 
+    @decorators.idempotent_id('a3c3d16b-5f62-4089-8f86-efc660592986')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_list_share_export_locations_by_different_project_user(self):
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.different_project_client.list_share_export_locations,
+            self.share['id'])
+
+    @decorators.idempotent_id('0f6823a5-3929-4025-9cd4-b5198b4384dd')
+    @tc.attr(base.TAG_NEGATIVE, base.TAG_API_WITH_BACKEND)
+    def test_get_share_export_location_by_different_project_user(self):
+        export_locations = self.admin_client.list_share_export_locations(
+            self.share['id'])['export_locations']
+
+        for export_location in export_locations:
+            self.assertRaises(
+                lib_exc.NotFound,
+                self.different_project_client.get_share_export_location,
+                self.share['id'],
+                export_location['id'])
+
 
 class ExportLocationsAPIOnlyNegativeTest(base.BaseSharesAdminTest):
 

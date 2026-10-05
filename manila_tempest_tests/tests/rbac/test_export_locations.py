@@ -17,6 +17,7 @@ import abc
 
 from tempest import config
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from testtools import testcase as tc
 
 from manila_tempest_tests.tests.api import base
@@ -128,6 +129,10 @@ class TestProjectMemberTestsNFS(ShareRbacExportLocationsTests,
             share_id=self.share['id'])['export_locations']
         self.assertNotEmpty(locations)
 
+        self.do_request(
+            'list_share_export_locations', expected_status=lib_exc.NotFound,
+            share_id=self.alt_share['id'])
+
     @decorators.idempotent_id('95297484-1081-4225-986d-e4b3017d992f')
     @tc.attr(base.TAG_POSITIVE, base.TAG_API_WITH_BACKEND)
     def test_show_export_location(self):
@@ -137,6 +142,14 @@ class TestProjectMemberTestsNFS(ShareRbacExportLocationsTests,
         self.do_request(
             'get_share_export_location', expected_status=200,
             share_id=self.share['id'],
+            export_location_uuid=export_location[0]['id'])
+
+        export_location = (
+            self.alt_project_share_v2_client.list_share_export_locations(
+                self.alt_share['id'])['export_locations'])
+        self.do_request(
+            'get_share_export_location', expected_status=lib_exc.NotFound,
+            share_id=self.alt_share['id'],
             export_location_uuid=export_location[0]['id'])
 
 
